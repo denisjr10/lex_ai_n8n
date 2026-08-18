@@ -465,6 +465,8 @@ A API do Escavador cobra por crédito, e o custo é dirigido por agente — incl
 | Persistência | PostgreSQL | Proposto |
 | Base vetorial | A definir conforme volume | Em aberto |
 | Canal WhatsApp | API oficial (Meta ou BSP) | Proposto — provedor a definir |
+| Canal interno — notificação | Mensageiro corporativo já contratado; Telegram como alternativa | Proposto (D-18) |
+| Canal interno — conteúdo e aprovação | Painel web próprio, iniciando pela caixa de aprovações | Proposto (D-16) |
 | Hospedagem | A definir com a infra existente | Em aberto |
 
 ### 12.2 Diretrizes de n8n
@@ -521,6 +523,13 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-13 | Orçamento e disjuntor de custo por conversa/usuário/escritório | Adotar | 🟡 Proposta |
 | D-14 | Modelo de IA: família Claude mais recente | Adotar | 🟡 Proposta |
 | D-15 | Workflows n8n versionados em Git | Adotar | 🟡 Proposta |
+| D-16 | Interface interna em dois níveis: mensageiro (notificação e ação rápida) + painel web (conteúdo, edição, aprovação) | Adotar | 🟡 Proposta |
+| D-17 | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar | 🟡 Proposta |
+| D-18 | Canal de notificação: preferir o corporativo já contratado (Google Chat / Teams / Slack); Telegram só se não houver | Confirmar com pergunta 16 | 🔴 Em aberto |
+| D-19 | MCP Escavador e MCP Trello em código, como serviços separados — não dentro do n8n | Adotar | 🟡 Proposta |
+| D-20 | Servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar | 🟡 Proposta |
+
+> D-16 a D-20 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md).
 
 ---
 
@@ -528,7 +537,7 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 
 | Fase | Conteúdo | Encerramento |
 |---|---|---|
-| **0 · Diretrizes** | Este documento; decisões D-01 a D-15 | Decisões confirmadas |
+| **0 · Diretrizes** | Este documento; decisões D-01 a D-20 | Decisões confirmadas |
 | **1 · Descoberta** | Mapeamento das APIs (Escavador → Trello); questionário do escritório respondido; acesso à infra e ao n8n | Mapeamentos publicados em `docs/` |
 | **2 · PRD + Spec** | Requisitos, casos de uso, matriz de privilégios definitiva, esquema de dados, contratos de ferramenta MCP | PRD e Spec aprovados |
 | **3 · Fundação** | Policy Gate, auditoria, identidade, ambiente, esqueleto dos servidores MCP | Uma chamada ponta a ponta, autorizada e auditada |
@@ -560,12 +569,12 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 
 ## 16. Próximos passos
 
-1. **Você revisa** este documento e decide sobre D-01 a D-15 (podem vir em bloco: "concordo, exceto X").
+1. **Você revisa** este documento e decide sobre D-01 a D-20 (podem vir em bloco: "concordo, exceto X").
 2. **Resolver R-01** — sem acesso à documentação do Escavador, o mapeamento não começa.
 3. **Enviar o questionário de descoberta** (`docs/02-descoberta-perguntas-abertas.md`) ao escritório.
 4. **Compartilhar acesso à infra e ao n8n** para calibrar §12.2.
-5. **Iniciar o mapeamento do Escavador** → `docs/03-mapeamento-escavador.md`.
-6. **Mapeamento do Trello** → `docs/04-mapeamento-trello.md` + parecer final.
+5. **Iniciar o mapeamento do Escavador** → `docs/04-mapeamento-escavador.md`.
+6. **Mapeamento do Trello** → `docs/05-mapeamento-trello.md` + parecer final.
 7. **PRD e Spec.**
 
 ---

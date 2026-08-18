@@ -20,8 +20,9 @@ Plataforma de automação e agentes de IA para escritório de advocacia, orquest
 |---|---|
 | [`docs/01-diretrizes-gerais.md`](docs/01-diretrizes-gerais.md) | **Comece aqui.** Escopo, princípios, arquitetura de referência, modelo de privilégios, registro de decisões, riscos |
 | [`docs/02-descoberta-perguntas-abertas.md`](docs/02-descoberta-perguntas-abertas.md) | Questionário de descoberta para o escritório, para a equipe técnica e sobre contratos |
+| [`docs/03-canais-internos-e-hospedagem.md`](docs/03-canais-internos-e-hospedagem.md) | Nota técnica: por onde a equipe interna usa os agentes (Telegram?) e onde ficam os servidores MCP (dentro do n8n?) |
 
-Documentos previstos: `03-mapeamento-escavador.md`, `04-mapeamento-trello.md`, PRD e Spec técnica.
+Documentos previstos: `04-mapeamento-escavador.md`, `05-mapeamento-trello.md`, PRD e Spec técnica.
 
 ## Roteiro
 
