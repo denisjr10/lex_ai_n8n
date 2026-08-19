@@ -116,23 +116,56 @@ O que trafega pelo Telegram é metadado operacional. O conteúdo só aparece no 
 
 Isso também elimina as desvantagens 1, 2, 5 e 7 quase por completo, e reduz a 3 e a 6 — se a conta de Telegram de alguém for tomada, o invasor vê que existe uma demanda, mas não o que ela contém, e não consegue abrir o painel.
 
-## 1.5 Se o escritório já usa Google Workspace ou Microsoft 365
+## 1.5 O canal corporativo exige plano pago? Análise de custo
 
-Vale checar antes de decidir pelo Telegram (é a pergunta 16 do questionário de descoberta). Se usarem, **Google Chat ou Microsoft Teams são estritamente melhores** para o papel de camada de notificação:
+**Resposta direta: a recomendação não exige contratar nada.** Ela é condicional — *"prefira o canal corporativo **que o escritório já tiver**"*. Se não houver nenhum, o Telegram é a escolha adequada, e não um consolo.
 
-- mesma conveniência de mensageiro e mesmos botões de ação;
-- **já cobertos pelo contrato de tratamento de dados** que o escritório tem com o fornecedor;
-- **identidade corporativa** — a mesma conta do e-mail, com segundo fator, e que é desligada quando a pessoa sai;
-- ambos têm integração nativa no n8n.
+Mas vale entender o quadro, porque ele afeta também a frente de e-mail (F3).
 
-Nesse cenário, o Telegram deixa de ter vantagem: ele ganha por ser fácil, mas perde nos pontos que mais importam aqui. A regra de "sem conteúdo no corpo" pode até ser relaxada num canal corporativo contratado.
+### 1.5.1 Situação de cada opção
 
-**Ordem de preferência recomendada para a camada de notificação:**
+| Canal | Tem versão gratuita? | Dá para criar bot no plano gratuito? | Observação |
+|---|---|---|---|
+| **Telegram** | Sim, integralmente | **Sim, sem restrição** | Zero custo, zero burocracia |
+| **Google Chat** | Só dentro do Google Workspace | **Não com conta `@gmail.com` comum** | A API de Chat exige conta Workspace; conta pessoal do Google não configura bot |
+| **Google Workspace (Business Starter)** | Não — é pago | Sim | ~R$ 35 a R$ 42 por usuário/mês no plano anual |
+| **Google Workspace Essentials Starter** | **Sim, gratuito** (até 100 usuários) | **Incerto** — ver abaixo | **Não inclui Gmail em domínio próprio.** É para quem já tem e-mail em outro lugar |
+| **Microsoft 365 / Teams** | Teams tem versão gratuita | Limitado e mal documentado no gratuito | Se o escritório já paga M365, está resolvido |
+| **Slack** | Sim | **Sim**, mas com teto de **10 aplicativos** no espaço inteiro, histórico de 90 dias e sem login único | Viável se já usarem |
 
-1. Google Chat ou Microsoft Teams — se o escritório já usa um deles
-2. Slack — se já usam
-3. Telegram — se não usam nenhum canal corporativo
-4. WhatsApp interno — evitar: custo por conversa, janela de 24 h e confusão com o canal de clientes
+### 1.5.2 O caso do Essentials Starter, e por que não resolve
+
+Existe uma edição gratuita e permanente do Google Workspace — a **Essentials Starter** — que inclui Chat, Drive, Docs e Meet para até 100 usuários. À primeira vista pareceria a saída. Não é, por dois motivos:
+
+1. **Ela não dá e-mail no domínio do escritório.** Foi feita justamente para quem já tem e-mail em outro provedor. Se o escritório precisa de `nome@escritorio.adv.br`, isso continua sendo contratado à parte.
+2. **Não consegui confirmar se ela permite criar bot de Chat.** A documentação do Google lista as edições "Essentials" entre as que suportam aplicativos de Chat, mas o guia de configuração da API menciona conta "Business ou Enterprise". São afirmações que não se encaixam, e a Essentials Starter é a mais restrita da família. **Isso só se resolve testando na prática** — não vou afirmar em nenhuma direção.
+
+Ou seja: caminho com custo de investigação e risco de não funcionar, para economizar algo que o Telegram já entrega de graça e com certeza. Não recomendo.
+
+### 1.5.3 Vale a pena contratar Workspace só por causa disso? Não.
+
+Fazendo a conta: a licença é **por usuário**, e todos os colaboradores que recebem notificação precisariam de uma. Para uma equipe de 12 pessoas, o Business Starter sai em torno de **R$ 420 a R$ 500 por mês** — algo como R$ 5.000 a R$ 6.000 por ano.
+
+Gastar isso para ter um canal de notificação é investimento ruim, por uma razão específica deste projeto: **a decisão D-17 já neutralizou o problema que o canal corporativo resolveria.** Se o conteúdo confidencial não trafega no corpo da mensagem — só a notificação e o link — a diferença entre Telegram e Google Chat cai para quase nada. O que sobra é conveniência de identidade e desligamento de conta, que é bom, mas não vale R$ 6.000 por ano.
+
+Esse mesmo dinheiro rende muito mais aplicado no painel web, que é o componente que de fato protege o conteúdo.
+
+**Onde contratar Workspace ou M365 *se justifica*** é outra conversa: por causa do e-mail profissional, do armazenamento de documentos e da gestão de contas do escritório. Aí o Chat vem junto, de graça, e você aproveita. Mas a justificativa é o e-mail, não o bot.
+
+### 1.5.4 O elo com a frente de e-mail
+
+Vale notar: o projeto **precisa** monitorar a caixa de e-mail do escritório (F3). Isso significa que eles necessariamente já pagam por alguma coisa — Workspace, Microsoft 365, ou hospedagem com e-mail (Locaweb, Titan, Zoho, UOL Host). A pergunta 16 da descoberta vai revelar qual.
+
+- Se a resposta for **Google Workspace** ou **Microsoft 365** → o canal corporativo já está pago, use Chat ou Teams e não se fala mais nisso.
+- Se for **outro provedor de e-mail** → Telegram, com a regra D-17. Sem contratar nada.
+- Se for **`@gmail.com` comum** → há um problema maior que o canal interno, e que precisa ser levantado com o escritório: e-mail profissional de advocacia em conta pessoal gratuita é frágil em continuidade, em controle de acesso e em imagem.
+
+### 1.5.5 Ordem de preferência (revisada)
+
+1. **Google Chat ou Microsoft Teams** — se o escritório já paga Workspace ou M365
+2. **Slack** — se já usam (atenção ao teto de 10 aplicativos)
+3. **Telegram** — se não usam nenhum canal corporativo. **Escolha legítima, não contingência**
+4. **WhatsApp interno** — evitar: custo por conversa, janela de 24 h e confusão com o canal de clientes
 
 ## 1.6 Faseamento sugerido
 
@@ -237,7 +270,7 @@ O código custa mais nas primeiras semanas e menos em todas as seguintes. Como o
 |---|---|---|
 | **D-16** | Interface interna em dois níveis: mensageiro para notificação e ação rápida; painel web para conteúdo, edição e aprovação | Adotar |
 | **D-17** | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar |
-| **D-18** | Canal de notificação: preferir o corporativo já contratado (Google Chat / Teams / Slack); Telegram apenas se não houver | Confirmar com pergunta 16 da descoberta |
+| **D-18** | Canal de notificação: usar o corporativo **se já contratado**; caso contrário, Telegram. **Não contratar Google Workspace ou M365 apenas para isso** | Confirmar com pergunta 16 da descoberta |
 | **D-19** | MCP Escavador e MCP Trello em código, como serviços separados — **não** dentro do n8n | Adotar |
 | **D-20** | Hospedar os servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar |
 
@@ -249,3 +282,7 @@ O código custa mais nas primeiras semanas e menos em todas as seguintes. Como o
 - [n8n Docs — Connect to n8n MCP server](https://docs.n8n.io/connect/connect-to-n8n-mcp-server)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
 - [Telegram Bots FAQ](https://core.telegram.org/bots/faq)
+- [Google Workspace — comparar planos e preços](https://workspace.google.com/pricing)
+- [Google Workspace Help — edições Essentials](https://support.google.com/a/answer/7681288)
+- [Google for Developers — Configure the Google Chat API](https://developers.google.com/workspace/chat/configure-chat-api)
+- [Slack — Usage limits for free workspaces](https://slack.com/help/articles/115002422943-Usage-limits-for-free-workspaces)

@@ -465,7 +465,7 @@ A API do Escavador cobra por crédito, e o custo é dirigido por agente — incl
 | Persistência | PostgreSQL | Proposto |
 | Base vetorial | A definir conforme volume | Em aberto |
 | Canal WhatsApp | API oficial (Meta ou BSP) | Proposto — provedor a definir |
-| Canal interno — notificação | Mensageiro corporativo já contratado; Telegram como alternativa | Proposto (D-18) |
+| Canal interno — notificação | Mensageiro corporativo se já contratado; senão Telegram (sem custo adicional) | Proposto (D-18) |
 | Canal interno — conteúdo e aprovação | Painel web próprio, iniciando pela caixa de aprovações | Proposto (D-16) |
 | Hospedagem | A definir com a infra existente | Em aberto |
 
@@ -525,7 +525,7 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-15 | Workflows n8n versionados em Git | Adotar | 🟡 Proposta |
 | D-16 | Interface interna em dois níveis: mensageiro (notificação e ação rápida) + painel web (conteúdo, edição, aprovação) | Adotar | 🟡 Proposta |
 | D-17 | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar | 🟡 Proposta |
-| D-18 | Canal de notificação: preferir o corporativo já contratado (Google Chat / Teams / Slack); Telegram só se não houver | Confirmar com pergunta 16 | 🔴 Em aberto |
+| D-18 | Canal de notificação: usar o corporativo se já contratado; caso contrário Telegram. Não contratar Workspace/M365 só para isso | Confirmar com pergunta 16 | 🔴 Em aberto |
 | D-19 | MCP Escavador e MCP Trello em código, como serviços separados — não dentro do n8n | Adotar | 🟡 Proposta |
 | D-20 | Servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar | 🟡 Proposta |
 

@@ -36,7 +36,7 @@
 ### A3. E-mail
 
 15. 🚧 Quantas caixas de e-mail devem ser monitoradas, e quais? (Ex.: `contato@`, caixa pessoal de sócio, caixa de intimações.)
-16. Provedor: Google Workspace, Microsoft 365, outro?
+16. 🚧 **Provedor de e-mail: Google Workspace, Microsoft 365, hospedagem com e-mail (Locaweb, Titan, Zoho, UOL Host) ou conta `@gmail.com` comum?** Se for Workspace ou M365, qual plano e quantas licenças? *(Define também o canal de notificação interno — D-18 — sem custo adicional.)*
 17. Volume aproximado de e-mails/dia e proporção de spam.
 18. Quais tipos de e-mail chegam com maior frequência? Quais são os críticos?
 19. Como intimações e comunicações de tribunal chegam hoje — e-mail, sistema do tribunal, ambos?
@@ -149,4 +149,5 @@ As perguntas 🚧 são as que travam alguma coisa:
 | 23 — papel do Trello | Prioridade da frente Trello (D-09) |
 | 9 — situação do número de WhatsApp | Cronograma da frente F1 |
 | 15 — caixas de e-mail | Desenho da frente F3 |
+| 16 — provedor de e-mail | Canal de notificação interno (D-18) |
 | 30 — software de gestão jurídica | Arquitetura de integração |
