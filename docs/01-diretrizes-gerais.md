@@ -560,7 +560,7 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 
 | # | Risco / bloqueio | Impacto | Encaminhamento |
 |---|---|---|---|
-| R-01 | **Egress de rede bloqueado neste ambiente.** `api.escavador.com` e `developer.atlassian.com` retornam 403 no gateway; não consigo acessar a documentação oficial daqui | **Bloqueia a Fase 1** | Liberar os domínios na política de rede do ambiente **ou** você me fornecer a documentação (OpenAPI/PDF/HTML) dentro do repositório |
+| R-01 | **Egress de rede bloqueado neste ambiente.** `api.escavador.com` e `developer.atlassian.com` retornam 403 no gateway | **Reduzido de bloqueio a limitação** — o SDK oficial no GitHub dá uma fonte primária parcial (ver Nota Técnica 02) | Três saídas: rede em modo *Custom*, documentação no repositório, ou SDKs oficiais via GitHub (já disponível). Detalhes em [`05-acesso-as-fontes-das-apis.md`](05-acesso-as-fontes-das-apis.md) |
 | R-02 | Perda de prazo processual por falha de automação | Gravíssimo — responsabilidade profissional | Rotina humana de verificação preservada; automação nunca é único controle (§8.3) |
 | R-03 | Injeção de prompt via e-mail ou anexo | Grave — vazamento ou ação indevida | Separação de privilégio entre agentes (§10.2) |
 | R-04 | Estouro de custo do Escavador por uso via WhatsApp | Financeiro | Quotas e disjuntor (§11) |

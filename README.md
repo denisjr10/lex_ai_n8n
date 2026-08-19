@@ -22,6 +22,7 @@ Plataforma de automação e agentes de IA para escritório de advocacia, orquest
 | [`docs/02-descoberta-perguntas-abertas.md`](docs/02-descoberta-perguntas-abertas.md) | Questionário de descoberta para o escritório, para a equipe técnica e sobre contratos |
 | [`docs/03-canais-internos-e-hospedagem.md`](docs/03-canais-internos-e-hospedagem.md) | Nota técnica: por onde a equipe interna usa os agentes (Telegram?) e onde ficam os servidores MCP (dentro do n8n?) |
 | [`docs/04-modelo-de-identidade-e-autorizacao.md`](docs/04-modelo-de-identidade-e-autorizacao.md) | Modelo de dados, escopos, contrato do Policy Gate, fluxo de aprovação, auditoria e custo |
+| [`docs/05-acesso-as-fontes-das-apis.md`](docs/05-acesso-as-fontes-das-apis.md) | Como obter a documentação das APIs: política de rede, arquivos no repositório, SDKs oficiais |
 
 Documentos previstos: `mapeamento-escavador.md`, `mapeamento-trello.md`, PRD e Spec técnica.
 
@@ -44,6 +45,6 @@ Fase 7  Atendimento externo (WhatsApp), em piloto
 
 **A IA propõe, o humano dispõe.** Toda ação com efeito externo exige aprovação humana; todo ato com efeito jurídico ou de prazo exige aprovação de advogado, sem exceção.
 
-## Bloqueio ativo
+## Acesso às fontes das APIs
 
-O ambiente de desenvolvimento atual não alcança `api.escavador.com` nem `developer.atlassian.com` (403 no gateway de rede). A Fase 1 depende da liberação desses domínios ou do fornecimento da documentação das APIs no repositório. Ver R-01 nas diretrizes.
+O ambiente não alcança `api.escavador.com` nem `developer.atlassian.com` (403 no gateway de rede). Isso deixou de ser bloqueio: o SDK oficial do Escavador é legível via GitHub, que usa proxy independente. Ver [`docs/05-acesso-as-fontes-das-apis.md`](docs/05-acesso-as-fontes-das-apis.md) para as três saídas e o passo a passo.
