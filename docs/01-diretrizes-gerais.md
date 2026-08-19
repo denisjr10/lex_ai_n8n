@@ -179,7 +179,7 @@ Quatro papéis, com privilégios estritamente crescentes exceto onde indicado:
 Este é um ponto crítico e frequentemente subestimado:
 
 - **Cliente (WhatsApp).** O número de telefone é **identificador fraco** — chip pode ser trocado, clonado ou emprestado. Diretriz: o número é a *chave de busca*, nunca a *prova de identidade*. Antes de qualquer dado sensível, exige-se verificação adicional (confirmação de dado cadastral e/ou código de uso único). Cadastro do vínculo número ↔ cliente é feito pelo escritório, não por auto-declaração no chat.
-- **Colaborador e advogado.** Autenticação nominal e individual, com MFA. **Conta compartilhada é proibida** — inviabiliza auditoria e responsabilização.
+- **Colaborador e advogado.** Autenticação nominal e individual, com MFA. **Conta compartilhada é proibida** — inviabiliza auditoria e responsabilização. ⚠️ *O escritório hoje opera com uma única conta do Google Workspace compartilhada. Ver R-11 e a [Nota Técnica 01 §1.6](03-canais-internos-e-hospedagem.md).*
 - **Sistema a sistema.** Credenciais de serviço com escopo mínimo, rotacionáveis, nunca reutilizadas entre ambientes.
 
 ### 5.3 Matriz de privilégios — versão preliminar
@@ -465,7 +465,7 @@ A API do Escavador cobra por crédito, e o custo é dirigido por agente — incl
 | Persistência | PostgreSQL | Proposto |
 | Base vetorial | A definir conforme volume | Em aberto |
 | Canal WhatsApp | API oficial (Meta ou BSP) | Proposto — provedor a definir |
-| Canal interno — notificação | Mensageiro corporativo se já contratado; senão Telegram (sem custo adicional) | Proposto (D-18) |
+| Canal interno — notificação | Telegram (Google Chat inviável com conta compartilhada — R-11) | Proposto (D-18) |
 | Canal interno — conteúdo e aprovação | Painel web próprio, iniciando pela caixa de aprovações | Proposto (D-16) |
 | Hospedagem | A definir com a infra existente | Em aberto |
 
@@ -525,11 +525,12 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-15 | Workflows n8n versionados em Git | Adotar | 🟡 Proposta |
 | D-16 | Interface interna em dois níveis: mensageiro (notificação e ação rápida) + painel web (conteúdo, edição, aprovação) | Adotar | 🟡 Proposta |
 | D-17 | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar | 🟡 Proposta |
-| D-18 | Canal de notificação: usar o corporativo se já contratado; caso contrário Telegram. Não contratar Workspace/M365 só para isso | Confirmar com pergunta 16 | 🔴 Em aberto |
+| D-18 | Canal de notificação: **Telegram**, enquanto a equipe não tiver contas individuais do Workspace. Google Chat só é viável com licenças individuais | Adotar | 🟡 Proposta |
 | D-19 | MCP Escavador e MCP Trello em código, como serviços separados — não dentro do n8n | Adotar | 🟡 Proposta |
 | D-20 | Servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar | 🟡 Proposta |
+| D-21 | Identidade individual é pré-requisito. Levar a conta compartilhada do Workspace ao escritório e recomendar licenças individuais; painel com identidade própria de qualquer forma | Adotar | 🟡 Proposta |
 
-> D-16 a D-20 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md).
+> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md).
 
 ---
 
@@ -537,7 +538,7 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 
 | Fase | Conteúdo | Encerramento |
 |---|---|---|
-| **0 · Diretrizes** | Este documento; decisões D-01 a D-20 | Decisões confirmadas |
+| **0 · Diretrizes** | Este documento; decisões D-01 a D-21 | Decisões confirmadas |
 | **1 · Descoberta** | Mapeamento das APIs (Escavador → Trello); questionário do escritório respondido; acesso à infra e ao n8n | Mapeamentos publicados em `docs/` |
 | **2 · PRD + Spec** | Requisitos, casos de uso, matriz de privilégios definitiva, esquema de dados, contratos de ferramenta MCP | PRD e Spec aprovados |
 | **3 · Fundação** | Policy Gate, auditoria, identidade, ambiente, esqueleto dos servidores MCP | Uma chamada ponta a ponta, autorizada e auditada |
@@ -564,12 +565,13 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-08 | Banimento do número de WhatsApp | Interrupção do canal | API oficial e conformidade de template (§8.1) |
 | R-09 | Dependência de token pessoal no Trello | Operacional | Credencial de serviço (§8.5) |
 | R-10 | Regulação da OAB sobre IA em evolução | Conformidade | Revisão periódica; desenho conservador (§9.2) |
+| R-11 | **Escritório usa uma única conta do Google Workspace compartilhada por toda a equipe** | **Grave — inviabiliza privilégios por papel, aprovação nominal e auditoria; contraria §5.2 e os termos do Google** | Levar ao escritório; recomendar licenças individuais; painel com identidade própria como salvaguarda (D-21, Nota Técnica 01 §1.6) |
 
 ---
 
 ## 16. Próximos passos
 
-1. **Você revisa** este documento e decide sobre D-01 a D-20 (podem vir em bloco: "concordo, exceto X").
+1. **Você revisa** este documento e decide sobre D-01 a D-21 (podem vir em bloco: "concordo, exceto X").
 2. **Resolver R-01** — sem acesso à documentação do Escavador, o mapeamento não começa.
 3. **Enviar o questionário de descoberta** (`docs/02-descoberta-perguntas-abertas.md`) ao escritório.
 4. **Compartilhar acesso à infra e ao n8n** para calibrar §12.2.

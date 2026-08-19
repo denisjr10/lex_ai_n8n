@@ -167,7 +167,89 @@ Vale notar: o projeto **precisa** monitorar a caixa de e-mail do escritório (F3
 3. **Telegram** — se não usam nenhum canal corporativo. **Escolha legítima, não contingência**
 4. **WhatsApp interno** — evitar: custo por conversa, janela de 24 h e confusão com o canal de clientes
 
-## 1.6 Faseamento sugerido
+## 1.6 Cenário confirmado: Workspace Business Starter com conta única compartilhada
+
+O escritório confirmou que **paga Google Workspace Business Starter, mas toda a equipe usa uma única conta compartilhada**. Isso muda a análise em dois níveis: o que é tecnicamente possível no Google Chat, e um problema estrutural bem maior que o canal de notificação.
+
+### 1.6.1 O que o Google Chat permite com contas externas
+
+Um usuário com `@gmail.com` comum **pode** ser convidado para um espaço (grupo) do Google Chat do escritório, desde que o administrador habilite conversas e espaços externos no console. Ele entra como **convidado externo**, não como membro da organização.
+
+Mas há um limite decisivo para este projeto, que consta da documentação de limitações conhecidas do Google Chat:
+
+> **Usuários externos não conseguem interagir com aplicativos em um espaço.** Menções, comandos de barra, cliques em cards publicados pelo app — tudo isso fica desabilitado para eles.
+
+Ou seja:
+
+| Ação | Membro licenciado do Workspace | Convidado externo (`@gmail.com`) |
+|---|:---:|:---:|
+| Entrar no espaço e ler as mensagens | ✅ | ✅ (após convite) |
+| **Ver** notificações publicadas pelo bot | ✅ | ✅ |
+| Mencionar o bot (`@assistente`) | ✅ | ❌ |
+| Usar comando de barra (`/consultar`) | ✅ | ❌ |
+| **Clicar em botão de card** (`[Aprovar]`) | ✅ | ❌ |
+| Conversa direta com o bot | ✅ | ❌ |
+
+**Resposta direta às perguntas:** sim, os colaboradores conseguem entrar no grupo com Gmail pessoal e **ver** o que o bot publica. Mas **não conseguem acionar o bot nem clicar nos botões**. Para interagir, é preciso ser usuário licenciado dentro da conta paga do Workspace. Isso é restrição do próprio Google, não configuração ajustável.
+
+Restaria usar o Chat como **mural de avisos somente-leitura** — o que joga fora justamente a vantagem que o tornava atraente (os botões de ação). Nesse papel reduzido, o Telegram faz o mesmo de graça e ainda deixa a pessoa responder.
+
+### 1.6.2 O problema maior: a conta compartilhada
+
+A restrição acima é secundária diante disto: **uma conta usada por todos significa que o sistema tem uma única identidade para o escritório inteiro.**
+
+Isso colide de frente com o alicerce do projeto:
+
+| O que quebra | Por quê |
+|---|---|
+| **Matriz de privilégios (§5.3)** | Não há como dar acesso diferente a advogado e colaborador se, do ponto de vista do sistema, existe uma pessoa só |
+| **Aprovação humana (§6.3, faixas A3/A4)** | A faixa A4 exige aprovação **de advogado**. Com conta única, não há como comprovar que quem aprovou era advogado — nem quem foi |
+| **Auditoria (P5)** | O registro diria sempre o mesmo nome. Em caso de vazamento ou erro, o escritório não consegue identificar a origem |
+| **Regra explícita das diretrizes (§5.2)** | *"Conta compartilhada é proibida — inviabiliza auditoria e responsabilização"* |
+| **Sigilo profissional e LGPD (§9)** | Como controlador, o escritório precisa saber quem acessou dado de qual cliente. Com conta única, não sabe |
+| **Desligamento de pessoal** | Quem sai continua sabendo a senha. Trocar a senha obriga a avisar todo mundo — e na prática ninguém troca |
+| **Termos do Google** | Licenças do Workspace são por usuário. Compartilhar uma conta entre a equipe contraria os termos e expõe a conta a suspensão |
+
+Vale notar a ironia útil: **o Telegram gratuito daria identidade melhor do que o Workspace pago do escritório hoje.** Doze colaboradores no Telegram são doze identificadores distintos; doze colaboradores numa conta compartilhada do Workspace são um só.
+
+Este achado extrapola o canal de notificação. Ele afeta a frente de e-mail (F3), o armazenamento de documentos e o modelo de identidade inteiro (§5). **Precisa ser levado ao escritório como questão de fundo, não como detalhe de configuração.**
+
+### 1.6.3 Caminhos possíveis
+
+**Caminho A — Licenças individuais do Workspace (correto e recomendado)**
+
+Cada pessoa com sua conta `nome@escritorio.adv.br`. Custo: cerca de **R$ 35 a R$ 42 por usuário/mês** no plano anual do Business Starter. Para uma equipe de 12, algo em torno de **R$ 420 a R$ 500 por mês** no total — descontando a licença que já pagam.
+
+Resolve de uma vez: identidade individual, segundo fator, desligamento controlado, auditoria de e-mail e documentos, conformidade com os termos do Google, **e** libera o Google Chat com botões para toda a equipe, sem contratar mais nada.
+
+Não é gasto criado por este projeto — é uma correção que o escritório precisaria fazer de qualquer forma. O projeto apenas trouxe o problema à superfície.
+
+**Caminho B — Identidade no painel, notificação no Telegram (se não houver orçamento)**
+
+A identidade sai do Google e passa a viver no **painel web** do projeto: login individual por pessoa, com segundo fator, na base de usuários da própria plataforma. O mensageiro vira apenas um cano de aviso.
+
+- Notificação: **Telegram**, um identificador por pessoa, custo zero
+- Conteúdo, edição e aprovação: painel, com identidade real e registro nominal
+- Google Chat: não utilizável como canal interativo neste cenário
+
+Funciona e mantém a auditoria de pé — mas deixa e-mail e documentos do escritório continuarem sem responsabilização individual, o que é problema deles, não do projeto. **Precisa ser dito com clareza ao escritório**, para que a decisão seja consciente.
+
+**Caminho C — Híbrido com Cloud Identity Free**
+
+O Google oferece o **Cloud Identity Free**, que dá até 50 contas gerenciadas no domínio do escritório **sem custo**. Essas contas não incluem Gmail nem Agenda, mas dão identidade individual no domínio, utilizável para login único no painel do projeto.
+
+Assim: advogados e quem precisa de e-mail próprio ficam com licença paga do Workspace; os demais recebem conta gratuita de identidade só para acessar o painel. Reduz o custo mantendo identidade individual.
+
+Duas ressalvas: **não confirmei se o Cloud Identity Free dá acesso ao Google Chat** (a documentação lista Drive, Docs, Meet e outros, mas não menciona Chat), e há mais complexidade de administração. O valor dele aqui é a **identidade individual barata**, não o Chat.
+
+### 1.6.4 Recomendação
+
+1. **Levar o problema da conta compartilhada ao escritório agora**, antes do PRD. Ele afeta o desenho de identidade inteiro, e refazer isso depois é caro.
+2. **Recomendar o Caminho A** — é a correção certa, e o custo é modesto perto do que o escritório já gasta em Trello, Escavador e no próprio projeto.
+3. **Desenhar a plataforma para funcionar no Caminho B de qualquer maneira.** O painel precisa ter identidade própria independentemente do que o Google ofereça — isso é bom desenho, e evita que a plataforma fique refém de uma decisão administrativa do cliente.
+4. **Não usar Google Chat como canal interativo** enquanto a equipe não tiver contas individuais licenciadas. Até lá, Telegram.
+
+## 1.7 Faseamento sugerido
 
 | Fase | Interface | Racional |
 |---|---|---|
@@ -270,7 +352,8 @@ O código custa mais nas primeiras semanas e menos em todas as seguintes. Como o
 |---|---|---|
 | **D-16** | Interface interna em dois níveis: mensageiro para notificação e ação rápida; painel web para conteúdo, edição e aprovação | Adotar |
 | **D-17** | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar |
-| **D-18** | Canal de notificação: usar o corporativo **se já contratado**; caso contrário, Telegram. **Não contratar Google Workspace ou M365 apenas para isso** | Confirmar com pergunta 16 da descoberta |
+| **D-18** | Canal de notificação: **Telegram**, enquanto a equipe não tiver contas individuais do Workspace. Google Chat só passa a ser viável no Caminho A (§1.6.3) | Adotar |
+| **D-21** | Identidade individual é pré-requisito do projeto. Levar a conta compartilhada ao escritório e recomendar licenças individuais; desenhar o painel com identidade própria de qualquer forma (§1.6) | Adotar |
 | **D-19** | MCP Escavador e MCP Trello em código, como serviços separados — **não** dentro do n8n | Adotar |
 | **D-20** | Hospedar os servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar |
 
@@ -286,3 +369,8 @@ O código custa mais nas primeiras semanas e menos em todas as seguintes. Como o
 - [Google Workspace Help — edições Essentials](https://support.google.com/a/answer/7681288)
 - [Google for Developers — Configure the Google Chat API](https://developers.google.com/workspace/chat/configure-chat-api)
 - [Slack — Usage limits for free workspaces](https://slack.com/help/articles/115002422943-Usage-limits-for-free-workspaces)
+- [Google Workspace Help — Google Chat known limitations](https://support.google.com/a/answer/9296435)
+- [Google Workspace Help — Chatting with external users & guest accounts](https://knowledge.workspace.google.com/admin/chat/chatting-with-external-users)
+- [Google Workspace Help — Control external Chat & spaces chat options](https://support.google.com/a/answer/9269229)
+- [Cloud Identity — Editions](https://docs.cloud.google.com/identity/docs/editions)
+- [Cloud Identity Help — Your Cloud Identity free edition user cap](https://support.google.com/cloudidentity/answer/7295541)
