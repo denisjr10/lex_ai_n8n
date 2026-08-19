@@ -529,8 +529,13 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-19 | MCP Escavador e MCP Trello em código, como serviços separados — não dentro do n8n | Adotar | 🟡 Proposta |
 | D-20 | Servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar | 🟡 Proposta |
 | D-21 | Identidade individual é pré-requisito. Levar a conta compartilhada do Workspace ao escritório e recomendar licenças individuais; painel com identidade própria de qualquer forma | Adotar | 🟡 Proposta |
+| D-22 | A plataforma mantém registro próprio de usuários; provedores externos são vinculados, nunca são a conta | Adotar | 🟡 Proposta |
+| D-23 | Login por senha próprio no painel desde a primeira versão; login único é conveniência adicional | Adotar | 🟡 Proposta |
+| D-24 | Convenção de escopos `<sistema>:<recurso>:<ação>[:<abrangência>]`, com `own` / `carteira` / `any` verificadas no servidor MCP | Adotar | 🟡 Proposta |
+| D-25 | Faixa A4 permanece bloqueada enquanto não houver identidade individual de advogado | Adotar | 🟡 Proposta |
+| D-26 | Administrador não recebe escopo de dado de cliente por padrão | Adotar | 🟡 Proposta |
 
-> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md).
+> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md).
 
 ---
 
@@ -538,7 +543,7 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 
 | Fase | Conteúdo | Encerramento |
 |---|---|---|
-| **0 · Diretrizes** | Este documento; decisões D-01 a D-21 | Decisões confirmadas |
+| **0 · Diretrizes** | Este documento; decisões D-01 a D-26 | Decisões confirmadas |
 | **1 · Descoberta** | Mapeamento das APIs (Escavador → Trello); questionário do escritório respondido; acesso à infra e ao n8n | Mapeamentos publicados em `docs/` |
 | **2 · PRD + Spec** | Requisitos, casos de uso, matriz de privilégios definitiva, esquema de dados, contratos de ferramenta MCP | PRD e Spec aprovados |
 | **3 · Fundação** | Policy Gate, auditoria, identidade, ambiente, esqueleto dos servidores MCP | Uma chamada ponta a ponta, autorizada e auditada |
@@ -571,12 +576,12 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 
 ## 16. Próximos passos
 
-1. **Você revisa** este documento e decide sobre D-01 a D-21 (podem vir em bloco: "concordo, exceto X").
+1. **Você revisa** este documento e decide sobre D-01 a D-26 (podem vir em bloco: "concordo, exceto X").
 2. **Resolver R-01** — sem acesso à documentação do Escavador, o mapeamento não começa.
 3. **Enviar o questionário de descoberta** (`docs/02-descoberta-perguntas-abertas.md`) ao escritório.
 4. **Compartilhar acesso à infra e ao n8n** para calibrar §12.2.
-5. **Iniciar o mapeamento do Escavador** → `docs/04-mapeamento-escavador.md`.
-6. **Mapeamento do Trello** → `docs/05-mapeamento-trello.md` + parecer final.
+5. **Iniciar o mapeamento do Escavador** → `docs/mapeamento-escavador.md`.
+6. **Mapeamento do Trello** → `docs/mapeamento-trello.md` + parecer final.
 7. **PRD e Spec.**
 
 ---
