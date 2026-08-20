@@ -543,8 +543,19 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-33 | Custo estimado por média móvel do cabeçalho `Creditos-Utilizados`, com reconciliação posterior | Adotar | 🟡 Proposta |
 | D-34 | Resumo por IA do Escavador é insumo de leitura, nunca fonte para resposta a cliente nem base de decisão de prazo | Adotar | 🟡 Proposta |
 | D-35 | Teto obrigatório de páginas e itens em toda ferramenta que percorra paginação | Adotar | 🟡 Proposta |
+| D-36 | Isolamento por quadro no Trello é garantido por verificação em código no MCP — a API não oferece escopo por recurso. Conta de serviço membro apenas dos quadros do escritório | Adotar | 🟡 Proposta |
+| D-37 | Não planejar contando com o OAuth 2.0 do Trello: anunciado em abril de 2025, ainda não documentado em julho de 2026 | Adotar | 🟡 Proposta |
+| D-38 | Webhooks do Trello criados pela conta de serviço, nunca por token de administrador da organização | Adotar | 🟡 Proposta |
+| D-39 | Verificação dupla de webhook do Trello: assinatura HMAC-SHA1 e faixa de IP | Adotar | 🟡 Proposta |
+| D-40 | `X-Trello-Client-Identifier` obrigatório em toda escrita, para impedir laço de sincronização | Adotar | 🟡 Proposta |
+| D-41 | Ferramentas expõem a alternativa reversível (arquivar), não a destrutiva (excluir) | Adotar | 🟡 Proposta |
+| D-42 | Edição e exclusão de `actions` do Trello nunca são expostas — preservar o histórico é premissa da auditoria | Adotar | 🟡 Proposta |
+| D-43 | Correspondência Trello ↔ base interna por Custom Fields, nunca por texto no nome ou descrição do card | Adotar | 🟡 Proposta |
+| D-44 | Ferramentas de fluxo do escritório vivem no n8n, compostas sobre ferramentas genéricas do MCP (Regra 3) | Adotar | 🟡 Proposta |
+| D-45 | O papel `cliente` não recebe nenhuma ferramenta do Trello | Adotar | 🟡 Proposta |
+| D-46 | Controle de vazão do Trello com três baldes (chave, token, rotas de membros/busca) e recuo exponencial | Adotar | 🟡 Proposta |
 
-> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md).
+> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md).
 
 ---
 
@@ -584,6 +595,11 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-13 | Custo recorrente de monitoramentos invisível a orçamento baseado em chamadas | Financeiro, crescente e silencioso | Orçamento separado para assinaturas ativas (D-32) |
 | R-14 | Remoção acidental de monitoramento desliga alerta de processo sem custo nem sinal | **Grave — realiza R-02, perda de prazo** | Ferramenta e escopo separados, com confirmação explícita (D-29) |
 | R-15 | Plano contratado pode não cobrir V1, deixando o escritório sem monitoramento de diário oficial | Operacional grave | Pergunta 58, com urgência elevada ([mapeamento](mapeamento-escavador.md) §12) |
+| R-16 | **A API do Trello não oferece escopo por quadro ou por recurso** — `read`/`write` valem para a conta inteira do token | **Grave — a API de destino não é segunda barreira; uma falha no MCP expõe todos os quadros** | Conta de serviço restrita por associação, verificação em código, escrita desligada por padrão (D-36). Isolamento forte exige contas separadas por área ([mapeamento](mapeamento-trello.md) §3) |
+| R-17 | Laço de sincronização entre n8n e Trello, com escrita realimentando webhook | Operacional — cards bagunçados e vazão esgotada | `X-Trello-Client-Identifier` obrigatório (D-40) |
+| R-18 | Webhook do Trello quebrado passa até 30 dias e 1.000 falhas antes da desativação, perdendo eventos em silêncio | Grave — sincronização se degrada sem sinal | Verificação periódica de `consecutiveFailures` e `active`, com alerta ativo |
+| R-19 | Limite de 100 req/900 s em `/search` e `/members` esgotável por uma conversa movimentada | Operacional | Balde próprio de vazão, cache e teto por sessão (D-46) |
+| R-20 | Token pessoal do Trello dá acesso à conta inteira da pessoa e pode ser revogado por ela sem aviso | Operacional e de privacidade | Conta de serviço dedicada (perguntas 65 e 66). **Agrava R-09** |
 
 ---
 
