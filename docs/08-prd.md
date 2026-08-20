@@ -6,7 +6,7 @@
 | Data | 2026-08-20 |
 | Estado | 🟡 **Proposta — aguarda aval do usuário** |
 | Fase | 2 — PRD e Spec |
-| Antecede | `09-spec-tecnica.md` (a escrever) |
+| Antecede | `09-spec-tecnica.md` — **Parte I escrita em 20/08**; Parte II depende das respostas da §13 |
 | Herda de | `01-diretrizes-gerais.md`, `04-modelo-de-identidade-e-autorizacao.md`, `mapeamento-escavador.md`, `mapeamento-trello.md`, `07-painel-escavador-achados.md` |
 
 > **O que este documento é.** A definição do **produto**: quem usa, o que faz, com que regras, a que custo e como se sabe que deu certo. Ele não descreve implementação — isso é da Spec. Onde uma decisão de produto depende de resposta do escritório, o requisito está marcado 🚧 e opera sob premissa declarada.
@@ -449,3 +449,5 @@ Recorte dos riscos de `01` §15 que mudam **o que o produto faz**, não apenas c
 **A Spec técnica** (`09-spec-tecnica.md`): contratos de ferramenta MCP, esquema de dados, contrato do Policy Gate já esboçado em `04` §4, desenho do receptor de callback, política de cache por tipo de dado e organização do repositório.
 
 Antes dela, este PRD precisa de **aval** — e as sete perguntas da §13 precisam de resposta, sob pena de a Spec detalhar premissa em vez de requisito.
+
+> **Atualização de 20/08/2026.** A Spec foi iniciada pela **Parte I** — o chassi, o motor de custo, o cache, o receptor de callbacks e o esquema de dados —, que reúne o que seria construído igual sob qualquer resposta do escritório. A **Parte II** (matriz definitiva de escopos, modelagem da demanda, fluxos n8n) continua aguardando as respostas da §13.

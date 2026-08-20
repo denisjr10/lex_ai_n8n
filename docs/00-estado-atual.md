@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-08-20 |
-| Fase | **2 — PRD e Spec.** PRD escrito, aguardando aval; Spec é o próximo passo |
+| Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
 | Crédito Escavador | 🔴 **Cota de teste expira em 23/08/2026.** R$ 50,00 · **R$ 0,00 gastos** · preço real por rota lido no painel (R$ 0,05 a R$ 3,00). Ver `07-painel-escavador-achados.md` e `06-orcamento-de-chamadas-escavador.md` |
@@ -16,7 +16,7 @@
 
 Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador e Trello.
 
-**O próximo passo é o PRD e a Spec**, e depois o chassi dos servidores MCP.
+Fase 2 em andamento: **PRD escrito e Spec Parte I escrita**, ambos aguardando aval. **O próximo passo é construir a fundação** (marcos 1 a 5 da §15 da Spec), que não depende de crédito nem de resposta do escritório.
 
 ## Concluído
 
@@ -32,6 +32,7 @@ Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador
 | Orçamento de chamadas da cota de teste do Escavador (rev. 2.0) | `06-orcamento-de-chamadas-escavador.md` |
 | **Achados do painel autenticado do Escavador — preços, tokens, callbacks, organização** | `07-painel-escavador-achados.md` |
 | **PRD — produto, entregas, requisitos, regras de negócio e modelo de custo** | `08-prd.md` |
+| **Spec Técnica — Parte I: chassi, motor de custo, cache, callbacks, esquema de dados** | `09-spec-tecnica.md` |
 
 ## O que os mapeamentos concluíram
 
@@ -58,7 +59,7 @@ O suporte do Escavador Business liberou **saldo de teste** em **13/08/2026**: R$
 
 Isso vira restrição de projeto, não detalhe operacional:
 
-- **Nenhuma rota é gratuita agora.** O que os mapeamentos marcam 🆓 custa R$ 3,00 na cota de teste
+- ~~**Nenhuma rota é gratuita agora.**~~ ✅ **Corrigido em 20/08 pelo Playground:** as rotas de *status* do ciclo assíncrono são **gratuitas**, e os preços vão de R$ 0,00 a R$ 3,00 — ver a seção do painel, abaixo
 - **A cota não revela a tabela de preços** — o custo é fixo. A pendência de preço por rota continua dependendo do painel autenticado
 - **16 chamadas validam contrato, não cobertura.** Autenticação, cobertura do plano (V1 e V2), formato dos dados e ciclo de webhook. Nada além disso
 - **Recarga paga é decisão do usuário**, tomada com o registro de execução à vista
@@ -92,11 +93,31 @@ Três decisões de produto que valem destaque:
 
 Sete perguntas travam o refino (§13 do PRD), e **P-01 — identidade individual — é a premissa mais crítica**: se cair, metade dos requisitos cai junto (D-67).
 
+## A Spec técnica começou pela metade que não depende do escritório — 20/08/2026
+
+`09-spec-tecnica.md`, **Parte I**, versão 1.0, 🟡 aguardando aval. O critério de corte: está na Parte I tudo que seria construído **exatamente igual** sob qualquer resposta que o escritório der.
+
+Ela especifica o **chassi** (`mcp-core`) e tudo que se apoia nele: arquitetura de execução, organização do repositório, sessão e verificação de escopo, motor de custo, cache, receptor de callbacks, esquema de dados, taxonomia de erros, vazão, observabilidade, segurança e testes.
+
+O que mais decide desenho:
+
+- **A ferramenta declara, o chassi decide.** Nenhuma ferramenta MCP chama o Policy Gate, lê token, mede custo ou grava auditoria. Ela declara faixa, escopo, sujeito, custo e cache — e o chassi aplica. Assim **não existe caminho até a API que escape da verificação**, e a Regra 1 deixa de depender da disciplina de quem escreve ferramenta
+- **Onze etapas, e negar é sempre mais barato que permitir.** As oito primeiras não custam um centavo: recusa por escopo ou abrangência acontece antes da chamada paga (RF-07)
+- **Preço é dado, não código.** O catálogo fica em arquivo versionado, com classificação `cobrada`/`gratuita`/`desconhecida`, unidade de cobrança e data de leitura. Quando o suporte responder P-06, muda-se um arquivo — não o código (D-71)
+- **Reserva antes, reconciliação depois** (D-72). Sem reserva, dez chamadas simultâneas de R$ 3,00 passam por um orçamento de R$ 5,00, porque nenhuma debitou ainda
+- **A auditoria vem antes do motor de custo** na ordem de construção, porque custo é um tipo de registro. Fazer na ordem inversa é retrabalho garantido
+- **Toda a fundação pode ser construída e testada sem gastar crédito**, sobre gravações anonimizadas. O crédito só entra na verificação final ponta a ponta — os R$ 0,05 já orçados (D-78)
+
+Riscos novos: **R-26** (o chassi concentra a fronteira — raio de dano máximo), **R-27** (janela entre revogar sessão e ela expirar), **R-28** (reserva por estimativa pode subestimar nas rotas por bloco). Decisões **D-68 a D-78**.
+
 ## Próximo passo
 
-**A Spec técnica.** Os dois mapeamentos entregaram o que faltava: superfície real, formato das respostas, limites, custo, modelo de webhook e desenho de ferramentas.
+Dois caminhos que não competem entre si:
 
-Depois: **chassi dos servidores MCP**. O §14 do mapeamento do Trello registra a diferença que o chassi precisa absorver — o recurso escasso é crédito no Escavador e vazão no Trello, e o disjuntor tem de cobrir os dois.
+1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
+2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
+
+A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
 
 ## Decisões
 
@@ -136,6 +157,9 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 | **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
 | **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |
 | **R-24** — token do Escavador não tem escopo; alcança toda a API da organização | **Novo e grave.** Espelha o R-16 do Trello. Privilégio fica só no código do MCP. Agrava R-12 |
+| **R-26** — o `mcp-core` concentra a fronteira de segurança dos dois servidores | **Novo e grave.** Consequência aceita de R-16 + R-24: com uma fronteira só, ela precisa ser auditada como tal (D-78) |
+| **R-27** — janela entre revogar a sessão MCP e ela expirar | **Novo, moderado.** Sessão de minutos, lista de revogação, A4 reconsultando o Policy Gate |
+| **R-28** — reserva por estimativa pode subestimar o custo nas rotas por bloco | **Novo, financeiro.** Reserva pelo pior caso permitido e teto de blocos por papel |
 | ~~R-23~~ — o painel não exibiria a expiração do bônus | ✅ Encerrado no mesmo dia: o painel exibe "Válido até 23/08/2026" |
 | **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
 | R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |

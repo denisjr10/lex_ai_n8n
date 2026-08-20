@@ -575,8 +575,19 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-65 | Aprovação humana **expira**: pedido não respondido em janela definida vence e precisa ser refeito | Adotar | 🟡 Proposta |
 | D-66 | A **taxa de rejeição em aprovação humana** é a métrica primária de qualidade do agente, com a taxa de escalada indevida como contramétrica | Adotar | 🟡 Proposta |
 | D-67 | Identidade individual é **bloqueio de projeto**, não preferência — sem ela, a entrega E1 não sai como especificada (R-11) | Adotar | 🟡 Proposta |
+| D-68 | Monorepo em TypeScript com pacote `mcp-core` compartilhado, PostgreSQL como única persistência, cache no próprio banco até que o volume justifique outra coisa | Adotar | 🟡 Proposta |
+| D-69 | A sessão MCP é **token assinado de vida curta** emitido pelo Policy Gate e validado offline pelo servidor, com lista de revogação consultada a cada chamada; a faixa **A4 reconsulta o Policy Gate** | Adotar | 🟡 Proposta |
+| D-70 | Toda ferramenta devolve o **envelope padrão** `dados` + `meta` + `avisos`, com origem, idade e custo obrigatórios; erro devolve código interno, mensagem ao agente e `acao_sugerida` | Adotar | 🟡 Proposta |
+| D-71 | O **catálogo de preços é dado versionado**, com classificação `cobrada`/`gratuita`/`desconhecida`, unidade de cobrança, data de leitura e fonte. Preço nunca aparece literal no código | Adotar | 🟡 Proposta |
+| D-72 | O orçamento opera por **reserva antes e reconciliação depois**; sem reserva concedida a chamada não sai, e rotas cobradas por bloco reservam pelo **pior caso permitido**, não pela média | Adotar | 🟡 Proposta |
+| D-73 | "Recurso escasso" é **uma abstração só** — crédito no Escavador, vazão no Trello — com um único mecanismo de reserva, degradação e disjuntor | Adotar | 🟡 Proposta |
+| D-74 | Resposta "não encontrado" vai para **cache negativo de 1 hora**, para que agente que erra não pague repetidamente pela mesma resposta vazia | Adotar | 🟡 Proposta |
+| D-75 | Um **`requisicao_id`** nasce no canal e atravessa n8n, Policy Gate, MCP, SDK, auditoria e callback — toda operação é reconstruível por ele | Adotar | 🟡 Proposta |
+| D-76 | A **base interna de vigilância** (publicações, movimentações e alertas), alimentada pelo receptor de callbacks, é a fonte de leitura do agente do cliente. Implementa D-63 | Adotar | 🟡 Proposta |
+| D-77 | A auditoria é **síncrona ao ato**, em banco próprio, com append-only imposto por permissão no banco. **Auditoria indisponível bloqueia a operação** — falha fecha também aqui | Adotar | 🟡 Proposta |
+| D-78 | A **matriz de escopo** (papel × ferramenta × abrangência) é critério de aceite da fundação, e a **CI nunca chama a API real** — testes rodam sobre gravações anonimizadas, atualizadas só por ato deliberado | Adotar | 🟡 Proposta |
 
-> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md); D-47 a D-50, no [Orçamento de Chamadas do Escavador](06-orcamento-de-chamadas-escavador.md).
+> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md); D-47 a D-50, no [Orçamento de Chamadas do Escavador](06-orcamento-de-chamadas-escavador.md); D-51 a D-60, nos [Achados do Painel do Escavador](07-painel-escavador-achados.md); D-61 a D-67, no [PRD](08-prd.md); D-68 a D-78, na [Spec Técnica — Parte I](09-spec-tecnica.md).
 
 ---
 
@@ -626,6 +637,9 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-23 | ~~O painel não exibe a data de expiração do saldo bônus~~ | ✅ **Encerrado em 2026-08-20, no mesmo dia** | Levantado por engano: o painel exibe sim, na barra lateral — "R$ 50,00 · Válido até 23/08/2026" |
 | R-25 | Quatro rotas de listagem cobram **por bloco de 200 resultados**, e o volume é desconhecido antes da chamada — "quais os processos deste cliente?" pode custar R$ 3,00 ou R$ 15,00 | Operacional e financeiro — é a consulta mais natural do agente e a de custo mais imprevisível | Sem paginação automática (D-57), contagem prévia e teto de blocos por papel (D-58) ([achados](07-painel-escavador-achados.md) §7-A) |
 | R-24 | **O token do Escavador não tem escopo.** A tela de criação só oferece nome, data de expiração e um interruptor de Playground — um token vazado alcança **toda** a superfície da API da organização, inclusive as rotas caras e as de certificado digital | **Grave — a API de destino não é segunda barreira, igual ao R-16 do Trello** | Privilégio existe só no código do MCP (Regra 1). Um token por aplicação, expiração curta, Playground desligado, revogação isolada (D-51). **Agrava R-12** ([achados](07-painel-escavador-achados.md) §9.1) |
+| R-26 | **O `mcp-core` concentra a fronteira de segurança** — um defeito nele atinge os dois servidores, todos os papéis e todos os inquilinos | **Grave — raio de dano máximo.** É o preço de ter uma fronteira só, preferível a cinco desatualizadas | Revisão de segurança dedicada, matriz de escopo como critério de aceite (D-78), dependência de mão única ([spec](09-spec-tecnica.md) §3 e §13) |
+| R-27 | A validação offline da sessão MCP cria janela entre revogar e expirar | Moderado — janela de minutos | Sessão curta, lista de revogação a cada chamada, faixa A4 reconsultando o Policy Gate (D-69) |
+| R-28 | A reserva de orçamento por estimativa pode subestimar o custo real nas rotas cobradas por bloco; o excedente só aparece na reconciliação, com o dinheiro já gasto | Financeiro — realiza R-25 por outro caminho | Reserva pelo pior caso permitido, teto de blocos por papel, contar antes de listar (D-72, D-58) |
 
 ---
 
