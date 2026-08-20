@@ -6,7 +6,7 @@
 | Fase | **1 — Descoberta e mapeamento das APIs — concluída** |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
-| Crédito Escavador | ⚠️ **Cota de teste: R$ 50,00 · 16 requisições · 10 dias · R$ 3,00 por chamada.** Ver `06-orcamento-de-chamadas-escavador.md` |
+| Crédito Escavador | 🔴 **Cota de teste expira em 23/08/2026.** R$ 50,00 · 16 requisições · R$ 3,00 por chamada · 0 gastas. Ver `06-orcamento-de-chamadas-escavador.md` |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
@@ -50,7 +50,9 @@ Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador
 
 ## Restrição nova — crédito do Escavador
 
-O suporte do Escavador Business liberou **saldo de teste**: R$ 50,00, **16 requisições**, **10 dias**, com **R$ 3,00 fixos por requisição, em qualquer rota**. Não há plano pago contratado.
+O suporte do Escavador Business liberou **saldo de teste** em **13/08/2026**: R$ 50,00, **16 requisições**, **10 dias** — ou seja, **expira em 23/08/2026** — com **R$ 3,00 fixos por requisição, em qualquer rota**. Não há plano pago contratado.
+
+🔴 **O prazo é o problema maior que o dinheiro.** Crédito não gasto até 23/08 é perdido. Primeira providência: **pedir prorrogação ao suporte**. Em paralelo, executar os Blocos A e B do orçamento, que não dependem de nada além do token e de um número de processo.
 
 Isso vira restrição de projeto, não detalhe operacional:
 
@@ -89,7 +91,6 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 
 - **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
 - **Dados do painel do Escavador** — tabela de preços por rota, plano contratado, limite de requisições, URL de callback já cadastrada, tokens existentes na conta. Só existem no painel autenticado
-- **Data de início da cota de teste** — para saber quando os 10 dias expiram
 - **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
 - Acesso à instância n8n e à infraestrutura, para calibrar §12.2 de `01`

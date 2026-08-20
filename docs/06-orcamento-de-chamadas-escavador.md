@@ -2,11 +2,12 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.0 |
+| Versão | 1.1 |
 | Data | 2026-08-20 |
 | Estado | 🟡 Proposta — aguarda aval do usuário |
 | Saldo | R$ 50,00 · 16 requisições · R$ 3,00 cada |
-| Validade | 10 dias a partir da liberação (**data de início a confirmar**) |
+| Liberado em | **13/08/2026** |
+| **Expira em** | **23/08/2026** — crédito não gasto é perdido |
 | Gastas até agora | **0 de 16** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
@@ -28,6 +29,27 @@ Três consequências que mudam o planejamento:
 **2. A cota de teste não revela a tabela de preços.** Como o custo é fixo em R$ 3,00, o cabeçalho `Creditos-Utilizados` durante o teste não mede o preço real de cada rota. A pendência 1 de `mapeamento-escavador.md` §15 **continua aberta** e só se resolve no painel autenticado. Não gaste chamada tentando descobrir preço.
 
 **3. 16 chamadas é pouco para 83 operações mapeadas.** O objetivo do teste não é cobrir a API — é validar **contrato**: autenticação funciona, o plano cobre V1 e V2, o formato dos dados é o que o mapeamento previu, e o webhook chega. Cobertura vem depois, com plano pago.
+
+## 1-A. Prazo — o saldo expira em 23/08/2026
+
+O saldo foi liberado em **13/08** com validade de 10 dias. **Restam três dias.**
+
+Isso inverte a lógica do orçamento. Um orçamento existe para não gastar demais; este passou a existir também para **não deixar de gastar**. Crédito não usado até 23/08 simplesmente evapora — não vira desconto, não acumula, não volta.
+
+**Consequência prática:** o que depende só do token e de um número de processo (Blocos A e B) precisa ser executado **imediatamente**, porque não depende de mais nada. O que depende de infraestrutura que ainda não existe (Bloco C, que exige URL pública de callback) provavelmente não cabe no prazo.
+
+**A primeira providência não é técnica: é pedir prorrogação ao suporte.** Custo zero, e o pedido é razoável — o teste começou antes de a arquitetura estar pronta para exercitar webhook. Se a prorrogação vier, o Bloco C volta ao plano. Se não vier, ele fica para o plano pago e as 16 chamadas se concentram em A, B e D.
+
+### Ordem de execução sob prazo curto
+
+| Prioridade | Bloco | Depende de | Cabe em 3 dias? |
+|---|---|---|---|
+| 1 | **A** — autenticação e cobertura do plano | Só do token | ✅ Sim, agora |
+| 2 | **B** — estrutura de dados | Token + um número de processo do escritório | ✅ Sim, agora |
+| 3 | **D** — formato dos erros | Só do token | ✅ Sim, é rápido |
+| 4 | **C** — assincronia e webhook | URL pública de callback cadastrada no painel | ⚠️ Só com prorrogação, ou com túnel local montado a tempo |
+
+Se a prorrogação não vier, as 4 chamadas do Bloco C e as 2 de reserva devem ser realocadas antes de 23/08 — provavelmente para ampliar o Bloco B (mais um processo, de outro tribunal, para ver o quanto o formato varia entre tribunais). Variação entre tribunais é uma incógnita real do modelo de dados e vale crédito.
 
 ## 2. Princípio de alocação
 
