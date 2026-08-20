@@ -35,6 +35,32 @@ Estas não se renegociam sem decisão formal registrada. Se uma tarefa parecer e
 | 5 | **Negar por padrão, e falha fecha.** Sem lista de permissão explícita, nega. Governança indisponível bloqueia em vez de liberar |
 | 6 | **Custo é requisito funcional.** A API do Escavador cobra por crédito; quota, cache e disjuntor fazem parte da funcionalidade |
 | 7 | **Nada de conta compartilhada.** Identidade individual é pré-requisito (ver R-11) |
+| 8 | **Crédito do Escavador é orçamento fechado.** Nenhuma chamada à API sem constar do orçamento aprovado (ver abaixo). Na dúvida, não chame — pergunte |
+
+## Orçamento de créditos do Escavador — **leia antes de chamar a API**
+
+O projeto opera hoje sobre uma **cota de teste**, liberada pelo suporte do Escavador Business:
+
+| Item | Valor |
+|---|---|
+| Saldo | **R$ 50,00** |
+| Custo por requisição | **R$ 3,00 — plano, para qualquer rota** |
+| Teto de requisições | **16** |
+| Validade | **10 dias** a partir da liberação |
+
+Não há recarga contratada. Uma recarga paga só acontece quando for **realmente necessária** — e essa é uma decisão do usuário, nunca uma consequência de uma chamada exploratória.
+
+**Regras operacionais:**
+
+1. **Toda chamada gasta R$ 3,00.** Não existe rota gratuita durante a cota de teste. Rotas marcadas 🆓 nos mapeamentos custam o mesmo que as pagas
+2. **Só chame o que está no orçamento** de `docs/06-orcamento-de-chamadas-escavador.md`. Chamada fora dele exige aval explícito do usuário, na hora
+3. **Não gaste chamada para descobrir o que a documentação já responde.** Consulte `docs/mapeamento-escavador.md`, o OpenAPI e o SDK oficial primeiro
+4. **Uma chamada, um objetivo registrado.** Toda resposta recebida vai para o orçamento com o que ela ensinou — resposta não anotada é crédito jogado fora
+5. **Nunca repita uma chamada já feita.** Guarde a resposta bruta em arquivo e releia dali
+6. **Nada de laço, lote ou varredura.** Nenhum script que chame a API mais de uma vez por execução
+7. **Cuidado com custo recorrente.** Criar monitoramento gera cobrança periódica. Se criar um para teste, remova ao terminar
+
+**A tabela de preços por rota continua pendente.** Como a cota de teste cobra R$ 3,00 fixo, ela não revela o preço real de nada — os preços continuam vindo só do painel autenticado.
 
 ## Convenções de trabalho
 

@@ -6,6 +6,7 @@
 | Fase | **1 — Descoberta e mapeamento das APIs — concluída** |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
+| Crédito Escavador | ⚠️ **Cota de teste: R$ 50,00 · 16 requisições · 10 dias · R$ 3,00 por chamada.** Ver `06-orcamento-de-chamadas-escavador.md` |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
@@ -28,6 +29,7 @@ Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador
 | Como obter as fontes das APIs | `05-acesso-as-fontes-das-apis.md` |
 | Mapeamento da API do Escavador — 83 operações | `mapeamento-escavador.md` |
 | Mapeamento da API do Trello — 261 operações | `mapeamento-trello.md` |
+| Orçamento de chamadas da cota de teste do Escavador | `06-orcamento-de-chamadas-escavador.md` |
 
 ## O que os mapeamentos concluíram
 
@@ -45,6 +47,19 @@ Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador
 - 12 ferramentas curadas sobre 261 operações — a superfície destrutiva do Trello (excluir quadro, apagar histórico, arquivar em massa) fica fora de todo perfil.
 - Recurso escasso aqui é **vazão**, não dinheiro: o Trello não cobra por chamada.
 - Resolvida a ressalva de §7.3: ferramentas de fluxo do escritório vivem no **n8n**, não no MCP (Regra 3, D-44).
+
+## Restrição nova — crédito do Escavador
+
+O suporte do Escavador Business liberou **saldo de teste**: R$ 50,00, **16 requisições**, **10 dias**, com **R$ 3,00 fixos por requisição, em qualquer rota**. Não há plano pago contratado.
+
+Isso vira restrição de projeto, não detalhe operacional:
+
+- **Nenhuma rota é gratuita agora.** O que os mapeamentos marcam 🆓 custa R$ 3,00 na cota de teste
+- **A cota não revela a tabela de preços** — o custo é fixo. A pendência de preço por rota continua dependendo do painel autenticado
+- **16 chamadas validam contrato, não cobertura.** Autenticação, cobertura do plano (V1 e V2), formato dos dados e ciclo de webhook. Nada além disso
+- **Recarga paga é decisão do usuário**, tomada com o registro de execução à vista
+
+Registrado como **R-21** e decisões **D-47 a D-50**. O orçamento chamada a chamada está em `06-orcamento-de-chamadas-escavador.md` e **precisa de aval antes da primeira execução**.
 
 ## Próximo passo
 
@@ -72,7 +87,10 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 
 ## Pendências com o usuário
 
-- **Credenciais do Escavador** — destravam a tabela de preços por rota, sem a qual as quotas são arbitrárias
+- **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
+- **Dados do painel do Escavador** — tabela de preços por rota, plano contratado, limite de requisições, URL de callback já cadastrada, tokens existentes na conta. Só existem no painel autenticado
+- **Data de início da cota de teste** — para saber quando os 10 dias expiram
+- **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
 - Acesso à instância n8n e à infraestrutura, para calibrar §12.2 de `01`
 - Aval sobre as decisões propostas (D-03 a D-46)

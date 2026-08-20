@@ -554,8 +554,12 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-44 | Ferramentas de fluxo do escritório vivem no n8n, compostas sobre ferramentas genéricas do MCP (Regra 3) | Adotar | 🟡 Proposta |
 | D-45 | O papel `cliente` não recebe nenhuma ferramenta do Trello | Adotar | 🟡 Proposta |
 | D-46 | Controle de vazão do Trello com três baldes (chave, token, rotas de membros/busca) e recuo exponencial | Adotar | 🟡 Proposta |
+| D-47 | Chamada à API do Escavador só ocorre se constar de orçamento aprovado; fora dele, exige aval explícito do usuário na hora | Adotar | 🟡 Proposta |
+| D-48 | Toda resposta da API do Escavador é salva bruta em arquivo, anonimizada, e nunca reconsultada | Adotar | 🟡 Proposta |
+| D-49 | A cota de teste do Escavador é gasta em validação de contrato, não em cobertura de superfície nem em descoberta de preço | Adotar | 🟡 Proposta |
+| D-50 | Recarga paga do Escavador é decisão exclusiva do usuário, tomada com o registro de execução à vista | Adotar | 🟡 Proposta |
 
-> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md).
+> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md); D-47 a D-50, no [Orçamento de Chamadas do Escavador](06-orcamento-de-chamadas-escavador.md).
 
 ---
 
@@ -599,6 +603,7 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-17 | Laço de sincronização entre n8n e Trello, com escrita realimentando webhook | Operacional — cards bagunçados e vazão esgotada | `X-Trello-Client-Identifier` obrigatório (D-40) |
 | R-18 | Webhook do Trello quebrado passa até 30 dias e 1.000 falhas antes da desativação, perdendo eventos em silêncio | Grave — sincronização se degrada sem sinal | Verificação periódica de `consecutiveFailures` e `active`, com alerta ativo |
 | R-19 | Limite de 100 req/900 s em `/search` e `/members` esgotável por uma conversa movimentada | Operacional | Balde próprio de vazão, cache e teto por sessão (D-46) |
+| R-21 | Cota de teste do Escavador é finita (16 requisições, R$ 50,00, 10 dias) e uma chamada exploratória a esgota sem entregar nada | Operacional — trava o desenvolvimento até recarga paga | Orçamento fechado por chamada, com aval prévio (D-47 a D-50) |
 | R-20 | Token pessoal do Trello dá acesso à conta inteira da pessoa e pode ser revogado por ela sem aviso | Operacional e de privacidade | Conta de serviço dedicada (perguntas 65 e 66). **Agrava R-09** |
 
 ---
