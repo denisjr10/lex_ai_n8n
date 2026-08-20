@@ -558,7 +558,7 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-48 | Toda resposta da API do Escavador é salva bruta em arquivo, anonimizada, e nunca reconsultada | Adotar | 🟡 Proposta |
 | D-49 | A cota de teste do Escavador é gasta em validação de contrato, não em cobertura de superfície nem em descoberta de preço | Adotar | 🟡 Proposta |
 | D-50 | Recarga paga do Escavador é decisão exclusiva do usuário, tomada com o registro de execução à vista | Adotar | 🟡 Proposta |
-| D-51 | **Um token do Escavador por aplicação**, com a menor permissão que sirva — nunca um token único compartilhado. A atribuição da chamada sai de graça no *Histórico das Requisições*, filtrável por token | Adotar | 🟡 Proposta |
+| D-51 | **Um token do Escavador por aplicação**, com data de expiração de no máximo 1 ano e Playground desligado. O token **não tem escopo** (ver R-24), então isso não reduz privilégio — dá **atribuição** (o *Histórico das Requisições* filtra por token) e **revogação isolada** | Adotar | 🟡 Proposta |
 | D-52 | O chassi do MCP suporta **dois modelos de validação de webhook**: segredo compartilhado no cabeçalho `Authorization` (Escavador) e assinatura HMAC (Trello) | Adotar | 🟡 Proposta |
 | D-53 | O receptor de callback é **idempotente** — o Escavador reentrega, e o painel conta as tentativas | Adotar | 🟡 Proposta |
 | D-54 | O disjuntor de custo do Escavador tem **duas camadas**: a nossa, em código, e o *Alerta de saldo* nativo do painel, configurado assim que houver saldo pago | Adotar | 🟡 Proposta |
@@ -612,7 +612,8 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-21 | Cota de teste do Escavador é finita (16 requisições, R$ 50,00, 10 dias) e uma chamada exploratória a esgota sem entregar nada | Operacional — trava o desenvolvimento até recarga paga | Orçamento fechado por chamada, com aval prévio (D-47 a D-50) |
 | R-20 | Token pessoal do Trello dá acesso à conta inteira da pessoa e pode ser revogado por ela sem aviso | Operacional e de privacidade | Conta de serviço dedicada (perguntas 65 e 66). **Agrava R-09** |
 | R-22 | Recarga de crédito do Escavador **não é autosserviço** — depende de atendimento comercial humano | Operacional — o projeto para até o comercial responder, por tempo imprevisível | Nunca deixar o saldo chegar perto de zero; pedir recarga com antecedência; usar o alerta de saldo nativo do painel (D-54) ([achados](07-painel-escavador-achados.md) §9.4) |
-| R-23 | O painel **não exibe a data de expiração** do saldo bônus; os 10 dias existem só na palavra do suporte | Operacional | Pedir confirmação por escrito ao suporte, junto com a prorrogação ([achados](07-painel-escavador-achados.md) §10) |
+| R-23 | ~~O painel não exibe a data de expiração do saldo bônus~~ | ✅ **Encerrado em 2026-08-20, no mesmo dia** | Levantado por engano: o painel exibe sim, na barra lateral — "R$ 50,00 · Válido até 23/08/2026" |
+| R-24 | **O token do Escavador não tem escopo.** A tela de criação só oferece nome, data de expiração e um interruptor de Playground — um token vazado alcança **toda** a superfície da API da organização, inclusive as rotas caras e as de certificado digital | **Grave — a API de destino não é segunda barreira, igual ao R-16 do Trello** | Privilégio existe só no código do MCP (Regra 1). Um token por aplicação, expiração curta, Playground desligado, revogação isolada (D-51). **Agrava R-12** ([achados](07-painel-escavador-achados.md) §9.1) |
 
 ---
 

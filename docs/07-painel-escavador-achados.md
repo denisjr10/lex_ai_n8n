@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.0 |
+| Versão | 1.1 |
 | Data | 2026-08-20 |
 | Estado | ✅ Levantado |
 | Fonte | Painel autenticado `api.escavador.com`, lido diretamente pelo navegador controlado na máquina do usuário |
@@ -22,9 +22,10 @@ O achado com mais consequência: **a cota de teste não cobra R$ 3,00 em todas a
 
 | Item | Estado em 2026-08-20 |
 |---|---|
-| Saldo | **R$ 50,00** (bônus lançado em 13/08/2026 15:38) |
+| Saldo | **R$ 50,00** (bônus lançado em 13/08/2026 15:38) · **válido até 23/08/2026**, exibido no painel |
 | Consumido | **R$ 0,00** · **0 requisições** |
 | Plano contratado | **"Sem contrato ativo"** |
+| Organização | 67.046.370 IZABEL OLIVEIRA RODRIGUES |
 | Usuários na organização | **1** — Dênis Júnior Oliveira Rodrigues, Administrador, conta principal |
 | Tokens de acesso | **1** — `Testes_Claude`, criado 20/08/2026, expira 23/08/2027, **nunca utilizado** |
 | URL de callback cadastrada | **Nenhuma** |
@@ -33,7 +34,7 @@ O achado com mais consequência: **a cota de teste não cobra R$ 3,00 em todas a
 | Certificados digitais da OAB | **Nenhum** |
 | Faturas | Nenhuma |
 
-**O painel não exibe data de expiração do bônus.** Os 10 dias (23/08/2026) existem apenas na palavra do suporte, não na interface. Vale pedir confirmação por escrito junto com o pedido de prorrogação.
+**A expiração do bônus está no painel**, na barra lateral, logo abaixo do saldo: *"R$ 50,00 — Válido até 23/08/2026"*. Confirma a conta de 13/08 + 10 dias.
 
 ## 3. Pendências de §15 resolvidas
 
@@ -176,17 +177,29 @@ Quatro telas entregam de graça o que o orçamento planejava comprar:
 
 ## 9. Achados que mudam o desenho da arquitetura
 
-### 9.1 Tokens do Escavador têm permissão — ao contrário do Trello
+### 9.1 O token do Escavador **não tem escopo** — o mesmo problema do Trello
 
-A tela *Playground* recusa o token existente com a mensagem: *"Crie um token com permissão de Playground para começar."* Ou seja, **o token do Escavador carrega permissões escolhidas na criação**, e a tela *Histórico das Requisições* permite **filtrar por token**.
+> ⚠️ **Correção de 2026-08-20, mesma data.** A versão 1.0 deste documento afirmou que o token do Escavador carrega permissões. **Está errado.** A afirmação foi inferida da mensagem do Playground (*"Crie um token com permissão de Playground"*), sem que a tela de criação pudesse ser lida. Com o print da tela `/tokens/criar` em mãos, o formulário completo é:
 
-Isso é o oposto do R-16 do Trello (token único que enxerga a conta inteira, sem escopo). No Escavador dá para:
+| Campo | Opções |
+|---|---|
+| **Nome** | texto livre (ex.: "Integração ERP") |
+| **Data de expiração** | data; o painel recomenda **até 1 ano** |
+| **"Este token também pode ser utilizado no Playground?"** | Não · Sim |
 
-- emitir **um token por aplicação** — n8n, MCP de leitura, MCP de monitoramento
-- **atribuir a chamada ao token** que a fez, no painel, sem instrumentação nossa
-- **revogar um token** sem derrubar os demais
+**É só isso. Não há seleção de escopo, de rota, de versão da API nem de operação.** O único interruptor de permissão que existe é o do Playground — e ele controla o acesso pela interface do painel, não pela API.
 
-🔴 **Pendente:** a lista completa de permissões disponíveis não foi lida — a página `/tokens/criar` foi bloqueada pelo modo de segurança desta sessão, por ser criação de credencial. **O usuário precisa abrir essa tela e informar quais opções existem.** É o que falta para desenhar a matriz de tokens.
+O aviso da tela: *"Após criar, copie e armazene com segurança, pois ele será exibido uma única vez."*
+
+**Consequência, e ela é grave:** um token do Escavador vazado dá acesso a **toda a superfície da API** da organização — incluindo as rotas caras (que queimam saldo) e as rotas de certificado digital e senha de advogado (**R-12**). É exatamente o R-16 do Trello, repetido no Escavador. Registrado como **R-24**.
+
+Isso reforça a **Regra 1** do projeto até o limite: como nenhuma das duas APIs de destino oferece segunda barreira, **o privilégio existe única e exclusivamente no código do servidor MCP**. Não há rede de segurança embaixo.
+
+O que o painel ainda oferece de útil, e que sustenta D-51:
+
+- **um token por aplicação** — não dá privilégio menor, mas dá **atribuição** (o *Histórico das Requisições* filtra por token) e **revogação isolada** (derrubar um não derruba os outros)
+- **data de expiração** — rotação de credencial vira coisa que o próprio painel cobra
+- **Playground: "Não"** em todo token de produção — reduz a superfície de uso de um token vazado
 
 ### 9.2 O callback tem token próprio de validação
 
@@ -225,7 +238,7 @@ A tela *Certificados Digitais* está vazia. O R-12 (a API armazena certificado, 
 Na mesma mensagem do pedido de prorrogação:
 
 1. **Prorrogação do bônus** — o teste foi liberado antes de a arquitetura estar pronta para exercitar webhook
-2. **Confirmação da data de expiração por escrito** — o painel não a exibe
+2. ~~Confirmação da data de expiração~~ — ✅ resolvido: o painel exibe "Válido até 23/08/2026"
 3. **O que significa o `*` nos preços da V2?**
 4. **A tabela de Serviços e Preços é a de catálogo, ou está limitada a R$ 3,00 por causa do bônus?** (§7)
 5. **Por que o monitoramento com documentos públicos é mais barato que o sem?**
@@ -238,4 +251,4 @@ Todas lidas em 2026-08-20 no painel autenticado, via navegador controlado na má
 
 `/painel` · `/servicos` (V1 e V2) · `/creditos` · `/historico-creditos` · `/faturas` · `/requisicoes` · `/monitoramentos` · `/callbacks` · `/tokens` · `/organizacao` · `/certificados` · `/playground`
 
-Não lidas: `/tokens/criar` (bloqueada por ser criação de credencial) e `/changelogs`.
+`/tokens/criar` foi lida em seguida, pelo print enviado pelo usuário — a página está bloqueada para esta sessão por ser criação de credencial. Não lida: `/changelogs`.

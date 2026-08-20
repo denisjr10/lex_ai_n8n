@@ -73,7 +73,7 @@ O que mais muda o projeto:
 - **Nem toda requisição custa R$ 3,00.** Os preços vão de **R$ 0,05** (`Envolvidos do processo`) a R$ 3,00. O teto de "16 requisições" era o pior caso — o orçamento revisado gasta ~R$ 18,25 em 9 chamadas
 - **R-15 encerrado.** V1 e V2 estão ambas disponíveis, com diário oficial, jurisprudência e legislação. Não há restrição de plano — a conta está "sem contrato ativo"
 - **Não há URL de callback cadastrada.** Nada a quebrar, e cadastrar a nossa é gratuito. O Bloco C está destravado do lado do Escavador
-- **Os tokens do Escavador têm permissão** — ao contrário do Trello (R-16). Dá para emitir um token por aplicação, atribuir chamada a token e revogar isoladamente (D-51)
+- **O token do Escavador não tem escopo** — a tela de criação só oferece nome, expiração e um interruptor de Playground. É o mesmo problema do R-16 do Trello, agora nas duas APIs: **nenhuma delas é segunda barreira** (R-24). Um token por aplicação continua valendo, mas por atribuição e revogação, não por privilégio (D-51)
 - **Recarga não é autosserviço** — depende do comercial. Risco novo, R-22
 - **O painel substitui instrumentação nossa**: histórico de requisições filtrável por token, histórico de callbacks com payload e tentativas, e alerta de saldo por e-mail
 
@@ -104,7 +104,7 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 ## Pendências com o usuário
 
 - **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
-- ~~**Dados do painel do Escavador**~~ ✅ **Levantados em 20/08** — ver `07-painel-escavador-achados.md`. Restam só duas coisas do painel: as **opções de permissão de token** (tela `/tokens/criar`, que o usuário precisa abrir) e as **respostas do suporte** às sete perguntas da §10
+- ~~**Dados do painel do Escavador**~~ ✅ **Levantados em 20/08** — ver `07-painel-escavador-achados.md`, inclusive a tela de criação de token. Resta do Escavador apenas a **resposta do suporte** às perguntas da §10 (mensagem enviada em 20/08)
 - **Número CNJ de um processo real do escritório** — trava a primeira chamada, que custa R$ 0,05 e resolve quatro perguntas de uma vez
 - **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
@@ -120,7 +120,8 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 | **R-12** — API do Escavador armazena certificado digital, senha e semente de 2FA | **Gravíssimo.** Tratado por desenho: rotas fora de todo perfil (D-30) |
 | **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
 | **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |
-| **R-23** — o painel não exibe a data de expiração do bônus | **Novo e aberto.** Pedir confirmação por escrito ao suporte |
+| **R-24** — token do Escavador não tem escopo; alcança toda a API da organização | **Novo e grave.** Espelha o R-16 do Trello. Privilégio fica só no código do MCP. Agrava R-12 |
+| ~~R-23~~ — o painel não exibiria a expiração do bônus | ✅ Encerrado no mesmo dia: o painel exibe "Válido até 23/08/2026" |
 | **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
 | R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
 | R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |
