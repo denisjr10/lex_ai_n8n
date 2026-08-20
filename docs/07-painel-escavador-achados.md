@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.1 |
+| Versão | 1.2 |
 | Data | 2026-08-20 |
 | Estado | ✅ Levantado |
 | Fonte | Painel autenticado `api.escavador.com`, lido diretamente pelo navegador controlado na máquina do usuário |
@@ -41,7 +41,7 @@ O achado com mais consequência: **a cota de teste não cobra R$ 3,00 em todas a
 | # | Pendência | Situação agora |
 |---|---|---|
 | 1 | Tabela de preços por rota | ✅ **Resolvida** — transcrita nas §5 e §6 abaixo |
-| 2 | Quais rotas são gratuitas | ✅ **Resolvida, e a resposta é "nenhuma"** — todo serviço listado tem preço. O que existe são rotas **baratas** (R$ 0,05) |
+| 2 | Quais rotas são gratuitas | ✅ **Resolvida — e existem sim.** As rotas de **status** do ciclo assíncrono são **Gratuito**. Ver §5-A |
 | 3 | Jurisprudência e legislação estão ativas? | ✅ **Resolvida — sim.** Ambas aparecem como categorias de serviço da V1, com preço |
 | 5 | Existe ambiente de homologação? | ⚠️ **Parcial** — não há sandbox, mas há **Playground** no painel, que executa com token real (logo, custa crédito) |
 | 6 | O plano cobre V1, V2 ou ambas? | ✅ **Resolvida — ambas.** Ver §4 |
@@ -107,6 +107,41 @@ Transcrição literal da tela em 2026-08-20. O `*` aparece no painel **sem nota 
 
 > Curiosidade que merece confirmação: o monitoramento **com** documentos públicos é mais barato que o **sem**. Pode ser erro de cadastro do painel, pode ser política de preço. Perguntar antes de desenhar em cima disso.
 
+## 5-A. Conferência pelo Playground — e as rotas gratuitas
+
+O Playground do painel exibe o custo de cada serviço antes de executar. Os nove serviços que ele oferece foram percorridos **sem executar nenhuma consulta**, e o custo de cada um foi comparado com a tela *Serviços e Preços*:
+
+| Serviço no Playground | Playground | Tela de Preços | Confere? |
+|---|---|---|---|
+| Processos do envolvido | R$ 3,00 até 200 itens · + R$ 3,00 a cada 200 | idem | ✅ |
+| Capa do processo | R$ 3,00 | R$ 3,00 * | ✅ |
+| Movimentações do processo | R$ 3,00 | R$ 3,00 * | ✅ |
+| Processos do advogado por OAB | R$ 3,00 até 200 itens · + R$ 3,00 a cada 200 | idem | ✅ |
+| Atualização do processo no tribunal | R$ 3,00 | R$ 3,00 * | ✅ |
+| **Status da atualização de processo** | **Gratuito** | **não consta** | 🆕 |
+| Atualizar o resumo de um Processo por IA | R$ 0,08 | R$ 0,08 | ✅ |
+| **Status da solicitação do resumo por IA** | **Gratuito** | **não consta** | 🆕 |
+| Resumo de um Processo por IA | R$ 0,05 | R$ 0,05 | ✅ |
+
+**Nove de nove batem** onde as duas fontes se sobrepõem. A tela de preços é confiável.
+
+### As duas rotas gratuitas mudam duas conclusões
+
+**1. Existem rotas gratuitas, mesmo na cota de teste.** As duas são de **status** — a consulta que pergunta "o pedido assíncrono já terminou?". Isso derruba a afirmação da versão 1.0 de que nenhuma rota é gratuita, e barateia o Bloco C do orçamento: `status-atualizacao` custa **R$ 0,00**.
+
+**2. A tela de preços lista só o que é cobrado.** Ausência dali **não significa indisponível** — pode significar gratuito. Consequência para o modelo de custo do MCP: cada rota precisa ser classificada como *cobrada*, *gratuita* ou *desconhecida*, e "desconhecida" é a única que exige medição.
+
+### E reforça a Leitura B da §7
+
+Se o bônus impusesse R$ 3,00 fixos em tudo, como o suporte informou, as rotas de status apareceriam como R$ 3,00 — e não aparecem. A presença simultânea de **Gratuito**, **R$ 0,05**, **R$ 0,08** e **R$ 3,00** indica preço real por rota, não valor único de teste. A confirmação continua sendo do suporte, mas a evidência pende para a Leitura B.
+
+### O que o Playground ainda ensinou
+
+- Ele cobre **9 dos 20 serviços da V2** — não serve para explorar a API inteira
+- **`Envolvidos do processo` (R$ 0,05) não está lá** — a chamada A1 do orçamento terá de ser feita fora do Playground
+- Ele exibe o custo **antes** de executar. É a forma mais barata de conferir preço de qualquer rota que ele cubra: **zero**
+- O token do Playground é criado com o interruptor `?playground=1`; um token comum não é aceito ali
+
 ## 6. Preços — API V1 (34 serviços)
 
 Praticamente tudo a R$ 3,00, com duas exceções destacadas.
@@ -156,11 +191,36 @@ Nenhum serviço custa **mais** de R$ 3,00, e vários custam bem menos. Duas leit
 
 **Leitura B — é a tabela de preços real da organização.** Sob esta leitura, ela serve para orçar tudo.
 
-Não dá para distinguir as duas sem perguntar ao suporte — e essa pergunta é gratuita. **Ela entra na mesma mensagem do pedido de prorrogação.**
+Não dá para distinguir as duas com certeza sem perguntar ao suporte. **A evidência do Playground (§5-A) pende para a Leitura B:** rotas gratuitas e de R$ 0,05 convivem com as de R$ 3,00, o que não aconteceria sob um valor único de teste.
 
 O que **vale sob qualquer leitura**, e é o achado operacional do dia:
 
 > **O teto de "16 requisições" é o pior caso, não um limite fixo.** R$ 50,00 compram 16 chamadas se todas custarem R$ 3,00 — ou **1.000 chamadas** de `Envolvidos do processo` a R$ 0,05.
+
+## 7-A. "R$ 3,00 até 200 itens" — cobrança por bloco de resultado
+
+Quatro serviços não cobram por **requisição**, e sim por **volume de resultado**, em blocos de 200:
+
+> `Processos do envolvido` · `Processos do advogado por OAB` · `Monitoramento de novos processos` (V2) · `Monitoramento em Diários Oficiais` (V1)
+
+A regra é: **R$ 3,00 cobrem os primeiros 200 itens; cada bloco de 200 adicionais custa mais R$ 3,00.**
+
+| Processos que o envolvido tem | Blocos | Custo |
+|---|---|---|
+| 1 a 200 | 1 | R$ 3,00 |
+| 201 a 400 | 2 | R$ 6,00 |
+| 401 a 600 | 3 | R$ 9,00 |
+| 1.000 | 5 | R$ 15,00 |
+
+**O problema é que o custo não é conhecido antes da chamada.** Ninguém sabe quantos processos um CPF tem até perguntar — e é justamente por isso que se pergunta. Um cliente pessoa física comum cabe no primeiro bloco; uma empresa litigante, um banco ou um órgão público, não. A consulta mais natural do agente — *"quais são os processos deste cliente?"* — é a de custo mais imprevisível da API.
+
+Registrado como **R-25**. O tratamento tem três partes, e vale como requisito do MCP:
+
+1. **Nunca paginar em laço automático.** Cada avanço de página pode ser mais R$ 3,00. A ferramenta busca **um bloco** e devolve o que veio, informando que há mais
+2. **Contar antes de listar, quando o volume for suspeito.** `Resumo do envolvido` (R$ 3,00) devolve a *quantidade* de processos sem trazer a lista. Para um envolvido grande, contar primeiro evita gastar às cegas
+3. **Teto por chamada e por papel** — um número máximo de blocos que a ferramenta aceita sem aprovação humana. Acima dele, a IA propõe e o humano aprova (Regra 2)
+
+Vale a distinção: nos **monitoramentos**, a mesma regra de blocos é **mensal e recorrente** — 200 itens monitorados por R$ 3,00/mês, e assim por diante. Ali o custo por bloco não é um susto único, é assinatura.
 
 ## 8. O painel substitui chamadas do orçamento
 
@@ -249,6 +309,6 @@ Na mesma mensagem do pedido de prorrogação:
 
 Todas lidas em 2026-08-20 no painel autenticado, via navegador controlado na máquina do usuário:
 
-`/painel` · `/servicos` (V1 e V2) · `/creditos` · `/historico-creditos` · `/faturas` · `/requisicoes` · `/monitoramentos` · `/callbacks` · `/tokens` · `/organizacao` · `/certificados` · `/playground`
+`/painel` · `/servicos` (V1 e V2) · `/creditos` · `/historico-creditos` · `/faturas` · `/requisicoes` · `/monitoramentos` · `/callbacks` · `/tokens` · `/organizacao` · `/certificados` · `/playground` (os 9 serviços percorridos, **sem executar nenhuma consulta**)
 
 `/tokens/criar` foi lida em seguida, pelo print enviado pelo usuário — a página está bloqueada para esta sessão por ser criação de credencial. Não lida: `/changelogs`.

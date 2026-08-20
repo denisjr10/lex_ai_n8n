@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.0 — **revisado após a leitura do painel autenticado** |
+| Versão | 2.1 — revisado após a leitura do painel e a conferência pelo Playground |
 | Data | 2026-08-20 |
 | Estado | 🟡 Proposta — aguarda aval do usuário |
 | Saldo | R$ 50,00 · **preço varia de R$ 0,05 a R$ 3,00 por rota** (ver [achados](07-painel-escavador-achados.md) §5 e §6) |
@@ -24,7 +24,7 @@ O suporte do Escavador Business liberou saldo de teste mediante CNPJ. As condiç
 
 Três consequências que mudam o planejamento:
 
-**1. Não existe rota gratuita agora.** A classificação 🆓 do `mapeamento-escavador.md` vale para o plano contratado, não para a cota de teste. `GET /api/v1/quantidade-creditos`, `GET /api/v1/origens`, consultar status de atualização — tudo custa R$ 3,00 aqui.
+**1. ~~Não existe rota gratuita agora.~~** ⚠️ **Corrigido em 20/08 pela conferência no Playground:** as rotas de **status** do ciclo assíncrono são **Gratuito**, mesmo durante a cota de teste. Ver `07-painel-escavador-achados.md` §5-A.
 
 **2. A cota de teste não revela a tabela de preços.** Como o custo é fixo em R$ 3,00, o cabeçalho `Creditos-Utilizados` durante o teste não mede o preço real de cada rota. A pendência 1 de `mapeamento-escavador.md` §15 **continua aberta** e só se resolve no painel autenticado. Não gaste chamada tentando descobrir preço.
 
@@ -122,7 +122,7 @@ Todas sobre **o mesmo processo real do escritório** usado em A1, para que as re
 
 > Bônus barato, se A1 mostrar que o processo já tem resumo por IA: `Resumo de um Processo por IA` custa **R$ 0,05**. Vale a pena — o resumo é matéria-prima direta para o agente.
 
-### Bloco C — Assincronia e webhook · 3 chamadas · **R$ 6,20**
+### Bloco C — Assincronia e webhook · 3 chamadas · **R$ 3,18**
 
 **Passo zero, gratuito e a fazer já:** cadastrar a URL de callback e gerar o token de validação em `api.escavador.com/callbacks`. O campo está vazio — não há integração do escritório a quebrar (pendência 7 encerrada). Isso não consome crédito e é pré-requisito de C1.
 
@@ -131,7 +131,7 @@ C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL,
 | # | Chamada | Preço | O que responde |
 |---|---|---|---|
 | C1 | `POST .../solicitar-atualizacao` — `documentos_publicos: false`, `autos: false` | R$ 3,00 * | Formato do aceite assíncrono. Configuração mínima de propósito. **Se `documentos_publicos: true` custa só R$ 0,20**, vale considerar a variante barata |
-| C2 | `GET .../status-atualizacao` | a medir | Máquina de estados da atualização. Preço não consta da tela de serviços — **medir no painel após a chamada** |
+| C2 | `GET .../status-atualizacao` | **Gratuito** | Máquina de estados da atualização. O Playground confirma: custo zero. Pode ser repetida à vontade |
 | C4 | `POST /api/v2/monitoramentos/processos` — frequência **mensal com documentos públicos** | **R$ 0,18 / mês** | Contrato de criação de monitoramento, na variante mais barata da tabela |
 
 > ⚠️ **C4 gera custo recorrente.** O monitoramento criado deve ser removido assim que o contrato for confirmado (remover não custa no plano; na cota de teste, custa uma chamada — decidir na hora se compensa).
@@ -151,11 +151,11 @@ C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL,
 |---|---|---|
 | A — autenticação e calibragem | 1 | R$ 0,05 |
 | B — estrutura de dados | 3 | R$ 9,00 |
-| C — assincronia e webhook | 3 | ~R$ 6,20 |
+| C — assincronia e webhook | 3 | R$ 3,18 (C2 é gratuita) |
 | D — erros | 2 | ~R$ 3,00 (D2 provavelmente não cobra) |
-| **Total** | **9** | **~R$ 18,25 de R$ 50,00** |
+| **Total** | **9** | **~R$ 15,23 de R$ 50,00** |
 
-**Sobram cerca de R$ 32,00** — folga que na versão 1.1 não existia. Ela deve ser gasta, não guardada: crédito não usado até 23/08 evapora. Destino recomendado, em ordem:
+**Sobram cerca de R$ 35,00** — folga que na versão 1.1 não existia. Ela deve ser gasta, não guardada: crédito não usado até 23/08 evapora. Destino recomendado, em ordem:
 
 1. **Um segundo processo, de outro tribunal** — a variação de formato entre tribunais é incógnita real do modelo de dados do MCP
 2. **A V1 na prática** — uma consulta de diário oficial, que é o gatilho de prazo e a parte que a V2 não cobre
@@ -165,7 +165,8 @@ C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL,
 
 | Não fazer | Por quê |
 |---|---|
-| Consultar preço por rota | Custo fixo na cota de teste; a tabela real está no painel |
+| Consultar preço por rota | A tabela está no painel, e o Playground mostra o custo antes de executar — ambos de graça |
+| Paginar em laço | Cada bloco de 200 itens custa R$ 3,00 nas rotas de listagem (R-25) |
 | Testar autos restritos, certificado digital ou senha do advogado | R-12, D-30 — fora de todo perfil por decisão de projeto |
 | Buscar por nome livre (`GET /api/v1/busca`) | Rota de resultado imprevisível; alto risco de gastar sem aprender |
 | Baixar PDF de documento ou de diário | Custo variável, e o formato do binário não está em questão |
