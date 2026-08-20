@@ -1,0 +1,132 @@
+# ==========================================================================
+# .gitignore — Plataforma de automação jurídica
+#
+# Prioridade número um: credencial nunca entra no repositório.
+# Token do Escavador, chave e token do Trello, senha do n8n, certificado
+# digital de advogado. Segredo commitado é praticamente impossível de
+# desfazer — o histórico do Git guarda tudo, mesmo depois de apagado.
+#
+# Regra prática: se o arquivo tem senha, token, chave ou dado de cliente,
+# ele não é versionado. Ponto.
+# ==========================================================================
+
+# --- Segredos e configuração de ambiente -----------------------------------
+.env
+.env.*
+!.env.example
+*.env
+secrets/
+credentials/
+credenciais/
+*.secret
+*.secrets
+
+# Chaves, certificados e material criptográfico
+# (R-12: a API do Escavador armazena certificado digital e senha do advogado)
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+
+# --- Dados de cliente e respostas brutas da API ----------------------------
+# Respostas de API só entram no repositório depois de anonimizadas, em
+# docs/amostras/. Qualquer captura crua fica fora.
+*.raw.json
+/capturas/
+/dados-brutos/
+/amostras-brutas/
+
+# --- n8n --------------------------------------------------------------------
+# Workflows exportados podem carregar credencial embutida. Exportar sempre
+# sem credencial antes de versionar.
+.n8n/
+*.credentials.json
+n8n-data/
+
+# --- Node / TypeScript ------------------------------------------------------
+node_modules/
+dist/
+build/
+out/
+*.tsbuildinfo
+.npm/
+.yarn/
+.pnp.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+.nyc_output/
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.Python
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+htmlcov/
+.coverage
+.coverage.*
+
+# --- Banco de dados local ---------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Logs e temporários -----------------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+.cache/
+
+# --- Docker -----------------------------------------------------------------
+docker-compose.override.yml
+
+# --- Túnel local (ngrok, cloudflared) para testar webhook -------------------
+.ngrok*
+cloudflared/
+*.tunnel.yml
+
+# --- Sistema operacional ----------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --- Editores ---------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# --- Claude Code ------------------------------------------------------------
+# As configurações compartilhadas do projeto (.claude/settings.json) são
+# versionadas de propósito; as locais e pessoais, não.
+.claude/settings.local.json
+.claude/scratchpad/
