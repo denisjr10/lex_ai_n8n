@@ -534,8 +534,17 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-24 | Convenção de escopos `<sistema>:<recurso>:<ação>[:<abrangência>]`, com `own` / `carteira` / `any` verificadas no servidor MCP | Adotar | 🟡 Proposta |
 | D-25 | Faixa A4 permanece bloqueada enquanto não houver identidade individual de advogado | Adotar | 🟡 Proposta |
 | D-26 | Administrador não recebe escopo de dado de cliente por padrão | Adotar | 🟡 Proposta |
+| D-27 | MCP Escavador cobre V1 **e** V2; V2 preferencial para processo judicial, V1 obrigatória para diários oficiais, busca livre, entidades e saldo | Adotar | 🟡 Proposta |
+| D-28 | Ferramentas MCP curadas em ~15 unidades sobre 83 operações, com perfis `cliente`/`colaborador`/`advogado`/`administrador`/`full` | Adotar | 🟡 Proposta |
+| D-29 | `remover_monitoramento` é ferramenta e escopo separados, com confirmação explícita | Adotar | 🟡 Proposta |
+| D-30 | Rotas de certificado digital fora de todos os perfis de exposição; credenciais de tribunal nunca vêm de parâmetro de ferramenta | Adotar | 🟡 Proposta |
+| D-31 | Política de cache por tipo de dado, com invalidação por callback e cache segregado por inquilino | Adotar | 🟡 Proposta |
+| D-32 | Orçamento separado para custo recorrente (monitoramentos ativos) | Adotar | 🟡 Proposta |
+| D-33 | Custo estimado por média móvel do cabeçalho `Creditos-Utilizados`, com reconciliação posterior | Adotar | 🟡 Proposta |
+| D-34 | Resumo por IA do Escavador é insumo de leitura, nunca fonte para resposta a cliente nem base de decisão de prazo | Adotar | 🟡 Proposta |
+| D-35 | Teto obrigatório de páginas e itens em toda ferramenta que percorra paginação | Adotar | 🟡 Proposta |
 
-> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md).
+> D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md).
 
 ---
 
@@ -571,6 +580,10 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-09 | Dependência de token pessoal no Trello | Operacional | Credencial de serviço (§8.5) |
 | R-10 | Regulação da OAB sobre IA em evolução | Conformidade | Revisão periódica; desenho conservador (§9.2) |
 | R-11 | **Escritório usa uma única conta do Google Workspace compartilhada por toda a equipe** | **Grave — inviabiliza privilégios por papel, aprovação nominal e auditoria; contraria §5.2 e os termos do Google** | Levar ao escritório; recomendar licenças individuais; painel com identidade própria como salvaguarda (D-21, Nota Técnica 01 §1.6) |
+| R-12 | **A API do Escavador armazena certificado digital, senha e semente de 2FA do advogado** | **Gravíssimo — comprometimento entrega a identidade jurídica completa, com poder de peticionar e assinar** | Rotas fora de todo perfil de exposição; uso de certificado é faixa A4, bloqueada por D-25 ([mapeamento](mapeamento-escavador.md) §9, D-30) |
+| R-13 | Custo recorrente de monitoramentos invisível a orçamento baseado em chamadas | Financeiro, crescente e silencioso | Orçamento separado para assinaturas ativas (D-32) |
+| R-14 | Remoção acidental de monitoramento desliga alerta de processo sem custo nem sinal | **Grave — realiza R-02, perda de prazo** | Ferramenta e escopo separados, com confirmação explícita (D-29) |
+| R-15 | Plano contratado pode não cobrir V1, deixando o escritório sem monitoramento de diário oficial | Operacional grave | Pergunta 58, com urgência elevada ([mapeamento](mapeamento-escavador.md) §12) |
 
 ---
 
