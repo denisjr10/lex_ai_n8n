@@ -4,7 +4,7 @@
 |---|---|
 | Atualizado em | 2026-08-20 |
 | Fase | **1 — Descoberta e mapeamento das APIs** |
-| Branch | `claude/escavador-api-mapping-5f35iz` |
+| Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
