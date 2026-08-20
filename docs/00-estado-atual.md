@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-08-20 |
-| Fase | **1 — Descoberta e mapeamento das APIs — concluída** |
+| Fase | **2 — PRD e Spec.** PRD escrito, aguardando aval; Spec é o próximo passo |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
 | Crédito Escavador | 🔴 **Cota de teste expira em 23/08/2026.** R$ 50,00 · **R$ 0,00 gastos** · preço real por rota lido no painel (R$ 0,05 a R$ 3,00). Ver `07-painel-escavador-achados.md` e `06-orcamento-de-chamadas-escavador.md` |
@@ -31,6 +31,7 @@ Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador
 | Mapeamento da API do Trello — 261 operações | `mapeamento-trello.md` |
 | Orçamento de chamadas da cota de teste do Escavador (rev. 2.0) | `06-orcamento-de-chamadas-escavador.md` |
 | **Achados do painel autenticado do Escavador — preços, tokens, callbacks, organização** | `07-painel-escavador-achados.md` |
+| **PRD — produto, entregas, requisitos, regras de negócio e modelo de custo** | `08-prd.md` |
 
 ## O que os mapeamentos concluíram
 
@@ -79,9 +80,21 @@ O que mais muda o projeto:
 - **Recarga não é autosserviço** — depende do comercial. Risco novo, R-22
 - **O painel substitui instrumentação nossa**: histórico de requisições filtrável por token, histórico de callbacks com payload e tentativas, e alerta de saldo por e-mail
 
+## O PRD está escrito — 20/08/2026
+
+`08-prd.md`, versão 1.0, 🟡 aguardando aval. Ele define quatro entregas (E1 fundação e consulta · E2 vigilância de prazo · E3 demandas e organização · E4 atendimento ao cliente), 34 requisitos funcionais com critério de aceite, 18 regras de negócio, 17 não funcionais, métricas e modelo de custo com os preços reais.
+
+Três decisões de produto que valem destaque:
+
+- **E2 antes de E3** — perda de prazo é o pior desfecho do projeto, e a vigilância é também a entrega mais barata
+- **D-62 — vigiar diário oficial por OAB, não processo a processo.** Mesma cobertura por **R$ 3,00/mês** em vez de R$ 600,00/mês para 200 processos. É onde nasce o prazo, e o custo não cresce com a carteira
+- **D-63 — o agente do cliente lê da base interna**, não da API paga sob demanda. Sem isso, a exposição financeira fica aberta e nas mãos de quem não paga a conta
+
+Sete perguntas travam o refino (§13 do PRD), e **P-01 — identidade individual — é a premissa mais crítica**: se cair, metade dos requisitos cai junto (D-67).
+
 ## Próximo passo
 
-**PRD e Spec.** Os dois mapeamentos entregaram o que faltava: superfície real, formato das respostas, limites, custo, modelo de webhook e desenho de ferramentas.
+**A Spec técnica.** Os dois mapeamentos entregaram o que faltava: superfície real, formato das respostas, limites, custo, modelo de webhook e desenho de ferramentas.
 
 Depois: **chassi dos servidores MCP**. O §14 do mapeamento do Trello registra a diferença que o chassi precisa absorver — o recurso escasso é crédito no Escavador e vazão no Trello, e o disjuntor tem de cobrir os dois.
 

@@ -568,6 +568,13 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-58 | Antes de listar um envolvido de volume desconhecido, **contar** com `Resumo do envolvido`; acima de um teto de blocos por papel, a listagem vira proposta que exige aprovação humana | Adotar | 🟡 Proposta |
 | D-59 | Cada rota do MCP é classificada como **cobrada**, **gratuita** ou **desconhecida** no catálogo interno. Ausência da tabela de preços do painel não significa indisponível — as rotas de *status* são gratuitas | Adotar | 🟡 Proposta |
 | D-60 | O **Playground do painel é a forma preferencial de conferir preço e formato** de qualquer rota que ele cubra: mostra o custo antes de executar, e a conferência custa zero | Adotar | 🟡 Proposta |
+| D-61 | O produto vai ao ar em quatro entregas, com **vigilância de prazo (E2) antes de demandas (E3)** e **atendimento ao cliente (E4) por último** | Adotar | 🟡 Proposta |
+| D-62 | A vigilância de prazo se apoia primariamente em **monitoramento de diário oficial por OAB (V1)**, não em monitoramento por processo — mesma cobertura, custo duas ordens de grandeza menor | Adotar | 🟡 Proposta |
+| D-63 | O agente do cliente lê da **base interna alimentada pela vigilância**; a API paga só é acionada com dado ausente ou vencido, dentro de teto por conversa | Adotar | 🟡 Proposta |
+| D-64 | A plataforma **sinaliza indício de prazo e nunca calcula prazo**. Contagem é ato de advogado | Adotar | 🟡 Proposta |
+| D-65 | Aprovação humana **expira**: pedido não respondido em janela definida vence e precisa ser refeito | Adotar | 🟡 Proposta |
+| D-66 | A **taxa de rejeição em aprovação humana** é a métrica primária de qualidade do agente, com a taxa de escalada indevida como contramétrica | Adotar | 🟡 Proposta |
+| D-67 | Identidade individual é **bloqueio de projeto**, não preferência — sem ela, a entrega E1 não sai como especificada (R-11) | Adotar | 🟡 Proposta |
 
 > D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md); D-47 a D-50, no [Orçamento de Chamadas do Escavador](06-orcamento-de-chamadas-escavador.md).
 
