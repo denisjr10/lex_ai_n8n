@@ -6,7 +6,7 @@
 | Fase | **1 — Descoberta e mapeamento das APIs — concluída** |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
-| Crédito Escavador | 🔴 **Cota de teste expira em 23/08/2026.** R$ 50,00 · 16 requisições · R$ 3,00 por chamada · 0 gastas. Ver `06-orcamento-de-chamadas-escavador.md` |
+| Crédito Escavador | 🔴 **Cota de teste expira em 23/08/2026.** R$ 50,00 · **R$ 0,00 gastos** · preço real por rota lido no painel (R$ 0,05 a R$ 3,00). Ver `07-painel-escavador-achados.md` e `06-orcamento-de-chamadas-escavador.md` |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
@@ -29,7 +29,8 @@ Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador
 | Como obter as fontes das APIs | `05-acesso-as-fontes-das-apis.md` |
 | Mapeamento da API do Escavador — 83 operações | `mapeamento-escavador.md` |
 | Mapeamento da API do Trello — 261 operações | `mapeamento-trello.md` |
-| Orçamento de chamadas da cota de teste do Escavador | `06-orcamento-de-chamadas-escavador.md` |
+| Orçamento de chamadas da cota de teste do Escavador (rev. 2.0) | `06-orcamento-de-chamadas-escavador.md` |
+| **Achados do painel autenticado do Escavador — preços, tokens, callbacks, organização** | `07-painel-escavador-achados.md` |
 
 ## O que os mapeamentos concluíram
 
@@ -63,6 +64,19 @@ Isso vira restrição de projeto, não detalhe operacional:
 
 Registrado como **R-21** e decisões **D-47 a D-50**. O orçamento chamada a chamada está em `06-orcamento-de-chamadas-escavador.md` e **precisa de aval antes da primeira execução**.
 
+## O painel do Escavador foi lido — 20/08/2026
+
+Com o Claude Code rodando na máquina local, foi possível navegar no painel autenticado `api.escavador.com` e transcrever tudo, **sem gastar um centavo de crédito**. O documento é `07-painel-escavador-achados.md`. Seis das sete pendências de `mapeamento-escavador.md` §15 foram encerradas.
+
+O que mais muda o projeto:
+
+- **Nem toda requisição custa R$ 3,00.** Os preços vão de **R$ 0,05** (`Envolvidos do processo`) a R$ 3,00. O teto de "16 requisições" era o pior caso — o orçamento revisado gasta ~R$ 18,25 em 9 chamadas
+- **R-15 encerrado.** V1 e V2 estão ambas disponíveis, com diário oficial, jurisprudência e legislação. Não há restrição de plano — a conta está "sem contrato ativo"
+- **Não há URL de callback cadastrada.** Nada a quebrar, e cadastrar a nossa é gratuito. O Bloco C está destravado do lado do Escavador
+- **Os tokens do Escavador têm permissão** — ao contrário do Trello (R-16). Dá para emitir um token por aplicação, atribuir chamada a token e revogar isoladamente (D-51)
+- **Recarga não é autosserviço** — depende do comercial. Risco novo, R-22
+- **O painel substitui instrumentação nossa**: histórico de requisições filtrável por token, histórico de callbacks com payload e tentativas, e alerta de saldo por e-mail
+
 ## Próximo passo
 
 **PRD e Spec.** Os dois mapeamentos entregaram o que faltava: superfície real, formato das respostas, limites, custo, modelo de webhook e desenho de ferramentas.
@@ -90,7 +104,8 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 ## Pendências com o usuário
 
 - **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
-- **Dados do painel do Escavador** — tabela de preços por rota, plano contratado, limite de requisições, URL de callback já cadastrada, tokens existentes na conta. Só existem no painel autenticado
+- ~~**Dados do painel do Escavador**~~ ✅ **Levantados em 20/08** — ver `07-painel-escavador-achados.md`. Restam só duas coisas do painel: as **opções de permissão de token** (tela `/tokens/criar`, que o usuário precisa abrir) e as **respostas do suporte** às sete perguntas da §10
+- **Número CNJ de um processo real do escritório** — trava a primeira chamada, que custa R$ 0,05 e resolve quatro perguntas de uma vez
 - **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
 - Acesso à instância n8n e à infraestrutura, para calibrar §12.2 de `01`
@@ -103,7 +118,9 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 | **R-16** — Trello não tem escopo por quadro; token vê a conta inteira | **Grave e estrutural.** Tratado por desenho (D-36), mas o isolamento passa a depender do nosso código. Precisa ser dito ao escritório |
 | **R-11** — conta única do Workspace compartilhada por toda a equipe | **Grave e aberto.** Inviabiliza privilégio por papel, aprovação nominal e auditoria |
 | **R-12** — API do Escavador armazena certificado digital, senha e semente de 2FA | **Gravíssimo.** Tratado por desenho: rotas fora de todo perfil (D-30) |
-| **R-15** — plano do Escavador pode não cobrir V1 | **Aberto.** Depende da pergunta 58 |
+| **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
+| **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |
+| **R-23** — o painel não exibe a data de expiração do bônus | **Novo e aberto.** Pedir confirmação por escrito ao suporte |
 | **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
 | R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
 | R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |

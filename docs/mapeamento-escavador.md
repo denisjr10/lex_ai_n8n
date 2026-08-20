@@ -576,6 +576,8 @@ Para somar à tabela §15 de `01-diretrizes-gerais.md`:
 
 ## 15. Pendências deste mapeamento
 
+> ✅ **Atualização de 2026-08-20:** o painel autenticado foi lido e **seis das sete pendências abaixo foram encerradas**, sem gastar crédito. A situação atual de cada uma está em [`07-painel-escavador-achados.md`](07-painel-escavador-achados.md) §3. A tabela abaixo fica como registro do que estava em aberto no fechamento do mapeamento.
+
 Todas dependem de credencial da API — nenhuma bloqueia o desenho, só a calibragem.
 
 | # | Pendência | Por quê |

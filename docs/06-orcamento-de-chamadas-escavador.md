@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.1 |
+| Versão | 2.0 — **revisado após a leitura do painel autenticado** |
 | Data | 2026-08-20 |
 | Estado | 🟡 Proposta — aguarda aval do usuário |
-| Saldo | R$ 50,00 · 16 requisições · R$ 3,00 cada |
+| Saldo | R$ 50,00 · **preço varia de R$ 0,05 a R$ 3,00 por rota** (ver [achados](07-painel-escavador-achados.md) §5 e §6) |
 | Liberado em | **13/08/2026** |
 | **Expira em** | **23/08/2026** — crédito não gasto é perdido |
 | Gastas até agora | **0 de 16** |
@@ -51,6 +51,29 @@ Isso inverte a lógica do orçamento. Um orçamento existe para não gastar dema
 
 Se a prorrogação não vier, as 4 chamadas do Bloco C e as 2 de reserva devem ser realocadas antes de 23/08 — provavelmente para ampliar o Bloco B (mais um processo, de outro tribunal, para ver o quanto o formato varia entre tribunais). Variação entre tribunais é uma incógnita real do modelo de dados e vale crédito.
 
+## 1-B. O que a leitura do painel mudou — revisão 2.0
+
+Em 2026-08-20 o painel autenticado foi lido inteiro, **sem gastar crédito**. Os achados estão em `07-painel-escavador-achados.md`. Três deles reescrevem este orçamento:
+
+**1. Nem toda requisição custa R$ 3,00.** A tela *Serviços e Preços* mostra preços de **R$ 0,05 a R$ 3,00**. `Envolvidos do processo` custa **R$ 0,05** — sessenta vezes menos que o assumido. O teto de "16 requisições" é o pior caso, não um limite.
+
+**2. Quatro chamadas do orçamento viraram desnecessárias.** O painel entrega de graça o que elas comprariam: catálogo de serviços (dispensa A3 e A4), monitoramentos ativos (dispensa parte de A2), saldo e consumo (dispensa parte de A1).
+
+**3. O Bloco C está destravado do lado do Escavador.** Não há URL de callback cadastrada — nada a quebrar — e cadastrá-la, junto com o token de validação, **não custa crédito**. O que falta para o Bloco C é só a URL pública (túnel na máquina local), não permissão nem dinheiro.
+
+> **A consequência maior:** dinheiro deixou de ser o gargalo. Com preços reais, R$ 50,00 cobrem o programa de testes inteiro com folga larga. **O gargalo é o prazo** — 23/08/2026 — e a dependência de um número de processo real do escritório.
+
+### A chamada nº 1 é, de graça, a calibragem de preço
+
+`Envolvidos do processo` (R$ 0,05) responde quatro perguntas de uma vez, pelo menor preço da tabela:
+
+1. O token autentica na V2?
+2. Qual o envelope e a paginação da V2?
+3. Como o envolvido é identificado? (bloqueia `sujeitos_autorizados`, R-06)
+4. **O preço cobrado foi R$ 0,05 ou R$ 3,00?** — basta abrir *Uso dos Créditos* depois. Isso resolve a dúvida da §7 dos achados (a tabela é catálogo real ou está limitada pelo bônus?) sem custo adicional
+
+Ela **depende do número CNJ do processo**. Enquanto ele não chega, a recomendação é **não gastar nada**: qualquer chamada que não precise de CNJ custa R$ 3,00 e ensina menos.
+
 ## 2. Princípio de alocação
 
 Cada uma das 16 chamadas precisa responder uma pergunta que **a documentação não responde** e que **bloqueia decisão de arquitetura**. Se a resposta está no OpenAPI, no SDK oficial ou no mapeamento, não é chamada — é leitura.
@@ -66,36 +89,50 @@ Ordem de prioridade:
 
 **14 chamadas alocadas, 2 de reserva.** Nenhuma é executada sem aval.
 
-### Bloco A — Autenticação e cobertura do plano · 4 chamadas · R$ 12,00
+> ⚠️ **Os blocos abaixo foram revistos na versão 2.0.** Os valores são os do painel; onde há `*`, o painel exibe um asterisco sem nota de rodapé (§10 dos achados).
 
-| # | Chamada | O que responde |
-|---|---|---|
-| A1 | `GET /api/v1/quantidade-creditos` | V1 autentica com este token? Envelope do saldo. O que o cabeçalho `Creditos-Utilizados` traz numa cota de teste |
-| A2 | `GET /api/v2/monitoramentos/processos` | V2 autentica? Envelope e paginação da V2. Já existem monitoramentos na conta? |
-| A3 | `GET /api/v1/origens` | **R-15 / pergunta 58** — diário oficial está no plano? Catálogo de origens para o MCP |
-| A4 | `GET /api/v1/jurisprudencias/busca?q=dano+moral&limit=1` | Pendência 3 — jurisprudência está ativa? Está no SDK, ausente do OpenAPI |
+### Bloco A — Autenticação e calibragem · 1 chamada · **R$ 0,05**
 
-### Bloco B — Estrutura de dados · 4 chamadas · R$ 12,00
+Era de 4 chamadas e R$ 12,00. O painel respondeu A3 (catálogo e diário oficial), A4 (jurisprudência ativa) e a maior parte de A1 e A2 de graça.
 
-Todas sobre **um único processo real do escritório**, escolhido pelo usuário, para que as respostas se conversem.
+| # | Chamada | Preço | O que responde |
+|---|---|---|---|
+| A1 | `GET /api/v2/processos/numero_cnj/{cnj}/envolvidos?limit=5` | **R$ 0,05** | Autenticação na V2 · envelope e paginação · modelo do envolvido · **e o preço realmente cobrado** (conferir em *Uso dos Créditos* logo depois) |
 
-| # | Chamada | O que responde |
-|---|---|---|
-| B1 | `GET /api/v2/processos/numero_cnj/{cnj}` | Modelo do processo: campos, tipos, o que vem nulo na prática |
-| B2 | `GET /api/v2/processos/numero_cnj/{cnj}/movimentacoes?limit=5` | Modelo da movimentação — é a peça que dispara prazo |
-| B3 | `GET /api/v2/processos/numero_cnj/{cnj}/envolvidos?limit=5` | Como o envolvido é identificado. Sem isso não dá para verificar `sujeitos_autorizados` (R-06) |
-| B4 | `GET /api/v2/envolvido/processos?cpf_cnpj={cnpj}&limit=5` | Caminho "todos os processos deste cliente" — a consulta mais comum do agente |
+**Chamadas removidas do Bloco A:**
 
-### Bloco C — Assincronia e webhook · 4 chamadas · R$ 12,00
+| Removida | Por quê |
+|---|---|
+| ~~`GET /api/v1/quantidade-creditos`~~ | Saldo, consumo e custo médio estão em *Uso dos Créditos* |
+| ~~`GET /api/v2/monitoramentos/processos`~~ | A tela *Monitoramentos* mostra V1 e V2, e ambas estão vazias |
+| ~~`GET /api/v1/origens`~~ | R-15 encerrado pelo painel: a V1 está disponível, com diário oficial |
+| ~~`GET /api/v1/jurisprudencias/busca`~~ | Jurisprudência e Legislação aparecem como categorias com preço → estão ativas |
 
-Só depois que houver uma URL de callback pública cadastrada no painel. **Não iniciar antes disso** — sem o callback, a chamada C1 se perde.
+Fica pendente uma única pergunta de autenticação que o painel não responde: **a V1 aceita este mesmo token?** Ela só importa quando o MCP for usar a V1 (diário oficial). Vale gastar R$ 3,00 nela **junto** com uma chamada útil da V1 — não isolada.
 
-| # | Chamada | O que responde |
-|---|---|---|
-| C1 | `POST /api/v2/processos/numero_cnj/{cnj}/solicitar-atualizacao` — `enviar_callback: true`, `documentos_publicos: false`, `autos: false` | Formato do aceite assíncrono. Configuração deliberadamente mínima, para não disparar custo variável |
-| C2 | `GET /api/v2/processos/numero_cnj/{cnj}/status-atualizacao` | Máquina de estados da atualização |
-| C3 | `GET /api/v2/callbacks` | O callback foi registrado? Formato do histórico |
-| C4 | `POST /api/v2/monitoramentos/processos` — frequência mínima | Contrato de criação de monitoramento |
+### Bloco B — Estrutura de dados · 3 chamadas · **R$ 9,00**
+
+Todas sobre **o mesmo processo real do escritório** usado em A1, para que as respostas se conversem. B3 saiu do bloco porque virou a chamada A1.
+
+| # | Chamada | Preço | O que responde |
+|---|---|---|---|
+| B1 | `GET /api/v2/processos/numero_cnj/{cnj}` (Capa do processo) | R$ 3,00 * | Modelo do processo: campos, tipos, o que vem nulo na prática |
+| B2 | `GET /api/v2/processos/numero_cnj/{cnj}/movimentacoes?limit=5` | R$ 3,00 * | Modelo da movimentação — é a peça que dispara prazo |
+| B4 | `GET /api/v2/envolvido/processos?cpf_cnpj={cnpj}&limit=5` | R$ 3,00 (até 200 itens) | Caminho "todos os processos deste cliente" — a consulta mais comum do agente |
+
+> Bônus barato, se A1 mostrar que o processo já tem resumo por IA: `Resumo de um Processo por IA` custa **R$ 0,05**. Vale a pena — o resumo é matéria-prima direta para o agente.
+
+### Bloco C — Assincronia e webhook · 3 chamadas · **R$ 6,20**
+
+**Passo zero, gratuito e a fazer já:** cadastrar a URL de callback e gerar o token de validação em `api.escavador.com/callbacks`. O campo está vazio — não há integração do escritório a quebrar (pendência 7 encerrada). Isso não consome crédito e é pré-requisito de C1.
+
+C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL, tentativas, status e payload — de graça.
+
+| # | Chamada | Preço | O que responde |
+|---|---|---|---|
+| C1 | `POST .../solicitar-atualizacao` — `documentos_publicos: false`, `autos: false` | R$ 3,00 * | Formato do aceite assíncrono. Configuração mínima de propósito. **Se `documentos_publicos: true` custa só R$ 0,20**, vale considerar a variante barata |
+| C2 | `GET .../status-atualizacao` | a medir | Máquina de estados da atualização. Preço não consta da tela de serviços — **medir no painel após a chamada** |
+| C4 | `POST /api/v2/monitoramentos/processos` — frequência **mensal com documentos públicos** | **R$ 0,18 / mês** | Contrato de criação de monitoramento, na variante mais barata da tabela |
 
 > ⚠️ **C4 gera custo recorrente.** O monitoramento criado deve ser removido assim que o contrato for confirmado (remover não custa no plano; na cota de teste, custa uma chamada — decidir na hora se compensa).
 >
@@ -108,9 +145,21 @@ Só depois que houver uma URL de callback pública cadastrada no painel. **Não 
 | D1 | `GET /api/v2/processos/numero_cnj/0000000-00.0000.0.00.0000` | Formato do erro para CNJ inválido/inexistente |
 | D2 | Qualquer rota com token propositalmente inválido | Formato do 401. **Provavelmente não consome cota** — rejeição antes do processamento. A confirmar em A1, comparando o saldo |
 
-### Reserva — 2 chamadas · R$ 6,00
+### Total revisado
 
-Guardadas para o que os blocos anteriores revelarem de inesperado. Não são alocadas antecipadamente.
+| Bloco | Chamadas | Custo |
+|---|---|---|
+| A — autenticação e calibragem | 1 | R$ 0,05 |
+| B — estrutura de dados | 3 | R$ 9,00 |
+| C — assincronia e webhook | 3 | ~R$ 6,20 |
+| D — erros | 2 | ~R$ 3,00 (D2 provavelmente não cobra) |
+| **Total** | **9** | **~R$ 18,25 de R$ 50,00** |
+
+**Sobram cerca de R$ 32,00** — folga que na versão 1.1 não existia. Ela deve ser gasta, não guardada: crédito não usado até 23/08 evapora. Destino recomendado, em ordem:
+
+1. **Um segundo processo, de outro tribunal** — a variação de formato entre tribunais é incógnita real do modelo de dados do MCP
+2. **A V1 na prática** — uma consulta de diário oficial, que é o gatilho de prazo e a parte que a V2 não cobre
+3. **Repetir A1 em processos diferentes a R$ 0,05** — dezenas de amostras do modelo de envolvido por quase nada
 
 ## 4. O que **não** entra no orçamento
 
@@ -138,14 +187,18 @@ As respostas brutas ficam em `docs/amostras/escavador/` (a criar), com CPF, CNPJ
 
 Continuam dependendo do painel autenticado ou do escritório:
 
-| Pendência | Onde se resolve |
+Revisado em 2026-08-20 — a maior parte foi resolvida pelo painel:
+
+| Pendência | Situação |
 |---|---|
-| Tabela de preços por rota (§15.1) | Painel — "Preços das rotas" |
-| Quais rotas são gratuitas no plano contratado (§15.2) | Painel |
-| Existe ambiente de homologação? (§15.5) | Painel ou suporte |
-| Uma URL de callback por conta é suficiente? (§15.7) | Painel — verificar se já há URL cadastrada |
-| Limite de requisições por minuto do plano | Painel |
-| Quantos tokens existem na conta e de quem são (R-11) | Painel — `api.escavador.com/tokens` |
+| ~~Tabela de preços por rota (§15.1)~~ | ✅ Lida no painel — `07-painel-escavador-achados.md` §5 e §6 |
+| ~~Quais rotas são gratuitas (§15.2)~~ | ✅ Nenhuma é gratuita; várias são baratas |
+| ~~Uma URL de callback por conta é suficiente? (§15.7)~~ | ✅ Campo vazio — nada a quebrar |
+| ~~Quantos tokens existem e de quem são (R-11)~~ | ✅ Um token, `Testes_Claude`, nunca usado |
+| Existe ambiente de homologação? (§15.5) | ⚠️ Não há sandbox; o Playground usa token real. **Perguntar ao suporte** |
+| Limite de requisições por minuto | 🔴 Não aparece no painel. **Perguntar ao suporte** |
+| A tabela de preços é catálogo ou está limitada pelo bônus? | 🔴 **Perguntar ao suporte** — e a chamada A1 dá um indício de graça |
+| Formato dos erros 402 e 429 (§15.4) | 🔴 Só se observa gastando — Bloco D |
 
 ## 7. Decisões que este documento propõe
 

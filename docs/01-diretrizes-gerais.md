@@ -558,6 +558,12 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-48 | Toda resposta da API do Escavador é salva bruta em arquivo, anonimizada, e nunca reconsultada | Adotar | 🟡 Proposta |
 | D-49 | A cota de teste do Escavador é gasta em validação de contrato, não em cobertura de superfície nem em descoberta de preço | Adotar | 🟡 Proposta |
 | D-50 | Recarga paga do Escavador é decisão exclusiva do usuário, tomada com o registro de execução à vista | Adotar | 🟡 Proposta |
+| D-51 | **Um token do Escavador por aplicação**, com a menor permissão que sirva — nunca um token único compartilhado. A atribuição da chamada sai de graça no *Histórico das Requisições*, filtrável por token | Adotar | 🟡 Proposta |
+| D-52 | O chassi do MCP suporta **dois modelos de validação de webhook**: segredo compartilhado no cabeçalho `Authorization` (Escavador) e assinatura HMAC (Trello) | Adotar | 🟡 Proposta |
+| D-53 | O receptor de callback é **idempotente** — o Escavador reentrega, e o painel conta as tentativas | Adotar | 🟡 Proposta |
+| D-54 | O disjuntor de custo do Escavador tem **duas camadas**: a nossa, em código, e o *Alerta de saldo* nativo do painel, configurado assim que houver saldo pago | Adotar | 🟡 Proposta |
+| D-55 | O **custo real de cada rota é medido no painel depois da chamada** (*Uso dos Créditos* e *Histórico das Requisições*), não inferido do cabeçalho `Creditos-Utilizados`. Nenhuma chamada é gasta para descobrir preço | Adotar | 🟡 Proposta |
+| D-56 | Cadastro da URL de callback e geração do token de callback acontecem **antes** de qualquer chamada paga — são gratuitos e destravam o Bloco C do orçamento | Adotar | 🟡 Proposta |
 
 > D-16 a D-21 são fundamentadas na [Nota Técnica 01](03-canais-internos-e-hospedagem.md); D-22 a D-26, no [Modelo de Identidade e Autorização](04-modelo-de-identidade-e-autorizacao.md); D-27 a D-35, no [Mapeamento da API do Escavador](mapeamento-escavador.md); D-36 a D-46, no [Mapeamento da API do Trello](mapeamento-trello.md); D-47 a D-50, no [Orçamento de Chamadas do Escavador](06-orcamento-de-chamadas-escavador.md).
 
@@ -598,13 +604,15 @@ Ordem deliberada: **o atendimento ao cliente é a última frente a ir ao ar**, m
 | R-12 | **A API do Escavador armazena certificado digital, senha e semente de 2FA do advogado** | **Gravíssimo — comprometimento entrega a identidade jurídica completa, com poder de peticionar e assinar** | Rotas fora de todo perfil de exposição; uso de certificado é faixa A4, bloqueada por D-25 ([mapeamento](mapeamento-escavador.md) §9, D-30) |
 | R-13 | Custo recorrente de monitoramentos invisível a orçamento baseado em chamadas | Financeiro, crescente e silencioso | Orçamento separado para assinaturas ativas (D-32) |
 | R-14 | Remoção acidental de monitoramento desliga alerta de processo sem custo nem sinal | **Grave — realiza R-02, perda de prazo** | Ferramenta e escopo separados, com confirmação explícita (D-29) |
-| R-15 | Plano contratado pode não cobrir V1, deixando o escritório sem monitoramento de diário oficial | Operacional grave | Pergunta 58, com urgência elevada ([mapeamento](mapeamento-escavador.md) §12) |
+| R-15 | ~~Plano contratado pode não cobrir V1, deixando o escritório sem monitoramento de diário oficial~~ | ✅ **Encerrado em 2026-08-20** | O painel autenticado lista V1 (34 serviços, incluindo Diários Oficiais, Jurisprudência e Legislação) e V2 (20 serviços), todos com preço e nenhum bloqueado. Não há restrição de plano — a conta está "sem contrato ativo" ([achados](07-painel-escavador-achados.md) §4) |
 | R-16 | **A API do Trello não oferece escopo por quadro ou por recurso** — `read`/`write` valem para a conta inteira do token | **Grave — a API de destino não é segunda barreira; uma falha no MCP expõe todos os quadros** | Conta de serviço restrita por associação, verificação em código, escrita desligada por padrão (D-36). Isolamento forte exige contas separadas por área ([mapeamento](mapeamento-trello.md) §3) |
 | R-17 | Laço de sincronização entre n8n e Trello, com escrita realimentando webhook | Operacional — cards bagunçados e vazão esgotada | `X-Trello-Client-Identifier` obrigatório (D-40) |
 | R-18 | Webhook do Trello quebrado passa até 30 dias e 1.000 falhas antes da desativação, perdendo eventos em silêncio | Grave — sincronização se degrada sem sinal | Verificação periódica de `consecutiveFailures` e `active`, com alerta ativo |
 | R-19 | Limite de 100 req/900 s em `/search` e `/members` esgotável por uma conversa movimentada | Operacional | Balde próprio de vazão, cache e teto por sessão (D-46) |
 | R-21 | Cota de teste do Escavador é finita (16 requisições, R$ 50,00, 10 dias) e uma chamada exploratória a esgota sem entregar nada | Operacional — trava o desenvolvimento até recarga paga | Orçamento fechado por chamada, com aval prévio (D-47 a D-50) |
 | R-20 | Token pessoal do Trello dá acesso à conta inteira da pessoa e pode ser revogado por ela sem aviso | Operacional e de privacidade | Conta de serviço dedicada (perguntas 65 e 66). **Agrava R-09** |
+| R-22 | Recarga de crédito do Escavador **não é autosserviço** — depende de atendimento comercial humano | Operacional — o projeto para até o comercial responder, por tempo imprevisível | Nunca deixar o saldo chegar perto de zero; pedir recarga com antecedência; usar o alerta de saldo nativo do painel (D-54) ([achados](07-painel-escavador-achados.md) §9.4) |
+| R-23 | O painel **não exibe a data de expiração** do saldo bônus; os 10 dias existem só na palavra do suporte | Operacional | Pedir confirmação por escrito ao suporte, junto com a prorrogação ([achados](07-painel-escavador-achados.md) §10) |
 
 ---
 
