@@ -130,3 +130,7 @@ $RECYCLE.BIN/
 # versionadas de propósito; as locais e pessoais, não.
 .claude/settings.local.json
 .claude/scratchpad/
+
+# Resultados das rodadas do conselho: sao gerados e mudam a cada execucao.
+# Continuam no disco para voce auditar - so nao entram no historico.
+.conselho/
