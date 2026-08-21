@@ -2,13 +2,13 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.1 — revisado após a leitura do painel e a conferência pelo Playground |
-| Data | 2026-08-20 |
+| Versão | 2.2 — revisado após a prorrogação concedida pelo suporte |
+| Data | 2026-08-21 |
 | Estado | 🟡 Proposta — aguarda aval do usuário |
-| Saldo | R$ 50,00 · **preço varia de R$ 0,05 a R$ 3,00 por rota** (ver [achados](07-painel-escavador-achados.md) §5 e §6) |
+| Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
 | Liberado em | **13/08/2026** |
-| **Expira em** | **23/08/2026** — crédito não gasto é perdido |
-| Gastas até agora | **0 de 16** |
+| **Expira em** | ✅ **Prorrogado em 21/08 por mais 10 dias.** Data exata a confirmar na barra lateral do painel ("Válido até") |
+| Gastas até agora | **0** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
@@ -30,15 +30,19 @@ Três consequências que mudam o planejamento:
 
 **3. 16 chamadas é pouco para 83 operações mapeadas.** O objetivo do teste não é cobrir a API — é validar **contrato**: autenticação funciona, o plano cobre V1 e V2, o formato dos dados é o que o mapeamento previu, e o webhook chega. Cobertura vem depois, com plano pago.
 
-## 1-A. Prazo — o saldo expira em 23/08/2026
+## 1-A. Prazo — prorrogado em 21/08/2026
 
-O saldo foi liberado em **13/08** com validade de 10 dias. **Restam três dias.**
+O saldo foi liberado em **13/08** com validade de 10 dias, o que o faria expirar em 23/08. **Em 21/08 o suporte concedeu mais 10 dias**, por escrito, reconhecendo que o teste começou antes de a arquitetura estar pronta para exercitar callback.
 
-Isso inverte a lógica do orçamento. Um orçamento existe para não gastar demais; este passou a existir também para **não deixar de gastar**. Crédito não usado até 23/08 simplesmente evapora — não vira desconto, não acumula, não volta.
+> *"Normalmente o saldo de teste não é renovável. Mas, como você ainda não utilizou os créditos e precisa validar justamente a parte de callback agora que a arquitetura está avançando, vou abrir uma exceção e estender o período por mais 10 dias."* — suporte Escavador B2B, 21/08/2026
 
-**Consequência prática:** o que depende só do token e de um número de processo (Blocos A e B) precisa ser executado **imediatamente**, porque não depende de mais nada. O que depende de infraestrutura que ainda não existe (Bloco C, que exige URL pública de callback) provavelmente não cabe no prazo.
+**A data exata deve ser confirmada na barra lateral do painel** ("Válido até"), que é onde ela aparece de forma autoritativa — não precisa perguntar.
 
-**A primeira providência não é técnica: é pedir prorrogação ao suporte.** Custo zero, e o pedido é razoável — o teste começou antes de a arquitetura estar pronta para exercitar webhook. Se a prorrogação vier, o Bloco C volta ao plano. Se não vier, ele fica para o plano pago e as 16 chamadas se concentram em A, B e D.
+O que a prorrogação muda:
+
+- **O Bloco C volta ao plano.** Validar o ciclo de callback era justamente o que não cabia no prazo antigo, e é a razão declarada da exceção. Deixar de exercitá-lo agora seria desperdiçar a cortesia
+- **A pressa deixa de comandar a ordem.** A execução pode esperar os marcos 1 a 5 da fundação (§15 da Spec), de modo que a chamada real valide o chassi de verdade, e não um script avulso
+- **A contrapartida está combinada:** o suporte pediu retorno sobre como foram os testes. É barato, é justo, e mantém o canal aberto para a recarga, que não é autosserviço (R-22)
 
 ### Ordem de execução sob prazo curto
 
@@ -73,6 +77,27 @@ Em 2026-08-20 o painel autenticado foi lido inteiro, **sem gastar crédito**. Os
 4. **O preço cobrado foi R$ 0,05 ou R$ 3,00?** — basta abrir *Uso dos Créditos* depois. Isso resolve a dúvida da §7 dos achados (a tabela é catálogo real ou está limitada pelo bônus?) sem custo adicional
 
 Ela **depende do número CNJ do processo**. Enquanto ele não chega, a recomendação é **não gastar nada**: qualquer chamada que não precise de CNJ custa R$ 3,00 e ensina menos.
+
+## 1-C. 🚧 A pergunta que ainda decide o tamanho deste orçamento
+
+Há uma contradição aberta entre duas informações do próprio suporte, e ela vale entre **16 chamadas** e **cerca de mil**:
+
+| Fonte | O que diz |
+|---|---|
+| Liberação da cota (13/08) | **R$ 3,00 por requisição, para qualquer rota**, durante o teste |
+| Suporte por escrito (14/08) | *"Não, após o período de teste a tabela retorna aos valores do pré pago. **Cada rota possui uma cobrança**."* |
+| Painel e Playground (20/08) | Preços diferenciados por rota — **R$ 0,00**, R$ 0,05, R$ 0,08, R$ 0,20, R$ 0,75 e R$ 3,00 |
+
+A leitura mais provável concilia as três: **a tabela exibida é o catálogo pré-pago** (por isso tem preços diferenciados), mas **o débito durante a cota de teste pode ser de R$ 3,00 fixos por requisição**, independentemente da rota.
+
+Se for assim, o orçamento revisado de ~R$ 15,23 em 9 chamadas passa a custar **R$ 27,00**, e as rotas de status deixam de ser gratuitas enquanto durar o bônus.
+
+**Como resolver, em ordem de custo:**
+
+1. **Perguntar ao suporte** — custo zero, e é a pergunta de maior valor que resta (§10 dos [achados](07-painel-escavador-achados.md))
+2. **Medir na primeira chamada** — executar a chamada A1 (`envolvidos`, catálogo R$ 0,05) e conferir *Uso dos Créditos* logo depois. Se o saldo cair R$ 0,05, vale a tabela; se cair R$ 3,00, vale o fixo. A calibragem é gratuita e vem de carona (D-55)
+
+Enquanto a resposta não vier, **o orçamento opera pelo pior caso: R$ 3,00 por chamada.** É a postura que a Regra 8 exige — na dúvida, orçar caro e não gastar.
 
 ## 2. Princípio de alocação
 

@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-20 |
+| Atualizado em | 2026-08-21 |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
-| Crédito Escavador | 🔴 **Cota de teste expira em 23/08/2026.** R$ 50,00 · **R$ 0,00 gastos** · preço real por rota lido no painel (R$ 0,05 a R$ 3,00). Ver `07-painel-escavador-achados.md` e `06-orcamento-de-chamadas-escavador.md` |
+| Crédito Escavador | ✅ **Prorrogado em 21/08 por mais 10 dias** (data exata na barra lateral do painel). R$ 50,00 · **R$ 0,00 gastos** · 🚧 débito real por chamada em aberto — ver `06-orcamento-de-chamadas-escavador.md` §1-C |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 

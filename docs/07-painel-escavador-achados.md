@@ -295,15 +295,26 @@ A tela *Certificados Digitais* está vazia. O R-12 (a API armazena certificado, 
 
 ## 10. O que perguntar ao suporte — custo zero
 
-Na mesma mensagem do pedido de prorrogação:
+> **Revisado em 21/08/2026**, depois da resposta do suporte. A prorrogação foi concedida (mais 10 dias) e duas perguntas caíram.
 
-1. **Prorrogação do bônus** — o teste foi liberado antes de a arquitetura estar pronta para exercitar webhook
-2. ~~Confirmação da data de expiração~~ — ✅ resolvido: o painel exibe "Válido até 23/08/2026"
-3. **O que significa o `*` nos preços da V2?**
-4. **A tabela de Serviços e Preços é a de catálogo, ou está limitada a R$ 3,00 por causa do bônus?** (§7)
-5. **Por que o monitoramento com documentos públicos é mais barato que o sem?**
-6. **Qual o limite de requisições por minuto?** Não aparece no painel
-7. **Existe ambiente de homologação sem cobrança?** O Playground usa token real
+**Essenciais — fazer agora:**
+
+1. **Durante a cota de teste, o débito é de R$ 3,00 fixos por requisição, ou é o preço da tabela por rota?** É a pergunta de maior valor que resta: decide entre 16 chamadas e cerca de mil (ver [orçamento](06-orcamento-de-chamadas-escavador.md) §1-C)
+2. **Um monitoramento criado e removido dentro do período de teste cobra o mês cheio? A cobrança se repete a cada mês enquanto estiver ativo?** Necessária justamente para o teste de callback que motivou a prorrogação
+3. **No Monitoramento em Diários Oficiais, "até 200 itens" são 200 termos vigiados ou 200 aparições por mês?** Decide o dimensionamento de D-62 — a vigilância de prazo do produto
+
+**Oportunas — mesma mensagem, sem peso de bloqueio:**
+
+4. **O que significa o `*` nos preços da V2?** Aparece sem nota de rodapé, e justamente nas rotas que mais usaremos (capa, movimentações, atualização)
+5. **A entrega de um callback consome crédito, ou o custo do monitoramento é só a mensalidade?** Não consta da tabela de preços, e muda o custo da vigilância em escala
+6. **Por que o monitoramento com documentos públicos é mais barato que o sem?** Baixou de prioridade: D-62 apoia a vigilância em diário oficial (V1), não neste caminho. Continua valendo confirmar se é política de preço ou erro de cadastro
+
+**Encerradas — não perguntar:**
+
+- ~~Prorrogação do bônus~~ — ✅ **concedida em 21/08**, mais 10 dias
+- ~~Confirmação da data de expiração~~ — ✅ o painel exibe "Válido até", na barra lateral
+- ~~Limite de requisições por minuto~~ — ✅ já respondido pela documentação e pelo SDK oficial: **500 req/min por conta** (`mapeamento-escavador.md` §2.2). Perguntar o que a fonte primária já responde contraria a Regra 3 do orçamento
+- ~~Ambiente de homologação sem cobrança~~ — deixou de ser decisivo: a fundação é construída e testada sobre **gravações anonimizadas**, sem tocar na API (D-78). Se o assunto surgir naturalmente, vale perguntar; provocar a pergunta, não
 
 ## 11. Fontes
 
