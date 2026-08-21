@@ -34,6 +34,7 @@ Fase 2 em andamento: **PRD escrito e Spec Parte I escrita**, ambos aguardando av
 | **PRD — produto, entregas, requisitos, regras de negócio e modelo de custo** | `08-prd.md` |
 | **Spec Técnica — Parte I: chassi, motor de custo, cache, callbacks, esquema de dados** | `09-spec-tecnica.md` |
 | **Nota Técnica 02 — ClickUp no lugar de Workspace, Chat e Trello: viabilidade, recursos e custo** | `10-clickup-avaliacao.md` |
+| **Nota Técnica 03 — Demonstração ao vivo para o escritório, antes do contrato** | `11-nota-tecnica-demo.md` |
 
 ## O que os mapeamentos concluíram
 
@@ -54,9 +55,11 @@ Fase 2 em andamento: **PRD escrito e Spec Parte I escrita**, ambos aguardando av
 
 ## Restrição nova — crédito do Escavador
 
-O suporte do Escavador Business liberou **saldo de teste** em **13/08/2026**: R$ 50,00, **16 requisições**, **10 dias** — ou seja, **expira em 23/08/2026** — com **R$ 3,00 fixos por requisição, em qualquer rota**. Não há plano pago contratado.
+O suporte do Escavador Business liberou **saldo de teste** em **13/08/2026**: R$ 50,00, **16 requisições**, **10 dias** — com **R$ 3,00 fixos por requisição, em qualquer rota**. Não há plano pago contratado.
 
-🔴 **O prazo é o problema maior que o dinheiro.** Crédito não gasto até 23/08 é perdido. Primeira providência: **pedir prorrogação ao suporte**. Em paralelo, executar os Blocos A e B do orçamento, que não dependem de nada além do token e de um número de processo.
+✅ **Prazo prorrogado em 21/08/2026 — mais 10 dias**, por exceção concedida pelo suporte, justamente para permitir a validação de callback. A data exata está na barra lateral do painel ("Válido até"). O que era corrida contra o relógio virou execução ordenada: os Blocos A e B seguem dependendo apenas do token e de um número de processo real, e o **Bloco C voltou ao plano** — ele é a razão declarada da prorrogação, e tem prioridade (D-94). O suporte pediu retorno sobre os testes; é a contrapartida combinada, e mantém aberto o canal do comercial (R-22).
+
+🚧 **A pergunta que resta decide o tamanho do orçamento:** o débito durante o bônus segue a tabela por rota ou é de R$ 3,00 fixos? Enquanto não houver resposta, o orçamento opera pelo pior caso. Ver `06-orcamento-de-chamadas-escavador.md` §1-C.
 
 Isso vira restrição de projeto, não detalhe operacional:
 
@@ -127,12 +130,29 @@ E a conta de custo: **não sai mais barato.** Corrigindo o R-11 nos dois cenári
 
 Riscos novos: **R-29** (API de Chat experimental), **R-30** (sem identidade de aplicativo), **R-31** (migrar descarta o mapeamento do Trello), **R-32** (concentração em fornecedor único cobrado em dólar). Decisões **D-79 a D-85**. Perguntas novas ao escritório: **P-08 a P-12**.
 
+## O escritório pediu para ver funcionando — 21/08/2026
+
+Antes de fechar o contrato, o escritório quer ver algo rodando na prática. `11-nota-tecnica-demo.md`, versão 1.0, 🟡 aguardando aval, especifica uma **demonstração descartável**: um agente para colaborador no **Telegram** e um para cliente no **WhatsApp via Uazapi**, com um roteiro de duas conversas curtas.
+
+O achado que viabiliza tudo: **a demo não consome crédito novo do Escavador.** Ela lê de um **instantâneo** produzido pelos Blocos A e B do orçamento — chamadas que já estavam previstas para validar contrato. Custo incremental em crédito: **R$ 0,00** (D-87). E, por ler de arquivo, a demo continua funcionando depois de o bônus expirar, antecipando a D-63.
+
+Três decisões que valem destaque:
+
+- **Não copiar o repositório.** Copiar separa a memória do projeto dos documentos, e as duas cópias divergem em uma semana. A demo vive em branch descartável `claude/demo-vitrine` e pasta `demo/`; o que volta ao projeto é um documento, não código (D-86)
+- **O roteiro demonstra as regras, não só o robô.** Aprovar no Telegram dispara o envio no WhatsApp — a Regra 2 acontecendo na frente do cliente. E a recusa de acesso a processo de terceiro mostra a Regra 1: verificação em código, não instrução de prompt (D-91)
+- **Uazapi é exceção, e só na demo.** A D-10 (somente WhatsApp oficial) permanece válida para produção. Na demo, três condições inegociáveis: chip descartável, lista de permissão fechada e ressalva por escrito (D-89)
+
+O risco central **não** é bagunçar o repositório: é **a demo virar produção** — sem Policy Gate, sem motor de custo, com WhatsApp não oficial (R-33). Riscos novos: **R-33 a R-36**. Decisões: **D-86 a D-94**.
+
+**Trava a demo o mesmo que já travava os Blocos A e B:** um número CNJ real do escritório.
+
 ## Próximo passo
 
-Dois caminhos que não competem entre si:
+Três caminhos que não competem entre si:
 
 1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
 2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
+3. **Executar a captura** (Blocos A e B) assim que o número CNJ chegar — ela valida contrato **e** abastece a demonstração, de uma vez só
 
 A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
 
