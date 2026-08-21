@@ -134,3 +134,7 @@ $RECYCLE.BIN/
 # Resultados das rodadas do conselho: sao gerados e mudam a cada execucao.
 # Continuam no disco para voce auditar - so nao entram no historico.
 .conselho/
+
+# Ferramenta de terceiro clonada localmente: tem historico proprio.
+# Nao entra neste repositorio (evita repositorio embutido quebrado).
+ferramentas/conselho/
