@@ -1,0 +1,545 @@
+{
+  "name": "[LEX-DEMO] A · Colaborador (Telegram)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "name": "[LEX-DEMO] Telegram"
+        }
+      },
+      "webhookId": "lex-demo-a-colaborador"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const COLABORADORES = [\n  {\n    \"telegram_user_id\": 111111111,\n    \"nome\": \"Nome do Advogado\",\n    \"papel\": \"advogado\",\n    \"pode_aprovar_envio_ao_cliente\": true,\n    \"_nota\": \"papel 'advogado' e o unico que aprova envio ao cliente (Regra 2)\"\n  },\n  {\n    \"telegram_user_id\": 222222222,\n    \"nome\": \"Nome do Estagiario\",\n    \"papel\": \"estagiario\",\n    \"pode_aprovar_envio_ao_cliente\": false\n  }\n];\nconst PROCESSOS = [\"ENSAIO-1\"];\n\nconst e = $json;\nconst cb = e.callback_query;\nconst msg = cb ? cb.message : e.message;\nconst de  = cb ? cb.from    : (e.message && e.message.from);\n\nif (!de) {\n  return [{ json: { rota: 'ignorar', motivo: 'evento sem remetente' } }];\n}\n\nconst chatId = msg && msg.chat ? msg.chat.id : de.id;\nconst autorizado = COLABORADORES.find(c => String(c.telegram_user_id) === String(de.id));\n\n// --- barreira 1: quem ------------------------------------------------------\nif (!autorizado) {\n  return [{ json: {\n    rota: 'negado',\n    chatId,\n    userId: de.id,\n    texto: [\n      'Acesso não autorizado.',\n      '',\n      'Este assistente atende apenas pessoas cadastradas pelo escritório.',\n      '',\n      'Se você deveria ter acesso, informe este número ao responsável:',\n      '<code>' + de.id + '</code>'\n    ].join('\\n')\n  }}];\n}\n\nconst base = {\n  chatId,\n  userId: de.id,\n  nome: autorizado.nome,\n  papel: autorizado.papel,\n  podeAprovar: autorizado.pode_aprovar_envio_ao_cliente === true,\n  origemDados: \"ensaio-ficticio\"\n};\n\n// --- ramo do clique nos botões --------------------------------------------\nif (cb) {\n  const [acao] = String(cb.data || '').split(':');\n\n  // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06)\n  if (acao === 'aprovar' && !base.podeAprovar) {\n    return [{ json: { ...base, rota: 'aprovacao_negada', callbackId: cb.id,\n      messageId: msg.message_id,\n      texto: 'Somente advogado identificado pode aprovar envio ao cliente.' }}];\n  }\n\n  return [{ json: { ...base, rota: 'aprovacao', acao,\n    callbackId: cb.id, messageId: msg.message_id,\n    textoOriginal: (msg.text || msg.caption || '') }}];\n}\n\n// --- ramo da mensagem de texto --------------------------------------------\nconst texto = String((msg && msg.text) || '').trim();\n\nif (!texto || texto === '/start') {\n  return [{ json: { ...base, rota: 'negado', texto: [\n    'Olá, ' + base.nome.split(' ')[0] + '.',\n    '',\n    'Posso consultar o andamento de um processo e redigir um retorno ao cliente.',\n    '',\n    'Processos disponíveis nesta demonstração: <b>' + PROCESSOS.join(', ') + '</b>',\n    '',\n    'Experimente:',\n    '· <i>Como está o processo ' + PROCESSOS[0] + '?</i>',\n    '· <i>Redige um retorno para o cliente sobre esse processo</i>'\n  ].join('\\n') }}];\n}\n\n// barreira 3: abrangência — só os processos do instantâneo existem\nconst alvo = PROCESSOS.find(id =>\n  texto.toUpperCase().includes(id.toUpperCase())\n) || (PROCESSOS.length === 1 ? PROCESSOS[0] : null);\n\nif (!alvo) {\n  return [{ json: { ...base, rota: 'negado', texto:\n    'Não identifiquei a qual processo você se refere. Disponíveis: <b>' + PROCESSOS.join(', ') + '</b>' }}];\n}\n\nconst querRedigir = /redi[jg]|retorno|mensagem|escrev|comunic|avis/i.test(texto);\n\nreturn [{ json: { ...base, rota: querRedigir ? 'redigir' : 'consulta',\n  processoId: alvo, pergunta: texto }}];"
+      },
+      "name": "Porteiro (verificação em código)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.rota }}",
+                    "rightValue": "consulta"
+                  }
+                ]
+              },
+              "outputKey": "consulta"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.rota }}",
+                    "rightValue": "redigir"
+                  }
+                ]
+              },
+              "outputKey": "redigir"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.rota }}",
+                    "rightValue": "aprovacao"
+                  }
+                ]
+              },
+              "outputKey": "aprovacao"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "leftValue": "={{ $json.rota }}",
+                    "rightValue": "negad"
+                  }
+                ]
+              },
+              "outputKey": "recusa"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "name": "Rota",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const INSTANTANEO = {\"versao_do_contrato\":1,\"origem\":\"ensaio-ficticio\",\"aviso\":\"DADOS FICTICIOS. Derivados dos exemplos da documentacao publica do Escavador, nao de processo real. O formato e exato; o conteudo nao existe.\",\"processos\":[{\"id\":\"ENSAIO-1\",\"numero_cnj\":\"3537817-53.2015.2.23.0000\",\"titulo\":\"Carlos Eduardo Rangel × Rafael Monteiro Alencar\",\"polo_ativo\":\"Carlos Eduardo Rangel\",\"polo_passivo\":\"Rafael Monteiro Alencar\",\"tribunal\":{\"sigla\":\"TJSP\",\"nome\":\"Tribunal de Justiça de São Paulo\",\"grau\":\"Primeiro Grau\",\"sistema\":\"ESAJ\"},\"orgao_julgador\":\"01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS\",\"classe\":\"PROCEDIMENTO COMUM CIVEL\",\"assunto\":\"Responsabilidade Civil\",\"area\":\"CIVEL\",\"situacao\":\"Baixado\",\"segredo_justica\":false,\"valor_causa\":{\"valor\":\"50000.0000\",\"moeda\":\"R$\",\"valor_formatado\":\"R$ 50.000,00\"},\"data_inicio\":\"2015-11-21\",\"data_ultima_movimentacao\":\"2018-07-25\",\"quantidade_movimentacoes\":103,\"envolvidos\":[{\"nome\":\"Carlos Eduardo Rangel\",\"papel\":\"Requerente\",\"polo\":\"ATIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Helena Vasconcelos Pires\",\"oab\":\"SP [OAB]\"},{\"nome\":\"Luiza Ferraz Bittencourt\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Bruno Siqueira Lacerda\",\"papel\":\"Requerido\",\"polo\":\"PASSIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Marcelo Andrade Peixoto\",\"oab\":\"SP [OAB]\"},{\"nome\":\"Tiago Queiroz Amorim\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Beatriz Sampaio Coutinho\",\"papel\":\"Juiz\",\"polo\":\"NENHUM\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[]},{\"nome\":\"Carlos Eduardo Rangel\",\"papel\":\"Apelante\",\"polo\":\"ATIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Tiago Queiroz Amorim\",\"oab\":\"SP [OAB]\"},{\"nome\":\"Marcelo Andrade Peixoto\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Bruno Siqueira Lacerda\",\"papel\":\"Apelado\",\"polo\":\"PASSIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Luiza Ferraz Bittencourt\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Clara Rezende Fontoura\",\"papel\":\"Juiz\",\"polo\":\"NENHUM\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[]}],\"movimentacoes\":[{\"id\":853879,\"data\":\"2018-07-25\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CERTIDAO DE CARTORIO EXPEDIDA\",\"fonte\":\"TJSP\"},{\"id\":853877,\"data\":\"2018-07-25\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CERTIDAO DE CARTORIO EXPEDIDA\",\"fonte\":\"TJSP\"},{\"id\":853875,\"data\":\"2018-07-25\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"ARQUIVADO DEFINITIVAMENTE\",\"fonte\":\"TJSP\"},{\"id\":853881,\"data\":\"2018-06-05\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"SUSPENSAO DO PRAZO\",\"fonte\":\"TJSP\"},{\"id\":853883,\"data\":\"2018-06-02\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"SUSPENSAO DO PRAZO\",\"fonte\":\"TJSP\"},{\"id\":853885,\"data\":\"2018-05-24\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CERTIDAO DE PUBLICACAO EXPEDIDA\",\"fonte\":\"TJSP\"},{\"id\":853887,\"data\":\"2018-05-23\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"REMETIDO AO DJE\",\"fonte\":\"TJSP\"},{\"id\":853889,\"data\":\"2018-05-10\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"PROFERIDO DESPACHO\",\"fonte\":\"TJSP\"},{\"id\":853896,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"DECISAO DE 2ª INSTANCIA - RECURSO NAO PROVIDO - JUNTADA\",\"fonte\":\"TJSP\"},{\"id\":853895,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EMBARGOS DE DECLARACAO ACOLHIDOS\",\"fonte\":\"TJSP\"},{\"id\":853893,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"TRANSITO EM JULGADO AS PARTES - PROC. EM ANDAMENTO\",\"fonte\":\"TJSP\"},{\"id\":853891,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CONCLUSOS PARA DESPACHO\",\"fonte\":\"TJSP\"},{\"id\":853897,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"RECEBIDOS OS AUTOS DO TRIBUNAL DE JUSTICA\",\"fonte\":\"TJSP\"},{\"id\":849990,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO\",\"fonte\":\"TJSP\"},{\"id\":849988,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"BAIXA DEFINITIVA\",\"fonte\":\"TJSP\"},{\"id\":849986,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO DE BAIXA DE RECURSO\",\"fonte\":\"TJSP\"},{\"id\":849992,\"data\":\"2018-03-28\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO\",\"fonte\":\"TJSP\"},{\"id\":849994,\"data\":\"2018-03-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"JULGADO VIRTUALMENTE\",\"fonte\":\"TJSP\"},{\"id\":849998,\"data\":\"2018-03-06\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO\",\"fonte\":\"TJSP\"},{\"id\":849996,\"data\":\"2018-03-06\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CONCLUSOS PARA O RELATOR (EXPEDIDO TERMO COM CONCLUSAO)\",\"fonte\":\"TJSP\"}]}]};\n\nconst p = INSTANTANEO.processos.find(x => x.id === $json.processoId);\nif (!p) return [{ json: { ...$json, erro: 'processo não encontrado no instantâneo' } }];\n\n// Agrupa participações da mesma pessoa — ela aparece uma vez por grau\nconst porNome = new Map();\nfor (const e of p.envolvidos) {\n  const atual = porNome.get(e.nome) || { nome: e.nome, papeis: [], advogados: [] };\n  if (e.papel && !atual.papeis.includes(e.papel)) atual.papeis.push(e.papel);\n  for (const a of e.advogados) if (!atual.advogados.some(x => x.nome === a.nome)) atual.advogados.push(a);\n  porNome.set(e.nome, atual);\n}\n\nconst partes = [...porNome.values()]\n  .map(e => '- ' + e.nome + ' (' + e.papeis.join(', ') + ')' +\n       (e.advogados.length ? ' — advogado(s): ' + e.advogados.map(a => a.nome).join(', ') : ''))\n  .join('\\n');\n\nconst movs = p.movimentacoes\n  .map(m => '- ' + m.data + ' · ' + m.tipo + ' · ' + m.conteudo)\n  .join('\\n');\n\nconst ficha = [\n  'PROCESSO ' + p.numero_cnj,\n  'Título: ' + p.titulo,\n  'Tribunal: ' + (p.tribunal.nome || '-') + ' (' + (p.tribunal.sigla || '-') + '), ' + (p.tribunal.grau || '-'),\n  'Órgão julgador: ' + (p.orgao_julgador || '-'),\n  'Classe: ' + (p.classe || '-'),\n  'Assunto: ' + (p.assunto || '-'),\n  'Área: ' + (p.area || '-'),\n  'Situação: ' + (p.situacao || '-'),\n  'Valor da causa: ' + (p.valor_causa ? p.valor_causa.valor_formatado : 'não informado'),\n  'Início: ' + (p.data_inicio || '-'),\n  'Última movimentação: ' + (p.data_ultima_movimentacao || '-'),\n  'Total de movimentações no processo: ' + (p.quantidade_movimentacoes ?? '-'),\n  '',\n  'PARTES E ADVOGADOS',\n  partes,\n  '',\n  'ÚLTIMAS ' + p.movimentacoes.length + ' MOVIMENTAÇÕES (mais recente primeiro)',\n  movs\n].join('\\n');\n\nreturn [{ json: { ...$json, ficha, aviso_origem: INSTANTANEO.aviso,\n  ehEnsaio: INSTANTANEO.origem === 'ensaio-ficticio' } }];"
+      },
+      "name": "Ficha do processo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const INSTANTANEO = {\"versao_do_contrato\":1,\"origem\":\"ensaio-ficticio\",\"aviso\":\"DADOS FICTICIOS. Derivados dos exemplos da documentacao publica do Escavador, nao de processo real. O formato e exato; o conteudo nao existe.\",\"processos\":[{\"id\":\"ENSAIO-1\",\"numero_cnj\":\"3537817-53.2015.2.23.0000\",\"titulo\":\"Carlos Eduardo Rangel × Rafael Monteiro Alencar\",\"polo_ativo\":\"Carlos Eduardo Rangel\",\"polo_passivo\":\"Rafael Monteiro Alencar\",\"tribunal\":{\"sigla\":\"TJSP\",\"nome\":\"Tribunal de Justiça de São Paulo\",\"grau\":\"Primeiro Grau\",\"sistema\":\"ESAJ\"},\"orgao_julgador\":\"01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS\",\"classe\":\"PROCEDIMENTO COMUM CIVEL\",\"assunto\":\"Responsabilidade Civil\",\"area\":\"CIVEL\",\"situacao\":\"Baixado\",\"segredo_justica\":false,\"valor_causa\":{\"valor\":\"50000.0000\",\"moeda\":\"R$\",\"valor_formatado\":\"R$ 50.000,00\"},\"data_inicio\":\"2015-11-21\",\"data_ultima_movimentacao\":\"2018-07-25\",\"quantidade_movimentacoes\":103,\"envolvidos\":[{\"nome\":\"Carlos Eduardo Rangel\",\"papel\":\"Requerente\",\"polo\":\"ATIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Helena Vasconcelos Pires\",\"oab\":\"SP [OAB]\"},{\"nome\":\"Luiza Ferraz Bittencourt\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Bruno Siqueira Lacerda\",\"papel\":\"Requerido\",\"polo\":\"PASSIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Marcelo Andrade Peixoto\",\"oab\":\"SP [OAB]\"},{\"nome\":\"Tiago Queiroz Amorim\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Beatriz Sampaio Coutinho\",\"papel\":\"Juiz\",\"polo\":\"NENHUM\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[]},{\"nome\":\"Carlos Eduardo Rangel\",\"papel\":\"Apelante\",\"polo\":\"ATIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Tiago Queiroz Amorim\",\"oab\":\"SP [OAB]\"},{\"nome\":\"Marcelo Andrade Peixoto\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Bruno Siqueira Lacerda\",\"papel\":\"Apelado\",\"polo\":\"PASSIVO\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[{\"nome\":\"Luiza Ferraz Bittencourt\",\"oab\":\"SP [OAB]\"}]},{\"nome\":\"Clara Rezende Fontoura\",\"papel\":\"Juiz\",\"polo\":\"NENHUM\",\"tipo_pessoa\":\"FISICA\",\"advogados\":[]}],\"movimentacoes\":[{\"id\":853879,\"data\":\"2018-07-25\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CERTIDAO DE CARTORIO EXPEDIDA\",\"fonte\":\"TJSP\"},{\"id\":853877,\"data\":\"2018-07-25\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CERTIDAO DE CARTORIO EXPEDIDA\",\"fonte\":\"TJSP\"},{\"id\":853875,\"data\":\"2018-07-25\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"ARQUIVADO DEFINITIVAMENTE\",\"fonte\":\"TJSP\"},{\"id\":853881,\"data\":\"2018-06-05\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"SUSPENSAO DO PRAZO\",\"fonte\":\"TJSP\"},{\"id\":853883,\"data\":\"2018-06-02\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"SUSPENSAO DO PRAZO\",\"fonte\":\"TJSP\"},{\"id\":853885,\"data\":\"2018-05-24\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CERTIDAO DE PUBLICACAO EXPEDIDA\",\"fonte\":\"TJSP\"},{\"id\":853887,\"data\":\"2018-05-23\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"REMETIDO AO DJE\",\"fonte\":\"TJSP\"},{\"id\":853889,\"data\":\"2018-05-10\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"PROFERIDO DESPACHO\",\"fonte\":\"TJSP\"},{\"id\":853896,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"DECISAO DE 2ª INSTANCIA - RECURSO NAO PROVIDO - JUNTADA\",\"fonte\":\"TJSP\"},{\"id\":853895,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EMBARGOS DE DECLARACAO ACOLHIDOS\",\"fonte\":\"TJSP\"},{\"id\":853893,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"TRANSITO EM JULGADO AS PARTES - PROC. EM ANDAMENTO\",\"fonte\":\"TJSP\"},{\"id\":853891,\"data\":\"2018-05-04\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CONCLUSOS PARA DESPACHO\",\"fonte\":\"TJSP\"},{\"id\":853897,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"RECEBIDOS OS AUTOS DO TRIBUNAL DE JUSTICA\",\"fonte\":\"TJSP\"},{\"id\":849990,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO\",\"fonte\":\"TJSP\"},{\"id\":849988,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"BAIXA DEFINITIVA\",\"fonte\":\"TJSP\"},{\"id\":849986,\"data\":\"2018-04-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO DE BAIXA DE RECURSO\",\"fonte\":\"TJSP\"},{\"id\":849992,\"data\":\"2018-03-28\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO\",\"fonte\":\"TJSP\"},{\"id\":849994,\"data\":\"2018-03-26\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"JULGADO VIRTUALMENTE\",\"fonte\":\"TJSP\"},{\"id\":849998,\"data\":\"2018-03-06\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"EXPEDIDO CERTIDAO\",\"fonte\":\"TJSP\"},{\"id\":849996,\"data\":\"2018-03-06\",\"tipo\":\"ANDAMENTO\",\"conteudo\":\"CONCLUSOS PARA O RELATOR (EXPEDIDO TERMO COM CONCLUSAO)\",\"fonte\":\"TJSP\"}]}]};\n\nconst p = INSTANTANEO.processos.find(x => x.id === $json.processoId);\nif (!p) return [{ json: { ...$json, erro: 'processo não encontrado no instantâneo' } }];\n\n// Agrupa participações da mesma pessoa — ela aparece uma vez por grau\nconst porNome = new Map();\nfor (const e of p.envolvidos) {\n  const atual = porNome.get(e.nome) || { nome: e.nome, papeis: [], advogados: [] };\n  if (e.papel && !atual.papeis.includes(e.papel)) atual.papeis.push(e.papel);\n  for (const a of e.advogados) if (!atual.advogados.some(x => x.nome === a.nome)) atual.advogados.push(a);\n  porNome.set(e.nome, atual);\n}\n\nconst partes = [...porNome.values()]\n  .map(e => '- ' + e.nome + ' (' + e.papeis.join(', ') + ')' +\n       (e.advogados.length ? ' — advogado(s): ' + e.advogados.map(a => a.nome).join(', ') : ''))\n  .join('\\n');\n\nconst movs = p.movimentacoes\n  .map(m => '- ' + m.data + ' · ' + m.tipo + ' · ' + m.conteudo)\n  .join('\\n');\n\nconst ficha = [\n  'PROCESSO ' + p.numero_cnj,\n  'Título: ' + p.titulo,\n  'Tribunal: ' + (p.tribunal.nome || '-') + ' (' + (p.tribunal.sigla || '-') + '), ' + (p.tribunal.grau || '-'),\n  'Órgão julgador: ' + (p.orgao_julgador || '-'),\n  'Classe: ' + (p.classe || '-'),\n  'Assunto: ' + (p.assunto || '-'),\n  'Área: ' + (p.area || '-'),\n  'Situação: ' + (p.situacao || '-'),\n  'Valor da causa: ' + (p.valor_causa ? p.valor_causa.valor_formatado : 'não informado'),\n  'Início: ' + (p.data_inicio || '-'),\n  'Última movimentação: ' + (p.data_ultima_movimentacao || '-'),\n  'Total de movimentações no processo: ' + (p.quantidade_movimentacoes ?? '-'),\n  '',\n  'PARTES E ADVOGADOS',\n  partes,\n  '',\n  'ÚLTIMAS ' + p.movimentacoes.length + ' MOVIMENTAÇÕES (mais recente primeiro)',\n  movs\n].join('\\n');\n\nreturn [{ json: { ...$json, ficha, aviso_origem: INSTANTANEO.aviso,\n  ehEnsaio: INSTANTANEO.origem === 'ensaio-ficticio' } }];"
+      },
+      "name": "Ficha do processo (redação)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "name": "Modelo — consulta",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        260
+      ],
+      "credentials": {
+        "openAiApi": {
+          "name": "[LEX-DEMO] OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "name": "Modelo — redação",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        460
+      ],
+      "credentials": {
+        "openAiApi": {
+          "name": "[LEX-DEMO] OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ficha }}\n\nPERGUNTA DO COLABORADOR: {{ $json.pergunta }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você é assistente de um escritório de advocacia, falando com um COLABORADOR interno.\n\nREGRAS ABSOLUTAS:\n- Responda EXCLUSIVAMENTE com base na ficha do processo fornecida. Nunca complete com conhecimento próprio.\n- Se a ficha não contém a informação, diga \"isso não consta dos dados que tenho\" — jamais suponha.\n- NUNCA calcule, estime ou mencione prazo processual. Não há dados de prazo aqui, e errar prazo é o pior desfecho possível. Se perguntarem, diga que prazo deve ser conferido no sistema do tribunal.\n- Não dê opinião jurídica nem prognóstico de resultado.\n\nFORMA:\n- Português do Brasil, direto, sem juridiquês desnecessário.\n- Use HTML simples do Telegram: <b>negrito</b>, <i>itálico</i>, <code>código</code>. Nunca use Markdown.\n- Comece com uma linha de resumo, depois os detalhes.\n- No máximo 12 linhas."
+            }
+          ]
+        }
+      },
+      "name": "Responder ao colaborador",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        700,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ficha }}\n\nO colaborador pediu: {{ $json.pergunta }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você redige, para um COLABORADOR do escritório, uma mensagem que será enviada AO CLIENTE por WhatsApp — mas somente depois que um advogado aprovar.\n\nREGRAS ABSOLUTAS:\n- Baseie-se EXCLUSIVAMENTE na ficha fornecida.\n- NUNCA mencione, calcule ou insinue prazo.\n- NUNCA prometa resultado, não crie urgência, não use linguagem de venda (Provimento 205/2021 da OAB: comunicação informativa e sóbria).\n- Não use jargão jurídico: o cliente é leigo. \"O processo foi arquivado\" e não \"houve baixa definitiva dos autos\".\n\nFORMA:\n- Escreva APENAS o texto da mensagem ao cliente. Sem saudação ao colaborador, sem comentários seus, sem aspas em volta.\n- Comece por \"Olá!\" e trate o cliente por você.\n- No máximo 6 linhas, tom cordial e calmo.\n- Termine SEMPRE com esta linha, exatamente:\nEsta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório."
+            }
+          ]
+        }
+      },
+      "name": "Redigir mensagem ao cliente",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
+        "text": "={{ ($('Ficha do processo').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + $json.text }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "name": "Enviar resposta",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        100
+      ],
+      "credentials": {
+        "telegramApi": {
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
+        "text": "={{ ($('Ficha do processo (redação)').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false,
+          "reply_markup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": {
+                  "buttons": [
+                    {
+                      "text": "✅ Aprovar e enviar",
+                      "additionalFields": {
+                        "callback_data": "aprovar"
+                      }
+                    },
+                    {
+                      "text": "✏️ Editar",
+                      "additionalFields": {
+                        "callback_data": "editar"
+                      }
+                    },
+                    {
+                      "text": "❌ Descartar",
+                      "additionalFields": {
+                        "callback_data": "descartar"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "name": "Propor envio (aguarda aprovação)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nconst quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';\nconst rotulo = { aprovar: '✅ APROVADO E ENVIADO', editar: '✏️ EM EDIÇÃO', descartar: '❌ DESCARTADO' }[j.acao] || '—';\n\n// A trilha: quem decidiu, o quê e quando. Na demo vai para o log da execução;\n// no produto, vai para a auditoria (§7 do modelo de identidade).\nconst trilha = { acao: j.acao, por: j.nome, papel: j.papel, userId: j.userId, quando };\n\nconst texto = j.textoOriginal.replace(\n  /<b>Proposta de mensagem ao cliente<\\/b>[\\s\\S]*?\\n\\n/,\n  '<b>' + rotulo + '</b>\\n<i>por ' + j.nome + ' · ' + quando + '</i>\\n\\n'\n);\n\nreturn [{ json: { ...j, trilha, textoFinal: texto,\n  aviso: j.acao === 'aprovar'\n    ? 'Na demonstração completa, este clique dispara o envio ao cliente no WhatsApp.'\n    : null } }];"
+      },
+      "name": "Registrar decisão",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "operation": "answerQuery",
+        "queryId": "={{ $json.callbackId }}",
+        "additionalFields": {
+          "text": "={{ $json.acao === \"aprovar\" ? \"Aprovado\" : ($json.acao === \"editar\" ? \"Marcado para edição\" : \"Descartado\") }}"
+        }
+      },
+      "name": "Confirmar clique",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        620
+      ],
+      "credentials": {
+        "telegramApi": {
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "editMessageText",
+        "chatId": "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
+        "messageId": "={{ $('Registrar decisão').item.json.messageId }}",
+        "text": "={{ $('Registrar decisão').item.json.textoFinal }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Atualizar mensagem",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        620
+      ],
+      "credentials": {
+        "telegramApi": {
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.texto }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "name": "Recusar",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        460,
+        760
+      ],
+      "credentials": {
+        "telegramApi": {
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Porteiro (verificação em código)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Porteiro (verificação em código)": {
+      "main": [
+        [
+          {
+            "node": "Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rota": {
+      "main": [
+        [
+          {
+            "node": "Ficha do processo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ficha do processo (redação)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar decisão",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Recusar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ficha do processo": {
+      "main": [
+        [
+          {
+            "node": "Responder ao colaborador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ficha do processo (redação)": {
+      "main": [
+        [
+          {
+            "node": "Redigir mensagem ao cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo — consulta": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Responder ao colaborador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo — redação": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Redigir mensagem ao cliente",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder ao colaborador": {
+      "main": [
+        [
+          {
+            "node": "Enviar resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redigir mensagem ao cliente": {
+      "main": [
+        [
+          {
+            "node": "Propor envio (aguarda aprovação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar decisão": {
+      "main": [
+        [
+          {
+            "node": "Confirmar clique",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar clique": {
+      "main": [
+        [
+          {
+            "node": "Atualizar mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
