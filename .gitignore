@@ -154,3 +154,9 @@ captura/respostas-brutas/
 demo/instantaneo/processos.json
 demo/listas/colaboradores.json
 demo/listas/clientes.json
+
+# --- Segredos da demo: gravados por guardar-segredo.mjs -------------------
+demo/n8n.local
+demo/telegram.local
+demo/ia.local
+demo/uazapi.local
