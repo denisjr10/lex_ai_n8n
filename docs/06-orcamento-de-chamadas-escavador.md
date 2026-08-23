@@ -2,15 +2,38 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.2 — revisado após a prorrogação concedida pelo suporte |
+| Versão | 2.3 — **Blocos A e B autorizados pelo usuário** |
 | Data | 2026-08-21 |
-| Estado | 🟡 Proposta — aguarda aval do usuário |
+| Estado | ✅ **Blocos A e B autorizados** em 21/08/2026 · Blocos C e D seguem 🟡 aguardando aval |
 | Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
 | Liberado em | **13/08/2026** |
 | **Expira em** | ✅ **Prorrogado em 21/08 por mais 10 dias.** Data exata a confirmar na barra lateral do painel ("Válido até") |
 | Gastas até agora | **0** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
+
+## 0. Autorização vigente — 21/08/2026
+
+| Item | Situação |
+|---|---|
+| **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) |
+| Blocos C e D | 🟡 Não autorizados ainda |
+| Processos disponíveis | **2**, ambos com dígito verificador conferido, de **tribunais diferentes** (TJPB e TJAP) — ver §0.1 |
+| 🚧 Pendente de esclarecimento | As 3 chamadas autorizadas valem **para um processo** ou **para cada um dos dois**? Enquanto não estiver claro, executa-se **um só** |
+| 🚧 Pendente de acesso | **O valor do token não está disponível na sessão.** Sem ele nada executa |
+
+### 0.1 Os processos — e por que eles não estão escritos aqui
+
+Os dois números CNJ foram fornecidos pelo usuário em 21/08 e **conferidos sem custo** pelo dígito verificador (Resolução CNJ 65/2008, validação aritmética local):
+
+| # | Tribunal | Ano | Por que serve |
+|---|---|---|---|
+| P1 | **TJPB** — Justiça Estadual da Paraíba | 2026 | Processo recente: poucas movimentações, formato atual |
+| P2 | **TJAP** — Justiça Estadual do Amapá | 2020 | Processo antigo: histórico longo, e **outro tribunal** |
+
+Serem de tribunais diferentes é sorte útil: a §3 deste documento já apontava "um segundo processo, de outro tribunal" como o melhor destino da folga, porque **a variação de formato entre tribunais é incógnita real do modelo de dados** do MCP. Os dois processos cobrem também extremos de idade — o que testa se movimentação antiga vem com o mesmo formato da recente.
+
+**Os números em si não entram no repositório** (D-95). Eles ficam em arquivo local ignorado pelo Git, lido pelo script de captura. Número de processo é público em regra, mas *a lista de processos deste escritório* é informação sobre a carteira do cliente, e §9 das diretrizes mantém dado de cliente fora do histórico.
 
 ---
 
@@ -234,3 +257,4 @@ Revisado em 2026-08-20 — a maior parte foi resolvida pelo painel:
 | **D-48** | Toda resposta da API é salva bruta em arquivo, anonimizada, e nunca reconsultada | Adotar |
 | **D-49** | A cota de teste é gasta em validação de **contrato**, não em cobertura de superfície nem em descoberta de preço | Adotar |
 | **D-50** | Recarga paga do Escavador é decisão exclusiva do usuário, tomada com o registro de execução §5 à vista | Adotar |
+| **D-95** | **Número CNJ de processo real não entra no repositório.** Vive em arquivo local ignorado pelo Git, lido pelo script de captura. Número é público em regra, mas a lista de processos do escritório é informação sobre a carteira do cliente (§9 das diretrizes) | Adotar |

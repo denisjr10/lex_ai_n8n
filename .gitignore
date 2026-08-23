@@ -138,3 +138,11 @@ $RECYCLE.BIN/
 # Ferramenta de terceiro clonada localmente: tem historico proprio.
 # Nao entra neste repositorio (evita repositorio embutido quebrado).
 ferramentas/conselho/
+
+# --- Dado de cliente: numero de processo real (D-95) ---------------------
+# Numero CNJ e publico em regra, mas a lista de processos do escritorio e
+# informacao sobre a carteira do cliente. Fica no disco, fora do historico.
+*.local.json
+*.local.*
+.local/
+captura/respostas-brutas/

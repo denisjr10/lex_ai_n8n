@@ -6,7 +6,7 @@
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Nenhum ainda. Só definição |
-| Crédito Escavador | ✅ **Prorrogado em 21/08 por mais 10 dias** (data exata na barra lateral do painel). R$ 50,00 · **R$ 0,00 gastos** · 🚧 débito real por chamada em aberto — ver `06-orcamento-de-chamadas-escavador.md` §1-C |
+| Crédito Escavador | ✅ **Prorrogado em 21/08 por mais 10 dias.** R$ 50,00 · **R$ 0,00 gastos** · ✅ **Blocos A e B autorizados** em 21/08 · 🚧 falta o valor do token na sessão · 🚧 débito real por chamada em aberto (`06` §0 e §1-C) |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
@@ -152,7 +152,7 @@ Três caminhos que não competem entre si:
 
 1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
 2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
-3. **Executar a captura** (Blocos A e B) assim que o número CNJ chegar — ela valida contrato **e** abastece a demonstração, de uma vez só
+3. **Executar a captura** (Blocos A e B) — ✅ **autorizada em 21/08**, com dois processos reais já conferidos. Falta apenas o **valor do token** na sessão e o esclarecimento de §0 do orçamento (3 chamadas em um processo, ou 3 em cada um?). Ela valida contrato **e** abastece a demonstração, de uma vez só
 
 A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
 
