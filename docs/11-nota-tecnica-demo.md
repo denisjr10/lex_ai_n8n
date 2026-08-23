@@ -151,7 +151,9 @@ Se as três não valerem, a recomendação é **não fazer a Demo B** e demonstr
 A demo mexe com dado de processo real. Três salvaguardas:
 
 - **O "cliente" da demo é pessoa do escritório ou o próprio usuário** — nunca um cliente real sem consentimento por escrito (D-90). Dado de processo é público em regra, mas *conversa sobre o processo* em canal não oficial não é
-- **Aviso de IA em toda mensagem ao "cliente"** (D-92). O Provimento 205/2021 exige publicidade informativa e sóbria: o agente informa, não vende, não promete resultado, não cria urgência
+- **Aviso de IA em toda mensagem ao "cliente"** (D-92). Duas normas distintas, que não se confundem: a **Recomendação nº 001/2024 do CFOAB** orienta informar previamente o uso de IA na prestação do serviço — daí o aviso; o **Provimento 205/2021** exige publicidade informativa e sóbria — daí o tom: o agente informa, não vende, não promete resultado, não cria urgência
+  - **Isto não é exigência da demo, é do produto.** O aviso já é **RF-26** do [PRD](08-prd.md), e §9.2 das [diretrizes](01-diretrizes-gerais.md) prevê ainda cláusula no contrato de honorários. A D-92 só impede que a demo dispense o aviso *por ser demo* — o que faria o escritório formar expectativa errada do que vai receber
+  - **A forma difere.** Na demo, o aviso vai em **toda** mensagem, porque não há sessão, cadastro prévio nem contrato a que ancorá-lo. Em produção, RF-26 pede aviso **na abertura** da conversa e caminho de escalada disponível em qualquer ponto — repetir em cada mensagem viraria ruído, e ruído que ninguém lê não informa ninguém
 - **O instantâneo entra no repositório anonimizado** — CPF, CNPJ e nome de parte substituídos por marcadores, conforme §9 das diretrizes e a D-48
 
 E uma vedação explícita: **a demo não escreve em nenhum sistema real do escritório** (D-93). Não toca Trello, não lê e-mail, não grava no Drive. Ela lê um arquivo e envia mensagem para números da lista. Superfície mínima.
@@ -237,7 +239,7 @@ Se a demo impressionar e não produzir nenhuma das três, ela custou dois dias e
 | **D-89** | WhatsApp não oficial (Uazapi) é admitido **exclusivamente na demo**, sob as três condições da §7. A **D-10 permanece válida para produção**, sem exceção | Adotar |
 | **D-90** | Nenhum cliente real participa da demo sem consentimento por escrito. O papel de cliente é feito por pessoa do escritório ou pelo usuário | Adotar |
 | **D-91** | O roteiro **demonstra explicitamente a Regra 2 (aprovação humana) e a Regra 1 (verificação em código)**. Não são adornos de apresentação — são o produto | Adotar |
-| **D-92** | Toda mensagem do agente ao "cliente" traz aviso de que é atendimento automatizado, em tom informativo e sóbrio (Provimento 205/2021) | Adotar |
+| **D-92** | Toda mensagem do agente ao "cliente" traz aviso de que é atendimento automatizado (Recomendação nº 001/2024 do CFOAB), em tom informativo e sóbrio (Provimento 205/2021). **Não cria a obrigação** — ela já é RF-26 do PRD; impede que a demo a dispense por ser demo | Adotar |
 | **D-93** | A demo **não escreve em nenhum sistema real do escritório** — não toca Trello, e-mail nem Drive. Lê arquivo, envia mensagem para a lista | Adotar |
 | **D-94** | O **Bloco C (callback) mantém prioridade** sobre a demo no consumo da cota de teste. A prorrogação foi concedida para validação técnica, e é isso que ela financia primeiro | Adotar |
 

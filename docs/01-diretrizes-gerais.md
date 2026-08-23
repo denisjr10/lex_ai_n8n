@@ -599,7 +599,7 @@ Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fe
 | D-89 | WhatsApp **não oficial (Uazapi) é admitido exclusivamente na demo**, sob três condições: número descartável, lista de permissão fechada e ressalva por escrito. **A D-10 permanece válida para produção, sem exceção** | Adotar | 🟡 Proposta |
 | D-90 | Nenhum cliente real participa da demo sem consentimento por escrito; o papel de cliente é feito por pessoa do escritório ou pelo usuário | Adotar | 🟡 Proposta |
 | D-91 | O roteiro da demo **demonstra explicitamente a Regra 2** (aprovação humana) **e a Regra 1** (verificação em código). Não são adornos de apresentação — são o produto | Adotar | 🟡 Proposta |
-| D-92 | Toda mensagem do agente ao "cliente" na demo traz **aviso de atendimento automatizado**, em tom informativo e sóbrio (Provimento 205/2021) | Adotar | 🟡 Proposta |
+| D-92 | Toda mensagem do agente ao "cliente" na demo traz **aviso de atendimento automatizado** (Recomendação nº 001/2024 do CFOAB), em tom informativo e sóbrio (Provimento 205/2021). Não cria a obrigação — ela já é **RF-26** do PRD; impede que a demo a dispense por ser demo | Adotar | 🟡 Proposta |
 | D-93 | A demo **não escreve em nenhum sistema real do escritório** — não toca Trello, e-mail nem Drive. Lê arquivo, envia mensagem para a lista | Adotar | 🟡 Proposta |
 | D-94 | O **Bloco C (callback) tem prioridade sobre a demo** no consumo da cota de teste — a prorrogação foi concedida para validação técnica, e é isso que ela financia primeiro | Adotar | 🟡 Proposta |
 
