@@ -144,5 +144,8 @@ ferramentas/conselho/
 # informacao sobre a carteira do cliente. Fica no disco, fora do historico.
 *.local.json
 *.local.*
+*.local
+token.local
+*token*.local
 .local/
 captura/respostas-brutas/

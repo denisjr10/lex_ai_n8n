@@ -19,7 +19,7 @@
 | **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) |
 | Blocos C e D | 🟡 Não autorizados ainda |
 | Processos disponíveis | **2**, ambos com dígito verificador conferido, de **tribunais diferentes** (TJPB e TJAP) — ver §0.1 |
-| 🚧 Pendente de esclarecimento | As 3 chamadas autorizadas valem **para um processo** ou **para cada um dos dois**? Enquanto não estiver claro, executa-se **um só** |
+| Alcance | ✅ **Resolvido em 21/08:** as 3 chamadas valem **só para o P1 (TJPB)**. O P2 fica guardado, e ampliar exige novo aval |
 | 🚧 Pendente de acesso | **O valor do token não está disponível na sessão.** Sem ele nada executa |
 
 ### 0.1 Os processos — e por que eles não estão escritos aqui
@@ -32,6 +32,14 @@ Os dois números CNJ foram fornecidos pelo usuário em 21/08 e **conferidos sem 
 | P2 | **TJAP** — Justiça Estadual do Amapá | 2020 | Processo antigo: histórico longo, e **outro tribunal** |
 
 Serem de tribunais diferentes é sorte útil: a §3 deste documento já apontava "um segundo processo, de outro tribunal" como o melhor destino da folga, porque **a variação de formato entre tribunais é incógnita real do modelo de dados** do MCP. Os dois processos cobrem também extremos de idade — o que testa se movimentação antiga vem com o mesmo formato da recente.
+
+### 0.2 Correção de rota — `limit=5` não existe
+
+O OpenAPI V2 foi lido em 21/08 (documentação pública, **custo zero**) e desmentiu um detalhe deste orçamento: o parâmetro `limit` de `envolvidos` e de `movimentacoes` **só aceita 20, 50 ou 100**. As chamadas A1 e B2 pediam `limit=5`.
+
+Não é detalhe de estilo: valor fora do conjunto arrisca um **422**, e um 422 custa o mesmo que um 200. Corrigido para **20** — o menor aceito, que também é o padrão da API. `movimentacoes` ganhou ainda `ordem=desc`, para que as movimentações mais recentes venham primeiro, que é o que a demo precisa mostrar.
+
+**Lição para o registro:** ler o OpenAPI antes de executar custou zero e evitou até duas chamadas perdidas — R$ 6,00 no pior caso. É a Regra 3 do orçamento funcionando.
 
 **Os números em si não entram no repositório** (D-95). Eles ficam em arquivo local ignorado pelo Git, lido pelo script de captura. Número de processo é público em regra, mas *a lista de processos deste escritório* é informação sobre a carteira do cliente, e §9 das diretrizes mantém dado de cliente fora do histórico.
 
@@ -145,7 +153,7 @@ Era de 4 chamadas e R$ 12,00. O painel respondeu A3 (catálogo e diário oficial
 
 | # | Chamada | Preço | O que responde |
 |---|---|---|---|
-| A1 | `GET /api/v2/processos/numero_cnj/{cnj}/envolvidos?limit=5` | **R$ 0,05** | Autenticação na V2 · envelope e paginação · modelo do envolvido · **e o preço realmente cobrado** (conferir em *Uso dos Créditos* logo depois) |
+| A1 | `GET /api/v2/processos/numero_cnj/{cnj}/envolvidos?limit=20` | **R$ 0,05** | Autenticação na V2 · envelope e paginação · modelo do envolvido · **e o preço realmente cobrado** (conferir em *Uso dos Créditos* logo depois) |
 
 **Chamadas removidas do Bloco A:**
 
@@ -165,7 +173,7 @@ Todas sobre **o mesmo processo real do escritório** usado em A1, para que as re
 | # | Chamada | Preço | O que responde |
 |---|---|---|---|
 | B1 | `GET /api/v2/processos/numero_cnj/{cnj}` (Capa do processo) | R$ 3,00 * | Modelo do processo: campos, tipos, o que vem nulo na prática |
-| B2 | `GET /api/v2/processos/numero_cnj/{cnj}/movimentacoes?limit=5` | R$ 3,00 * | Modelo da movimentação — é a peça que dispara prazo |
+| B2 | `GET /api/v2/processos/numero_cnj/{cnj}/movimentacoes?limit=20&ordem=desc` | R$ 3,00 * | Modelo da movimentação — é a peça que dispara prazo |
 | B4 | `GET /api/v2/envolvido/processos?cpf_cnpj={cnpj}&limit=5` | R$ 3,00 (até 200 itens) | Caminho "todos os processos deste cliente" — a consulta mais comum do agente |
 
 > Bônus barato, se A1 mostrar que o processo já tem resumo por IA: `Resumo de um Processo por IA` custa **R$ 0,05**. Vale a pena — o resumo é matéria-prima direta para o agente.
