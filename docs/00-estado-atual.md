@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-21 |
+| Atualizado em | 2026-08-23 |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | Nenhum ainda. Só definição |
-| Crédito Escavador | ✅ **Prorrogado em 21/08 por mais 10 dias.** R$ 50,00 · **R$ 0,00 gastos** · ✅ **Blocos A e B autorizados** em 21/08 · 🚧 falta o valor do token na sessão · 🚧 débito real por chamada em aberto (`06` §0 e §1-C) |
+| Código | **Primeira linha escrita:** `captura/capturar.mjs` — o script de captura, com as travas do orçamento em código |
+| Crédito Escavador | 🔴 **BLOQUEADO.** A API recusa com `403 · "Seu saldo está bloqueado"`. A prorrogação prometida em 21/08 **não foi aplicada** (R-37). R$ 0,00 gastos — nada foi debitado |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
@@ -57,7 +57,7 @@ Fase 2 em andamento: **PRD escrito e Spec Parte I escrita**, ambos aguardando av
 
 O suporte do Escavador Business liberou **saldo de teste** em **13/08/2026**: R$ 50,00, **16 requisições**, **10 dias** — com **R$ 3,00 fixos por requisição, em qualquer rota**. Não há plano pago contratado.
 
-✅ **Prazo prorrogado em 21/08/2026 — mais 10 dias**, por exceção concedida pelo suporte, justamente para permitir a validação de callback. A data exata está na barra lateral do painel ("Válido até"). O que era corrida contra o relógio virou execução ordenada: os Blocos A e B seguem dependendo apenas do token e de um número de processo real, e o **Bloco C voltou ao plano** — ele é a razão declarada da prorrogação, e tem prioridade (D-94). O suporte pediu retorno sobre os testes; é a contrapartida combinada, e mantém aberto o canal do comercial (R-22).
+⚠️ **Prorrogação prometida em 21/08 — mas não aplicada.** O suporte concedeu por escrito "mais 10 dias", e em 23/08 a API recusou com `403 · "Seu saldo está bloqueado"` (R-37). O que segue continua valendo **se e quando** a extensão for de fato lançada na conta; a fonte do estado real é a barra lateral do painel ("Válido até"), nunca a conversa. O que era corrida contra o relógio virou execução ordenada: os Blocos A e B seguem dependendo apenas do token e de um número de processo real, e o **Bloco C voltou ao plano** — ele é a razão declarada da prorrogação, e tem prioridade (D-94). O suporte pediu retorno sobre os testes; é a contrapartida combinada, e mantém aberto o canal do comercial (R-22).
 
 🚧 **A pergunta que resta decide o tamanho do orçamento:** o débito durante o bônus segue a tabela por rota ou é de R$ 3,00 fixos? Enquanto não houver resposta, o orçamento opera pelo pior caso. Ver `06-orcamento-de-chamadas-escavador.md` §1-C.
 
@@ -145,6 +145,81 @@ Três decisões que valem destaque:
 O risco central **não** é bagunçar o repositório: é **a demo virar produção** — sem Policy Gate, sem motor de custo, com WhatsApp não oficial (R-33). Riscos novos: **R-33 a R-36**. Decisões: **D-86 a D-94**.
 
 **Trava a demo o mesmo que já travava os Blocos A e B:** um número CNJ real do escritório.
+
+## Próximo passo
+
+Três caminhos que não competem entre si:
+
+1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
+2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
+3. **Executar a captura** (Blocos A e B) — ✅ **autorizada em 21/08**, com dois processos reais já conferidos. Falta apenas o **valor do token** na sessão e o esclarecimento de §0 do orçamento (3 chamadas em um processo, ou 3 em cada um?). Ela valida contrato **e** abastece a demonstração, de uma vez só
+
+A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
+
+## Decisões
+
+**D-01 a D-46** estão em `01-diretrizes-gerais.md` §13.
+
+- ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável)
+- 🟡 Propostas aguardando aval do usuário: todas as demais, exceto as abaixo
+- 🔴 Em aberto, dependem do escritório: **D-07** (advogado vê toda a base ou só sua carteira) e **D-09** (Trello é gestão de casos ou quadro de tarefas)
+
+## Pendências com o escritório
+
+**Elevadas em urgência pelos mapeamentos:**
+
+- **Pergunta 58** — plano contratado do Escavador. Se não cobrir V1, o escritório fica sem monitoramento de diário oficial (R-15)
+- **Pergunta 66** — é possível criar conta de serviço dedicada no Trello? Se não, R-20 fica sem tratamento
+- **Pergunta 27** — Power-Ups e automações Butler ativos no Trello. Butler reage às nossas escritas; precisa ser inventariado antes da primeira gravação
+
+Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11), **D-07**, **D-09**, e o restante do questionário. As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` §15 e `mapeamento-trello.md` §13.
+
+## Pendências com o usuário
+
+- **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
+- ~~**Dados do painel do Escavador**~~ ✅ **Levantados em 20/08** — ver `07-painel-escavador-achados.md`, inclusive a tela de criação de token. Resta do Escavador apenas a **resposta do suporte** às perguntas da §10 (mensagem enviada em 20/08)
+- **Número CNJ de um processo real do escritório** — trava a primeira chamada, que custa R$ 0,05 e resolve quatro perguntas de uma vez
+- **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
+- **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
+- Acesso à instância n8n e à infraestrutura, para calibrar §12.2 de `01`
+- Aval sobre as decisões propostas (D-03 a D-46)
+
+## Riscos ativos
+
+| Risco | Situação |
+|---|---|
+| **R-16** — Trello não tem escopo por quadro; token vê a conta inteira | **Grave e estrutural.** Tratado por desenho (D-36), mas o isolamento passa a depender do nosso código. Precisa ser dito ao escritório |
+| **R-11** — conta única do Workspace compartilhada por toda a equipe | **Grave e aberto.** Inviabiliza privilégio por papel, aprovação nominal e auditoria |
+| **R-12** — API do Escavador armazena certificado digital, senha e semente de 2FA | **Gravíssimo.** Tratado por desenho: rotas fora de todo perfil (D-30) |
+| **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
+| **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |
+| **R-24** — token do Escavador não tem escopo; alcança toda a API da organização | **Novo e grave.** Espelha o R-16 do Trello. Privilégio fica só no código do MCP. Agrava R-12 |
+| **R-26** — o `mcp-core` concentra a fronteira de segurança dos dois servidores | **Novo e grave.** Consequência aceita de R-16 + R-24: com uma fronteira só, ela precisa ser auditada como tal (D-78) |
+| **R-27** — janela entre revogar a sessão MCP e ela expirar | **Novo, moderado.** Sessão de minutos, lista de revogação, A4 reconsultando o Policy Gate |
+| **R-28** — reserva por estimativa pode subestimar o custo nas rotas por bloco | **Novo, financeiro.** Reserva pelo pior caso permitido e teto de blocos por papel |
+| **R-29 a R-32** — riscos do ClickUp: API de Chat experimental, sem identidade de robô, migração descarta o mapeamento do Trello, concentração em fornecedor único em dólar | **Novos, moderados e condicionais** — só se materializam se a migração for adotada (`10-clickup-avaliacao.md` §11) |
+| ~~R-23~~ — o painel não exibiria a expiração do bônus | ✅ Encerrado no mesmo dia: o painel exibe "Válido até 23/08/2026" |
+| **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
+| R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
+| R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |
+| Demais (R-02 a R-10) | Registrados em `01` §15, tratados por desenho |### A primeira chamada real foi feita — e recusada, sem custo
+
+Com token e processo em mãos, `captura/capturar.mjs --executar` disparou a chamada A1. A resposta:
+
+```
+HTTP 403
+{"error":"Seu saldo está bloqueado. Faça uma recarga para voltar a utilizar a API."}
+```
+
+🔴 **A prorrogação prometida em 21/08 não foi aplicada à conta.** O cabeçalho `Date` da resposta marca 23/08 — a data original de expiração. Registrado como **R-37**: promessa em atendimento não é estado de sistema, e o painel ("Válido até") é a única fonte do estado real.
+
+**Três achados, custo R$ 0,00:**
+
+1. **Nada foi debitado.** `Creditos-Utilizados` veio ausente. A trava do script abortou a fila na primeira chamada — que é a mais barata do catálogo por escolha de ordenação —, de modo que B1 e B2, de R$ 3,00 cada, nunca aconteceram
+2. **O token está correto.** Token inválido responde 401; o 403 significa que a autenticação passou e quem recusou foi a cobrança
+3. 🆕 **O erro de saldo é 403, e o OpenAPI não o documenta** — ele lista 402 para pagamento. **Isso muda o disjuntor** (D-33): um MCP que só tratasse 402 leria o 403 como problema de permissão e reagiria errado. Envelope: `{"error": "<texto>"}`, sem código de máquina. **Parte do Bloco D foi respondida sem gastar um centavo**
+
+**O que destrava:** reabrir com o suporte do Escavador anexando a mensagem de 21/08. Enquanto o painel não mostrar "Válido até" numa data futura, não adianta tentar de novo — cada tentativa é só outro 403.
 
 ## Próximo passo
 

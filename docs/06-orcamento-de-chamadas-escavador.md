@@ -2,29 +2,30 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.3 — **Blocos A e B autorizados pelo usuário** |
-| Data | 2026-08-21 |
-| Estado | ✅ **Blocos A e B autorizados** em 21/08/2026 · Blocos C e D seguem 🟡 aguardando aval |
+| Versão | 2.4 — **primeira execução tentada; saldo bloqueado** |
+| Data | 2026-08-23 |
+| Estado | 🔴 **Bloqueado pelo Escavador.** Blocos A e B autorizados e tentados em 23/08; a API recusou com saldo bloqueado |
 | Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
 | Liberado em | **13/08/2026** |
-| **Expira em** | ✅ **Prorrogado em 21/08 por mais 10 dias.** Data exata a confirmar na barra lateral do painel ("Válido até") |
+| **Expira em** | 🔴 **Expirou em 23/08.** A prorrogação prometida em 21/08 **não foi aplicada** — a API recusa com "saldo bloqueado" (R-37, §5.1) |
 | Gastas até agora | **0** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
-## 0. Autorização vigente — 21/08/2026
+## 0. Autorização vigente — 23/08/2026
 
 | Item | Situação |
 |---|---|
 | **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) |
 | Blocos C e D | 🟡 Não autorizados ainda |
 | Processos disponíveis | **2**, ambos com dígito verificador conferido, de **tribunais diferentes** (TJPB e TJAP) — ver §0.1 |
-| Alcance | ✅ **Resolvido em 21/08:** as 3 chamadas valem **só para o P1 (TJPB)**. O P2 fica guardado, e ampliar exige novo aval |
-| 🚧 Pendente de acesso | **O valor do token não está disponível na sessão.** Sem ele nada executa |
+| Alcance | ✅ **Resolvido em 23/08:** as 3 chamadas valem **só para o P1 (TJPB)**. O P2 fica guardado, e ampliar exige novo aval |
+| Token | ✅ **Fornecido e funcional** — a API autenticou; a recusa veio da cobrança, não da identidade |
+| 🔴 Bloqueio | **Saldo bloqueado.** A prorrogação prometida em 21/08 não foi aplicada à conta — ver §5 |
 
 ### 0.1 Os processos — e por que eles não estão escritos aqui
 
-Os dois números CNJ foram fornecidos pelo usuário em 21/08 e **conferidos sem custo** pelo dígito verificador (Resolução CNJ 65/2008, validação aritmética local):
+Os dois números CNJ foram fornecidos pelo usuário em 23/08 e **conferidos sem custo** pelo dígito verificador (Resolução CNJ 65/2008, validação aritmética local):
 
 | # | Tribunal | Ano | Por que serve |
 |---|---|---|---|
@@ -35,7 +36,7 @@ Serem de tribunais diferentes é sorte útil: a §3 deste documento já apontava
 
 ### 0.2 Correção de rota — `limit=5` não existe
 
-O OpenAPI V2 foi lido em 21/08 (documentação pública, **custo zero**) e desmentiu um detalhe deste orçamento: o parâmetro `limit` de `envolvidos` e de `movimentacoes` **só aceita 20, 50 ou 100**. As chamadas A1 e B2 pediam `limit=5`.
+O OpenAPI V2 foi lido em 23/08 (documentação pública, **custo zero**) e desmentiu um detalhe deste orçamento: o parâmetro `limit` de `envolvidos` e de `movimentacoes` **só aceita 20, 50 ou 100**. As chamadas A1 e B2 pediam `limit=5`.
 
 Não é detalhe de estilo: valor fora do conjunto arrisca um **422**, e um 422 custa o mesmo que um 200. Corrigido para **20** — o menor aceito, que também é o padrão da API. `movimentacoes` ganhou ainda `ordem=desc`, para que as movimentações mais recentes venham primeiro, que é o que a demo precisa mostrar.
 
@@ -61,13 +62,15 @@ Três consequências que mudam o planejamento:
 
 **3. 16 chamadas é pouco para 83 operações mapeadas.** O objetivo do teste não é cobrir a API — é validar **contrato**: autenticação funciona, o plano cobre V1 e V2, o formato dos dados é o que o mapeamento previu, e o webhook chega. Cobertura vem depois, com plano pago.
 
-## 1-A. Prazo — prorrogado em 21/08/2026
+## 1-A. Prazo — prorrogação prometida em 21/08, mas não aplicada
 
 O saldo foi liberado em **13/08** com validade de 10 dias, o que o faria expirar em 23/08. **Em 21/08 o suporte concedeu mais 10 dias**, por escrito, reconhecendo que o teste começou antes de a arquitetura estar pronta para exercitar callback.
 
 > *"Normalmente o saldo de teste não é renovável. Mas, como você ainda não utilizou os créditos e precisa validar justamente a parte de callback agora que a arquitetura está avançando, vou abrir uma exceção e estender o período por mais 10 dias."* — suporte Escavador B2B, 21/08/2026
 
-**A data exata deve ser confirmada na barra lateral do painel** ("Válido até"), que é onde ela aparece de forma autoritativa — não precisa perguntar.
+🔴 **A prorrogação não chegou a valer.** Em 23/08 a API recusou a primeira chamada com `403 — "Seu saldo está bloqueado"`. O que segue nesta seção descreve o que a prorrogação *deveria* ter mudado, e continua válido **se e quando** ela for de fato aplicada à conta. Ver §5.1 e **R-37**.
+
+**A data efetiva é a da barra lateral do painel** ("Válido até") — não a da conversa. Promessa em atendimento não é estado de sistema, e essa é a lição que o R-37 registra.
 
 O que a prorrogação muda:
 
@@ -236,7 +239,36 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 
 | # | Data/hora | Rota | HTTP | `Creditos-Utilizados` | Saldo restante | O que ensinou |
 |---|---|---|---|---|---|---|
-| — | — | — | — | — | R$ 50,00 | Nenhuma chamada executada ainda |
+| A1 | 2026-08-23 15:13 UTC | `GET /api/v2/.../envolvidos?limit=20` | **403** | **ausente** | R$ 50,00 (nada debitado) | Ver §5.1 — três achados, custo zero |
+| B1 | — | — | — | — | — | **Não executada.** A fila abortou em A1, de propósito |
+| B2 | — | — | — | — | — | **Não executada.** Idem |
+
+### 5.1 O que a chamada A1 ensinou — por R$ 0,00
+
+A primeira chamada real do projeto foi recusada. Ela não custou nada e respondeu três perguntas:
+
+**1. O saldo está bloqueado, e a prorrogação não chegou à conta.**
+
+```
+HTTP 403
+{"error":"Seu saldo está bloqueado. Faça uma recarga para voltar a utilizar a API."}
+```
+
+O cabeçalho `Date` da resposta marca **23/08/2026** — a data original de expiração. O suporte prometeu por escrito, em 21/08, "estender o período por mais 10 dias", mas **a extensão não foi aplicada**. Promessa em conversa não é estado de sistema. Registrado como **R-37**.
+
+**2. O token está correto — e isso se sabe pelo código do erro.**
+
+Token inválido responde **401**. O **403** significa que a autenticação passou e quem recusou foi a cobrança. É informação útil: não há nada a corrigir do nosso lado.
+
+**3. 🆕 O erro de saldo é 403, e o OpenAPI não o documenta.**
+
+A especificação lista, para esta rota, apenas `200, 401, 402, 404, 422`. **403 não consta.** O erro de pagamento documentado é o 402 — mas o que a API devolve de verdade, com saldo bloqueado, é 403.
+
+Isso **muda o disjuntor** (§11 das diretrizes, D-33): um servidor MCP que só tratasse 402 como "sem crédito" leria o 403 como problema de permissão e reagiria errado — provavelmente tentando de novo, ou culpando o escopo do usuário em vez de avisar que o dinheiro acabou. O envelope também fica conhecido: `{"error": "<texto em português>"}`, sem código de máquina.
+
+**Parte do Bloco D foi respondida sem gastar um centavo** — justamente a pergunta que a §6 dizia que "só se observa gastando".
+
+> **A trava do script funcionou como projetada.** A fila abortou na primeira chamada, que é a mais barata do catálogo por escolha de ordenação. As duas de R$ 3,00 nunca aconteceram. Sem essa trava, o mesmo 403 teria sido recebido três vezes.
 
 As respostas brutas ficam em `docs/amostras/escavador/` (a criar), com CPF, CNPJ e nome de parte **substituídos por marcadores** antes do commit — dado de cliente não entra no repositório (LGPD, §9 das diretrizes).
 

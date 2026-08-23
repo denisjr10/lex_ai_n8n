@@ -4,7 +4,7 @@
 |---|---|
 | Status | Para decisão |
 | Versão | 1.0 |
-| Data | 2026-08-21 |
+| Data | 2026-08-23 |
 | Responde a | (1) Dá para mostrar algo funcionando antes de fechar o contrato? (2) Um agente para colaborador no Telegram e outro para cliente no WhatsApp? (3) Isso bagunça o desenvolvimento? Precisa copiar o repositório? (4) Dá para fazer com as rotas baratas do Escavador? |
 | Decisões geradas | D-86 a D-94 (ver `01-diretrizes-gerais.md` §13) |
 | Riscos gerados | R-33 a R-36 (ver `01-diretrizes-gerais.md` §15) |
@@ -29,7 +29,7 @@
 
 ## 2. O que a prorrogação mudou — e o que não mudou
 
-A prorrogação concedida em 21/08 (mais 10 dias) **tira a pressa, mas não muda a proposta**. Duas consequências:
+A prorrogação concedida em 21/08 (mais 10 dias — **que não chegou a valer na conta; ver R-37**) **tira a pressa, mas não muda a proposta**. Duas consequências:
 
 **1. A captura deixa de ser corrida.** Na versão anterior desta proposta, a captura precisava acontecer em 48 horas ou o saldo evaporaria. Agora ela pode esperar o número CNJ real chegar sem sobressalto e — melhor ainda — pode ser executada **pelo próprio chassi**, quando os marcos 1 a 5 estiverem prontos, validando o motor de custo de verdade em vez de um script avulso.
 

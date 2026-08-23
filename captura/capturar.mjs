@@ -106,17 +106,34 @@ function lerJson(arquivo, seFaltar) {
   return JSON.parse(fs.readFileSync(arquivo, 'utf8'));
 }
 
-/** O token nunca e impresso, nem inteiro nem em pedaco util. */
+/** Le o token de arquivo, tolerando a codificacao que o Windows produzir.
+ *  O `>` do PowerShell 5 grava UTF-16LE; o do PowerShell 7, UTF-8 sem BOM;
+ *  o Bloco de Notas costuma deixar BOM. Ler errado gera um 401 — e um 401
+ *  gasta tempo, pode gastar credito, e parece problema de token valido.
+ *  O token nunca e impresso, nem inteiro nem em pedaco util. */
+function decodificar(buf) {
+  if (buf[0] === 0xFF && buf[1] === 0xFE) return buf.subarray(2).toString('utf16le');
+  if (buf[0] === 0xFE && buf[1] === 0xFF) return buf.subarray(2).swap16().toString('utf16le');
+  if (buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF) return buf.subarray(3).toString('utf8');
+  return buf.toString('utf8');
+}
+
 function lerToken() {
   const doAmbiente = process.env.ESCAVADOR_TOKEN;
-  if (doAmbiente && doAmbiente.trim()) return doAmbiente.trim();
+  if (doAmbiente && doAmbiente.trim()) return { token: doAmbiente.trim(), origem: 'ESCAVADOR_TOKEN' };
 
   const arq = path.join(AQUI, 'token.local');
-  if (fs.existsSync(arq)) {
-    const t = fs.readFileSync(arq, 'utf8').trim();
-    if (t) return t;
+  if (!fs.existsSync(arq)) return { token: null };
+
+  const t = decodificar(fs.readFileSync(arq)).replace(/\s+/g, '');
+  if (!t) return { token: null };
+
+  // Um PAT so tem caracteres de Base64URL e pontos. Qualquer outra coisa e
+  // sinal de codificacao errada ou de conteudo colado por engano.
+  if (!/^[A-Za-z0-9._-]+$/.test(t)) {
+    return { token: null, sujo: true, origem: 'captura/token.local' };
   }
-  return null;
+  return { token: t, origem: 'captura/token.local' };
 }
 
 // ===========================================================================
@@ -172,13 +189,17 @@ if (registro.chamadas.length + pendentes.length > AUTORIZACAO.tetoDeChamadas) {
 }
 
 // -- token ---------------------------------------------------------------
-const token = lerToken();
-if (!token) {
+const { token, origem, sujo } = lerToken();
+if (sujo) {
+  aviso('o arquivo de token tem caracteres que um token nao tem');
+  info('causa mais comum no Windows: o arquivo foi gravado em UTF-16 e lido como texto comum');
+  info('regrave com:  node -e "require(\'fs\').writeFileSync(\'captura/token.local\',\'COLE_AQUI\')"');
+} else if (!token) {
   aviso('token nao encontrado — o ensaio segue, a execucao nao');
   info('forneca por variavel de ambiente ESCAVADOR_TOKEN, ou em captura/token.local');
   info('captura/token.local e ignorado pelo Git. Nunca cole o token em chat nem em commit');
 } else {
-  ok(`token carregado (${token.length} caracteres, nao exibido)`);
+  ok(`token carregado de ${origem} (${token.length} caracteres, nao exibido)`);
 }
 
 // ===========================================================================
