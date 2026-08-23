@@ -149,3 +149,8 @@ token.local
 *token*.local
 .local/
 captura/respostas-brutas/
+
+# --- Demo: dado real fica fora; so o ensaio ficticio e versionado ----------
+demo/instantaneo/processos.json
+demo/listas/colaboradores.json
+demo/listas/clientes.json

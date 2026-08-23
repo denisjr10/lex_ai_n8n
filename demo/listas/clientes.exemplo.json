@@ -1,0 +1,14 @@
+{
+  "_leia-me": "MODELO. Copie para clientes.json (ignorado pelo Git) e preencha com dados reais.",
+  "_regra": "O numero de telefone e CHAVE DE BUSCA, nunca prova de identidade (D-08). O vinculo e cadastrado aqui pelo escritorio — jamais por auto-declaracao no chat.",
+  "clientes": [
+    {
+      "telefone": "5583999999999",
+      "nome_exibicao": "Primeiro nome do cliente",
+      "processos": [
+        "ENSAIO-1"
+      ],
+      "_nota": "so os processos listados aqui sao visiveis a este numero. Qualquer outro e recusado"
+    }
+  ]
+}

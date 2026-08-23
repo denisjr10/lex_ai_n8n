@@ -1,0 +1,290 @@
+{
+ "items": [
+  {
+   "id": 853879,
+   "data": "2018-07-25",
+   "tipo": "ANDAMENTO",
+   "conteudo": "CERTIDAO DE CARTORIO EXPEDIDA",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853877,
+   "data": "2018-07-25",
+   "tipo": "ANDAMENTO",
+   "conteudo": "CERTIDAO DE CARTORIO EXPEDIDA",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853875,
+   "data": "2018-07-25",
+   "tipo": "ANDAMENTO",
+   "conteudo": "ARQUIVADO DEFINITIVAMENTE",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853881,
+   "data": "2018-06-05",
+   "tipo": "ANDAMENTO",
+   "conteudo": "SUSPENSAO DO PRAZO",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853883,
+   "data": "2018-06-02",
+   "tipo": "ANDAMENTO",
+   "conteudo": "SUSPENSAO DO PRAZO",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853885,
+   "data": "2018-05-24",
+   "tipo": "ANDAMENTO",
+   "conteudo": "CERTIDAO DE PUBLICACAO EXPEDIDA",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853887,
+   "data": "2018-05-23",
+   "tipo": "ANDAMENTO",
+   "conteudo": "REMETIDO AO DJE",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853889,
+   "data": "2018-05-10",
+   "tipo": "ANDAMENTO",
+   "conteudo": "PROFERIDO DESPACHO",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853896,
+   "data": "2018-05-04",
+   "tipo": "ANDAMENTO",
+   "conteudo": "DECISAO DE 2ª INSTANCIA - RECURSO NAO PROVIDO - JUNTADA",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853895,
+   "data": "2018-05-04",
+   "tipo": "ANDAMENTO",
+   "conteudo": "EMBARGOS DE DECLARACAO ACOLHIDOS",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853893,
+   "data": "2018-05-04",
+   "tipo": "ANDAMENTO",
+   "conteudo": "TRANSITO EM JULGADO AS PARTES - PROC. EM ANDAMENTO",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853891,
+   "data": "2018-05-04",
+   "tipo": "ANDAMENTO",
+   "conteudo": "CONCLUSOS PARA DESPACHO",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 853897,
+   "data": "2018-04-26",
+   "tipo": "ANDAMENTO",
+   "conteudo": "RECEBIDOS OS AUTOS DO TRIBUNAL DE JUSTICA",
+   "fonte": {
+    "fonte_id": 3,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 1,
+    "grau_formatado": "Primeiro Grau"
+   }
+  },
+  {
+   "id": 849990,
+   "data": "2018-04-26",
+   "tipo": "ANDAMENTO",
+   "conteudo": "EXPEDIDO CERTIDAO",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  },
+  {
+   "id": 849988,
+   "data": "2018-04-26",
+   "tipo": "ANDAMENTO",
+   "conteudo": "BAIXA DEFINITIVA",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  },
+  {
+   "id": 849986,
+   "data": "2018-04-26",
+   "tipo": "ANDAMENTO",
+   "conteudo": "EXPEDIDO CERTIDAO DE BAIXA DE RECURSO",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  },
+  {
+   "id": 849992,
+   "data": "2018-03-28",
+   "tipo": "ANDAMENTO",
+   "conteudo": "EXPEDIDO CERTIDAO",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  },
+  {
+   "id": 849994,
+   "data": "2018-03-26",
+   "tipo": "ANDAMENTO",
+   "conteudo": "JULGADO VIRTUALMENTE",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  },
+  {
+   "id": 849998,
+   "data": "2018-03-06",
+   "tipo": "ANDAMENTO",
+   "conteudo": "EXPEDIDO CERTIDAO",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  },
+  {
+   "id": 849996,
+   "data": "2018-03-06",
+   "tipo": "ANDAMENTO",
+   "conteudo": "CONCLUSOS PARA O RELATOR (EXPEDIDO TERMO COM CONCLUSAO)",
+   "fonte": {
+    "fonte_id": 6,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "tipo": "TRIBUNAL",
+    "sigla": "TJSP",
+    "grau": 2,
+    "grau_formatado": "Segundo Grau"
+   }
+  }
+ ],
+ "links": {
+  "next": "https://api.escavador.com/api/v2/processos/numero_cnj/1024000-20.2015.8.22.0000/movimentacoes?cursor=eyJkYXRhIjoiMjAxOC0wMy0wNiAwMDowMDowMCIsIm1vdmltZW50YWNhb19pZCI6ODQ5OTk2LCJfcG9pbnRzVG9OZXh0SXRlbXMiOnRydWV9&li=216029777"
+ },
+ "paginator": {
+  "per_page": 20
+ }
+}

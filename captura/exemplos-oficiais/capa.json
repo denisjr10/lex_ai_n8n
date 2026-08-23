@@ -1,0 +1,422 @@
+{
+ "numero_cnj": "1024000-20.2015.2.23.0000",
+ "titulo_polo_ativo": "Maria da Conceição de Oliveira",
+ "titulo_polo_passivo": "João da Silva",
+ "ano_inicio": 2015,
+ "data_inicio": "2015-11-21",
+ "estado_origem": {
+  "nome": "São Paulo",
+  "sigla": "SP"
+ },
+ "unidade_origem": {
+  "nome": "01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS",
+  "endereco": "Avenida Francisco Xavier de Arruda Camargo, 300",
+  "classificacao": "JE - Juizado Especial",
+  "cidade": "São Paulo",
+  "estado": {
+   "nome": "São Paulo",
+   "sigla": "SP"
+  },
+  "tribunal_sigla": "TJSP"
+ },
+ "data_ultima_movimentacao": "2018-07-25",
+ "quantidade_movimentacoes": 103,
+ "fontes_tribunais_estao_arquivadas": false,
+ "data_ultima_verificacao": "2023-02-09T14:30:11+00:00",
+ "tempo_desde_ultima_verificacao": "há 1 mês",
+ "processos_relacionados": [
+  {
+   "numero": "8027909-02.2019.8.05.0000"
+  },
+  {
+   "numero": "8028150-73.2019.8.05.0000"
+  }
+ ],
+ "fontes": [
+  {
+   "id": 3,
+   "processo_fonte_id": 14626,
+   "descricao": "TJSP - 1º grau",
+   "nome": "Tribunal de Justiça de São Paulo",
+   "sigla": "TJSP",
+   "tipo": "TRIBUNAL",
+   "data_inicio": "2015-11-27",
+   "data_ultima_movimentacao": "2018-07-25",
+   "segredo_justica": null,
+   "arquivado": null,
+   "status_predito": "INATIVO",
+   "grau": 1,
+   "grau_formatado": "Primeiro Grau",
+   "fisico": false,
+   "sistema": "ESAJ",
+   "capa": {
+    "classe": "PROCEDIMENTO COMUM CIVEL",
+    "assunto": "RESPONSABILIDADE CIVIL",
+    "assuntos_normalizados": [
+     {
+      "id": 3642,
+      "nome": "Responsabilidade Civil",
+      "nome_com_pai": "DIREITO CIVIL > Responsabilidade Civil",
+      "path_completo": "DIREITO CIVIL > Responsabilidade Civil",
+      "categoria_raiz": "DIREITO CIVIL",
+      "bloqueado": false
+     }
+    ],
+    "assunto_principal_normalizado": {
+     "id": 3642,
+     "nome": "Responsabilidade Civil",
+     "nome_com_pai": "DIREITO CIVIL > Responsabilidade Civil",
+     "path_completo": "DIREITO CIVIL > Responsabilidade Civil",
+     "categoria_raiz": "DIREITO CIVIL",
+     "bloqueado": false
+    },
+    "area": "CIVEL",
+    "orgao_julgador": "01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS",
+    "orgao_julgador_normalizado": {
+     "nome": "01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS",
+     "endereco": "Avenida Francisco Xavier de Arruda Camargo, 300",
+     "classificacao": "JE - Juizado Especial",
+     "cidade": "São Paulo",
+     "estado": {
+      "nome": "São Paulo",
+      "sigla": "SP"
+     },
+     "tribunal_sigla": "TJSP"
+    },
+    "situacao": "Baixado",
+    "valor_causa": {
+     "valor": "50000.0000",
+     "moeda": "R$",
+     "valor_formatado": "R$ 50.000,00"
+    },
+    "data_distribuicao": "2015-11-27",
+    "data_arquivamento": null,
+    "informacoes_complementares": null
+   },
+   "audiencias": [
+    {
+     "tipo": "Instrução",
+     "data": "2024-10-17",
+     "quantidade_pessoas": 2,
+     "situacao": "Cancelada"
+    }
+   ],
+   "url": "https://esaj.tjsp.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado=1024000-20.2015&foroNumeroUnificado=0000&dadosConsulta.valorConsultaNuUnificado=1024000-20.2015.2.23.0000&dadosConsulta.valorConsulta=",
+   "tribunal": {
+    "id": 102,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "sigla": "TJSP",
+    "categoria": null
+   },
+   "quantidade_movimentacoes": 68,
+   "quantidade_envolvidos": 7,
+   "data_ultima_verificacao": "2023-02-09T14:30:11+00:00",
+   "envolvidos": [
+    {
+     "nome": "Maria da Conceição de Oliveira",
+     "quantidade_processos": 1,
+     "tipo_pessoa": "FISICA",
+     "advogados": [
+      {
+       "nome": "Marta Brandao de Oliveira",
+       "quantidade_processos": 21,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Marta Brandao de Oliveira",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      },
+      {
+       "nome": "Fernando Marçal",
+       "quantidade_processos": 10,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Fernando Marçal",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      }
+     ],
+     "prefixo": null,
+     "sufixo": null,
+     "tipo": "REQUERENTE",
+     "tipo_normalizado": "Requerente",
+     "polo": "ATIVO",
+     "cpf": "00000000000",
+     "nome_normalizado": "Maria da Conceição de Oliveira"
+    },
+    {
+     "nome": "Joao da Silva",
+     "quantidade_processos": 97,
+     "tipo_pessoa": "FISICA",
+     "advogados": [
+      {
+       "nome": "Antonio Carlos de Souza",
+       "quantidade_processos": 37,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Antonio Carlos de Souza",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      },
+      {
+       "nome": "Fabiane Santos Carvalho",
+       "quantidade_processos": 33,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Fabiane Santos Carvalho",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      }
+     ],
+     "prefixo": null,
+     "sufixo": null,
+     "tipo": "REQUERIDO",
+     "tipo_normalizado": "Requerido",
+     "polo": "PASSIVO",
+     "cpf": "00000000000",
+     "nome_normalizado": "Joao da Silva"
+    },
+    {
+     "nome": "Marcos Tira Teima",
+     "quantidade_processos": 126,
+     "tipo_pessoa": "FISICA",
+     "prefixo": null,
+     "sufixo": null,
+     "tipo": "JUIZ",
+     "tipo_normalizado": "Juiz",
+     "polo": "NENHUM"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "processo_fonte_id": 14566,
+   "descricao": "TJSP - 2º grau",
+   "nome": "Tribunal de Justiça de São Paulo",
+   "sigla": "TJSP",
+   "tipo": "TRIBUNAL",
+   "data_inicio": "2017-06-01",
+   "data_ultima_movimentacao": "2018-04-26",
+   "segredo_justica": null,
+   "arquivado": null,
+   "status_predito": "INATIVO",
+   "grau": 2,
+   "grau_formatado": "Segundo Grau",
+   "fisico": false,
+   "sistema": "ESAJ",
+   "capa": {
+    "classe": "APELACAO CIVEL",
+    "assunto": "DIREITO CIVIL-RESPONSABILIDADE CIVIL-INDENIZACAO POR DANO MORAL",
+    "assuntos_normalizados": [
+     {
+      "id": 3644,
+      "nome": "Indenização por Dano Moral",
+      "nome_com_pai": "Responsabilidade Civil > Indenização por Dano Moral",
+      "path_completo": "DIREITO CIVIL > Responsabilidade Civil > Indenização por Dano Moral",
+      "categoria_raiz": "DIREITO CIVIL",
+      "bloqueado": false
+     }
+    ],
+    "assunto_principal_normalizado": {
+     "id": 3644,
+     "nome": "Indenização por Dano Moral",
+     "nome_com_pai": "Responsabilidade Civil > Indenização por Dano Moral",
+     "path_completo": "DIREITO CIVIL > Responsabilidade Civil > Indenização por Dano Moral",
+     "categoria_raiz": "DIREITO CIVIL",
+     "bloqueado": false
+    },
+    "area": "CIVEL",
+    "orgao_julgador": "01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS",
+    "orgao_julgador_normalizado": {
+     "nome": "01 VARA JUIZADO ESPECIAL CIVEL DE CAMPINAS",
+     "endereco": "Avenida Francisco Xavier de Arruda Camargo, 300",
+     "classificacao": "JE - Juizado Especial",
+     "cidade": "São Paulo",
+     "estado": {
+      "nome": "São Paulo",
+      "sigla": "SP"
+     },
+     "tribunal_sigla": "TJSP"
+    },
+    "situacao": "Baixado",
+    "valor_causa": {
+     "valor": "50000.0000",
+     "moeda": "R$",
+     "valor_formatado": "R$ 50.000,00"
+    },
+    "data_distribuicao": "2017-06-01",
+    "data_arquivamento": null,
+    "informacoes_complementares": null
+   },
+   "audiencias": [],
+   "url": "https://esaj.tjsp.jus.br/cposg/search.do?conversationId=&paginaConsulta=0&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado=1024000-20.2015&foroNumeroUnificado=0000&dePesquisaNuUnificado=1024000-20.2015.8.22.0000&dePesquisaNuUnificado=UNIFICADO&dePesquisa=&tipoNuProcesso=UNIFICADO&uuidCaptcha=sajcaptcha_e6c6a295c5404a6887d81483bdd96048&g-recaptcha-response=",
+   "tribunal": {
+    "id": 102,
+    "nome": "Tribunal de Justiça de São Paulo",
+    "sigla": "TJSP",
+    "categoria": null
+   },
+   "quantidade_movimentacoes": 35,
+   "quantidade_envolvidos": 7,
+   "data_ultima_verificacao": "2023-02-09T14:30:00+00:00",
+   "envolvidos": [
+    {
+     "nome": "Maria da Conceição de Oliveira",
+     "quantidade_processos": 1,
+     "tipo_pessoa": "FISICA",
+     "advogados": [
+      {
+       "nome": "Fabiane Santos Carvalho",
+       "quantidade_processos": 21,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Fabiane Santos Carvalho",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      },
+      {
+       "nome": "Antonio Carlos de Souza",
+       "quantidade_processos": 10,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Antonio Carlos de Souza",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      }
+     ],
+     "prefixo": null,
+     "sufixo": null,
+     "tipo": "APELANTE",
+     "tipo_normalizado": "Apelante",
+     "polo": "ATIVO",
+     "cpf": "00000000000",
+     "nome_normalizado": "Maria da Conceicao de Oliveira"
+    },
+    {
+     "nome": "Joao da Silva",
+     "quantidade_processos": 97,
+     "tipo_pessoa": "FISICA",
+     "advogados": [
+      {
+       "nome": "",
+       "quantidade_processos": 37,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Marta Brandao de Oliveira",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      },
+      {
+       "nome": "Fernando Marçal",
+       "quantidade_processos": 33,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "ADVOGADO",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": "00000000000",
+       "nome_normalizado": "Fernando Marçal",
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123123
+        }
+       ]
+      }
+     ],
+     "prefixo": null,
+     "sufixo": null,
+     "tipo": "APELADO",
+     "tipo_normalizado": "Apelado",
+     "polo": "PASSIVO",
+     "cpf": "00000000000",
+     "nome_normalizado": "Joao da Silva"
+    },
+    {
+     "nome": "Ronaldo de Assis",
+     "quantidade_processos": 86,
+     "tipo_pessoa": "FISICA",
+     "prefixo": null,
+     "sufixo": null,
+     "tipo": "RELATOR",
+     "tipo_normalizado": "Juiz",
+     "polo": "NENHUM",
+     "cpf": "00000000000",
+     "nome_normalizado": "Ronaldo de Assis"
+    }
+   ]
+  }
+ ]
+}

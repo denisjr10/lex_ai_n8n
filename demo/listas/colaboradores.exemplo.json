@@ -1,0 +1,19 @@
+{
+  "_leia-me": "MODELO. Copie para colaboradores.json (ignorado pelo Git) e preencha com dados reais.",
+  "_regra": "Quem nao esta nesta lista e recusado antes de qualquer consulta. Negar por padrao (Regra 5).",
+  "colaboradores": [
+    {
+      "telegram_user_id": 111111111,
+      "nome": "Nome do Advogado",
+      "papel": "advogado",
+      "pode_aprovar_envio_ao_cliente": true,
+      "_nota": "papel 'advogado' e o unico que aprova envio ao cliente (Regra 2)"
+    },
+    {
+      "telegram_user_id": 222222222,
+      "nome": "Nome do Estagiario",
+      "papel": "estagiario",
+      "pode_aprovar_envio_ao_cliente": false
+    }
+  ]
+}

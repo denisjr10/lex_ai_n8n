@@ -1,0 +1,173 @@
+{
+ "items": [
+  {
+   "nome": "Município de Gravataí / RS",
+   "quantidade_processos": 4177,
+   "tipo_pessoa": "JURIDICA",
+   "cpf": null,
+   "cnpj": "87.890.992/0001-58",
+   "participacoes_processo": [
+    {
+     "tipo": "REQUERIDO",
+     "tipo_normalizado": "Requerido",
+     "polo": "PASSIVO",
+     "prefixo": null,
+     "sufixo": null,
+     "advogados": [],
+     "fonte": {
+      "processo_fonte_id": 715246906,
+      "id": 2827,
+      "tipo": "TRIBUNAL",
+      "nome": "Tribunal de Justiça do Rio Grande do Sul",
+      "sigla": "TJRS",
+      "grau": 1,
+      "grau_formatado": "Primeiro Grau"
+     }
+    }
+   ]
+  },
+  {
+   "nome": "João da Silva",
+   "quantidade_processos": 567,
+   "tipo_pessoa": "FISICA",
+   "cpf": "123.456.789-00",
+   "cnpj": null,
+   "participacoes_processo": [
+    {
+     "tipo": "Apelado",
+     "tipo_normalizado": "Apelado",
+     "polo": "PASSIVO",
+     "prefixo": null,
+     "sufixo": null,
+     "advogados": [],
+     "fonte": {
+      "processo_fonte_id": 987654321,
+      "id": 5678,
+      "tipo": "TRIBUNAL",
+      "nome": "Supremo Tribunal Federal",
+      "sigla": "STF",
+      "grau": 3,
+      "grau_formatado": "Superior"
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Município de Porto Alegre / RS",
+   "quantidade_processos": 2345,
+   "tipo_pessoa": "JURIDICA",
+   "cpf": null,
+   "cnpj": "98.765.432/0001-12",
+   "participacoes_processo": [
+    {
+     "tipo": "REQUERIDO",
+     "tipo_normalizado": "Requerido",
+     "polo": "ATIVO",
+     "prefixo": null,
+     "sufixo": null,
+     "advogados": [],
+     "fonte": {
+      "processo_fonte_id": 112233445,
+      "id": 9101,
+      "tipo": "TRIBUNAL",
+      "nome": "Tribunal Regional Federal",
+      "sigla": "TRF",
+      "grau": 1,
+      "grau_formatado": "Primeiro Grau"
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Maria Oliveira",
+   "quantidade_processos": 890,
+   "tipo_pessoa": "FISICA",
+   "cpf": "987.654.321-00",
+   "cnpj": null,
+   "participacoes_processo": [
+    {
+     "tipo": "AGRAVADO",
+     "tipo_normalizado": "Agravado",
+     "polo": "PASSIVO",
+     "prefixo": null,
+     "sufixo": null,
+     "advogados": [
+      {
+       "nome": "Danielle Almeida",
+       "quantidade_processos": 1,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "Advogado",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": null,
+       "cnpj": null
+      }
+     ],
+     "fonte": {
+      "processo_fonte_id": 223344556,
+      "id": 3344,
+      "tipo": "TRIBUNAL",
+      "nome": "Tribunal de Justiça do Rio de Janeiro",
+      "sigla": "TJRJ",
+      "grau": 2,
+      "grau_formatado": "Segundo Grau"
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Associação ABC",
+   "quantidade_processos": 456,
+   "tipo_pessoa": "JURIDICA",
+   "cpf": null,
+   "cnpj": "11.222.333/0001-44",
+   "participacoes_processo": [
+    {
+     "tipo": "Apelado",
+     "tipo_normalizado": "Apelado",
+     "polo": null,
+     "prefixo": null,
+     "sufixo": null,
+     "advogados": [
+      {
+       "nome": "Ana Souza",
+       "quantidade_processos": 1,
+       "tipo_pessoa": "FISICA",
+       "prefixo": null,
+       "sufixo": null,
+       "tipo": "Advogado",
+       "tipo_normalizado": "Advogado",
+       "polo": "ADVOGADO",
+       "cpf": null,
+       "cnpj": null,
+       "oabs": [
+        {
+         "uf": "SP",
+         "tipo": "ADVOGADO",
+         "numero": 123456
+        }
+       ]
+      }
+     ],
+     "fonte": {
+      "processo_fonte_id": 445566778,
+      "id": 5566,
+      "tipo": "TRIBUNAL",
+      "nome": "Tribunal de Justiça de Minas Gerais",
+      "sigla": "TJMG",
+      "grau": 1,
+      "grau_formatado": "Primeiro Grau"
+     }
+    }
+   ]
+  }
+ ],
+ "links": {
+  "next": "https://api.escavador.com/api/v2/processos/numero_cnj/87.890.992/0001-58/envolvidos?cursor=eyJlbnZvbHZpZG9fcHJvY2Vzc28uaWQiOjE5OSwiX3BvaW50c1RvTmV4dEl0ZW1zIjp0cnVlfQ&li=1262"
+ },
+ "paginator": {
+  "per_page": 20
+ }
+}
