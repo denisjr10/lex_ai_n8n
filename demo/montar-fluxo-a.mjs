@@ -99,10 +99,29 @@ if (cb) {
     textoOriginal: (msg.text || msg.caption || '') }};
 }
 
+// --- memória curta, por pessoa ---------------------------------------------
+// Guarda apenas o último processo que cada colaborador consultou, para que
+// "esse processo" tenha a que se referir. Nada de conteúdo de conversa: com um
+// processo só, dá na mesma; com seis, é a diferença entre funcionar e não.
+// Vive no armazenamento estático do workflow — só persiste em execução de
+// produção (fluxo ativo), não em teste manual dentro do editor.
+// O try existe porque memória é conveniência, não segurança: se o
+// armazenamento estático não estiver disponível, o assistente deve ficar sem
+// memória — nunca deixar de responder.
+let memoria;
+try { memoria = $getWorkflowStaticData('global'); } catch (erro) { memoria = {}; }
+if (!memoria || typeof memoria !== 'object') memoria = {};
+if (!memoria.ultimoProcesso) memoria.ultimoProcesso = {};
+
 // --- ramo da mensagem de texto --------------------------------------------
 const texto = String((msg && msg.text) || '').trim();
 
-if (!texto || texto === '/start') {
+// Saudação e comandos não são pergunta sobre processo. Sem esta porta, um "oi"
+// caía na busca de processo e, havendo um só, era respondido com o resumo
+// inteiro — o assistente respondendo o que ninguém perguntou.
+const ehSaudacao = /^(\\/start|\\/ajuda|\\/menu|oi+|ol[áa]|opa|e a[íi]|al[oô]|hey|hell?o|bom dia|boa tarde|boa noite|tudo bem|tudo bom|ajuda|menu|come[çc]ar)[\\s!.,?]*$/i.test(texto);
+
+if (!texto || ehSaudacao) {
   return { json: { ...base, rota: 'negado', texto: [
     'Olá, ' + base.nome.split(' ')[0] + '.',
     '',
@@ -120,16 +139,20 @@ if (!texto || texto === '/start') {
 // barreira 3: abrangência — só os processos do instantâneo existem.
 // Casa pelo número CNJ (com ou sem pontuação) ou pelo apelido interno.
 const digitos = soDigitos(texto);
+const lembrado = memoria.ultimoProcesso[String(de.id)];
 const alvo = PROCESSOS.find(p =>
   (digitos.length >= 15 && digitos.indexOf(soDigitos(p.numero)) !== -1) ||
   texto.toUpperCase().indexOf(p.id.toUpperCase()) !== -1
-) || (PROCESSOS.length === 1 ? PROCESSOS[0] : null);
+) || PROCESSOS.find(p => p.id === lembrado)
+  || (PROCESSOS.length === 1 ? PROCESSOS[0] : null);
 
 if (!alvo) {
   return { json: { ...base, rota: 'negado', texto:
     'Não identifiquei a qual processo você se refere.\\n\\nDisponível:\\n' +
     PROCESSOS.map(p => '<code>' + p.numero + '</code>').join('\\n') }};
 }
+
+memoria.ultimoProcesso[String(de.id)] = alvo.id;
 
 const querRedigir = /redi[jg]|retorno|mensagem|escrev|comunic|avis/i.test(texto);
 
@@ -206,6 +229,12 @@ FORMA:
 - Comece com uma linha de resumo, depois os detalhes.
 - No máximo 12 linhas.`;
 
+// A nota de uso de IA (Recomendação nº 001/2024 do CFOAB, D-92) NÃO é pedida ao
+// modelo: ela é acrescentada pelo fluxo, em itálico, como nota de rodapé. Texto
+// obrigatório não se delega a quem pode variar a redação — e o itálico distingue
+// a nota da mensagem ao cliente, que é o que ele de fato deve ler.
+const NOTA_IA = 'Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.';
+
 const SISTEMA_REDACAO = `Você redige, para um COLABORADOR do escritório, uma mensagem que será enviada AO CLIENTE por WhatsApp — mas somente depois que um advogado aprovar.
 
 REGRAS ABSOLUTAS:
@@ -218,8 +247,7 @@ FORMA:
 - Escreva APENAS o texto da mensagem ao cliente. Sem saudação ao colaborador, sem comentários seus, sem aspas em volta.
 - Comece por "Olá!" e trate o cliente por você.
 - No máximo 6 linhas, tom cordial e calmo.
-- Termine SEMPRE com esta linha, exatamente:
-Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.`;
+- NÃO escreva nota de rodapé, aviso de uso de inteligência artificial nem assinatura. O fluxo acrescenta isso automaticamente.`;
 
 // ===========================================================================
 // Montagem do grafo
@@ -311,7 +339,7 @@ const nodes = [
 
   no('Propor envio (aguarda aprovação)', 'n8n-nodes-base.telegram', 1.2,
     { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
-      text: "={{ ($('Ficha do processo (redação)').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text }}",
+      text: "={{ ($('Ficha do processo (redação)').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text.trim() + '\\n\\n<i>" + NOTA_IA + "</i>' }}",
       // ATENÇÃO: replyMarkup e inlineKeyboard são parâmetros de TOPO do nó.
       // Dentro de additionalFields eles são simplesmente ignorados — a mensagem
       // chega sem botão nenhum, e sem erro que denuncie o problema.
@@ -351,13 +379,21 @@ const temAviso = blocos[0] && blocos[0].indexOf('DADOS FICTÍCIOS') !== -1;
 const iCabecalho = blocos.findIndex(b => b.indexOf('Proposta de mensagem ao cliente') === 0);
 
 const aviso = temAviso ? esc(blocos[0]) + '\\n\\n' : '';
-const corpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0)).join('\\n\\n');
+
+// A nota de uso de IA é NOTA, não mensagem: volta em itálico, para o cliente
+// distinguir o que é o retorno do escritório do que é rodapé obrigatório.
+const NOTA = ${JSON.stringify(NOTA_IA)};
+const corpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0))
+  .map(b => b.trim() === NOTA ? '<i>' + esc(b.trim()) + '</i>' : esc(b))
+  .join('\\n\\n');
 
 const assinatura = j.acao === 'negado'
   ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'
   : 'por ' + j.nome + ' · ' + quando;
 
-const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + esc(corpo);
+// corpo JÁ vem escapado bloco a bloco acima — escapar de novo aqui viraria
+// &lt;i&gt; na tela. Só assinatura e aviso precisam de escape neste ponto.
+const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo;
 
 return { json: { ...j, trilha, textoFinal: texto,
   aviso: j.acao === 'aprovar'

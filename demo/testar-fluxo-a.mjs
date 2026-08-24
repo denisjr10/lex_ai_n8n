@@ -24,7 +24,12 @@ const codigo = (nome) => {
   if (!n) throw new Error(`nó não encontrado: ${nome}`);
   return n.parameters.jsCode;
 };
-const rodar = (js, $json) => new Function('$json', js)($json);
+// O Porteiro guarda o último processo no armazenamento estático do workflow.
+// Aqui isso vira um objeto comum — cada `memoriaNova()` simula uma instância
+// recém-criada, sem lembrança nenhuma.
+let MEMORIA = {};
+const memoriaNova = () => { MEMORIA = {}; };
+const rodar = (js, $json) => new Function('$json', '$getWorkflowStaticData', js)($json, () => MEMORIA);
 
 const lista = JSON.parse(fs.readFileSync(
   fs.existsSync(path.join(AQUI, 'listas', 'colaboradores.json'))
@@ -64,6 +69,8 @@ const PROPOSTA_COMO_O_TELEGRAM_DEVOLVE = [
   'Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.',
 ].join('\n');
 
+const NOTA_IA = 'Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.';
+
 // ===========================================================================
 console.log('\n\x1b[1mPorteiro — as três barreiras\x1b[0m');
 const P = codigo('Porteiro (verificação em código)');
@@ -90,6 +97,38 @@ for (const [rotulo, pergunta] of [
 const red = rodar(P, msg(ADVOGADO.telegram_user_id, 'Redige um retorno para o cliente sobre esse processo')).json;
 checar('pedido de redação vai para a rota certa', red.rota === 'redigir');
 
+// ---------------------------------------------------------------------------
+console.log('\n\x1b[1mSaudação — abrir conversa sem /start\x1b[0m');
+for (const saudacao of ['oi', 'Oi!', 'olá', 'Bom dia', 'boa noite', 'e aí', 'ajuda', '/start']) {
+  memoriaNova();
+  const r = rodar(P, msg(ADVOGADO.telegram_user_id, saudacao)).json;
+  const ok = r.rota === 'negado' && String(r.texto).includes('Olá');
+  checar(`"${saudacao}" abre com boas-vindas, não com resumo`, ok,
+    `rota=${r.rota} · ${String(r.texto || '').slice(0, 80)}`);
+}
+const pergunta = rodar(P, msg(ADVOGADO.telegram_user_id, `Como está o processo ${NUMERO}?`)).json;
+checar('mensagem de conteúdo NÃO é confundida com saudação', pergunta.rota === 'consulta');
+
+// ---------------------------------------------------------------------------
+console.log('\n\x1b[1mMemória curta — "esse processo" tem a que se referir\x1b[0m');
+memoriaNova();
+rodar(P, msg(ADVOGADO.telegram_user_id, `Como está o processo ${NUMERO}?`));
+checar('o processo consultado fica guardado', MEMORIA.ultimoProcesso[String(ADVOGADO.telegram_user_id)] === APELIDO);
+const seguimento = rodar(P, msg(ADVOGADO.telegram_user_id, 'Redige um retorno para o cliente sobre esse processo')).json;
+checar('o seguimento recupera o processo da memória', seguimento.processoId === APELIDO);
+checar('a memória é por pessoa, não do fluxo inteiro',
+  MEMORIA.ultimoProcesso[String(999999999)] === undefined);
+checar('saudação não apaga a memória',
+  MEMORIA.ultimoProcesso[String(ADVOGADO.telegram_user_id)] === APELIDO);
+
+// Memória é conveniência, não segurança: sem armazenamento, responde assim mesmo.
+const semMemoria = new Function('$json', '$getWorkflowStaticData',
+  codigo('Porteiro (verificação em código)'))(
+    msg(ADVOGADO.telegram_user_id, `Como está o processo ${NUMERO}?`),
+    () => { throw new Error('armazenamento indisponível'); }).json;
+checar('sem armazenamento estático, ainda responde', semMemoria.rota === 'consulta');
+memoriaNova();
+
 // ===========================================================================
 console.log('\n\x1b[1mFicha — o que o modelo recebe\x1b[0m');
 const F = codigo('Ficha do processo');
@@ -112,6 +151,9 @@ checar('corpo da mensagem ao cliente é preservado', aprov.textoFinal.includes('
 checar('aviso de dados fictícios é preservado', aprov.textoFinal.includes('DADOS FICTÍCIOS'));
 checar('assinatura nomeia quem aprovou', aprov.textoFinal.includes(ADVOGADO.nome));
 checar('formatação HTML é reaplicada', /<b>.*<\/b>/.test(aprov.textoFinal));
+checar('nota de uso de IA volta em itálico', aprov.textoFinal.includes(`<i>${NOTA_IA}</i>`),
+  `trecho final: ${JSON.stringify(aprov.textoFinal.slice(-160))}`);
+checar('corpo não é escapado duas vezes', !aprov.textoFinal.includes('&lt;'));
 
 if (!SEM_PODER.telegram_user_id) {
   console.log('  \x1b[33m—\x1b[0m 3 verificações puladas: não há colaborador sem poder de aprovar com id real');
@@ -133,6 +175,12 @@ checar('teclado está no nível de topo do nó', proposta.parameters.replyMarkup
 checar('teclado NÃO está dentro de additionalFields', !('reply_markup' in (proposta.parameters.additionalFields || {})));
 checar('três botões definidos', proposta.parameters.inlineKeyboard.rows[0].row.buttons.length === 3);
 checar('parse_mode HTML na proposta', proposta.parameters.additionalFields.parse_mode === 'HTML');
+
+checar('a proposta acrescenta a nota de IA em itálico, sem depender do modelo',
+  proposta.parameters.text.includes(`<i>${NOTA_IA}</i>`));
+const sistemaRedacao = wf.nodes.find(n => n.name === 'Redigir mensagem ao cliente')
+  .parameters.messages.messageValues[0].message;
+checar('o modelo é instruído a NÃO escrever a nota', !sistemaRedacao.includes(NOTA_IA));
 
 const editar = wf.nodes.find(n => n.name === 'Atualizar mensagem');
 checar('parse_mode HTML na atualização', editar.parameters.additionalFields.parse_mode === 'HTML');
