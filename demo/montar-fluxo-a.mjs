@@ -214,8 +214,16 @@ if (!alvo) {
     'Mande <i>oi</i> para ver a lista.' }};
 }
 
+const querRedigir = /redi[jg]|retorno|mensagem|escrev|comunic|avis/i.test(texto);
+
 // Barreira 4: segredo de justiça. É verificação em código, não instrução ao
 // modelo — o conteúdo nem chega a ser montado, então não há o que convencer.
+//
+// O processo sigiloso FICA na memória, e isso é deliberado. Se ele fosse
+// esquecido, o "esse processo" seguinte escorregaria para outro caso sem que
+// nada denunciasse a troca: o colaborador pediria mensagem sobre o processo A
+// e receberia uma sobre o B, bem escrita e plausível. Recusar faz barulho;
+// escolher sozinho é silencioso, e é o erro que a aprovação humana não pega.
 if (alvo.segredo) {
   memoria.ultimoProcesso[String(de.id)] = alvo.id;
   return { json: { ...base, rota: 'negado', texto: [
@@ -223,8 +231,9 @@ if (alvo.segredo) {
     '',
     '<code>' + alvo.numero + '</code> — ' + (alvo.classe || '').toLowerCase(),
     '',
-    'Não exibo andamento nem redijo mensagem sobre processo em segredo. ' +
-    'Consulte diretamente o sistema do tribunal, com a sua identificação.',
+    querRedigir
+      ? 'Não redijo mensagem ao cliente sobre processo em segredo. Se você quis dizer outro processo, diga o nome da parte ou o número — não escolho por você.'
+      : 'Não exibo andamento nem redijo mensagem sobre processo em segredo. Consulte diretamente o sistema do tribunal, com a sua identificação.',
     '',
     '<i>Esta recusa é verificada em código, antes de qualquer consulta. ' +
     'Não é uma orientação dada à inteligência artificial.</i>'
@@ -232,8 +241,6 @@ if (alvo.segredo) {
 }
 
 memoria.ultimoProcesso[String(de.id)] = alvo.id;
-
-const querRedigir = /redi[jg]|retorno|mensagem|escrev|comunic|avis/i.test(texto);
 
 return { json: { ...base, rota: querRedigir ? 'redigir' : 'consulta',
   processoId: alvo.id, processoNumero: alvo.numero, pergunta: texto }};

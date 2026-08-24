@@ -185,6 +185,20 @@ if (!SIGILOSO) {
     !SIGILOSO.envolvidos.some((e) => e.nome && String(sig.texto).includes(e.nome)));
   const pedirRedacao = rodar(P, msg(ADVOGADO.telegram_user_id, 'Redige um retorno para o cliente sobre esse processo')).json;
   checar('nem redigir mensagem sobre ele', pedirRedacao.rota === 'negado', `rota=${pedirRedacao.rota}`);
+
+  // A memória NÃO pode esquecer o sigiloso: esquecer faria o "esse processo"
+  // seguinte escorregar para outro caso, calado.
+  checar('o processo em segredo continua sendo o "esse processo" corrente',
+    MEMORIA.ultimoProcesso[String(ADVOGADO.telegram_user_id)] === SIGILOSO.id);
+  checar('a recusa de redação diz como sair do beco',
+    /diga o nome da parte ou o n[úu]mero/i.test(String(pedirRedacao.texto)));
+  checar('a recusa de redação não promete escolher outro processo',
+    /n[ãa]o escolho por voc[êe]/i.test(String(pedirRedacao.texto)));
+
+  // E nomear outro processo tem de funcionar imediatamente depois da recusa.
+  const saida = rodar(P, msg(ADVOGADO.telegram_user_id, `Redige um retorno sobre o processo ${NUMERO}`)).json;
+  checar('nomear outro processo sai da recusa na hora',
+    saida.rota === 'redigir' && saida.processoId === APELIDO, `rota=${saida.rota}`);
   memoriaNova();
 }
 
