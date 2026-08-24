@@ -160,3 +160,6 @@ demo/n8n.local
 demo/telegram.local
 demo/ia.local
 demo/uazapi.local
+
+# IDs de credencial do n8n: sem segredo, mas especificos da instancia
+demo/credenciais.json

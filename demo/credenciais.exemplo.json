@@ -1,0 +1,11 @@
+{
+  "_leia-me": "MODELO. Copie para credenciais.json e preencha com os IDs da sua instancia.",
+  "telegramApi": {
+    "id": "cole-o-id-aqui",
+    "name": "[LEX-DEMO] Telegram"
+  },
+  "openAiApi": {
+    "id": "cole-o-id-aqui",
+    "name": "[LEX-DEMO] OpenAI"
+  }
+}

@@ -218,7 +218,32 @@ Esta mensagem foi preparada com apoio de inteligência artificial e revisada por
 // ===========================================================================
 // Montagem do grafo
 // ===========================================================================
-const cred = { openai: { name: '[LEX-DEMO] OpenAI' }, telegram: { name: '[LEX-DEMO] Telegram' } };
+// ===========================================================================
+// Credenciais — SEMPRE por id, nunca só por nome
+// ===========================================================================
+// A API do n8n ignora o nome quando o id não vem junto: ela resolve para alguma
+// credencial daquele tipo, à escolha dela. Publicar sem id repontou este fluxo
+// para credenciais pessoais do usuário que não têm nada a ver com a demo.
+const credPath = fs.existsSync(path.join(AQUI, 'credenciais.json'))
+  ? path.join(AQUI, 'credenciais.json') : null;
+
+if (!credPath) {
+  console.error('\n  FALTA demo/credenciais.json — sem os ids, o n8n vincula a credencial errada.');
+  console.error('  Copie demo/credenciais.exemplo.json e preencha com os ids da sua instância.\n');
+  process.exit(1);
+}
+const credCfg = JSON.parse(fs.readFileSync(credPath, 'utf8'));
+
+for (const [tipo, c] of Object.entries(credCfg)) {
+  if (tipo.startsWith('_')) continue;
+  if (!c.id || String(c.id).startsWith('cole-')) {
+    console.error(`\n  credenciais.json: o id de ${tipo} não foi preenchido.\n`);
+    process.exit(1);
+  }
+}
+console.log(`credenciais : ${credCfg.telegramApi.name} · ${credCfg.openAiApi.name}`);
+
+const cred = { openai: credCfg.openAiApi, telegram: credCfg.telegramApi };
 
 function no(nome, tipo, versao, params, pos, extra = {}) {
   return { parameters: params, id: undefined, name: nome, type: tipo, typeVersion: versao, position: pos, ...extra };

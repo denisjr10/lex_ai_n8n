@@ -18,6 +18,7 @@
       ],
       "credentials": {
         "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       },
@@ -176,6 +177,7 @@
       ],
       "credentials": {
         "openAiApi": {
+          "id": "EpP8kBc6FiMag5mG",
           "name": "[LEX-DEMO] OpenAI"
         }
       }
@@ -196,6 +198,7 @@
       ],
       "credentials": {
         "openAiApi": {
+          "id": "EpP8kBc6FiMag5mG",
           "name": "[LEX-DEMO] OpenAI"
         }
       }
@@ -258,6 +261,7 @@
       ],
       "credentials": {
         "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       }
@@ -309,6 +313,7 @@
       ],
       "credentials": {
         "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       }
@@ -344,6 +349,7 @@
       ],
       "credentials": {
         "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       }
@@ -368,6 +374,7 @@
       ],
       "credentials": {
         "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       }
@@ -390,6 +397,7 @@
       ],
       "credentials": {
         "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       }
