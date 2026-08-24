@@ -269,6 +269,80 @@ checar('o texto reescrito volta COM os três botões',
 memoriaNova();
 
 // ===========================================================================
+// O fio que liga a Demo A à Demo B. Aqui mora o único ponto do sistema em que
+// um clique produz uma mensagem para fora do escritório — e por isso é o ponto
+// que mais precisa de teste automático.
+console.log('\n\x1b[1mAprovar → enviar ao cliente\x1b[0m');
+
+const clientes = JSON.parse(fs.readFileSync(
+  fs.existsSync(path.join(AQUI, 'listas', 'clientes.json'))
+    ? path.join(AQUI, 'listas', 'clientes.json')
+    : path.join(AQUI, 'listas', 'clientes.exemplo.json'), 'utf8'));
+
+const COM_CLIENTE = (clientes.clientes || []).find(c => (c.processos || []).length);
+const ID_COM_CLIENTE = COM_CLIENTE ? COM_CLIENTE.processos[0] : null;
+const PROC_COM_CLIENTE = ID_COM_CLIENTE
+  ? instantaneo.processos.find(p => p.id === ID_COM_CLIENTE) : null;
+const PROC_SEM_CLIENTE = instantaneo.processos.find(
+  p => !p.segredo_justica && p.id !== ID_COM_CLIENTE);
+
+/** Consulta um processo (para fixar a memória) e clica no botão pedido. */
+function decidir(userId, acao, processo) {
+  memoriaNova();
+  rodar(P, msg(userId, `Como está o processo ${processo.numero_cnj}?`));
+  return rodar(R, rodar(P, clique(userId, acao, PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
+}
+
+if (!PROC_COM_CLIENTE) {
+  console.log('  \x1b[33m—\x1b[0m verificações puladas: nenhum cliente vinculado em demo/listas/clientes.json');
+} else {
+  const env = decidir(ADVOGADO.telegram_user_id, 'aprovar', PROC_COM_CLIENTE);
+  checar('aprovar processo com cliente vinculado manda enviar',
+    env.desfecho === 'enviar' && env.enviarAoCliente === true, `desfecho=${env.desfecho}`);
+  checar('o número do destinatário vem da lista, não da conversa',
+    env.clienteNumero === String(COM_CLIENTE.whatsapp).replace(/\D/g, ''), `numero=${env.clienteNumero}`);
+  checar('a mensagem ao cliente leva o corpo aprovado',
+    env.textoAoCliente.includes('encontra-se arquivado'));
+  checar('a mensagem ao cliente NÃO leva o cabeçalho de proposta',
+    !/Proposta de mensagem ao cliente|Nada foi enviado/i.test(env.textoAoCliente));
+  checar('a mensagem ao cliente NÃO leva a assinatura de quem aprovou',
+    !env.textoAoCliente.includes(ADVOGADO.nome));
+  checar('a mensagem ao cliente não tem HTML — o WhatsApp não lê',
+    !/<\/?[a-z]+>/i.test(env.textoAoCliente), JSON.stringify(env.textoAoCliente.slice(0, 120)));
+  checar('a nota de IA vai em itálico do WhatsApp',
+    env.textoAoCliente.includes(`_${NOTA_IA}_`),
+    `final: ${JSON.stringify(env.textoAoCliente.slice(-140))}`);
+  checar('a mensagem ao cliente abre com o aviso de demonstração',
+    env.textoAoCliente.indexOf('⚠️') === 0);
+  checar('a confirmação ao colaborador mascara o número',
+    /•••• \d{4}/.test(env.confirmacao) && !env.confirmacao.includes(env.clienteNumero),
+    env.confirmacao);
+
+  // Os três desfechos que NÃO podem enviar nada.
+  for (const acao of ['editar', 'descartar']) {
+    const d = decidir(ADVOGADO.telegram_user_id, acao, PROC_COM_CLIENTE);
+    checar(`"${acao}" não envia nada ao cliente`,
+      d.desfecho === 'nada' && d.enviarAoCliente === false && d.textoAoCliente === null,
+      `desfecho=${d.desfecho}`);
+  }
+  if (SEM_PODER.telegram_user_id) {
+    const n = decidir(SEM_PODER.telegram_user_id, 'aprovar', PROC_COM_CLIENTE);
+    checar('quem não pode aprovar não consegue fazer sair mensagem',
+      n.desfecho === 'nada' && n.enviarAoCliente === false && n.textoAoCliente === null,
+      `desfecho=${n.desfecho}`);
+  }
+}
+
+if (PROC_SEM_CLIENTE) {
+  const s = decidir(ADVOGADO.telegram_user_id, 'aprovar', PROC_SEM_CLIENTE);
+  checar('processo sem cliente vinculado não inventa destinatário',
+    s.desfecho === 'sem-destino' && s.clienteNumero === null, `desfecho=${s.desfecho}`);
+  checar('e o colaborador é avisado de que NÃO saiu',
+    /não enviado|Nada saiu/i.test(String(s.confirmacao)), String(s.confirmacao));
+}
+memoriaNova();
+
+// ===========================================================================
 console.log('\n\x1b[1mEstrutura do fluxo\x1b[0m');
 const proposta = wf.nodes.find(n => n.name === 'Propor envio (aguarda aprovação)');
 checar('teclado está no nível de topo do nó', proposta.parameters.replyMarkup === 'inlineKeyboard');
@@ -290,6 +364,20 @@ for (const n of wf.nodes.filter(x => x.credentials)) {
     checar(`credencial de ${n.name} tem id`, Boolean(c.id), `${tipo} sem id — o n8n escolheria outra`);
   }
 }
+const envio = wf.nodes.find(n => n.name === 'Enviar ao cliente (WhatsApp)');
+checar('o nó de envio existe', Boolean(envio));
+checar('o token da Uazapi não está no JSON versionado',
+  !JSON.stringify(wf).match(/[Tt]oken"\s*:\s*"[A-Za-z0-9]{20,}/),
+  'um segredo dentro do workflow vazaria no Git');
+checar('o envio usa credencial, não cabeçalho escrito à mão',
+  envio.parameters.authentication === 'genericCredentialType'
+  && envio.parameters.genericAuthType === 'httpHeaderAuth');
+checar('o destinatário vem do nó de decisão, não de expressão livre',
+  envio.parameters.jsonBody.includes("$('Registrar decisão').item.json.clienteNumero"));
+const desfechoNo = wf.nodes.find(n => n.name === 'Desfecho da aprovação');
+checar('sem regra que case, o fluxo para em vez de seguir',
+  desfechoNo.parameters.options.fallbackOutput === 'none');
+
 checar('nenhum nó nasce ativo', wf.active !== true);
 
 // ===========================================================================

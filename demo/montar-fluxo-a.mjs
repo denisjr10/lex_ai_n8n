@@ -58,12 +58,35 @@ const listaPath = fs.existsSync(path.join(AQUI, 'listas', 'colaboradores.json'))
   : path.join(AQUI, 'listas', 'colaboradores.exemplo.json');
 const lista = JSON.parse(fs.readFileSync(listaPath, 'utf8'));
 
+// --- para onde vai a mensagem aprovada -------------------------------------
+// A MESMA lista que a Demo B usa para decidir o escopo do cliente. Ela é a
+// única fonte do vínculo processo → cliente, e por isso o destinatário nunca
+// sai da conversa do colaborador nem da redação do modelo: sai da lista.
+// Ninguém escolhe para quem enviar digitando um número no Telegram.
+const clientesPath = fs.existsSync(path.join(AQUI, 'listas', 'clientes.json'))
+  ? path.join(AQUI, 'listas', 'clientes.json')
+  : path.join(AQUI, 'listas', 'clientes.exemplo.json');
+const listaClientes = JSON.parse(fs.readFileSync(clientesPath, 'utf8'));
+
+const DESTINOS = {};
+for (const c of listaClientes.clientes || []) {
+  for (const id of c.processos || []) {
+    if (DESTINOS[id]) {
+      console.error(`\n  ${path.basename(clientesPath)}: o processo ${id} aparece em dois clientes`);
+      console.error(`  (${DESTINOS[id].nome} e ${c.nome}). Não escolho por você — corrija a lista.\n`);
+      process.exit(1);
+    }
+    DESTINOS[id] = { numero: String(c.whatsapp || '').replace(/\D/g, ''), nome: c.nome };
+  }
+}
+
 const emSegredo = instantaneo.processos.filter((p) => p.segredo_justica).length;
 console.log(`instantâneo : ${instantaneo.origem} · ${instantaneo.processos.length} processo(s)`
   + (emSegredo ? ` · ${emSegredo} em segredo de justiça` : ''));
 if (bruto.nomes_reais) console.log(`\x1b[33m              NOMES REAIS — este fluxo levará dado de cliente ao provedor de IA (D-97)\x1b[0m`);
 console.log(`              ficha limitada a ${MOVS_NA_FICHA} movimentações por processo`);
 console.log(`lista       : ${path.basename(listaPath)} · ${lista.colaboradores.length} colaborador(es)`);
+console.log(`destinos    : ${path.basename(clientesPath)} · ${Object.keys(DESTINOS).length} processo(s) com cliente vinculado`);
 
 // A nota de uso de IA (Recomendação nº 001/2024 do CFOAB, D-92) NÃO é pedida ao
 // modelo: ela é acrescentada pelo fluxo, em itálico, como nota de rodapé. Texto
@@ -79,6 +102,14 @@ const AVISO_TOPO = instantaneo.origem === 'ensaio-ficticio'
   : bruto.nomes_reais
   ? '⚠️ <b>DADOS REAIS DE CLIENTE — demonstração</b>'
   : '⚠️ <b>Demonstração — dados reais do escritório, nomes anonimizados</b>';
+
+// O que o CLIENTE vê no WhatsApp. Outro canal, outra marcação: lá não existe
+// HTML, o itálico é _assim_. Mesmos textos da Demo B, de propósito — quem
+// receber a mensagem aprovada não deve perceber que veio por outro caminho.
+const AVISO_TOPO_WA = instantaneo.origem === 'ensaio-ficticio'
+  ? '⚠️ DEMONSTRAÇÃO — dados fictícios'
+  : '⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório';
+const NOTA_IA_WA = '_' + NOTA_IA + '_';
 
 // ===========================================================================
 // O PORTEIRO — a Regra 1 em código
@@ -423,7 +454,19 @@ for (const [tipo, c] of Object.entries(credCfg)) {
 }
 console.log(`credenciais : ${credCfg.telegramApi.name} · ${credCfg.openAiApi.name}`);
 
-const cred = { openai: credCfg.openAiApi, telegram: credCfg.telegramApi };
+const cred = { openai: credCfg.openAiApi, telegram: credCfg.telegramApi,
+               uazapi: credCfg.httpHeaderAuth || null };
+
+// A credencial da Uazapi pode não existir: a instância gratuita dura 1 hora, e
+// o fluxo A funciona sem ela — só não fecha o ciclo até o cliente. Gerar sem
+// ela é normal; publicar sem ela deixa o botão Aprovar registrando a decisão e
+// avisando que não há para onde enviar, em vez de fingir que enviou.
+if (!cred.uazapi || !cred.uazapi.id) {
+  console.log('\x1b[33mUazapi      : sem credencial — o ciclo para na aprovação, não chega ao cliente\x1b[0m');
+  console.log('              crie a instância e rode: node demo/uazapi.mjs credencial');
+} else {
+  console.log(`Uazapi      : ${cred.uazapi.name} · aprovar envia ao cliente de verdade`);
+}
 
 function no(nome, tipo, versao, params, pos, extra = {}) {
   return { parameters: params, id: undefined, name: nome, type: tipo, typeVersion: versao, position: pos, ...extra };
@@ -548,7 +591,8 @@ const aviso = temAviso ? esc(blocos[0]) + '\\n\\n' : '';
 // A nota de uso de IA é NOTA, não mensagem: volta em itálico, para o cliente
 // distinguir o que é o retorno do escritório do que é rodapé obrigatório.
 const NOTA = ${JSON.stringify(NOTA_IA)};
-const corpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0))
+const blocosCorpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0));
+const corpo = blocosCorpo
   .map(b => b.trim() === NOTA ? '<i>' + esc(b.trim()) + '</i>' : esc(b))
   .join('\\n\\n');
 
@@ -565,10 +609,46 @@ const instrucao = j.acao === 'editar'
   : '';
 const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + instrucao;
 
+// --- para quem vai, se for ------------------------------------------------
+// O destinatário sai da lista, casado pelo processo. Não sai da conversa, nem
+// da redação do modelo, nem de um número digitado por alguém. É a mesma ideia
+// da Regra 1 aplicada ao caminho de VOLTA: o poder de escolher para quem o
+// escritório fala não pode morar dentro de um texto.
+const DESTINOS = ${JSON.stringify(DESTINOS, null, 2)};
+const destino = j.processoId ? DESTINOS[j.processoId] || null : null;
+
+// Só aprovar envia. E j.acao só vale 'aprovar' se quem clicou podia aprovar —
+// o Porteiro já rebaixou para 'negado' quem não podia (Regra 2).
+const enviarAoCliente = j.acao === 'aprovar' && Boolean(destino && destino.numero);
+
+const AVISO_WA = ${JSON.stringify(AVISO_TOPO_WA)};
+const NOTA_WA = ${JSON.stringify(NOTA_IA_WA)};
+
+// A mensagem ao cliente é o corpo aprovado, e SÓ ele: sem o cabeçalho de
+// proposta, sem a assinatura de quem aprovou, sem HTML (o WhatsApp não lê).
+// A nota de IA é reposta em itálico do WhatsApp, no lugar dela.
+const textoAoCliente = enviarAoCliente
+  ? [AVISO_WA, '', blocosCorpo.filter(b => b.trim() !== NOTA).join('\\n\\n').trim(), '', NOTA_WA].join('\\n')
+  : null;
+
+// Número mascarado para a confirmação. O colaborador precisa ver PARA QUEM
+// foi, não precisa ver o número inteiro numa tela que pode estar sendo
+// projetada — e numa demonstração ela está.
+const mascarado = destino && destino.numero
+  ? '•••• ' + destino.numero.slice(-4)
+  : null;
+
+const confirmacao = j.acao !== 'aprovar' ? null
+  : enviarAoCliente
+  ? '📤 <b>Enviado ao cliente no WhatsApp</b>\\n<i>' + esc(destino.nome) + ' · ' + mascarado + ' · ' + quando + '</i>'
+  : '⚠️ <b>Aprovado, mas não enviado</b>\\n<i>Nenhum cliente está vinculado a este processo na lista do escritório. Nada saiu daqui.</i>';
+
+const desfecho = j.acao !== 'aprovar' ? 'nada' : enviarAoCliente ? 'enviar' : 'sem-destino';
+
 return { json: { ...j, trilha, textoFinal: texto,
-  aviso: j.acao === 'aprovar'
-    ? 'Na demonstração completa, este clique dispara o envio ao cliente no WhatsApp.'
-    : null } };
+  enviarAoCliente, textoAoCliente, confirmacao, desfecho,
+  clienteNumero: enviarAoCliente ? destino.numero : null,
+  clienteNome: destino ? destino.nome : null } };
 `.trim() }, [460, 500]),
 
   no('Confirmar clique', 'n8n-nodes-base.telegram', 1.2,
@@ -602,6 +682,54 @@ return { json: { ...j, trilha, textoFinal: texto,
       ] } } ] },
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [460, 940],
     { credentials: { telegramApi: cred.telegram } }),
+
+  // --- o fio até o cliente -------------------------------------------------
+  // Este IF é a única porta entre "o advogado clicou" e "a mensagem saiu".
+  // Ele lê uma decisão já tomada em código (enviarAoCliente), não um texto.
+  // Três desfechos, não dois: enviar, avisar que não havia para quem enviar, e
+  // não fazer nada (editar, descartar, negado). O terceiro é o mais comum, e
+  // por isso é o padrão: fallbackOutput 'none' — sem regra que case, para.
+  no('Desfecho da aprovação', 'n8n-nodes-base.switch', 3,
+    { rules: { values: [
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' },
+            leftValue: "={{ $('Registrar decisão').item.json.desfecho }}", rightValue: 'enviar' }] },
+          outputKey: 'enviar' },
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' },
+            leftValue: "={{ $('Registrar decisão').item.json.desfecho }}", rightValue: 'sem-destino' }] },
+          outputKey: 'sem-destino' },
+      ] }, options: { fallbackOutput: 'none' } }, [1220, 620]),
+
+  no('Enviar ao cliente (WhatsApp)', 'n8n-nodes-base.httpRequest', 4.2,
+    { method: 'POST',
+      url: 'https://free.uazapi.com/send/text',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      specifyBody: 'json',
+      // O token vai por credencial, nunca no corpo do fluxo — este JSON é
+      // versionado. O número vem do nó de decisão, não da expressão.
+      jsonBody: `=${'{{'} JSON.stringify({ number: $('Registrar decisão').item.json.clienteNumero, text: $('Registrar decisão').item.json.textoAoCliente, linkPreview: false, delay: 1200 }) ${'}}'}`,
+      options: {} }, [1460, 540],
+    cred.uazapi ? { credentials: { httpHeaderAuth: cred.uazapi } } : {}),
+
+  // A confirmação vem DEPOIS do envio, e por isso diz a verdade: se a Uazapi
+  // falhar, o nó anterior falha e esta mensagem não chega. Confirmar antes de
+  // enviar seria mentir com aparência de funcionamento.
+  no('Confirmar ao colaborador', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: "={{ $('Registrar decisão').item.json.chatId }}",
+      text: "={{ $('Registrar decisão').item.json.confirmacao }}",
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1700, 540],
+    { credentials: { telegramApi: cred.telegram } }),
+
+  // Aprovado sem cliente vinculado: o colaborador precisa saber que NÃO saiu.
+  // Silêncio aqui seria lido como sucesso.
+  no('Avisar que não saiu', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: "={{ $('Registrar decisão').item.json.chatId }}",
+      text: "={{ $('Registrar decisão').item.json.confirmacao }}",
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1460, 700],
+    { credentials: { telegramApi: cred.telegram } }),
 ];
 
 const connections = {
@@ -622,6 +750,14 @@ const connections = {
   'Redigir mensagem ao cliente': { main: [[{ node: 'Propor envio (aguarda aprovação)', type: 'main', index: 0 }]] },
   'Registrar decisão': { main: [[{ node: 'Confirmar clique', type: 'main', index: 0 }]] },
   'Confirmar clique':  { main: [[{ node: 'Atualizar mensagem', type: 'main', index: 0 }]] },
+  // A mensagem no Telegram é atualizada ANTES do envio: quem clicou vê na hora
+  // que a decisão foi registrada, e a confirmação de envio chega logo atrás.
+  'Atualizar mensagem': { main: [[{ node: 'Desfecho da aprovação', type: 'main', index: 0 }]] },
+  'Desfecho da aprovação': { main: [
+      [{ node: 'Enviar ao cliente (WhatsApp)', type: 'main', index: 0 }],
+      [{ node: 'Avisar que não saiu', type: 'main', index: 0 }],
+  ] },
+  'Enviar ao cliente (WhatsApp)': { main: [[{ node: 'Confirmar ao colaborador', type: 'main', index: 0 }]] },
 };
 
 const workflow = {

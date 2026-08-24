@@ -341,7 +341,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const j = $json;\nconst quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';\nconst rotulo = {\n  aprovar:   '✅ APROVADO E ENVIADO',\n  editar:    '✏️ AGUARDANDO O TEXTO CORRIGIDO',\n  descartar: '❌ DESCARTADO',\n  negado:    '⛔ ENVIO NÃO AUTORIZADO'\n}[j.acao] || '—';\n\n// Editar abre um estado: a PRÓXIMA mensagem desta pessoa é o texto corrigido.\n// O Porteiro é quem fecha o estado, e devolve a proposta reescrita com os\n// mesmos três botões — texto editado por humano continua sem aprovação.\nif (j.acao === 'editar') {\n  let mem;\n  try { mem = $getWorkflowStaticData('global'); } catch (erro) { mem = {}; }\n  if (!mem.edicaoPendente) mem.edicaoPendente = {};\n  mem.edicaoPendente[String(j.userId)] = {\n    processoId: j.processoId || null,\n    processoNumero: j.processoNumero || null,\n    quando\n  };\n}\n\n// A trilha: quem decidiu, o quê e quando. Na demo vai para o log da execução;\n// no produto, vai para a auditoria (§7 do modelo de identidade).\nconst trilha = { acao: j.acao, acaoPedida: j.acaoPedida, por: j.nome, papel: j.papel, userId: j.userId, quando };\n\n// ATENÇÃO: o Telegram devolve msg.text em TEXTO PURO — as marcações HTML que\n// enviamos não voltam (elas viajam à parte, em \"entities\"). Procurar <b>…</b>\n// aqui nunca casa, e o resultado é a mensagem reenviada idêntica: sem cabeçalho\n// de decisão, sem formatação, e sem botões (editMessageText os remove).\n// Por isso reconstruímos a mensagem por blocos, e reaplicamos o HTML nós mesmos.\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst blocos = String(j.textoOriginal || '').split('\\n\\n');\n// O aviso de topo sempre começa com ⚠️. Procurar pelo texto exato quebraria a\n// cada mudança de redação, e o sintoma seria a mensagem remontada errada.\nconst temAviso = blocos[0] && blocos[0].indexOf('⚠️') === 0;\nconst iCabecalho = blocos.findIndex(b => b.indexOf('Proposta de mensagem ao cliente') === 0);\n\nconst aviso = temAviso ? esc(blocos[0]) + '\\n\\n' : '';\n\n// A nota de uso de IA é NOTA, não mensagem: volta em itálico, para o cliente\n// distinguir o que é o retorno do escritório do que é rodapé obrigatório.\nconst NOTA = \"Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.\";\nconst corpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0))\n  .map(b => b.trim() === NOTA ? '<i>' + esc(b.trim()) + '</i>' : esc(b))\n  .join('\\n\\n');\n\nconst assinatura = j.acao === 'negado'\n  ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'\n  : j.acao === 'editar'\n  ? j.nome + ' vai reescrever · ' + quando\n  : 'por ' + j.nome + ' · ' + quando;\n\n// corpo JÁ vem escapado bloco a bloco acima — escapar de novo aqui viraria\n// &lt;i&gt; na tela. Só assinatura e aviso precisam de escape neste ponto.\nconst instrucao = j.acao === 'editar'\n  ? '\\n\\n<i>Mande agora a mensagem como ela deve ficar. Escreva <b>cancelar</b> para desistir.</i>'\n  : '';\nconst texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + instrucao;\n\nreturn { json: { ...j, trilha, textoFinal: texto,\n  aviso: j.acao === 'aprovar'\n    ? 'Na demonstração completa, este clique dispara o envio ao cliente no WhatsApp.'\n    : null } };"
+        "jsCode": "const j = $json;\nconst quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';\nconst rotulo = {\n  aprovar:   '✅ APROVADO E ENVIADO',\n  editar:    '✏️ AGUARDANDO O TEXTO CORRIGIDO',\n  descartar: '❌ DESCARTADO',\n  negado:    '⛔ ENVIO NÃO AUTORIZADO'\n}[j.acao] || '—';\n\n// Editar abre um estado: a PRÓXIMA mensagem desta pessoa é o texto corrigido.\n// O Porteiro é quem fecha o estado, e devolve a proposta reescrita com os\n// mesmos três botões — texto editado por humano continua sem aprovação.\nif (j.acao === 'editar') {\n  let mem;\n  try { mem = $getWorkflowStaticData('global'); } catch (erro) { mem = {}; }\n  if (!mem.edicaoPendente) mem.edicaoPendente = {};\n  mem.edicaoPendente[String(j.userId)] = {\n    processoId: j.processoId || null,\n    processoNumero: j.processoNumero || null,\n    quando\n  };\n}\n\n// A trilha: quem decidiu, o quê e quando. Na demo vai para o log da execução;\n// no produto, vai para a auditoria (§7 do modelo de identidade).\nconst trilha = { acao: j.acao, acaoPedida: j.acaoPedida, por: j.nome, papel: j.papel, userId: j.userId, quando };\n\n// ATENÇÃO: o Telegram devolve msg.text em TEXTO PURO — as marcações HTML que\n// enviamos não voltam (elas viajam à parte, em \"entities\"). Procurar <b>…</b>\n// aqui nunca casa, e o resultado é a mensagem reenviada idêntica: sem cabeçalho\n// de decisão, sem formatação, e sem botões (editMessageText os remove).\n// Por isso reconstruímos a mensagem por blocos, e reaplicamos o HTML nós mesmos.\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst blocos = String(j.textoOriginal || '').split('\\n\\n');\n// O aviso de topo sempre começa com ⚠️. Procurar pelo texto exato quebraria a\n// cada mudança de redação, e o sintoma seria a mensagem remontada errada.\nconst temAviso = blocos[0] && blocos[0].indexOf('⚠️') === 0;\nconst iCabecalho = blocos.findIndex(b => b.indexOf('Proposta de mensagem ao cliente') === 0);\n\nconst aviso = temAviso ? esc(blocos[0]) + '\\n\\n' : '';\n\n// A nota de uso de IA é NOTA, não mensagem: volta em itálico, para o cliente\n// distinguir o que é o retorno do escritório do que é rodapé obrigatório.\nconst NOTA = \"Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.\";\nconst blocosCorpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0));\nconst corpo = blocosCorpo\n  .map(b => b.trim() === NOTA ? '<i>' + esc(b.trim()) + '</i>' : esc(b))\n  .join('\\n\\n');\n\nconst assinatura = j.acao === 'negado'\n  ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'\n  : j.acao === 'editar'\n  ? j.nome + ' vai reescrever · ' + quando\n  : 'por ' + j.nome + ' · ' + quando;\n\n// corpo JÁ vem escapado bloco a bloco acima — escapar de novo aqui viraria\n// &lt;i&gt; na tela. Só assinatura e aviso precisam de escape neste ponto.\nconst instrucao = j.acao === 'editar'\n  ? '\\n\\n<i>Mande agora a mensagem como ela deve ficar. Escreva <b>cancelar</b> para desistir.</i>'\n  : '';\nconst texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + instrucao;\n\n// --- para quem vai, se for ------------------------------------------------\n// O destinatário sai da lista, casado pelo processo. Não sai da conversa, nem\n// da redação do modelo, nem de um número digitado por alguém. É a mesma ideia\n// da Regra 1 aplicada ao caminho de VOLTA: o poder de escolher para quem o\n// escritório fala não pode morar dentro de um texto.\nconst DESTINOS = {\n  \"AUTOS-05\": {\n    \"numero\": \"559681186483\",\n    \"nome\": \"Tiago Correia Bandeira\"\n  }\n};\nconst destino = j.processoId ? DESTINOS[j.processoId] || null : null;\n\n// Só aprovar envia. E j.acao só vale 'aprovar' se quem clicou podia aprovar —\n// o Porteiro já rebaixou para 'negado' quem não podia (Regra 2).\nconst enviarAoCliente = j.acao === 'aprovar' && Boolean(destino && destino.numero);\n\nconst AVISO_WA = \"⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório\";\nconst NOTA_WA = \"_Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório._\";\n\n// A mensagem ao cliente é o corpo aprovado, e SÓ ele: sem o cabeçalho de\n// proposta, sem a assinatura de quem aprovou, sem HTML (o WhatsApp não lê).\n// A nota de IA é reposta em itálico do WhatsApp, no lugar dela.\nconst textoAoCliente = enviarAoCliente\n  ? [AVISO_WA, '', blocosCorpo.filter(b => b.trim() !== NOTA).join('\\n\\n').trim(), '', NOTA_WA].join('\\n')\n  : null;\n\n// Número mascarado para a confirmação. O colaborador precisa ver PARA QUEM\n// foi, não precisa ver o número inteiro numa tela que pode estar sendo\n// projetada — e numa demonstração ela está.\nconst mascarado = destino && destino.numero\n  ? '•••• ' + destino.numero.slice(-4)\n  : null;\n\nconst confirmacao = j.acao !== 'aprovar' ? null\n  : enviarAoCliente\n  ? '📤 <b>Enviado ao cliente no WhatsApp</b>\\n<i>' + esc(destino.nome) + ' · ' + mascarado + ' · ' + quando + '</i>'\n  : '⚠️ <b>Aprovado, mas não enviado</b>\\n<i>Nenhum cliente está vinculado a este processo na lista do escritório. Nada saiu daqui.</i>';\n\nconst desfecho = j.acao !== 'aprovar' ? 'nada' : enviarAoCliente ? 'enviar' : 'sem-destino';\n\nreturn { json: { ...j, trilha, textoFinal: texto,\n  enviarAoCliente, textoAoCliente, confirmacao, desfecho,\n  clienteNumero: enviarAoCliente ? destino.numero : null,\n  clienteNome: destino ? destino.nome : null } };"
       },
       "name": "Registrar decisão",
       "type": "n8n-nodes-base.code",
@@ -466,6 +466,135 @@
       "position": [
         460,
         940
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Registrar decisão').item.json.desfecho }}",
+                    "rightValue": "enviar"
+                  }
+                ]
+              },
+              "outputKey": "enviar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Registrar decisão').item.json.desfecho }}",
+                    "rightValue": "sem-destino"
+                  }
+                ]
+              },
+              "outputKey": "sem-destino"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "name": "Desfecho da aprovação",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1220,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Registrar decisão').item.json.clienteNumero, text: $('Registrar decisão').item.json.textoAoCliente, linkPreview: false, delay: 1200 }) }}",
+        "options": {}
+      },
+      "name": "Enviar ao cliente (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1460,
+        540
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "sNm7ZdSpzEubaBOu",
+          "name": "[LEX-DEMO] Uazapi (instância)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Registrar decisão').item.json.chatId }}",
+        "text": "={{ $('Registrar decisão').item.json.confirmacao }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "name": "Confirmar ao colaborador",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1700,
+        540
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Registrar decisão').item.json.chatId }}",
+        "text": "={{ $('Registrar decisão').item.json.confirmacao }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "name": "Avisar que não saiu",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1460,
+        700
       ],
       "credentials": {
         "telegramApi": {
@@ -619,6 +748,46 @@
         [
           {
             "node": "Atualizar mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar mensagem": {
+      "main": [
+        [
+          {
+            "node": "Desfecho da aprovação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Desfecho da aprovação": {
+      "main": [
+        [
+          {
+            "node": "Enviar ao cliente (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisar que não saiu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar ao cliente (WhatsApp)": {
+      "main": [
+        [
+          {
+            "node": "Confirmar ao colaborador",
             "type": "main",
             "index": 0
           }
