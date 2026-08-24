@@ -163,3 +163,9 @@ demo/uazapi.local
 
 # IDs de credencial do n8n: sem segredo, mas especificos da instancia
 demo/credenciais.json
+
+# --- Autos em PDF fornecidos pelo escritorio ------------------------------
+# Peca processual e dado de cliente, e em volume. Fica no disco, nunca no
+# historico. So o instantaneo derivado e anonimizado chega perto do Git.
+captura/autos/
+captura/autos-texto/
