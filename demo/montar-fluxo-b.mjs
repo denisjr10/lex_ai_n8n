@@ -31,6 +31,10 @@ import { fileURLToPath } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const publicar = process.argv.includes('--publicar');
+// Ativar e o que liga o fluxo de verdade: o gatilho passa a receber eventos do
+// mundo. Fica separado de publicar, e explicito, porque publicar e reversivel e
+// ativar nao e — a partir dai o fluxo responde a quem mandar mensagem.
+const ativar = process.argv.includes('--ativar');
 
 const NOME = '[LEX-DEMO] B · Cliente (WhatsApp)';
 const CAMINHO_WEBHOOK = 'lex-demo-b-cliente';
@@ -393,3 +397,15 @@ if (!r.ok) {
 }
 console.log(`\n${jaExiste ? 'atualizado' : 'criado'} no n8n · id ${corpoResp.id}`);
 console.log(`  ${baseUrl.replace(/\/+$/, '')}/workflow/${corpoResp.id}\n`);
+
+if (ativar) {
+  const a = await fetch(`${base}/workflows/${corpoResp.id}/activate`, { method: 'POST', headers: cab });
+  if (!a.ok) {
+    console.error(`  nao consegui ativar (HTTP ${a.status}): ${(await a.text()).slice(0, 300)}`);
+    console.error('  ative pelo painel do n8n, no botao do canto superior direito.\n');
+    process.exit(1);
+  }
+  console.log('  ATIVADO — o gatilho ja esta recebendo eventos.\n');
+} else {
+  console.log('  inativo. Para ligar:  node demo/montar-fluxo-b.mjs --publicar --ativar\n');
+}
