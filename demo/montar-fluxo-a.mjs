@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /**
+ * NOTA: no modo runOnceForEachItem o Code node do n8n exige UM objeto —
+ * `return { json: {...} }`. Devolver `[{ json: ... }]` (a forma do modo
+ * "all items") falha com "Code doesn't return a single object".
+ *
  * montar-fluxo-a.mjs — gera o workflow da Demo A (colaborador no Telegram)
  * ---------------------------------------------------------------------------
  * O fluxo é GERADO, não escrito à mão. Assim:
@@ -48,7 +52,7 @@ const msg = cb ? cb.message : e.message;
 const de  = cb ? cb.from    : (e.message && e.message.from);
 
 if (!de) {
-  return [{ json: { rota: 'ignorar', motivo: 'evento sem remetente' } }];
+  return { json: { rota: 'ignorar', motivo: 'evento sem remetente' } };
 }
 
 const chatId = msg && msg.chat ? msg.chat.id : de.id;
@@ -56,7 +60,7 @@ const autorizado = COLABORADORES.find(c => String(c.telegram_user_id) === String
 
 // --- barreira 1: quem ------------------------------------------------------
 if (!autorizado) {
-  return [{ json: {
+  return { json: {
     rota: 'negado',
     chatId,
     userId: de.id,
@@ -68,7 +72,7 @@ if (!autorizado) {
       'Se você deveria ter acesso, informe este número ao responsável:',
       '<code>' + de.id + '</code>'
     ].join('\\n')
-  }}];
+  }};
 }
 
 const base = {
@@ -84,23 +88,21 @@ const base = {
 if (cb) {
   const [acao] = String(cb.data || '').split(':');
 
-  // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06)
-  if (acao === 'aprovar' && !base.podeAprovar) {
-    return [{ json: { ...base, rota: 'aprovacao_negada', callbackId: cb.id,
-      messageId: msg.message_id,
-      texto: 'Somente advogado identificado pode aprovar envio ao cliente.' }}];
-  }
+  // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06).
+  // A recusa segue pelo MESMO caminho do clique legítimo — assim o botão
+  // recebe resposta e a tentativa fica registrada na trilha.
+  const efetiva = (acao === 'aprovar' && !base.podeAprovar) ? 'negado' : acao;
 
-  return [{ json: { ...base, rota: 'aprovacao', acao,
+  return { json: { ...base, rota: 'aprovacao', acao: efetiva, acaoPedida: acao,
     callbackId: cb.id, messageId: msg.message_id,
-    textoOriginal: (msg.text || msg.caption || '') }}];
+    textoOriginal: (msg.text || msg.caption || '') }};
 }
 
 // --- ramo da mensagem de texto --------------------------------------------
 const texto = String((msg && msg.text) || '').trim();
 
 if (!texto || texto === '/start') {
-  return [{ json: { ...base, rota: 'negado', texto: [
+  return { json: { ...base, rota: 'negado', texto: [
     'Olá, ' + base.nome.split(' ')[0] + '.',
     '',
     'Posso consultar o andamento de um processo e redigir um retorno ao cliente.',
@@ -110,7 +112,7 @@ if (!texto || texto === '/start') {
     'Experimente:',
     '· <i>Como está o processo ' + PROCESSOS[0] + '?</i>',
     '· <i>Redige um retorno para o cliente sobre esse processo</i>'
-  ].join('\\n') }}];
+  ].join('\\n') }};
 }
 
 // barreira 3: abrangência — só os processos do instantâneo existem
@@ -119,14 +121,14 @@ const alvo = PROCESSOS.find(id =>
 ) || (PROCESSOS.length === 1 ? PROCESSOS[0] : null);
 
 if (!alvo) {
-  return [{ json: { ...base, rota: 'negado', texto:
-    'Não identifiquei a qual processo você se refere. Disponíveis: <b>' + PROCESSOS.join(', ') + '</b>' }}];
+  return { json: { ...base, rota: 'negado', texto:
+    'Não identifiquei a qual processo você se refere. Disponíveis: <b>' + PROCESSOS.join(', ') + '</b>' }};
 }
 
 const querRedigir = /redi[jg]|retorno|mensagem|escrev|comunic|avis/i.test(texto);
 
-return [{ json: { ...base, rota: querRedigir ? 'redigir' : 'consulta',
-  processoId: alvo, pergunta: texto }}];
+return { json: { ...base, rota: querRedigir ? 'redigir' : 'consulta',
+  processoId: alvo, pergunta: texto }};
 `.trim();
 
 // ===========================================================================
@@ -136,7 +138,7 @@ const CODIGO_CONTEXTO = `
 const INSTANTANEO = ${JSON.stringify(instantaneo)};
 
 const p = INSTANTANEO.processos.find(x => x.id === $json.processoId);
-if (!p) return [{ json: { ...$json, erro: 'processo não encontrado no instantâneo' } }];
+if (!p) return { json: { ...$json, erro: 'processo não encontrado no instantâneo' } };
 
 // Agrupa participações da mesma pessoa — ela aparece uma vez por grau
 const porNome = new Map();
@@ -177,8 +179,8 @@ const ficha = [
   movs
 ].join('\\n');
 
-return [{ json: { ...$json, ficha, aviso_origem: INSTANTANEO.aviso,
-  ehEnsaio: INSTANTANEO.origem === 'ensaio-ficticio' } }];
+return { json: { ...$json, ficha, aviso_origem: INSTANTANEO.aviso,
+  ehEnsaio: INSTANTANEO.origem === 'ensaio-ficticio' } };
 `.trim();
 
 // ===========================================================================
@@ -292,27 +294,34 @@ const nodes = [
     { mode: 'runOnceForEachItem', jsCode: `
 const j = $json;
 const quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';
-const rotulo = { aprovar: '✅ APROVADO E ENVIADO', editar: '✏️ EM EDIÇÃO', descartar: '❌ DESCARTADO' }[j.acao] || '—';
+const rotulo = {
+  aprovar:   '✅ APROVADO E ENVIADO',
+  editar:    '✏️ EM EDIÇÃO',
+  descartar: '❌ DESCARTADO',
+  negado:    '⛔ ENVIO NÃO AUTORIZADO'
+}[j.acao] || '—';
 
 // A trilha: quem decidiu, o quê e quando. Na demo vai para o log da execução;
 // no produto, vai para a auditoria (§7 do modelo de identidade).
-const trilha = { acao: j.acao, por: j.nome, papel: j.papel, userId: j.userId, quando };
+const trilha = { acao: j.acao, acaoPedida: j.acaoPedida, por: j.nome, papel: j.papel, userId: j.userId, quando };
 
 const texto = j.textoOriginal.replace(
   /<b>Proposta de mensagem ao cliente<\\/b>[\\s\\S]*?\\n\\n/,
-  '<b>' + rotulo + '</b>\\n<i>por ' + j.nome + ' · ' + quando + '</i>\\n\\n'
+  '<b>' + rotulo + '</b>\\n<i>' + (j.acao === 'negado'
+     ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'
+     : 'por ' + j.nome + ' · ' + quando) + '</i>\\n\\n'
 );
 
-return [{ json: { ...j, trilha, textoFinal: texto,
+return { json: { ...j, trilha, textoFinal: texto,
   aviso: j.acao === 'aprovar'
     ? 'Na demonstração completa, este clique dispara o envio ao cliente no WhatsApp.'
-    : null } }];
+    : null } };
 `.trim() }, [460, 500]),
 
   no('Confirmar clique', 'n8n-nodes-base.telegram', 1.2,
     { resource: 'callback', operation: 'answerQuery',
       queryId: '={{ $json.callbackId }}',
-      additionalFields: { text: '={{ $json.acao === "aprovar" ? "Aprovado" : ($json.acao === "editar" ? "Marcado para edição" : "Descartado") }}' } },
+      additionalFields: { text: '={{ ({aprovar:"Aprovado", editar:"Marcado para edição", descartar:"Descartado", negado:"Somente advogado aprova envio ao cliente"})[$json.acao] }}' } },
     [700, 620], { credentials: { telegramApi: cred.telegram } }),
 
   no('Atualizar mensagem', 'n8n-nodes-base.telegram', 1.2,
