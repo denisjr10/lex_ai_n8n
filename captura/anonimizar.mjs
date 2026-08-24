@@ -33,21 +33,58 @@ const RAIZ = path.resolve(AQUI, '..');
 const DIR_INSTANTANEO = path.join(RAIZ, 'demo', 'instantaneo');
 
 const usarExemplos = process.argv.includes('--exemplos');
+const usarAutos = process.argv.includes('--autos');
 
 // ===========================================================================
 // Pseudonimos — deliberadamente comuns, para nao parecerem dados reais
 // ===========================================================================
 
-const NOMES_PF = [
-  'Ana Beatriz Nogueira', 'Carlos Eduardo Rangel', 'Helena Vasconcelos Pires',
-  'Rafael Monteiro Alencar', 'Luiza Ferraz Bittencourt', 'Tiago Queiroz Amorim',
-  'Beatriz Sampaio Coutinho', 'Marcelo Andrade Peixoto', 'Clara Rezende Fontoura',
-  'Gustavo Teixeira Mourão', 'Isabela Prado Cavalcanti', 'Bruno Siqueira Lacerda',
+// As listas sao COMBINADAS, nao escritas a mao. Com uma duzia de nomes fixos,
+// oito processos ja esgotavam o estoque e o anonimizador comecava a emitir
+// "Rafael Monteiro Alencar (12)" — que denuncia a maquinaria e atrapalha a
+// demonstracao. Combinando prenome e sobrenome sobram centenas de opcoes.
+const PRENOMES = [
+  'Ana Beatriz', 'Carlos Eduardo', 'Helena', 'Rafael', 'Luiza', 'Tiago',
+  'Beatriz', 'Marcelo', 'Clara', 'Gustavo', 'Isabela', 'Bruno',
+  'Fernanda', 'Ricardo', 'Camila', 'Eduardo', 'Patricia', 'Leandro',
+  'Juliana', 'Vinicius', 'Mariana', 'Rodrigo', 'Larissa', 'Felipe',
 ];
-const NOMES_PJ = [
-  'Comercial Aurora Ltda.', 'Transportadora Vale Claro S.A.', 'Construtora Pedra Alta Ltda.',
-  'Distribuidora Norte Sul Ltda.', 'Agropecuária Campo Verde S.A.',
+const SOBRENOMES = [
+  'Nogueira', 'Rangel', 'Vasconcelos Pires', 'Monteiro Alencar', 'Ferraz Bittencourt',
+  'Queiroz Amorim', 'Sampaio Coutinho', 'Andrade Peixoto', 'Rezende Fontoura',
+  'Teixeira Mourao', 'Prado Cavalcanti', 'Siqueira Lacerda', 'Barbosa Vilela',
+  'Guimaraes Tavares', 'Machado Bastos', 'Correia Bandeira', 'Furtado Rocha',
+  'Lemos Aragao', 'Pontes Vieira', 'Salgado Braga',
 ];
+const NOMES_PF = PRENOMES.flatMap(p => SOBRENOMES.map(s => `${p} ${s}`));
+
+const RAMOS = [
+  'Comercial', 'Transportadora', 'Construtora', 'Distribuidora', 'Agropecuaria',
+  'Industria', 'Servicos', 'Logistica', 'Engenharia', 'Alimentos',
+];
+const MARCAS = [
+  'Aurora', 'Vale Claro', 'Pedra Alta', 'Norte Sul', 'Campo Verde',
+  'Bela Vista', 'Rio Branco', 'Serra Azul', 'Ponta Nova', 'Alvorada',
+  'Boa Esperanca', 'Monte Belo',
+];
+const SUFIXOS = ['Ltda.', 'S.A.', 'EIRELI'];
+
+// Ente publico merece pool proprio. Trocar "Secretaria de Estado da Saude" por
+// "Logistica Monte Belo EIRELI" nao vaza nada, mas destroi o sentido do caso:
+// acao contra o poder publico deixa de parecer acao contra o poder publico, e
+// a advogada nao reconhece mais o proprio processo.
+const ORGAOS = [
+  'Municipio de', 'Estado de', 'Secretaria Estadual de Saude de',
+  'Secretaria Municipal de Educacao de', 'Fazenda Publica de',
+  'Instituto de Previdencia de', 'Autarquia de Transito de',
+];
+const LUGARES = [
+  'Santa Luzia', 'Vale Claro', 'Porto Belo', 'Serra Nova', 'Boa Vista do Norte',
+  'Campo Alegre', 'Rio Verde', 'Vila Formosa', 'Monte Cristo', 'Alto Bonito',
+];
+const NOMES_PUB = ORGAOS.flatMap(o => LUGARES.map(l => `${o} ${l}`));
+const MARCAS_ENTE_PUBLICO = /\b(MUNIC[ÍI]PIO|ESTADO D[OE]|UNI[ÃA]O|SECRETARIA|MINIST[ÉE]RIO|PREFEITURA|FAZENDA P[ÚU]BLICA|INSS|AUTARQUIA|DEFENSORIA|PROCURADORIA|C[ÂA]MARA MUNICIPAL|ASSEMBLEIA|TRIBUNAL|INSTITUTO DE PREVID[ÊE]NCIA|DETRAN|IBAMA|ANVISA|IPHAN)\b/i;
+const NOMES_PJ = RAMOS.flatMap(r => MARCAS.flatMap(m => SUFIXOS.map(x => `${r} ${m} ${x}`)));
 
 /** Hash estavel → indice. Mesmo nome, mesmo pseudonimo, hoje e daqui a um mes. */
 function indiceEstavel(texto, tamanho) {
@@ -65,7 +102,9 @@ class Cofre {
     const chave = nomeReal.toLowerCase().trim();
     if (this.porNome.has(chave)) return this.porNome.get(chave);
 
-    const lista = tipoPessoa === 'JURIDICA' ? NOMES_PJ : NOMES_PF;
+    const lista = MARCAS_ENTE_PUBLICO.test(nomeReal) ? NOMES_PUB
+      : tipoPessoa === 'JURIDICA' ? NOMES_PJ
+      : NOMES_PF;
     let i = indiceEstavel(nomeReal, lista.length);
     let escolhido = lista[i];
     // colisao: anda na lista ate achar um livre
@@ -83,7 +122,22 @@ class Cofre {
   /** Nomes reais em ordem decrescente de tamanho — para trocar "Maria da Silva"
    *  antes de "Maria", e nao deixar sobra reconhecivel no texto livre. */
   paresParaTextoLivre() {
-    return [...this.porNome.entries()].sort((a, b) => b[0].length - a[0].length);
+    // Trocar so o nome COMPLETO nao basta. No PJe o texto livre e formado por
+    // titulos de documento, e la o nome aparece picado: "LAUDO MEDICO FULANO",
+    // "Procuracao_Fulano__assinado". Por isso cada pedaco do nome real tambem
+    // entra na lista, apontando para o pedaco correspondente do pseudonimo.
+    const PREPOSICOES = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'di', 'du', 'van', 'von']);
+    const pares = [];
+    for (const [real, falso] of this.porNome) {
+      pares.push([real, falso]);
+      const pedacosReais = String(real).split(/[\s._+-]+/)
+        .filter((t) => t.length >= 4 && !PREPOSICOES.has(t.toLowerCase()));
+      const pedacosFalsos = String(falso).split(/\s+/).filter((t) => t.length >= 3);
+      pedacosReais.forEach((t, i) => {
+        pares.push([t, pedacosFalsos[Math.min(i, pedacosFalsos.length - 1)] || falso]);
+      });
+    }
+    return pares.sort((a, b) => b[0].length - a[0].length);
   }
 }
 
@@ -96,15 +150,25 @@ const PADROES = [
   [/\b\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}\b/g, '[CNPJ]'],
   [/\bOAB\s*\/?\s*[A-Z]{2}\s*n?º?\s*[\d.]+\b/gi, '[OAB]'],
   [/\b[\w.+-]+@[\w-]+\.[\w.]+\b/g, '[EMAIL]'],
-  [/\(?\d{2}\)?\s?9?\d{4}[-\s]?\d{4}\b/g, '[TELEFONE]'],
+  // As bordas importam: sem elas, "2608060909026940000" (numero de documento
+  // do PJe) era lido como telefone e virava "[TELEFONE]" no meio do numero.
+  // Exigir separador: sem ele, "2026-0001873766" (nome de arquivo do PJe)
+  // virava telefone. Telefone escrito de verdade sempre tem hifen ou espaco.
+  [/(?<!\d)(?:\(\d{2}\)\s?|\d{2}\s)?9?\d{4}[-\s]\d{4}(?!\d)/g, '[TELEFONE]'],
   [/\b\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}\b/g, '[CNJ]'],
+  // Endereco de sistema do tribunal nao acrescenta nada a ficha e ainda pode
+  // levar a identificacao do processo real
+  [/https?:\/\/\S+/g, '[LINK]'],
 ];
 
 function limparTexto(txt, cofre) {
   if (typeof txt !== 'string') return txt;
   let s = txt;
   for (const [real, falso] of cofre.paresParaTextoLivre()) {
-    s = s.replace(new RegExp(real.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), falso);
+    // As bordas evitam o estrago classico: trocar "Ana" dentro de "Analise".
+    // Nao servem \b aqui: nome colado a sublinhado ou a acento precisa casar.
+    const escapado = real.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    s = s.replace(new RegExp(`(?<!\\p{L})${escapado}(?!\\p{L})`, 'giu'), falso);
   }
   for (const [re, marca] of PADROES) s = s.replace(re, marca);
   return s;
@@ -165,8 +229,12 @@ function registrarNomes(e, cofre) {
   for (const l of listas) for (const a of l) cofre.pseudonimo(a.nome, a.tipo_pessoa);
 }
 
-function transformar({ capa, envolvidos, movimentacoes }, apelido, coerente = true) {
-  const cofre = new Cofre();
+/** O cofre e UM SO para toda a rodada, de proposito. Um cofre por processo faz
+ *  duas coisas ruins ao mesmo tempo: a mesma pessoa real ganha pseudonimos
+ *  diferentes em processos diferentes, e pessoas diferentes acabam recebendo o
+ *  mesmo nome falso — porque cada cofre so evita colisao dentro de si. Nos dois
+ *  casos a carteira do escritorio deixa de fazer sentido na demo. */
+function transformar({ capa, envolvidos, movimentacoes }, apelido, coerente = true, cofre = new Cofre()) {
 
   const doEndpoint = envolvidos?.items || [];
   const daCapa = (capa.fontes || []).flatMap(f => f.envolvidos || []);
@@ -229,6 +297,19 @@ function lerExemplos() {
   return [{ apelido: 'ENSAIO-1', dados: { capa: j('capa.json'), envolvidos: j('envolvidos.json'), movimentacoes: j('movimentacoes.json') } }];
 }
 
+/** Autos em PDF convertidos por importar-autos.mjs. Ja vem na forma da API,
+ *  de proposito: assim existe UM lugar que anonimiza, e nao dois. */
+function lerAutos() {
+  const dir = path.join(AQUI, 'autos-texto');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir)
+    .filter(f => f.endsWith('.local.json')).sort()
+    .map(f => {
+      const dados = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+      return { apelido: dados._origem_apelido || f.replace('.local.json', ''), dados };
+    });
+}
+
 function lerCapturadas() {
   const dir = path.join(AQUI, 'respostas-brutas');
   if (!fs.existsSync(dir)) return [];
@@ -243,7 +324,7 @@ function lerCapturadas() {
   return [{ apelido: 'P1', dados: porId }];
 }
 
-const entradas = usarExemplos ? lerExemplos() : lerCapturadas();
+const entradas = usarExemplos ? lerExemplos() : usarAutos ? lerAutos() : lerCapturadas();
 
 if (!entradas.length) {
   console.log('\nNao ha respostas capturadas com sucesso ainda.');
@@ -254,13 +335,17 @@ if (!entradas.length) {
 
 const instantaneo = {
   versao_do_contrato: 1,
-  origem: usarExemplos ? 'ensaio-ficticio' : 'escavador-v2',
+  origem: usarExemplos ? 'ensaio-ficticio' : usarAutos ? 'autos-fornecidos' : 'escavador-v2',
   aviso: usarExemplos
     ? 'DADOS FICTICIOS. Derivados dos exemplos da documentacao publica do Escavador, nao de processo real. O formato e exato; o conteudo nao existe.'
+    : usarAutos
+    ? 'Dados reais, extraidos dos autos em PDF fornecidos pelo escritorio e ANONIMIZADOS. Linha do tempo vinda da tabela Documentos do PJe, nao da API.'
     : 'Dados reais de processo, ANONIMIZADOS. Nomes substituidos por pseudonimos estaveis; CPF, CNPJ, OAB e numero CNJ redigidos.',
   // Nos exemplos oficiais, capa e envolvidos vem de processos diferentes.
   // Na captura real vem do mesmo — por isso o endpoint pode ser usado.
-  processos: entradas.map(e => transformar(e.dados, e.apelido, !usarExemplos)),
+  // Um cofre para todos: ver a nota em transformar()
+  processos: (() => { const cofre = new Cofre();
+    return entradas.map(e => transformar(e.dados, e.apelido, !usarExemplos, cofre)); })(),
 };
 
 fs.mkdirSync(DIR_INSTANTANEO, { recursive: true });
