@@ -2,11 +2,13 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-23 |
+| Atualizado em | 2026-08-24 |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | **Primeira linha escrita:** `captura/capturar.mjs` — o script de captura, com as travas do orçamento em código |
+| Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **Demo A rodando no Telegram** (fluxo `ZPh3DxptHFIyWETO`, 15 nós, 47 verificações automáticas) |
 | Crédito Escavador | 🔴 **BLOQUEADO.** A API recusa com `403 · "Seu saldo está bloqueado"`. A prorrogação prometida em 21/08 **não foi aplicada** (R-37). R$ 0,00 gastos — nada foi debitado |
+| Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
+| Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
@@ -16,7 +18,16 @@
 
 Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador e Trello.
 
-Fase 2 em andamento: **PRD escrito e Spec Parte I escrita**, ambos aguardando aval. **O próximo passo é construir a fundação** (marcos 1 a 5 da §15 da Spec), que não depende de crédito nem de resposta do escritório.
+Fase 2 em andamento: **PRD escrito e Spec Parte I escrita**, ambos aguardando aval.
+
+Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A responde no Telegram, com o Porteiro barrando em código quem pode o quê, e o ciclo de aprovação funcionando de ponta a ponta. Os dados deixaram de depender do Escavador — os autos em PDF entregues pelo escritório foram convertidos para o mesmo contrato que a API produziria (D-98).
+
+**Próximos passos imediatos:**
+
+1. Ligar os 8 processos ao fluxo — a ficha precisa limitar as movimentações mais recentes (um dos processos tem 400) antes de ir ao modelo
+2. Decidir o nível de anonimização com a advogada (D-97) — o interruptor já existe
+3. Segundo `user_id` do Telegram, para demonstrar ao vivo a recusa de aprovação
+4. Demo B (cliente no WhatsApp/Uazapi) — ainda não começada
 
 ## Concluído
 
@@ -202,7 +213,8 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 | **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
 | R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
 | R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |
-| Demais (R-02 a R-10) | Registrados em `01` §15, tratados por desenho |### A primeira chamada real foi feita — e recusada, sem custo
+| Demais (R-02 a R-10) | Registrados em `01` §15, tratados por desenho |
+### A primeira chamada real foi feita — e recusada, sem custo
 
 Com token e processo em mãos, `captura/capturar.mjs --executar` disparou a chamada A1. A resposta:
 

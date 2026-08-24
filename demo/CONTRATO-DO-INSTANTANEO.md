@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Versão do contrato | **1** |
-| Data | 2026-08-23 |
-| Produzido por | [`captura/anonimizar.mjs`](../captura/anonimizar.mjs) |
+| Versão do contrato | **2** |
+| Data | 2026-08-24 |
+| Produzido por | [`captura/anonimizar.mjs`](../captura/anonimizar.mjs), a partir da API **ou** de [`captura/importar-autos.mjs`](../captura/importar-autos.mjs) |
 | Consumido por | Os fluxos do n8n da Demo A (Telegram) e da Demo B (WhatsApp) |
 
 > Este arquivo é a fronteira entre a captura e a demonstração. Enquanto ele não mudar, **trocar dado fictício por dado real não altera uma linha dos fluxos**.
@@ -33,7 +33,17 @@ Os fluxos leem **um dos dois**, e o campo `origem` diz qual:
 | `origem` | Significa |
 |---|---|
 | `ensaio-ficticio` | Dado inventado. O agente **precisa** avisar isso na resposta |
-| `escavador-v2` | Dado real de processo, anonimizado |
+| `escavador-v2` | Dado real de processo, vindo da API, anonimizado |
+| `autos-fornecidos` | Dado real, extraído dos **autos em PDF** entregues pelo escritório, anonimizado. A linha do tempo vem da tabela *Documentos* do PJe, não de andamentos da API — é mais pobre em texto e mais fiel em datas |
+
+Há ainda um campo booleano no topo, `nomes_reais`:
+
+| `nomes_reais` | Significa |
+|---|---|
+| `false` (padrão) | Nomes de parte e advogado substituídos por pseudônimos estáveis; número CNJ pseudonimizado |
+| `true` | Nomes e número **verdadeiros**, por decisão informada do escritório (D-97). CPF, CNPJ, OAB, e-mail e telefone continuam redigidos |
+
+> Com `nomes_reais: true` o instantâneo passa a ser dado pessoal de cliente em texto claro, e cada pergunta o envia ao provedor de IA. Só existe com aval explícito, e o arquivo nunca entra no Git.
 
 > **Essa distinção é obrigatória, não decorativa.** Um ensaio apresentado como dado real é a pior falha possível numa demonstração para advogado: o escritório tomaria decisão sobre um processo que não existe. O fluxo deve exibir um aviso visível sempre que `origem` for `ensaio-ficticio`.
 
@@ -113,6 +123,13 @@ Real, a partir da captura — também não gasta nada, porque lê arquivo já ba
 node captura/anonimizar.mjs
 ```
 
+A partir dos autos em PDF — o caminho usado enquanto o saldo do Escavador está bloqueado:
+
+```bash
+node captura/importar-autos.mjs
+node captura/anonimizar.mjs --autos
+```
+
 > **A saída real exige revisão humana antes de qualquer commit.** Redação automática erra: leia o `conteudo` das movimentações procurando nome, endereço ou número que tenha escapado. O anonimizador avisa isso ao terminar.
 
 ## 6. Se o contrato mudar
@@ -122,3 +139,4 @@ Suba `versao_do_contrato` e anote aqui o que mudou. Os fluxos do n8n devem recus
 | Versão | Data | Mudança |
 |---|---|---|
 | 1 | 2026-08-23 | Primeira versão, derivada dos exemplos oficiais da V2 |
+| 2 | 2026-08-24 | Nova `origem` `autos-fornecidos` e campo `nomes_reais`. Nenhum campo de processo mudou — instantâneo da versão 1 continua válido |

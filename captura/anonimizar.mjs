@@ -20,7 +20,14 @@
  *
  * Uso:
  *   node captura/anonimizar.mjs --exemplos    # usa os exemplos oficiais → ensaio.json
+ *   node captura/anonimizar.mjs --autos       # usa os autos em PDF importados → processos.json
  *   node captura/anonimizar.mjs               # usa as respostas capturadas → processos.json
+ *
+ *   node captura/anonimizar.mjs --autos --nomes-reais
+ *      Mantem os nomes verdadeiros. Existe porque o escritorio pode querer se
+ *      reconhecer na demonstracao — e essa e uma decisao DELE, informada, nao
+ *      nossa. Exige --eu-sei-o-que-estou-fazendo junto, e a saida continua
+ *      fora do Git. Ver D-97.
  */
 
 import fs from 'node:fs';
@@ -34,6 +41,24 @@ const DIR_INSTANTANEO = path.join(RAIZ, 'demo', 'instantaneo');
 
 const usarExemplos = process.argv.includes('--exemplos');
 const usarAutos = process.argv.includes('--autos');
+
+// Nomes reais: interruptor deliberadamente duro de acionar por engano.
+// Nao vale para os exemplos (que sao ficticios) nem seria util ali.
+const nomesReais = process.argv.includes('--nomes-reais');
+if (nomesReais && !process.argv.includes('--eu-sei-o-que-estou-fazendo')) {
+  console.error(`
+  --nomes-reais mantem nome de cliente, de advogado e de parte no instantaneo.
+  Esse conteudo passa a ir para o provedor de IA a cada pergunta.
+
+  So faz sentido com o aval informado do escritorio (D-97). Se e o caso:
+    node captura/anonimizar.mjs --autos --nomes-reais --eu-sei-o-que-estou-fazendo
+`);
+  process.exit(1);
+}
+if (nomesReais && usarExemplos) {
+  console.error('\n  --nomes-reais nao se aplica aos exemplos: eles ja sao ficticios.\n');
+  process.exit(1);
+}
 
 // ===========================================================================
 // Pseudonimos — deliberadamente comuns, para nao parecerem dados reais
@@ -99,6 +124,9 @@ class Cofre {
 
   pseudonimo(nomeReal, tipoPessoa) {
     if (!nomeReal || typeof nomeReal !== 'string') return nomeReal;
+    // Com --nomes-reais o cofre vira passagem livre. CPF, CNPJ, OAB, e-mail e
+    // telefone continuam saindo: eles nao ajudam ninguem a se reconhecer.
+    if (nomesReais) return nomeReal;
     const chave = nomeReal.toLowerCase().trim();
     if (this.porNome.has(chave)) return this.porNome.get(chave);
 
@@ -177,6 +205,9 @@ function limparTexto(txt, cofre) {
 /** CNJ pseudonimo: preserva tribunal e ano (nao identificam sozinhos) e troca
  *  a sequencia, recalculando o digito verificador para o numero seguir valido. */
 function cnjPseudonimo(cnj) {
+  // Com nomes reais o numero tambem tem de ser o real, senao o escritorio nao
+  // consegue casar o que ve na tela com o processo que tem em maos.
+  if (nomesReais) return cnj;
   const m = String(cnj || '').match(/^(\d{7})-(\d{2})\.(\d{4})\.(\d)\.(\d{2})\.(\d{4})$/);
   if (!m) return '0000000-00.0000.0.00.0000';
   const [, seq, , ano, j, tr, origem] = m;
@@ -336,6 +367,7 @@ if (!entradas.length) {
 const instantaneo = {
   versao_do_contrato: 1,
   origem: usarExemplos ? 'ensaio-ficticio' : usarAutos ? 'autos-fornecidos' : 'escavador-v2',
+  nomes_reais: nomesReais,
   aviso: usarExemplos
     ? 'DADOS FICTICIOS. Derivados dos exemplos da documentacao publica do Escavador, nao de processo real. O formato e exato; o conteudo nao existe.'
     : usarAutos

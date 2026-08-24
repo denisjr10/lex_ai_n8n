@@ -36,8 +36,8 @@ const RAIZ = path.resolve(AQUI, '..');
 // Alterar qualquer coisa aqui exige novo aval do usuario (Regra 8).
 // ===========================================================================
 const AUTORIZACAO = {
-  data: '2026-08-21',
-  processoAutorizado: 'P1',          // so o TJPB. O P2 NAO esta autorizado
+  data: '2026-08-24',                // alvo trocado; ver D-96
+  processoAutorizado: 'P1',          // TJAP, saude publica. P2 e P3 NAO estao autorizados
   tetoDeChamadas: 3,
   blocos: 'A e B',
 };
@@ -156,7 +156,15 @@ if (!cnjValido(processo.numero_cnj)) {
   morrer(`o CNJ do ${processo.apelido} tem digito verificador invalido. ` +
          `Chamar assim gastaria credito para receber 404`);
 }
-ok(`processo ${processo.apelido} (${processo.tribunal}) · digito verificador confere`);
+// Trava 8: processo em segredo de justica nao se consulta por aqui.
+// Vira regra em codigo, e nao nota de rodape, porque o custo do engano e alto
+// nos dois sentidos: credito gasto para receber pouco, e dado que nao devia
+// circular circulando. Foi assim que o alvo mudou (D-96).
+if (processo.segredo_justica === true) {
+  morrer(`o ${processo.apelido} esta marcado como SEGREDO DE JUSTICA. ` +
+         `Trocar o alvo em processos.local.json, ou pedir aval explicito do usuario`);
+}
+ok(`processo ${processo.apelido} (${processo.tribunal}) · digito verificador confere · sem segredo de justica`);
 
 const naoAutorizados = (cfg.processos || []).filter(p => p.apelido !== AUTORIZACAO.processoAutorizado);
 if (naoAutorizados.length) {
@@ -167,11 +175,21 @@ if (naoAutorizados.length) {
 const registro = lerJson(ARQ_REGISTRO, { chamadas: [] });
 const jaFeitas = new Set(registro.chamadas.map(c => `${c.id}:${c.cnj}`));
 
-if (registro.chamadas.length >= AUTORIZACAO.tetoDeChamadas) {
+/** O teto e de DINHEIRO, nao de tentativas. Um 401 ou 403 e recusa na porta —
+ *  a API nem chegou a consultar o processo, e nada foi debitado. Foi o que
+ *  aconteceu em 23/08: saldo bloqueado, R$ 0,00 gastos. Contar aquilo contra o
+ *  teto travava a captura inteira sem que um centavo tivesse saido.
+ *  Na duvida conta: so nao conta com prova de que foi de graca. */
+const naoCobrada = (c) => c.http === 401 || c.http === 403 || c.creditosUtilizados === 0;
+const cobradas = registro.chamadas.filter(c => !naoCobrada(c));
+const gratuitas = registro.chamadas.length - cobradas.length;
+
+if (cobradas.length >= AUTORIZACAO.tetoDeChamadas) {
   morrer(`o teto de ${AUTORIZACAO.tetoDeChamadas} chamadas autorizadas ja foi atingido ` +
-         `(${registro.chamadas.length} registradas). Ampliar exige novo aval`);
+         `(${cobradas.length} cobradas). Ampliar exige novo aval`);
 }
-ok(`registro de execucao: ${registro.chamadas.length} de ${AUTORIZACAO.tetoDeChamadas} chamadas gastas`);
+ok(`registro de execucao: ${cobradas.length} de ${AUTORIZACAO.tetoDeChamadas} chamadas cobradas`);
+if (gratuitas) info(`${gratuitas} tentativa(s) recusadas na porta (401/403) — nao contam, nada foi debitado`);
 
 // -- fila efetiva --------------------------------------------------------
 const pendentes = FILA.filter(c => !jaFeitas.has(`${c.id}:${processo.numero_cnj}`));
@@ -184,7 +202,7 @@ if (!pendentes.length) {
   process.exit(0);
 }
 
-if (registro.chamadas.length + pendentes.length > AUTORIZACAO.tetoDeChamadas) {
+if (cobradas.length + pendentes.length > AUTORIZACAO.tetoDeChamadas) {
   morrer(`executar as ${pendentes.length} pendentes passaria do teto de ${AUTORIZACAO.tetoDeChamadas}`);
 }
 

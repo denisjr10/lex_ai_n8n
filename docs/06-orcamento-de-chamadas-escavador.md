@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.4 — **primeira execução tentada; saldo bloqueado** |
-| Data | 2026-08-23 |
+| Versão | 2.5 — **alvo trocado: o P1 anterior estava em segredo de justiça** |
+| Data | 2026-08-24 |
 | Estado | 🔴 **Bloqueado pelo Escavador.** Blocos A e B autorizados e tentados em 23/08; a API recusou com saldo bloqueado |
 | Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
 | Liberado em | **13/08/2026** |
@@ -12,27 +12,42 @@
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
-## 0. Autorização vigente — 23/08/2026
+## 0. Autorização vigente — 24/08/2026
 
 | Item | Situação |
 |---|---|
 | **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) |
 | Blocos C e D | 🟡 Não autorizados ainda |
-| Processos disponíveis | **2**, ambos com dígito verificador conferido, de **tribunais diferentes** (TJPB e TJAP) — ver §0.1 |
-| Alcance | ✅ **Resolvido em 23/08:** as 3 chamadas valem **só para o P1 (TJPB)**. O P2 fica guardado, e ampliar exige novo aval |
+| Processos disponíveis | **8**, extraídos dos autos em PDF fornecidos pelo escritório — ver §0.1 |
+| Alcance | ✅ As 3 chamadas valem **só para o P1 (TJAP, saúde pública)**. Os demais ficam guardados, e ampliar exige novo aval |
+| 🔄 Alvo trocado | **24/08:** o P1 anterior (TJPB, alimentos) está em **segredo de justiça**. Substituído — ver §0.1 |
 | Token | ✅ **Fornecido e funcional** — a API autenticou; a recusa veio da cobrança, não da identidade |
 | 🔴 Bloqueio | **Saldo bloqueado.** A prorrogação prometida em 21/08 não foi aplicada à conta — ver §5 |
 
-### 0.1 Os processos — e por que eles não estão escritos aqui
+### 0.1 Os processos — e por que o alvo mudou em 24/08
 
-Os dois números CNJ foram fornecidos pelo usuário em 23/08 e **conferidos sem custo** pelo dígito verificador (Resolução CNJ 65/2008, validação aritmética local):
+Até 23/08 havia dois números CNJ, fornecidos pelo usuário e conferidos sem custo pelo dígito verificador (Resolução CNJ 65/2008, validação aritmética local). Em 24/08 o escritório entregou os **autos completos de 6 processos em PDF**, e a leitura deles (custo zero — ver `demo/CONTRATO-DO-INSTANTANEO.md`) revelou **8 processos** e um fato que muda a autorização:
 
-| # | Tribunal | Ano | Por que serve |
-|---|---|---|---|
-| P1 | **TJPB** — Justiça Estadual da Paraíba | 2026 | Processo recente: poucas movimentações, formato atual |
-| P2 | **TJAP** — Justiça Estadual do Amapá | 2020 | Processo antigo: histórico longo, e **outro tribunal** |
+> 🔴 **Os dois processos autorizados até então estão em SEGREDO DE JUSTIÇA.** O P1 anterior (TJPB) é cumprimento de sentença de alimentos, vara de família, com parte identificada apenas por iniciais nos próprios autos — menor de idade.
 
-Serem de tribunais diferentes é sorte útil: a §3 deste documento já apontava "um segundo processo, de outro tribunal" como o melhor destino da folga, porque **a variação de formato entre tribunais é incógnita real do modelo de dados** do MCP. Os dois processos cobrem também extremos de idade — o que testa se movimentação antiga vem com o mesmo formato da recente.
+Isso é impeditivo por dois motivos independentes:
+
+1. **Risco de crédito.** Processo em segredo pode devolver resposta vazia ou restrita. R$ 3,00 gastos para receber pouco, sem que a Regra 4 (uma chamada, um objetivo registrado) se cumpra
+2. **Risco de dado.** É o pior conteúdo possível para circular numa demonstração e num provedor de IA externo
+
+**Novo alvo autorizado pelo usuário em 24/08 (D-96):**
+
+| # | Tribunal | Ano | Segredo | Por que serve |
+|---|---|---|---|---|
+| **P1** | **TJAP** — Justiça Estadual do Amapá | 2025 | ❌ Não | Saúde pública, processo **ativo**, 44 entradas de linha do tempo nos autos. Formato atual, movimentação recente |
+| P2 | TJPB | 2026 | 🔒 **Sim** | **Não autorizado** |
+| P3 | TJAP | 2020 | 🔒 **Sim** | **Não autorizado** |
+
+A trava virou código: `captura/capturar.mjs` **recusa executar** se o processo autorizado estiver marcado com segredo de justiça. Nota de rodapé não impede engano; código impede.
+
+**Perda em relação ao plano anterior:** os dois tribunais diferentes (TJPB e TJAP) eram sorte útil para testar variação de formato. Com o novo alvo, ficamos só no TJAP. Fica registrado como folga a recuperar se houver recarga — mas **a variação entre tribunais já está parcialmente coberta de graça** pelos autos em PDF, que trouxeram TJAP, TJPB e TRT-8.
+
+**Os números em si não entram no repositório** (D-95). Ficam em arquivo local ignorado pelo Git, lido pelo script de captura.
 
 ### 0.2 Correção de rota — `limit=5` não existe
 
