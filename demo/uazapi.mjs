@@ -14,7 +14,7 @@
  * Nenhum dos dois entra no repositório, e nenhum é impresso na tela.
  *
  * Uso:
- *   node demo/uazapi.mjs criar <nome>     # cria a instância (gasta o token admin)
+ *   node demo/uazapi.mjs criar <nome>     # cria a instância e grava o token dela
  *   node demo/uazapi.mjs parear [tel]     # devolve o QR code / código de pareamento
  *   node demo/uazapi.mjs status           # conectado? quanto falta para expirar?
  *   node demo/uazapi.mjs webhook          # aponta o webhook para o n8n
@@ -75,18 +75,21 @@ try {
   if (comando === 'criar') {
     const nome = args[0] || 'lex-demo-b';
     const r = await api('/instance/create', { metodo: 'POST', corpo: { name: nome }, cabecalhos: comAdmin() });
+
+    // O token da instância vai DIRETO do corpo da resposta para o arquivo. Não
+    // passa pela tela, não passa por copiar e colar, não passa por chat. Um
+    // segredo que ninguém precisa ler é um segredo que ninguém vaza.
+    const token = r.token || (r.instance && r.instance.token);
+    if (!token) {
+      console.error('\n  a API não devolveu token. Resposta:', JSON.stringify(r).slice(0, 300), '\n');
+      process.exit(1);
+    }
+    fs.writeFileSync(path.join(AQUI, 'uazapi.local'), String(token).trim(), { encoding: 'utf8' });
+
     console.log(`\ninstância criada: ${r.name || nome}`);
-    console.log(`  ${r.info || 'atenção: a instância gratuita expira em 1 hora'}`);
-    console.log(`
-  O TOKEN DA INSTÂNCIA foi devolvido pela API e NÃO será impresso aqui.
-  Grave-o agora, no seu terminal:
-
-    node guardar-segredo.mjs demo/uazapi.local
-
-  Ele aparece no painel da Uazapi, na instância recém-criada.
-`);
-    // Deliberadamente não imprimimos r.token: o que aparece na tela acaba
-    // colado em chat, e o token da instância envia mensagem em nome do número.
+    console.log(`  ${r.info || 'a instância gratuita expira em 1 hora'}`);
+    console.log(`  token gravado em demo/uazapi.local (${String(token).trim().length} caracteres, não exibido)`);
+    console.log(`\n  Próximo:  node demo/uazapi.mjs parear\n`);
   }
 
   else if (comando === 'parear') {
@@ -94,11 +97,19 @@ try {
     const r = await api('/instance/connect', { metodo: 'POST', corpo, cabecalhos: comInstancia() });
     const inst = r.instance || r;
     if (inst.paircode || r.paircode) console.log(`\ncódigo de pareamento: ${inst.paircode || r.paircode}\n`);
-    if (inst.qrcode || r.qrcode) {
-      const arq = path.join(AQUI, 'qrcode.local.txt');
-      fs.writeFileSync(arq, String(inst.qrcode || r.qrcode));
-      console.log(`\nQR code gravado em demo/qrcode.local.txt (é uma imagem em base64).`);
-      console.log(`Abra no navegador colando o conteúdo na barra de endereço.\n`);
+    const qr = inst.qrcode || r.qrcode;
+    if (qr) {
+      // O QR chega em base64. Gravar como HTML poupa o passo de descobrir o que
+      // fazer com uma parede de caracteres — é só abrir o arquivo.
+      const src = String(qr).startsWith('data:') ? qr : 'data:image/png;base64,' + qr;
+      const html = '<html><head><meta charset="utf-8"><title>Parear WhatsApp</title></head>' +
+        '<body style="background:#111;color:#eee;font-family:sans-serif;text-align:center;padding:2rem">' +
+        '<h2>WhatsApp &rsaquo; Aparelhos conectados &rsaquo; Conectar aparelho</h2>' +
+        '<img src="' + src + '" style="width:340px;background:#fff;padding:12px;border-radius:8px">' +
+        '<p>O código expira em segundos. Se falhar, rode <code>node demo/uazapi.mjs parear</code> de novo.</p>' +
+        '</body></html>';
+      fs.writeFileSync(path.join(AQUI, 'qrcode.local.html'), html);
+      console.log(`\nQR code em demo/qrcode.local.html — abra o arquivo e escaneie.`);
     }
     console.log(`status: ${inst.status || r.status || '(não informado)'}\n`);
   }
@@ -177,15 +188,7 @@ try {
   }
 
   else {
-    console.log(`
-comandos:
-  criar <nome>          cria a instância gratuita (1 hora de vida)
-  parear [telefone]     QR code ou código de pareamento
-  status                conectado?
-  webhook               aponta o webhook para o n8n
-  credencial            grava o token da instância como credencial do n8n
-  enviar <tel> <texto>  teste de envio
-`);
+    console.log(`\ncomandos:\n  criar <nome>          cria a instância gratuita (1 hora de vida)\n  parear [telefone]     QR code ou código de pareamento\n  status                conectado?\n  webhook               aponta o webhook para o n8n\n  credencial            grava o token da instância como credencial do n8n\n  enviar <tel> <texto>  teste de envio\n`);
   }
 } catch (e) {
   console.error(`\nfalhou: ${e.message}`);
