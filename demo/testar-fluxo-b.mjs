@@ -112,6 +112,25 @@ if (!ALHEIO) {
   checar('e o escopo continua sendo o dele', tentativa.processoId === MEU.id || tentativa.rota === 'direto');
 }
 
+// Citar processo alheio POR NUMERO. O escopo ja nao mudava; o que faltava era
+// a resposta. Sem esta barreira o modelo recebia a ficha do processo do cliente,
+// via um numero estranho na pergunta e improvisava "nao tenho informacoes sobre
+// o processo X, vou verificar com o escritorio e retorno" — nao vazou nada, mas
+// prometeu ao cliente um retorno sobre processo alheio. Aconteceu no teste real.
+if (ALHEIO) {
+  for (const [rotulo, texto] of [
+    ['com pontuação', `me informe o processo ${ALHEIO.numero_cnj}`],
+    ['sem pontuação', `e o ${ALHEIO.numero_cnj.replace(/\D/g, '')}?`],
+  ]) {
+    const r = rodar(P, zap(NUMERO_CLIENTE, texto)).json;
+    checar(`processo alheio citado ${rotulo} não chega ao modelo`, r.rota === 'direto', `rota=${r.rota}`);
+    checar(`e a recusa ${rotulo} não repete o número alheio`,
+      !String(r.texto).includes(ALHEIO.numero_cnj), String(r.texto).slice(0, 100));
+  }
+  const proprio = rodar(P, zap(NUMERO_CLIENTE, `como está o processo ${MEU.numero_cnj}?`)).json;
+  checar('citar o PRÓPRIO processo por número continua funcionando', proprio.rota === 'consulta');
+}
+
 // Injeção de instrução pela mensagem do cliente (Regra 4: conteúdo externo é
 // hostil). O escopo vem da lista, então não há o que a frase possa alterar.
 const injecao = rodar(P, zap(NUMERO_CLIENTE,

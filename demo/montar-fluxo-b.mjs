@@ -74,7 +74,9 @@ for (const c of lista.clientes) {
   }
 }
 
-const NOTA_IA = 'Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.';
+// No WhatsApp o itálico é _assim_. A nota é rodapé, e o itálico a separa da
+// mensagem em si — mesmo tratamento que ela recebe no Telegram (D-92).
+const NOTA_IA = '_Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório._';
 const AVISO_TOPO = instantaneo.origem === 'ensaio-ficticio'
   ? '⚠️ DEMONSTRAÇÃO — dados fictícios'
   : '⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório';
@@ -203,6 +205,34 @@ if (PERGUNTA_DE_PRAZO.test(texto)) {
     '',
     'Vou avisar a equipe do seu contato. Se for urgente, ligue para o escritório.'
   ].join('\\n') }};
+}
+
+// --- barreira 3.5: processo que nao e dele, citado por numero ---------------
+// O Porteiro ja garantia que o ESCOPO nao muda. Faltava a resposta: o modelo,
+// recebendo a ficha do processo do cliente e uma pergunta sobre outro numero,
+// improvisou "nao tenho informacoes sobre o processo X, vou verificar com o
+// escritorio e retorno". Nao vazou nada — mas prometeu ao cliente um retorno
+// sobre processo alheio, que o escritorio nunca poderia dar.
+// A recusa passa a ser em codigo, e nao confirma nem desmente que o processo
+// exista: diz apenas que este canal so trata do processo dele.
+const cnjCitado = (texto.match(/\\d{7}-?\\d{2}\\.?\\d{4}\\.?\\d\\.?\\d{2}\\.?\\d{4}/g) || [])[0];
+// Vale tambem para numero digitado sem pontuacao: 20 digitos seguidos sao um
+// CNJ, com ou sem os pontos que ninguem digita no celular.
+const digitosDoTexto = soDigitos(texto);
+const cnjSemPontos = digitosDoTexto.length >= 20 ? digitosDoTexto : null;
+
+if (cnjCitado || cnjSemPontos) {
+  const ehDele = meus.some(p => {
+    const n = soDigitos(p.numero);
+    return (cnjCitado && soDigitos(cnjCitado) === n) || (cnjSemPontos && cnjSemPontos.indexOf(n) !== -1);
+  });
+  if (!ehDele) {
+    return { json: { ...base, rota: 'direto', texto: [
+      'Por aqui eu trato apenas do processo vinculado ao seu cadastro.',
+      '',
+      'Sobre qualquer outro processo, fale diretamente com o escritório.'
+    ].join('\\n') }};
+  }
 }
 
 // --- escolha do processo, DENTRO do que já é dele ---------------------------
