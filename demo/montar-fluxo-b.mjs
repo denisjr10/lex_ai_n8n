@@ -100,6 +100,29 @@ const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
 
 const soDigitos = (t) => String(t || '').replace(/\\D/g, '');
 
+/** Celular brasileiro tem DUAS formas, e o WhatsApp guarda a do cadastro
+ *  original: 55 + DDD + 9 digitos (com o nono) ou 55 + DDD + 8 (sem).
+ *  Quem cadastra o cliente digita a que conhece; o telefone reporta a que tem.
+ *  Comparar sem normalizar recusa cliente legitimo — e a recusa parece um
+ *  problema de seguranca funcionando, o que e o pior tipo de defeito.
+ *  Aconteceu na primeira conexao: numero cadastrado com o nono, WhatsApp
+ *  registrado sem ele. */
+function formasDoNumero(bruto) {
+  const n = soDigitos(bruto);
+  const formas = [n];
+  const m = n.match(/^55(\\d{2})(\\d{8,9})\$/);
+  if (m) {
+    const [, ddd, resto] = m;
+    if (resto.length === 9 && resto[0] === '9') formas.push('55' + ddd + resto.slice(1));
+    if (resto.length === 8) formas.push('55' + ddd + '9' + resto);
+  }
+  return formas;
+}
+const mesmoNumero = (a, b) => {
+  const fa = formasDoNumero(a), fb = formasDoNumero(b);
+  return fa.some(x => fb.indexOf(x) !== -1);
+};
+
 // O corpo do webhook da Uazapi e { event, instance, data }, e o formato de
 // "data" varia por evento. Aceitar as formas plausíveis custa três linhas e
 // evita que uma mudança de versão derrube a demonstração na frente do cliente.
@@ -124,7 +147,7 @@ if (!numero) {
 // --- barreira 1: quem -------------------------------------------------------
 // A recusa é deliberadamente sem informação. Dizer "este processo não é seu"
 // já confirma que o processo existe, e para quem pesca isso basta.
-const cliente = CLIENTES.find(c => soDigitos(c.whatsapp) === numero);
+const cliente = CLIENTES.find(c => mesmoNumero(c.whatsapp, numero));
 if (!cliente) {
   return { json: { rota: 'direto', numero, texto: [
     'Olá! Este é o atendimento automatizado do escritório.',

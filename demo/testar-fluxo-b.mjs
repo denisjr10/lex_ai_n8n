@@ -69,6 +69,29 @@ const doCliente = rodar(P, zap(NUMERO_CLIENTE, PERGUNTA)).json;
 checar('cliente cadastrado é atendido', doCliente.rota === 'consulta', `rota=${doCliente.rota}`);
 checar('e recebe o processo DELE', doCliente.processoId === MEU.id);
 
+// O WhatsApp guarda o numero na forma do cadastro original. O escritorio vai
+// digitar a forma que conhece. As duas tem de casar — foi isto que recusou o
+// cliente legitimo na primeira conexao real.
+const semNono = NUMERO_CLIENTE.replace(/^(55\d{2})9(\d{8})$/, '$1$2');
+const comNono = NUMERO_CLIENTE.length === 12
+  ? NUMERO_CLIENTE.replace(/^(55\d{2})(\d{8})$/, '$19$2')
+  : NUMERO_CLIENTE;
+
+// A variante tem de ser DIFERENTE do cadastro, senão o teste passa sem testar
+// nada — foi o que aconteceu na primeira versão desta verificação.
+checar('as duas formas do número são de fato diferentes', semNono !== comNono,
+  `sem=${semNono} com=${comNono}`);
+
+for (const [rotulo, variante] of [
+  ['sem o nono dígito', semNono],
+  ['com o nono dígito', comNono],
+  ['com máscara e espaços', `+55 (96) 8118-6483`.replace(/\D/g, '') === semNono ? '+55 (96) 8118-6483' : comNono],
+]) {
+  const r = rodar(P, zap(String(variante).replace(/\D/g, ''), PERGUNTA)).json;
+  checar(`o mesmo cliente é reconhecido ${rotulo}`, r.rota === 'consulta',
+    `variante=${variante} rota=${r.rota}`);
+}
+
 const doEstranho = rodar(P, zap(ESTRANHO, PERGUNTA)).json;
 checar('número desconhecido não é atendido', doEstranho.rota === 'direto');
 checar('a recusa não confirma que o processo existe',
