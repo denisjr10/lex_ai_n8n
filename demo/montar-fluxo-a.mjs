@@ -44,7 +44,8 @@ console.log(`lista       : ${path.basename(listaPath)} · ${lista.colaboradores.
 // contorna nada, porque quem decide não é ela.
 const CODIGO_PORTEIRO = `
 const COLABORADORES = ${JSON.stringify(lista.colaboradores, null, 2)};
-const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => p.id))};
+const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({ id: p.id, numero: p.numero_cnj, titulo: p.titulo })))};
+const soDigitos = (t) => String(t).replace(/\D/g, '');
 
 const e = $json;
 const cb = e.callback_query;
@@ -107,28 +108,33 @@ if (!texto || texto === '/start') {
     '',
     'Posso consultar o andamento de um processo e redigir um retorno ao cliente.',
     '',
-    'Processos disponíveis nesta demonstração: <b>' + PROCESSOS.join(', ') + '</b>',
+    'Processo disponível nesta demonstração:',
+    PROCESSOS.map(p => '<code>' + p.numero + '</code> — ' + p.titulo).join('\\n'),
     '',
     'Experimente:',
-    '· <i>Como está o processo ' + PROCESSOS[0] + '?</i>',
+    '· <i>Como está o processo ' + PROCESSOS[0].numero + '?</i>',
     '· <i>Redige um retorno para o cliente sobre esse processo</i>'
   ].join('\\n') }};
 }
 
-// barreira 3: abrangência — só os processos do instantâneo existem
-const alvo = PROCESSOS.find(id =>
-  texto.toUpperCase().includes(id.toUpperCase())
+// barreira 3: abrangência — só os processos do instantâneo existem.
+// Casa pelo número CNJ (com ou sem pontuação) ou pelo apelido interno.
+const digitos = soDigitos(texto);
+const alvo = PROCESSOS.find(p =>
+  (digitos.length >= 15 && digitos.indexOf(soDigitos(p.numero)) !== -1) ||
+  texto.toUpperCase().indexOf(p.id.toUpperCase()) !== -1
 ) || (PROCESSOS.length === 1 ? PROCESSOS[0] : null);
 
 if (!alvo) {
   return { json: { ...base, rota: 'negado', texto:
-    'Não identifiquei a qual processo você se refere. Disponíveis: <b>' + PROCESSOS.join(', ') + '</b>' }};
+    'Não identifiquei a qual processo você se refere.\\n\\nDisponível:\\n' +
+    PROCESSOS.map(p => '<code>' + p.numero + '</code>').join('\\n') }};
 }
 
 const querRedigir = /redi[jg]|retorno|mensagem|escrev|comunic|avis/i.test(texto);
 
 return { json: { ...base, rota: querRedigir ? 'redigir' : 'consulta',
-  processoId: alvo, pergunta: texto }};
+  processoId: alvo.id, processoNumero: alvo.numero, pergunta: texto }};
 `.trim();
 
 // ===========================================================================
@@ -333,12 +339,25 @@ const rotulo = {
 // no produto, vai para a auditoria (§7 do modelo de identidade).
 const trilha = { acao: j.acao, acaoPedida: j.acaoPedida, por: j.nome, papel: j.papel, userId: j.userId, quando };
 
-const texto = j.textoOriginal.replace(
-  /<b>Proposta de mensagem ao cliente<\\/b>[\\s\\S]*?\\n\\n/,
-  '<b>' + rotulo + '</b>\\n<i>' + (j.acao === 'negado'
-     ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'
-     : 'por ' + j.nome + ' · ' + quando) + '</i>\\n\\n'
-);
+// ATENÇÃO: o Telegram devolve msg.text em TEXTO PURO — as marcações HTML que
+// enviamos não voltam (elas viajam à parte, em "entities"). Procurar <b>…</b>
+// aqui nunca casa, e o resultado é a mensagem reenviada idêntica: sem cabeçalho
+// de decisão, sem formatação, e sem botões (editMessageText os remove).
+// Por isso reconstruímos a mensagem por blocos, e reaplicamos o HTML nós mesmos.
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const blocos = String(j.textoOriginal || '').split('\\n\\n');
+const temAviso = blocos[0] && blocos[0].indexOf('DADOS FICTÍCIOS') !== -1;
+const iCabecalho = blocos.findIndex(b => b.indexOf('Proposta de mensagem ao cliente') === 0);
+
+const aviso = temAviso ? esc(blocos[0]) + '\\n\\n' : '';
+const corpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(temAviso ? 1 : 0)).join('\\n\\n');
+
+const assinatura = j.acao === 'negado'
+  ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'
+  : 'por ' + j.nome + ' · ' + quando;
+
+const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + esc(corpo);
 
 return { json: { ...j, trilha, textoFinal: texto,
   aviso: j.acao === 'aprovar'
