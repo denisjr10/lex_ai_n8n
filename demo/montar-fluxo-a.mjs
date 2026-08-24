@@ -26,14 +26,39 @@ const publicar = process.argv.includes('--publicar');
 const NOME = '[LEX-DEMO] A · Colaborador (Telegram)';
 
 // --- dados embutidos -------------------------------------------------------
-const instantaneo = JSON.parse(fs.readFileSync(path.join(AQUI, 'instantaneo', 'ensaio.json'), 'utf8'));
+// Quantas movimentações vão para a ficha que o modelo lê. O limite existe por
+// razão dura, não por estética: um dos processos reais tem 400 entradas, e a
+// janela de contexto do modelo não comporta isso — nem faria sentido pagar por
+// reler o processo inteiro a cada pergunta (Regra 6: custo é requisito).
+// O total verdadeiro continua na ficha, em número, para o modelo não afirmar
+// que aquelas são todas as movimentações que existem.
+const MOVS_NA_FICHA = 20;
+
+// Dado real, quando existe, tem precedência sobre o ensaio fictício.
+const caminhoReal = path.join(AQUI, 'instantaneo', 'processos.json');
+const caminhoEnsaio = path.join(AQUI, 'instantaneo', 'ensaio.json');
+const usarReal = fs.existsSync(caminhoReal) && !process.argv.includes('--ensaio');
+const bruto = JSON.parse(fs.readFileSync(usarReal ? caminhoReal : caminhoEnsaio, 'utf8'));
+
+const instantaneo = {
+  ...bruto,
+  processos: bruto.processos.map((p) => ({
+    ...p,
+    movimentacoes: (p.movimentacoes || []).slice(0, MOVS_NA_FICHA),
+    quantidade_movimentacoes: p.quantidade_movimentacoes ?? (p.movimentacoes || []).length,
+  })),
+};
 
 const listaPath = fs.existsSync(path.join(AQUI, 'listas', 'colaboradores.json'))
   ? path.join(AQUI, 'listas', 'colaboradores.json')
   : path.join(AQUI, 'listas', 'colaboradores.exemplo.json');
 const lista = JSON.parse(fs.readFileSync(listaPath, 'utf8'));
 
-console.log(`instantâneo : ${instantaneo.origem} · ${instantaneo.processos.length} processo(s)`);
+const emSegredo = instantaneo.processos.filter((p) => p.segredo_justica).length;
+console.log(`instantâneo : ${instantaneo.origem} · ${instantaneo.processos.length} processo(s)`
+  + (emSegredo ? ` · ${emSegredo} em segredo de justiça` : ''));
+if (bruto.nomes_reais) console.log(`\x1b[33m              NOMES REAIS — este fluxo levará dado de cliente ao provedor de IA (D-97)\x1b[0m`);
+console.log(`              ficha limitada a ${MOVS_NA_FICHA} movimentações por processo`);
 console.log(`lista       : ${path.basename(listaPath)} · ${lista.colaboradores.length} colaborador(es)`);
 
 // ===========================================================================
@@ -44,8 +69,18 @@ console.log(`lista       : ${path.basename(listaPath)} · ${lista.colaboradores.
 // contorna nada, porque quem decide não é ela.
 const CODIGO_PORTEIRO = `
 const COLABORADORES = ${JSON.stringify(lista.colaboradores, null, 2)};
-const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({ id: p.id, numero: p.numero_cnj, titulo: p.titulo })))};
+const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
+  id: p.id,
+  numero: p.numero_cnj,
+  titulo: p.titulo,
+  classe: p.classe,
+  segredo: p.segredo_justica === true,
+  // Nomes das partes, para casar "o processo do Fulano" — que é como um
+  // colaborador realmente pergunta. Ninguém decora número CNJ.
+  partes: [...new Set((p.envolvidos || []).map(e => e.nome).filter(Boolean))],
+})))};
 const soDigitos = (t) => String(t).replace(/\D/g, '');
+const semAcento = (t) => String(t).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toUpperCase();
 
 const e = $json;
 const cb = e.callback_query;
@@ -122,16 +157,23 @@ const texto = String((msg && msg.text) || '').trim();
 const ehSaudacao = /^(\\/start|\\/ajuda|\\/menu|oi+|ol[áa]|opa|e a[íi]|al[oô]|hey|hell?o|bom dia|boa tarde|boa noite|tudo bem|tudo bom|ajuda|menu|come[çc]ar)[\\s!.,?]*$/i.test(texto);
 
 if (!texto || ehSaudacao) {
+  // Com um processo dava para listar tudo. Com oito, uma lista de oito números
+  // CNJ e' parede de texto que ninguem le. Mostra-se o que se usa: o nome da
+  // parte, que e' como o colaborador de fato se refere ao processo.
+  const linhas = PROCESSOS.map(p => {
+    const parte = (p.partes[0] || p.titulo.split(' × ')[0] || '').split(' ').slice(0, 2).join(' ');
+    return '· ' + (p.segredo ? '🔒 ' : '') + '<b>' + parte + '</b> — ' + (p.classe || p.titulo).toLowerCase();
+  });
   return { json: { ...base, rota: 'negado', texto: [
     'Olá, ' + base.nome.split(' ')[0] + '.',
     '',
     'Posso consultar o andamento de um processo e redigir um retorno ao cliente.',
     '',
-    'Processo disponível nesta demonstração:',
-    PROCESSOS.map(p => '<code>' + p.numero + '</code> — ' + p.titulo).join('\\n'),
+    '<b>' + PROCESSOS.length + ' processo(s) nesta demonstração:</b>',
+    linhas.join('\\n'),
     '',
-    'Experimente:',
-    '· <i>Como está o processo ' + PROCESSOS[0].numero + '?</i>',
+    'Pergunte pelo nome da parte ou pelo número. Experimente:',
+    '· <i>Como está o processo ' + (PROCESSOS.find(p => !p.segredo) || PROCESSOS[0]).partes[0] + '?</i>',
     '· <i>Redige um retorno para o cliente sobre esse processo</i>'
   ].join('\\n') }};
 }
@@ -139,17 +181,54 @@ if (!texto || ehSaudacao) {
 // barreira 3: abrangência — só os processos do instantâneo existem.
 // Casa pelo número CNJ (com ou sem pontuação) ou pelo apelido interno.
 const digitos = soDigitos(texto);
+const alvoTexto = semAcento(texto);
 const lembrado = memoria.ultimoProcesso[String(de.id)];
-const alvo = PROCESSOS.find(p =>
+
+// Por número, por apelido interno, ou por nome de parte — nesta ordem.
+const porNumero = PROCESSOS.find(p =>
   (digitos.length >= 15 && digitos.indexOf(soDigitos(p.numero)) !== -1) ||
-  texto.toUpperCase().indexOf(p.id.toUpperCase()) !== -1
-) || PROCESSOS.find(p => p.id === lembrado)
+  alvoTexto.indexOf(semAcento(p.id)) !== -1);
+
+// Nome de parte: casa por sobrenome ou nome completo, nunca por pedaço curto.
+// "Ana" sozinha nao decide nada quando ha oito processos.
+const porNome = porNumero ? [] : PROCESSOS.filter(p => p.partes.some(nome =>
+  semAcento(nome).split(' ').filter(t => t.length >= 4)
+    .some(t => alvoTexto.indexOf(t) !== -1)));
+
+// Ambiguidade nao se resolve no chute: pergunta-se.
+if (!porNumero && porNome.length > 1) {
+  return { json: { ...base, rota: 'negado', texto: [
+    'Encontrei mais de um processo com esse nome. Qual deles?',
+    '',
+    porNome.map(p => '· ' + (p.segredo ? '🔒 ' : '') + '<code>' + p.numero + '</code> — ' + (p.classe || p.titulo).toLowerCase()).join('\\n')
+  ].join('\\n') }};
+}
+
+const alvo = porNumero || porNome[0] || PROCESSOS.find(p => p.id === lembrado)
   || (PROCESSOS.length === 1 ? PROCESSOS[0] : null);
 
 if (!alvo) {
   return { json: { ...base, rota: 'negado', texto:
-    'Não identifiquei a qual processo você se refere.\\n\\nDisponível:\\n' +
-    PROCESSOS.map(p => '<code>' + p.numero + '</code>').join('\\n') }};
+    'Não identifiquei a qual processo você se refere.\\n\\n' +
+    'Diga o nome de uma das partes ou o número do processo. ' +
+    'Mande <i>oi</i> para ver a lista.' }};
+}
+
+// Barreira 4: segredo de justiça. É verificação em código, não instrução ao
+// modelo — o conteúdo nem chega a ser montado, então não há o que convencer.
+if (alvo.segredo) {
+  memoria.ultimoProcesso[String(de.id)] = alvo.id;
+  return { json: { ...base, rota: 'negado', texto: [
+    '🔒 <b>Processo em segredo de justiça</b>',
+    '',
+    '<code>' + alvo.numero + '</code> — ' + (alvo.classe || '').toLowerCase(),
+    '',
+    'Não exibo andamento nem redijo mensagem sobre processo em segredo. ' +
+    'Consulte diretamente o sistema do tribunal, com a sua identificação.',
+    '',
+    '<i>Esta recusa é verificada em código, antes de qualquer consulta. ' +
+    'Não é uma orientação dada à inteligência artificial.</i>'
+  ].join('\\n') }};
 }
 
 memoria.ultimoProcesso[String(de.id)] = alvo.id;
@@ -187,7 +266,11 @@ const movs = p.movimentacoes
   .map(m => '- ' + m.data + ' · ' + m.tipo + ' · ' + m.conteudo)
   .join('\\n');
 
-const ficha = [
+// Campo vazio vira "-" e ocupa espaço sem ensinar nada — e ainda convida o
+// modelo a comentar a ausência. Os autos em PDF não trazem área nem situação.
+const semVazios = (linhas) => linhas.filter(l => !/: -$/.test(l));
+
+const ficha = semVazios([
   'PROCESSO ' + p.numero_cnj,
   'Título: ' + p.titulo,
   'Tribunal: ' + (p.tribunal.nome || '-') + ' (' + (p.tribunal.sigla || '-') + '), ' + (p.tribunal.grau || '-'),
@@ -204,12 +287,26 @@ const ficha = [
   'PARTES E ADVOGADOS',
   partes,
   '',
-  'ÚLTIMAS ' + p.movimentacoes.length + ' MOVIMENTAÇÕES (mais recente primeiro)',
+  // O modelo precisa saber que está vendo um RECORTE. Sem esta linha ele
+  // afirma "o processo teve 20 movimentações", e a afirmação é falsa.
+  'MOVIMENTAÇÕES MAIS RECENTES — ' + p.movimentacoes.length + ' de ' +
+    (p.quantidade_movimentacoes ?? p.movimentacoes.length) +
+    ' (recorte; as mais antigas não estão aqui)',
   movs
-].join('\\n');
+]).join('\\n');
+
+const ehEnsaio = INSTANTANEO.origem === 'ensaio-ficticio';
+
+// O aviso de topo diz ao colaborador o que ele está vendo. Sempre começa com
+// ⚠️ — o nó de aprovação reconhece o bloco por esse marcador.
+const avisoTopo = ehEnsaio
+  ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>'
+  : INSTANTANEO.nomes_reais
+  ? '⚠️ <b>DADOS REAIS DE CLIENTE — demonstração</b>'
+  : '⚠️ <b>Demonstração — dados reais do escritório, nomes anonimizados</b>';
 
 return { json: { ...$json, ficha, aviso_origem: INSTANTANEO.aviso,
-  ehEnsaio: INSTANTANEO.origem === 'ensaio-ficticio' } };
+  ehEnsaio, avisoTopo } };
 `.trim();
 
 // ===========================================================================
@@ -333,13 +430,13 @@ const nodes = [
 
   no('Enviar resposta', 'n8n-nodes-base.telegram', 1.2,
     { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
-      text: "={{ ($('Ficha do processo').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + $json.text }}",
+      text: "={{ $('Ficha do processo').item.json.avisoTopo + '\\n\\n' + $json.text }}",
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [960, 100],
     { credentials: { telegramApi: cred.telegram } }),
 
   no('Propor envio (aguarda aprovação)', 'n8n-nodes-base.telegram', 1.2,
     { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
-      text: "={{ ($('Ficha do processo (redação)').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text.trim() + '\\n\\n<i>" + NOTA_IA + "</i>' }}",
+      text: "={{ $('Ficha do processo (redação)').item.json.avisoTopo + '\\n\\n' + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text.trim() + '\\n\\n<i>" + NOTA_IA + "</i>' }}",
       // ATENÇÃO: replyMarkup e inlineKeyboard são parâmetros de TOPO do nó.
       // Dentro de additionalFields eles são simplesmente ignorados — a mensagem
       // chega sem botão nenhum, e sem erro que denuncie o problema.
@@ -375,7 +472,9 @@ const trilha = { acao: j.acao, acaoPedida: j.acaoPedida, por: j.nome, papel: j.p
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const blocos = String(j.textoOriginal || '').split('\\n\\n');
-const temAviso = blocos[0] && blocos[0].indexOf('DADOS FICTÍCIOS') !== -1;
+// O aviso de topo sempre começa com ⚠️. Procurar pelo texto exato quebraria a
+// cada mudança de redação, e o sintoma seria a mensagem remontada errada.
+const temAviso = blocos[0] && blocos[0].indexOf('⚠️') === 0;
 const iCabecalho = blocos.findIndex(b => b.indexOf('Proposta de mensagem ao cliente') === 0);
 
 const aviso = temAviso ? esc(blocos[0]) + '\\n\\n' : '';

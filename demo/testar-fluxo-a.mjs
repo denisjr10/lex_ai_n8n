@@ -36,12 +36,22 @@ const lista = JSON.parse(fs.readFileSync(
     ? path.join(AQUI, 'listas', 'colaboradores.json')
     : path.join(AQUI, 'listas', 'colaboradores.exemplo.json'), 'utf8'));
 
-const instantaneo = JSON.parse(fs.readFileSync(path.join(AQUI, 'instantaneo', 'ensaio.json'), 'utf8'));
+// O teste le o MESMO instantaneo que o gerador embutiu — o real quando existe.
+// Testar contra o ensaio enquanto o fluxo publicado usa dado real e testar
+// outro programa.
+const caminhoReal = path.join(AQUI, 'instantaneo', 'processos.json');
+const instantaneo = JSON.parse(fs.readFileSync(
+  fs.existsSync(caminhoReal) ? caminhoReal : path.join(AQUI, 'instantaneo', 'ensaio.json'), 'utf8'));
 
 const ADVOGADO   = lista.colaboradores.find(c => c.pode_aprovar_envio_ao_cliente) || {};
 const SEM_PODER  = lista.colaboradores.find(c => !c.pode_aprovar_envio_ao_cliente) || {};
-const NUMERO     = instantaneo.processos[0].numero_cnj;
-const APELIDO    = instantaneo.processos[0].id;
+// As consultas de teste usam um processo SEM segredo: o de segredo tem barreira
+// propria, testada a parte.
+const ABERTO     = instantaneo.processos.find(p => !p.segredo_justica) || instantaneo.processos[0];
+const SIGILOSO   = instantaneo.processos.find(p => p.segredo_justica) || null;
+const NUMERO     = ABERTO.numero_cnj;
+const APELIDO    = ABERTO.id;
+const PARTE      = (ABERTO.envolvidos.find(e => e.nome) || {}).nome || '';
 
 let falhas = 0;
 function checar(rotulo, condicao, detalhe = '') {
@@ -82,13 +92,16 @@ checar('recusa não vaza nome de colaborador', !String(desconhecido.texto).inclu
 
 const boasVindas = rodar(P, msg(ADVOGADO.telegram_user_id, '/start')).json;
 checar('autorizado recebe boas-vindas', boasVindas.rota === 'negado' && String(boasVindas.texto).includes('Olá'));
-checar('boas-vindas mostram o NÚMERO do processo, não o apelido interno',
-  String(boasVindas.texto).includes(NUMERO), `texto: ${String(boasVindas.texto).slice(0, 120)}`);
+checar('boas-vindas não vazam o apelido interno',
+  !String(boasVindas.texto).includes(APELIDO), `texto: ${String(boasVindas.texto).slice(0, 160)}`);
+checar('boas-vindas anunciam quantos processos existem',
+  String(boasVindas.texto).includes(String(instantaneo.processos.length)));
 
 for (const [rotulo, pergunta] of [
   ['pelo número com pontuação', `Como está o processo ${NUMERO}?`],
   ['pelo número sem pontuação', `Como está o processo ${NUMERO.replace(/\D/g, '')}?`],
   ['pelo apelido interno', `Como está o processo ${APELIDO}?`],
+  ['pelo nome da parte', `Como está o processo do ${PARTE}?`],
 ]) {
   const r = rodar(P, msg(ADVOGADO.telegram_user_id, pergunta)).json;
   checar(`consulta reconhecida ${rotulo}`, r.rota === 'consulta' && r.processoId === APELIDO, `rota=${r.rota}`);
@@ -134,9 +147,46 @@ console.log('\n\x1b[1mFicha — o que o modelo recebe\x1b[0m');
 const F = codigo('Ficha do processo');
 const ficha = rodar(F, rodar(P, msg(ADVOGADO.telegram_user_id, `e o ${NUMERO}?`)).json).json;
 checar('ficha inclui o número do processo', String(ficha.ficha).includes(NUMERO));
-checar('ficha marca origem de ensaio', ficha.ehEnsaio === true);
 checar('ficha não contém CPF', !/\d{3}\.\d{3}\.\d{3}-\d{2}/.test(ficha.ficha));
-checar('ficha agrupa papéis da mesma pessoa', /\(.*,.*\)/.test(ficha.ficha));
+
+// O aviso de topo tem de dizer a verdade sobre a origem — é ele que impede o
+// escritório de tomar decisão sobre processo que não existe.
+checar('aviso de topo combina com a origem do instantâneo',
+  instantaneo.origem === 'ensaio-ficticio'
+    ? ficha.ehEnsaio === true && /FICTÍCIOS/.test(ficha.avisoTopo)
+    : ficha.ehEnsaio === false && /dados reais/i.test(ficha.avisoTopo),
+  `origem=${instantaneo.origem} · aviso=${ficha.avisoTopo}`);
+checar('aviso de topo começa com ⚠️, o marcador que a aprovação procura',
+  String(ficha.avisoTopo).indexOf('⚠️') === 0);
+
+// O corte existe para caber na janela do modelo. Mas o total verdadeiro tem de
+// aparecer, ou o modelo afirma que aquelas são todas as movimentações que há.
+const linhaMovs = String(ficha.ficha).split('\n').find((l) => l.startsWith('MOVIMENTAÇÕES MAIS RECENTES'));
+checar('ficha avisa que as movimentações são um recorte', Boolean(linhaMovs));
+checar('ficha traz o total verdadeiro de movimentações',
+  Boolean(linhaMovs) && linhaMovs.includes(String(ABERTO.quantidade_movimentacoes)),
+  `linha: ${linhaMovs}`);
+
+const embutido = JSON.parse(codigo('Ficha do processo').match(/const INSTANTANEO = ([\s\S]*?);\n/)[1]);
+const maiorEmbutido = Math.max(...embutido.processos.map((p) => p.movimentacoes.length));
+checar('o fluxo publicado embute no máximo 20 movimentações por processo',
+  maiorEmbutido <= 20, `maior embutido: ${maiorEmbutido}`);
+
+// ---------------------------------------------------------------------------
+console.log('\n\x1b[1mSegredo de justiça — a barreira que nasceu dos autos reais\x1b[0m');
+if (!SIGILOSO) {
+  console.log('  \x1b[33m—\x1b[0m 4 verificações puladas: não há processo em segredo neste instantâneo');
+} else {
+  memoriaNova();
+  const sig = rodar(P, msg(ADVOGADO.telegram_user_id, `Como está o processo ${SIGILOSO.numero_cnj}?`)).json;
+  checar('processo em segredo não chega ao modelo', sig.rota === 'negado', `rota=${sig.rota}`);
+  checar('a recusa diz o motivo', /segredo de justi/i.test(String(sig.texto)));
+  checar('a recusa não revela as partes',
+    !SIGILOSO.envolvidos.some((e) => e.nome && String(sig.texto).includes(e.nome)));
+  const pedirRedacao = rodar(P, msg(ADVOGADO.telegram_user_id, 'Redige um retorno para o cliente sobre esse processo')).json;
+  checar('nem redigir mensagem sobre ele', pedirRedacao.rota === 'negado', `rota=${pedirRedacao.rota}`);
+  memoriaNova();
+}
 
 // ===========================================================================
 console.log('\n\x1b[1mAprovação — o coração da demonstração\x1b[0m');

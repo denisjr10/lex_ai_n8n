@@ -317,7 +317,8 @@ function montar(capa, documentos, apelido) {
         tipo: d.tipo || 'DOCUMENTO',
         // O PJe não tem texto de andamento como o Escavador: o que existe é o
         // título do documento. É pouco, e é honesto — inventar não é opção.
-        conteudo: [d.tipo, d.documento].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' — '),
+        // O tipo já vai no campo próprio; repeti-lo aqui só ocupa contexto.
+        conteudo: (d.documento && d.documento !== d.tipo) ? d.documento : (d.tipo || 'Documento'),
         fonte: { sigla },
       })),
     },
