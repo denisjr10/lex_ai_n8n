@@ -5,7 +5,7 @@
 | Atualizado em | 2026-08-24 |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **Demo A rodando no Telegram** (fluxo `ZPh3DxptHFIyWETO`, 15 nós, 47 verificações automáticas) |
+| Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **Demo A rodando no Telegram** (fluxo `ZPh3DxptHFIyWETO`, 15 nós, 8 processos reais, 60 verificações automáticas) |
 | Crédito Escavador | 🔴 **BLOQUEADO.** A API recusa com `403 · "Seu saldo está bloqueado"`. A prorrogação prometida em 21/08 **não foi aplicada** (R-37). R$ 0,00 gastos — nada foi debitado |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -24,10 +24,11 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 
 **Próximos passos imediatos:**
 
-1. Ligar os 8 processos ao fluxo — a ficha precisa limitar as movimentações mais recentes (um dos processos tem 400) antes de ir ao modelo
-2. Decidir o nível de anonimização com a advogada (D-97) — o interruptor já existe
-3. Segundo `user_id` do Telegram, para demonstrar ao vivo a recusa de aprovação
-4. Demo B (cliente no WhatsApp/Uazapi) — ainda não começada
+1. ✅ **Feito** — os 8 processos estão no fluxo publicado, com a ficha cortada em 20 movimentações (406 tokens por pergunta) e barreira de segredo de justiça em código
+2. **Teste no Telegram** dos caminhos novos: busca por nome, ambiguidade, recusa por segredo
+3. Decidir o nível de anonimização com a advogada (D-97) — o interruptor já existe
+4. Segundo `user_id` do Telegram, para demonstrar ao vivo a recusa de aprovação
+5. Demo B (cliente no WhatsApp/Uazapi) — ainda não começada
 
 ## Concluído
 
