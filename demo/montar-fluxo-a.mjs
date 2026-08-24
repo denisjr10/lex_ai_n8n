@@ -245,7 +245,7 @@ const nodes = [
           outputKey: 'aprovacao' },
         { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
           { operator: { type: 'string', operation: 'contains' }, leftValue: '={{ $json.rota }}', rightValue: 'negad' }] },
-          outputKey: 'recusa' }
+          outputKey: 'direto' }
       ] }, options: { fallbackOutput: 'none' } }, [220, 300]),
 
   no('Ficha do processo', 'n8n-nodes-base.code', 2,
@@ -332,7 +332,7 @@ return { json: { ...j, trilha, textoFinal: texto,
       additionalFields: { parse_mode: 'HTML' } }, [960, 620],
     { credentials: { telegramApi: cred.telegram } }),
 
-  no('Recusar', 'n8n-nodes-base.telegram', 1.2,
+  no('Responder sem consultar', 'n8n-nodes-base.telegram', 1.2,
     { chatId: '={{ $json.chatId }}', text: '={{ $json.texto }}',
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [460, 760],
     { credentials: { telegramApi: cred.telegram } }),
@@ -345,7 +345,7 @@ const connections = {
       [{ node: 'Ficha do processo', type: 'main', index: 0 }],
       [{ node: 'Ficha do processo (redação)', type: 'main', index: 0 }],
       [{ node: 'Registrar decisão', type: 'main', index: 0 }],
-      [{ node: 'Recusar', type: 'main', index: 0 }],
+      [{ node: 'Responder sem consultar', type: 'main', index: 0 }],
   ] },
   'Ficha do processo':           { main: [[{ node: 'Responder ao colaborador', type: 'main', index: 0 }]] },
   'Ficha do processo (redação)': { main: [[{ node: 'Redigir mensagem ao cliente', type: 'main', index: 0 }]] },
