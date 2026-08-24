@@ -169,3 +169,6 @@ demo/credenciais.json
 # historico. So o instantaneo derivado e anonimizado chega perto do Git.
 captura/autos/
 captura/autos-texto/
+
+demo/uazapi-admin.local
+demo/qrcode.local.txt

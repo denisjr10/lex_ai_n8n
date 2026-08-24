@@ -1,14 +1,13 @@
 {
-  "_leia-me": "MODELO. Copie para clientes.json (ignorado pelo Git) e preencha com dados reais.",
-  "_regra": "O numero de telefone e CHAVE DE BUSCA, nunca prova de identidade (D-08). O vinculo e cadastrado aqui pelo escritorio — jamais por auto-declaracao no chat.",
+  "_leia-me": "Modelo. Copie para clientes.json (ignorado pelo Git) e preencha com numeros reais.",
+  "_regra": "O ESCOPO DO CLIENTE VEM DAQUI, nao da pergunta dele. Ele pode pedir o que quiser: o Porteiro so entrega o que esta nesta lista, para o numero que esta nesta lista. Numero fora da lista e recusado sem revelar se o processo existe (Regra 5).",
+  "_formato_numero": "So digitos, com codigo do pais. Ex.: 5596999998888 para (96) 99999-8888.",
   "clientes": [
     {
-      "telefone": "5583999999999",
-      "nome_exibicao": "Primeiro nome do cliente",
-      "processos": [
-        "ENSAIO-1"
-      ],
-      "_nota": "so os processos listados aqui sao visiveis a este numero. Qualquer outro e recusado"
+      "whatsapp": "5500000000000",
+      "nome": "Cliente de demonstracao",
+      "processos": ["AUTOS-05"],
+      "_nota": "Um cliente pode ter mais de um processo. O Porteiro so entrega os que estao aqui."
     }
   ]
 }
