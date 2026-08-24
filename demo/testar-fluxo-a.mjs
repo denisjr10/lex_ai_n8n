@@ -224,9 +224,10 @@ if (!SEM_PODER.telegram_user_id) {
   console.log('      (preencha a vaga de estagiário em demo/listas/colaboradores.json)');
 } else {
   const neg = rodar(R, rodar(P, clique(SEM_PODER.telegram_user_id, 'aprovar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
-  checar('quem não pode aprovar é barrado', neg.acao === 'negado');
-  checar('a tentativa fica na trilha', neg.trilha.acaoPedida === 'aprovar' && neg.trilha.acao === 'negado');
-  checar('mensagem mostra recusa', neg.textoFinal.includes('⛔ ENVIO NÃO AUTORIZADO'));
+  checar('quem não pode aprovar não aprova', neg.acao === 'encaminhado', `acao=${neg.acao}`);
+  checar('a tentativa fica na trilha', neg.trilha.acaoPedida === 'aprovar' && neg.trilha.acao === 'encaminhado');
+  checar('e não vira recusa seca: sobe para o advogado',
+    neg.textoFinal.includes('📨 ENVIADO PARA APROVAÇÃO'), neg.textoFinal.slice(0, 120));
 }
 
 const desc = rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id, 'descartar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
@@ -286,11 +287,11 @@ const PROC_COM_CLIENTE = ID_COM_CLIENTE
 const PROC_SEM_CLIENTE = instantaneo.processos.find(
   p => !p.segredo_justica && p.id !== ID_COM_CLIENTE);
 
-/** Consulta um processo (para fixar a memória) e clica no botão pedido. */
-function decidir(userId, acao, processo) {
+/** Clica num botão como o Telegram o devolve: 'acao|processo|autor'. */
+function decidir(userId, acao, processo, autor = userId) {
   memoriaNova();
-  rodar(P, msg(userId, `Como está o processo ${processo.numero_cnj}?`));
-  return rodar(R, rodar(P, clique(userId, acao, PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
+  const dados = `${acao}|${processo.id}|${autor}`;
+  return rodar(R, rodar(P, clique(userId, dados, PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
 }
 
 if (!PROC_COM_CLIENTE) {
@@ -328,7 +329,7 @@ if (!PROC_COM_CLIENTE) {
   if (SEM_PODER.telegram_user_id) {
     const n = decidir(SEM_PODER.telegram_user_id, 'aprovar', PROC_COM_CLIENTE);
     checar('quem não pode aprovar não consegue fazer sair mensagem',
-      n.desfecho === 'nada' && n.enviarAoCliente === false && n.textoAoCliente === null,
+      n.enviarAoCliente === false && n.textoAoCliente === null && n.clienteNumero === null,
       `desfecho=${n.desfecho}`);
   }
 }
@@ -339,6 +340,61 @@ if (PROC_SEM_CLIENTE) {
     s.desfecho === 'sem-destino' && s.clienteNumero === null, `desfecho=${s.desfecho}`);
   checar('e o colaborador é avisado de que NÃO saiu',
     /não enviado|Nada saiu/i.test(String(s.confirmacao)), String(s.confirmacao));
+}
+memoriaNova();
+
+// ===========================================================================
+// O beco que a recusa criava: o estagiário era barrado e o trabalho morria ali.
+console.log('\n\x1b[1mEncaminhar ao advogado — a recusa que não é beco\x1b[0m');
+
+if (!SEM_PODER.telegram_user_id || !PROC_COM_CLIENTE) {
+  console.log('  \x1b[33m—\x1b[0m verificações puladas: faltam estagiário ou cliente vinculado');
+} else {
+  const enc = decidir(SEM_PODER.telegram_user_id, 'aprovar', PROC_COM_CLIENTE);
+  checar('o clique do estagiário vira encaminhamento, não recusa',
+    enc.desfecho === 'encaminhar' && enc.acao === 'encaminhado', `desfecho=${enc.desfecho}`);
+  checar('nada sai para o cliente nesse momento',
+    enc.enviarAoCliente === false && enc.textoAoCliente === null);
+  checar('o encaminhamento vai para o advogado da lista',
+    String(enc.advogadoChatId) === String(ADVOGADO.telegram_user_id), `para=${enc.advogadoChatId}`);
+  checar('a proposta encaminhada leva o corpo redigido',
+    enc.textoEncaminhado.includes('encontra-se arquivado'));
+  checar('a proposta encaminhada diz quem redigiu',
+    enc.textoEncaminhado.includes(SEM_PODER.nome));
+  checar('a proposta encaminhada insiste que nada foi enviado',
+    /Nada foi enviado ao cliente/i.test(enc.textoEncaminhado));
+  checar('o estagiário é avisado de para quem foi',
+    enc.textoFinal.includes(ADVOGADO.nome) && /não se perdeu/i.test(enc.textoFinal));
+  checar('a trilha registra o encaminhamento',
+    enc.trilha.encaminhadoPara === ADVOGADO.nome && enc.trilha.acaoPedida === 'aprovar');
+
+  // E agora o advogado decide sobre a proposta encaminhada. O botão carrega o
+  // processo e o autor — é assim que a decisão chega ao cliente certo e o
+  // desfecho volta para quem redigiu.
+  const ap = decidir(ADVOGADO.telegram_user_id, 'aprovar', PROC_COM_CLIENTE, SEM_PODER.telegram_user_id);
+  checar('o advogado aprova o que foi encaminhado, e aí sim sai',
+    ap.desfecho === 'enviar' && ap.enviarAoCliente === true, `desfecho=${ap.desfecho}`);
+  checar('quem aprovou é o advogado, não quem redigiu',
+    ap.trilha.por === ADVOGADO.nome && ap.trilha.acao === 'aprovar');
+  checar('quem redigiu recebe o desfecho',
+    String(ap.autorChatId) === String(SEM_PODER.telegram_user_id)
+    && /aprovada e enviada/i.test(String(ap.avisoAoAutor)), String(ap.avisoAoAutor));
+
+  const de = decidir(ADVOGADO.telegram_user_id, 'descartar', PROC_COM_CLIENTE, SEM_PODER.telegram_user_id);
+  checar('descarte também volta para quem redigiu',
+    /descartada/i.test(String(de.avisoAoAutor)), String(de.avisoAoAutor));
+  checar('descarte não envia nada', de.enviarAoCliente === false);
+
+  // Aprovar a própria redação não gera aviso a si mesmo.
+  const so = decidir(ADVOGADO.telegram_user_id, 'aprovar', PROC_COM_CLIENTE);
+  checar('quem aprova a própria redação não recebe aviso redundante',
+    so.autorChatId === null && so.avisoAoAutor === null);
+
+  // O estagiário não pode aprovar nem o que já subiu — o botão dele encaminha
+  // de novo, nunca envia. Poder emprestado não existe.
+  const outra = decidir(SEM_PODER.telegram_user_id, 'aprovar', PROC_COM_CLIENTE, ADVOGADO.telegram_user_id);
+  checar('o estagiário nunca consegue enviar, nem com botão de proposta alheia',
+    outra.enviarAoCliente === false && outra.desfecho === 'encaminhar', `desfecho=${outra.desfecho}`);
 }
 memoriaNova();
 
@@ -377,6 +433,23 @@ checar('o destinatário vem do nó de decisão, não de expressão livre',
 const desfechoNo = wf.nodes.find(n => n.name === 'Desfecho da aprovação');
 checar('sem regra que case, o fluxo para em vez de seguir',
   desfechoNo.parameters.options.fallbackOutput === 'none');
+
+// O botão precisa carregar o processo: se dependesse da memória, consultar
+// outro processo entre receber a proposta e clicar em aprovar mandaria a
+// mensagem para o cliente errado.
+for (const nome of ['Propor envio (aguarda aprovação)', 'Repropor texto editado', 'Encaminhar ao advogado']) {
+  const n = wf.nodes.find(x => x.name === nome);
+  const dados = n.parameters.inlineKeyboard.rows[0].row.buttons.map(b => b.additionalFields.callback_data);
+  checar(`botões de "${nome}" carregam processo e autor`,
+    dados.length === 3 && dados.every(d => d.startsWith('=') && d.split('|').length === 3),
+    JSON.stringify(dados[0]));
+}
+const encNo = wf.nodes.find(n => n.name === 'Encaminhar ao advogado');
+checar('o encaminhamento vai para o advogado, não para quem clicou',
+  encNo.parameters.chatId.includes('advogadoChatId'));
+const filtro = wf.nodes.find(n => n.name === 'Tem quem avisar?');
+checar('o aviso a quem redigiu só sai se houver o que dizer',
+  filtro.parameters.conditions.conditions[0].operator.operation === 'notEmpty');
 
 checar('nenhum nó nasce ativo', wf.active !== true);
 

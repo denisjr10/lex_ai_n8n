@@ -188,18 +188,25 @@ if (!memoria.ultimoProcesso) memoria.ultimoProcesso = {};
 
 // --- ramo do clique nos botões --------------------------------------------
 if (cb) {
-  const [acao] = String(cb.data || '').split(':');
+  // O botão carrega consigo o processo e quem redigiu: 'aprovar|AUTOS-05|123'.
+  // Isso não é detalhe de implementação — é correção de um perigo real. Se o
+  // processo viesse da memória, e a pessoa consultasse OUTRO processo entre
+  // receber a proposta e clicar em aprovar, a mensagem sairia para o cliente
+  // errado. O botão precisa saber do que ele trata.
+  const [acao, procDoBotao, autorDoBotao] = String(cb.data || '').split('|');
 
   // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06).
-  // A recusa segue pelo MESMO caminho do clique legítimo — assim o botão
-  // recebe resposta e a tentativa fica registrada na trilha.
-  const efetiva = (acao === 'aprovar' && !base.podeAprovar) ? 'negado' : acao;
+  // A tentativa segue pelo MESMO caminho do clique legítimo — assim o botão
+  // recebe resposta e a tentativa fica registrada na trilha. Mas ela não morre
+  // ali: quem não pode aprovar ENCAMINHA para quem pode.
+  const efetiva = (acao === 'aprovar' && !base.podeAprovar) ? 'encaminhado' : acao;
 
-  // O clique carrega o processo corrente: o botão Editar precisa saber sobre
-  // qual processo a reescrita será, e o callback do Telegram não diz isso.
   return { json: { ...base, rota: 'aprovacao', acao: efetiva, acaoPedida: acao,
     callbackId: cb.id, messageId: msg.message_id,
-    processoId: memoria.ultimoProcesso[String(de.id)] || null,
+    processoId: procDoBotao || memoria.ultimoProcesso[String(de.id)] || null,
+    // Quem redigiu, quando não é quem está decidindo. Preenchido só nos botões
+    // de uma proposta encaminhada — é por aqui que o desfecho volta para ele.
+    autorChatId: autorDoBotao && String(autorDoBotao) !== String(de.id) ? autorDoBotao : null,
     textoOriginal: (msg.text || msg.caption || '') }};
 }
 
@@ -468,6 +475,16 @@ if (!cred.uazapi || !cred.uazapi.id) {
   console.log(`Uazapi      : ${cred.uazapi.name} · aprovar envia ao cliente de verdade`);
 }
 
+/** Os tres botoes da proposta. O callback carrega 'acao|processo|autor':
+ *  o processo, para que aprovar nunca use o processo errado se a pessoa
+ *  consultou outro no meio do caminho; o autor, para que o desfecho volte
+ *  para quem redigiu quando quem decide e outra pessoa. */
+const BOTOES = (proc, autor) => ({ rows: [ { row: { buttons: [
+  { text: '✅ Aprovar e enviar', additionalFields: { callback_data: `=aprovar|{{ ${proc} }}|{{ ${autor} }}` } },
+  { text: '✏️ Editar',          additionalFields: { callback_data: `=editar|{{ ${proc} }}|{{ ${autor} }}` } },
+  { text: '❌ Descartar',       additionalFields: { callback_data: `=descartar|{{ ${proc} }}|{{ ${autor} }}` } }
+] } } ] });
+
 function no(nome, tipo, versao, params, pos, extra = {}) {
   return { parameters: params, id: undefined, name: nome, type: tipo, typeVersion: versao, position: pos, ...extra };
 }
@@ -536,24 +553,39 @@ const nodes = [
       // Dentro de additionalFields eles são simplesmente ignorados — a mensagem
       // chega sem botão nenhum, e sem erro que denuncie o problema.
       replyMarkup: 'inlineKeyboard',
-      inlineKeyboard: { rows: [ { row: { buttons: [
-        { text: '✅ Aprovar e enviar', additionalFields: { callback_data: 'aprovar' } },
-        { text: '✏️ Editar',          additionalFields: { callback_data: 'editar' } },
-        { text: '❌ Descartar',       additionalFields: { callback_data: 'descartar' } }
-      ] } } ] },
+      inlineKeyboard: BOTOES("$('Ficha do processo (redação)').item.json.processoId", "$('Ficha do processo (redação)').item.json.userId"),
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [960, 300],
     { credentials: { telegramApi: cred.telegram } }),
 
   no('Registrar decisão', 'n8n-nodes-base.code', 2,
     { mode: 'runOnceForEachItem', jsCode: `
+// Quem pode aprovar. Na demonstração é um só — e é justamente por isso que a
+// escolha "para qual advogado encaminhar" pode ser a mais simples possível: o
+// primeiro da lista. Em produção isso vira o advogado responsável pelo
+// processo, e a lista de processos passa a dizer quem responde por cada um.
+const ADVOGADOS = ${JSON.stringify(
+  lista.colaboradores.filter(c => c.pode_aprovar_envio_ao_cliente === true)
+    .map(c => ({ id: c.telegram_user_id, nome: c.nome })), null, 2)};
+
 const j = $json;
 const quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';
-const rotulo = {
-  aprovar:   '✅ APROVADO E ENVIADO',
-  editar:    '✏️ AGUARDANDO O TEXTO CORRIGIDO',
-  descartar: '❌ DESCARTADO',
-  negado:    '⛔ ENVIO NÃO AUTORIZADO'
-}[j.acao] || '—';
+const ROTULOS = {
+  aprovar:     '✅ APROVADO E ENVIADO',
+  editar:      '✏️ AGUARDANDO O TEXTO CORRIGIDO',
+  descartar:   '❌ DESCARTADO',
+  encaminhado: '📨 ENVIADO PARA APROVAÇÃO',
+  negado:      '⛔ ENVIO NÃO AUTORIZADO'
+};
+
+// Para qual advogado vai o que o estagiário não pode aprovar. O primeiro da
+// lista, e só. Se não houver advogado nenhum cadastrado, não há para onde
+// encaminhar — e aí a recusa volta a ser recusa seca, que é o comportamento
+// correto: falha fecha (Regra 5).
+const advogado = ADVOGADOS.find(a => String(a.id) !== String(j.userId)) || null;
+const encaminhar = j.acao === 'encaminhado' && Boolean(advogado);
+const acaoReal = j.acao === 'encaminhado' && !advogado ? 'negado' : j.acao;
+const rotulo = ROTULOS[acaoReal] || '—';
+
 
 // Editar abre um estado: a PRÓXIMA mensagem desta pessoa é o texto corrigido.
 // O Porteiro é quem fecha o estado, e devolve a proposta reescrita com os
@@ -571,7 +603,8 @@ if (j.acao === 'editar') {
 
 // A trilha: quem decidiu, o quê e quando. Na demo vai para o log da execução;
 // no produto, vai para a auditoria (§7 do modelo de identidade).
-const trilha = { acao: j.acao, acaoPedida: j.acaoPedida, por: j.nome, papel: j.papel, userId: j.userId, quando };
+const trilha = { acao: acaoReal, acaoPedida: j.acaoPedida, por: j.nome, papel: j.papel, userId: j.userId, quando,
+  encaminhadoPara: encaminhar ? advogado.nome : null };
 
 // ATENÇÃO: o Telegram devolve msg.text em TEXTO PURO — as marcações HTML que
 // enviamos não voltam (elas viajam à parte, em "entities"). Procurar <b>…</b>
@@ -596,16 +629,20 @@ const corpo = blocosCorpo
   .map(b => b.trim() === NOTA ? '<i>' + esc(b.trim()) + '</i>' : esc(b))
   .join('\\n\\n');
 
-const assinatura = j.acao === 'negado'
+const assinatura = acaoReal === 'negado'
   ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'
-  : j.acao === 'editar'
+  : acaoReal === 'encaminhado'
+  ? 'redigido por ' + j.nome + ' (' + j.papel + ') · enviado a ' + advogado.nome + ' · ' + quando
+  : acaoReal === 'editar'
   ? j.nome + ' vai reescrever · ' + quando
   : 'por ' + j.nome + ' · ' + quando;
 
 // corpo JÁ vem escapado bloco a bloco acima — escapar de novo aqui viraria
 // &lt;i&gt; na tela. Só assinatura e aviso precisam de escape neste ponto.
-const instrucao = j.acao === 'editar'
+const instrucao = acaoReal === 'editar'
   ? '\\n\\n<i>Mande agora a mensagem como ela deve ficar. Escreva <b>cancelar</b> para desistir.</i>'
+  : acaoReal === 'encaminhado'
+  ? '\\n\\n<i>Você não aprova envio ao cliente, mas o trabalho não se perdeu: a proposta foi para ' + esc(advogado.nome) + '. Você recebe o desfecho aqui.</i>'
   : '';
 const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + instrucao;
 
@@ -619,7 +656,7 @@ const destino = j.processoId ? DESTINOS[j.processoId] || null : null;
 
 // Só aprovar envia. E j.acao só vale 'aprovar' se quem clicou podia aprovar —
 // o Porteiro já rebaixou para 'negado' quem não podia (Regra 2).
-const enviarAoCliente = j.acao === 'aprovar' && Boolean(destino && destino.numero);
+const enviarAoCliente = acaoReal === 'aprovar' && Boolean(destino && destino.numero);
 
 const AVISO_WA = ${JSON.stringify(AVISO_TOPO_WA)};
 const NOTA_WA = ${JSON.stringify(NOTA_IA_WA)};
@@ -638,15 +675,43 @@ const mascarado = destino && destino.numero
   ? '•••• ' + destino.numero.slice(-4)
   : null;
 
-const confirmacao = j.acao !== 'aprovar' ? null
+const confirmacao = acaoReal !== 'aprovar' ? null
   : enviarAoCliente
   ? '📤 <b>Enviado ao cliente no WhatsApp</b>\\n<i>' + esc(destino.nome) + ' · ' + mascarado + ' · ' + quando + '</i>'
   : '⚠️ <b>Aprovado, mas não enviado</b>\\n<i>Nenhum cliente está vinculado a este processo na lista do escritório. Nada saiu daqui.</i>';
 
-const desfecho = j.acao !== 'aprovar' ? 'nada' : enviarAoCliente ? 'enviar' : 'sem-destino';
+// A proposta que sobe para o advogado. Ela chega COM os três botões, e os
+// botões carregam o processo e quem redigiu — é assim que a decisão volta para
+// a pessoa certa, sem que ninguém aprove no lugar de ninguém.
+const textoEncaminhado = encaminhar
+  ? aviso + '<b>📨 PROPOSTA AGUARDANDO SUA APROVAÇÃO</b>\\n<i>' +
+      esc('redigida por ' + j.nome + ' (' + j.papel + ') · ' + quando) + '</i>\\n\\n' +
+      corpo + '\\n\\n<i>Nada foi enviado ao cliente. A decisão é sua.</i>'
+  : null;
+
+// O desfecho volta para quem redigiu — sem isso, encaminhar seria só um jeito
+// mais elegante de a mensagem sumir. Só existe quando quem decidiu NÃO é quem
+// redigiu; aprovar a própria redação não precisa de aviso a si mesmo.
+const avisoAoAutor = !j.autorChatId ? null
+  : acaoReal === 'aprovar' && enviarAoCliente
+  ? '✅ <b>Sua proposta foi aprovada e enviada ao cliente</b>\\n<i>por ' + esc(j.nome) + ' · ' + quando + '</i>'
+  : acaoReal === 'aprovar'
+  ? '⚠️ <b>Sua proposta foi aprovada, mas não foi enviada</b>\\n<i>Nenhum cliente está vinculado a este processo na lista do escritório.</i>'
+  : acaoReal === 'descartar'
+  ? '❌ <b>Sua proposta foi descartada</b>\\n<i>por ' + esc(j.nome) + ' · ' + quando + '</i>'
+  : acaoReal === 'editar'
+  ? '✏️ <b>' + esc(j.nome) + ' está reescrevendo a sua proposta</b>'
+  : null;
+
+const desfecho = encaminhar ? 'encaminhar'
+  : acaoReal !== 'aprovar' ? 'nada'
+  : enviarAoCliente ? 'enviar' : 'sem-destino';
 
 return { json: { ...j, trilha, textoFinal: texto,
-  enviarAoCliente, textoAoCliente, confirmacao, desfecho,
+  acao: acaoReal, enviarAoCliente, textoAoCliente, confirmacao, desfecho,
+  textoEncaminhado, avisoAoAutor,
+  advogadoChatId: encaminhar ? advogado.id : null,
+  advogadoNome: advogado ? advogado.nome : null,
   clienteNumero: enviarAoCliente ? destino.numero : null,
   clienteNome: destino ? destino.nome : null } };
 `.trim() }, [460, 500]),
@@ -654,7 +719,7 @@ return { json: { ...j, trilha, textoFinal: texto,
   no('Confirmar clique', 'n8n-nodes-base.telegram', 1.2,
     { resource: 'callback', operation: 'answerQuery',
       queryId: '={{ $json.callbackId }}',
-      additionalFields: { text: '={{ ({aprovar:"Aprovado", editar:"Marcado para edição", descartar:"Descartado", negado:"Somente advogado aprova envio ao cliente"})[$json.acao] }}' } },
+      additionalFields: { text: '={{ ({aprovar:"Aprovado", editar:"Marcado para edição", descartar:"Descartado", encaminhado:"Enviado ao advogado para aprovação", negado:"Somente advogado aprova envio ao cliente"})[$json.acao] }}' } },
     [700, 620], { credentials: { telegramApi: cred.telegram } }),
 
   no('Atualizar mensagem', 'n8n-nodes-base.telegram', 1.2,
@@ -675,11 +740,7 @@ return { json: { ...j, trilha, textoFinal: texto,
   no('Repropor texto editado', 'n8n-nodes-base.telegram', 1.2,
     { chatId: '={{ $json.chatId }}', text: '={{ $json.textoProposta }}',
       replyMarkup: 'inlineKeyboard',
-      inlineKeyboard: { rows: [ { row: { buttons: [
-        { text: '✅ Aprovar e enviar', additionalFields: { callback_data: 'aprovar' } },
-        { text: '✏️ Editar',          additionalFields: { callback_data: 'editar' } },
-        { text: '❌ Descartar',       additionalFields: { callback_data: 'descartar' } }
-      ] } } ] },
+      inlineKeyboard: BOTOES('$json.processoId', '$json.userId'),
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [460, 940],
     { credentials: { telegramApi: cred.telegram } }),
 
@@ -699,6 +760,14 @@ return { json: { ...j, trilha, textoFinal: texto,
           { operator: { type: 'string', operation: 'equals' },
             leftValue: "={{ $('Registrar decisão').item.json.desfecho }}", rightValue: 'sem-destino' }] },
           outputKey: 'sem-destino' },
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' },
+            leftValue: "={{ $('Registrar decisão').item.json.desfecho }}", rightValue: 'encaminhar' }] },
+          outputKey: 'encaminhar' },
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' },
+            leftValue: "={{ $('Registrar decisão').item.json.desfecho }}", rightValue: 'nada' }] },
+          outputKey: 'nada' },
       ] }, options: { fallbackOutput: 'none' } }, [1220, 620]),
 
   no('Enviar ao cliente (WhatsApp)', 'n8n-nodes-base.httpRequest', 4.2,
@@ -721,6 +790,37 @@ return { json: { ...j, trilha, textoFinal: texto,
     { chatId: "={{ $('Registrar decisão').item.json.chatId }}",
       text: "={{ $('Registrar decisão').item.json.confirmacao }}",
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1700, 540],
+    { credentials: { telegramApi: cred.telegram } }),
+
+  // --- o que o estagiário não pode aprovar sobe para quem pode -------------
+  // Sem este nó, a recusa era um beco: a redação morria ali e o estagiário
+  // tinha que chamar o advogado pelo braço. A proposta chega ao advogado COM
+  // os três botões, e os botões carregam o processo e quem redigiu — quem
+  // aprova é ele, com a identidade dele. Ninguém aprova no lugar de ninguém.
+  no('Encaminhar ao advogado', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: "={{ $('Registrar decisão').item.json.advogadoChatId }}",
+      text: "={{ $('Registrar decisão').item.json.textoEncaminhado }}",
+      replyMarkup: 'inlineKeyboard',
+      inlineKeyboard: BOTOES("$('Registrar decisão').item.json.processoId",
+                             "$('Registrar decisão').item.json.userId"),
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1460, 860],
+    { credentials: { telegramApi: cred.telegram } }),
+
+  // O desfecho volta para quem redigiu. Encaminhar sem devolver resposta seria
+  // só um jeito mais elegante de a mensagem sumir.
+  no('Tem quem avisar?', 'n8n-nodes-base.filter', 2.2,
+    { conditions: { options: { caseSensitive: true, version: 2, typeValidation: 'loose' },
+        combinator: 'and',
+        conditions: [{ id: 'tem',
+          operator: { type: 'string', operation: 'notEmpty', singleValue: true },
+          leftValue: "={{ $('Registrar decisão').item.json.avisoAoAutor }}",
+          rightValue: '' }] },
+      options: {} }, [1700, 700]),
+
+  no('Avisar quem redigiu', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: "={{ $('Registrar decisão').item.json.autorChatId }}",
+      text: "={{ $('Registrar decisão').item.json.avisoAoAutor }}",
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1940, 700],
     { credentials: { telegramApi: cred.telegram } }),
 
   // Aprovado sem cliente vinculado: o colaborador precisa saber que NÃO saiu.
@@ -756,8 +856,17 @@ const connections = {
   'Desfecho da aprovação': { main: [
       [{ node: 'Enviar ao cliente (WhatsApp)', type: 'main', index: 0 }],
       [{ node: 'Avisar que não saiu', type: 'main', index: 0 }],
+      [{ node: 'Encaminhar ao advogado', type: 'main', index: 0 }],
+      // 'nada' — editar, descartar, negado. Nada sai daqui para o cliente, mas
+      // quem redigiu ainda pode precisar saber o que houve.
+      [{ node: 'Tem quem avisar?', type: 'main', index: 0 }],
   ] },
   'Enviar ao cliente (WhatsApp)': { main: [[{ node: 'Confirmar ao colaborador', type: 'main', index: 0 }]] },
+  // Os três caminhos que terminam convergem no mesmo aviso a quem redigiu, e
+  // sempre DEPOIS do que aconteceu de fato — nunca antes.
+  'Confirmar ao colaborador': { main: [[{ node: 'Tem quem avisar?', type: 'main', index: 0 }]] },
+  'Avisar que não saiu':      { main: [[{ node: 'Tem quem avisar?', type: 'main', index: 0 }]] },
+  'Tem quem avisar?':         { main: [[{ node: 'Avisar quem redigiu', type: 'main', index: 0 }]] },
 };
 
 const workflow = {
