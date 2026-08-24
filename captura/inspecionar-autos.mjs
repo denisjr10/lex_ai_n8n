@@ -104,22 +104,31 @@ if (!pdfs.length) {
 
 // pdftotext -layout preserva colunas, o que importa numa lista de movimentações.
 // O separador de página é o caractere de form feed (\f).
-function extrair(arquivo, primeira, ultima) {
-  const args = ['-layout', '-enc', 'UTF-8'];
+function extrair(arquivo, primeira, ultima, comLayout = true) {
+  const args = comLayout ? ['-layout', '-enc', 'UTF-8'] : ['-enc', 'UTF-8'];
   if (primeira) args.push('-f', String(primeira));
   if (ultima) args.push('-l', String(ultima));
   args.push(arquivo, '-');
   return execFileSync(PDFTOTEXT, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
 }
 
-// Pistas de que ali existe uma lista de andamentos, e não peça processual.
-const PISTAS_MOVIMENTACAO = [
-  /movimenta[çc][õo]es/i, /andamentos?/i, /hist[óo]rico do processo/i,
-  /\bdata\b.{0,40}\bdescri[çc][ãa]o\b/i,
-];
+// A linha do tempo do PJe NÃO é uma seção chamada "movimentações": é a tabela
+// "Documentos" da capa — Id / Data / Documento / Tipo. Procurar pela palavra
+// "andamento" dá falso positivo em petição que fala do andamento do feito.
+const CABECALHO_TABELA = /\bId\.?\b[\s\S]{0,120}?\bData\b[\s\S]{0,120}?\bDocumento\b[\s\S]{0,120}?\bTipo\b/;
 const PISTAS_CAPA = [
   /n[úu]mero( [úu]nico)?[:\s]/i, /classe[:\s]/i, /assunto[:\s]/i,
-  /[óo]rg[ãa]o julgador/i, /valor da (causa|a[çc][ãa]o)/i, /autuad[oa]/i,
+  /[óo]rg[ãa]o julgador/i, /valor da (causa|a[çc][ãa]o)/i, /autua[çc][ãa]o|distribui[çc][ãa]o/i,
+];
+const ROTULOS_PJE = [
+  ['Número', /^\s*N[úu]mero:\s*(.+)$/m],
+  ['Classe', /^\s*Classe:\s*(.+)$/m],
+  ['Órgão julgador', /^\s*[ÓO]rg[ãa]o julgador:\s*(.+)$/m],
+  ['Distribuição', /^\s*[ÚU]ltima distribui[çc][ãa]o\s*:\s*(.+)$/m],
+  ['Autuação', /^\s*Data da Autua[çc][ãa]o:\s*(.+)$/m],
+  ['Valor da causa', /^\s*Valor da causa:\s*(.+)$/m],
+  ['Assuntos', /^\s*Assuntos?:\s*(.+)$/m],
+  ['Segredo de justiça', /^\s*Segredo de justi[çc]a\?\s*(.+)$/m],
 ];
 
 console.log(`\n${pdfs.length} PDF(s) em captura/autos/`);
@@ -149,11 +158,25 @@ for (const nome of pdfs) {
   // imagem: o texto está lá para o olho humano, não para o programa.
   const temCamadaDeTexto = porPagina >= 100;
 
-  // Onde estão as páginas que parecem lista de movimentação
-  const paginasComMovimentacao = [];
-  paginas.forEach((p, i) => {
-    if (PISTAS_MOVIMENTACAO.some((r) => r.test(p))) paginasComMovimentacao.push(i + 1);
-  });
+  // Onde começa a tabela Documentos, e quantas entradas ela tem
+  const paginasComTabela = [];
+  paginas.forEach((p, i) => { if (CABECALHO_TABELA.test(p)) paginasComTabela.push(i + 1); });
+
+  // As entradas se contam pelos carimbos de data e hora da coluna Data — mas
+  // no modo -layout as colunas se embaralham. Sem -layout o pdftotext devolve
+  // a tabela coluna a coluna, e cada carimbo fica inteiro numa linha só.
+  let entradas = 0;
+  if (paginasComTabela.length) {
+    const cru = extrair(caminho, paginasComTabela[0], paginasComTabela[paginasComTabela.length - 1], false);
+    entradas = (cru.match(/\b\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}\b/g) || []).length;
+  }
+
+  // Quais rótulos da capa foram encontrados — é o que o conversor vai ler
+  const capa = ROTULOS_PJE
+    .map(([rotulo, re]) => [rotulo, (texto.match(re) || [])[1]])
+    .filter(([, v]) => v);
+  const segredo = /^\s*Segredo de justi[çc]a\?\s*SIM/mi.test(texto);
+
   const paginasComCapa = [];
   paginas.forEach((p, i) => {
     const acertos = PISTAS_CAPA.filter((r) => r.test(p)).length;
@@ -167,13 +190,13 @@ for (const nome of pdfs) {
   console.log(`  ${temCamadaDeTexto ? '✓' : '⚠'} ${nome}`);
   console.log(`      ${totalPaginas} páginas · ${(tamanho / 1048576).toFixed(1)} MB · ${porPagina} caracteres úteis por página`);
   console.log(`      camada de texto : ${temCamadaDeTexto ? 'sim — dá para extrair' : 'NÃO — parece PDF escaneado, precisaria de OCR'}`);
-  console.log(`      datas dd/mm/aaaa: ${datas.length}`);
-  console.log(`      números CNJ     : ${cnj.length ? `${cnj.length} ocorrência(s), ${new Set(cnj).size} distinto(s)` : 'nenhum reconhecido'}`);
-  console.log(`      cara de capa    : ${paginasComCapa.length ? `páginas ${paginasComCapa.slice(0, 6).join(', ')}` : 'não localizada'}`);
-  console.log(`      cara de andamento: ${paginasComMovimentacao.length ? `${paginasComMovimentacao.length} página(s), a partir da ${paginasComMovimentacao[0]}` : 'não localizada'}`);
+  console.log(`      capa lida       : ${capa.length ? capa.map(([r]) => r).join(' · ') : 'nenhum rótulo do PJe reconhecido'}`);
+  console.log(`      tabela Documentos: ${paginasComTabela.length ? `páginas ${paginasComTabela[0]}–${paginasComTabela[paginasComTabela.length - 1]} · ${entradas} entrada(s)` : 'não localizada'}`);
+  console.log(`      outros processos citados: ${new Set(cnj).size > 1 ? `${new Set(cnj).size} números CNJ distintos` : 'só o próprio'}`);
+  if (segredo) console.log(`      \x1b[33m⚠ SEGREDO DE JUSTIÇA\x1b[0m — o contrato manda o fluxo recusar exibir conteúdo`);
 
   if (comAmostra) {
-    const alvo = paginasComMovimentacao[0] || paginasComCapa[0] || 1;
+    const alvo = paginasComTabela[0] || paginasComCapa[0] || 1;
     const linhas = paginas[alvo - 1].split('\n').filter((l) => l.trim()).slice(0, 20);
     console.log(`\n      — amostra da página ${alvo} —`);
     for (const l of linhas) console.log(`      | ${l.slice(0, 160)}`);
@@ -181,16 +204,23 @@ for (const nome of pdfs) {
   console.log('');
 
   resumo.push({
-    nome, totalPaginas, temCamadaDeTexto,
-    andamento: paginasComMovimentacao.length > 0,
-    estado: !temCamadaDeTexto ? 'precisa de OCR' : paginasComMovimentacao.length ? 'pronto para converter' : 'sem lista de andamento localizada',
+    nome, totalPaginas, temCamadaDeTexto, entradas, segredo,
+    estado: !temCamadaDeTexto ? 'precisa de OCR'
+      : !capa.length ? 'capa em formato não reconhecido'
+      : !paginasComTabela.length ? 'capa ok, sem tabela Documentos'
+      : `pronto — ${entradas} entrada(s) de linha do tempo`,
   });
 }
 
 console.log('  ─────────────────────────────────────────────');
-for (const r of resumo) console.log(`  ${r.nome}: ${r.estado}`);
+for (const r of resumo) console.log(`  ${r.segredo ? '🔒' : '  '} ${r.nome}: ${r.estado}`);
 
 const semTexto = resumo.filter((r) => r.temCamadaDeTexto === false).length;
+const emSegredo = resumo.filter((r) => r.segredo).length;
+if (emSegredo) console.log(`
+  🔒 ${emSegredo} processo(s) em segredo de justiça. O contrato do instantâneo
+     já prevê o campo, e a regra é recusar exibir conteúdo. Vale decidir se
+     entra na demo como CASO DE TESTE da recusa, ou se fica de fora.`);
 console.log(`
   O que acontece a seguir: destes PDFs sai APENAS o que cabe no contrato do
   instantâneo — capa, partes e lista de movimentações. Petição, decisão e
