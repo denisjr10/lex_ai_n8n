@@ -11,7 +11,9 @@
  * Este script responde a isso sem gravar nada e sem gastar crédito de API.
  * Nada aqui chama a internet.
  *
- * Depende do `pdftotext` (do pacote Poppler/Xpdf), que já está nesta máquina.
+ * Depende do `pdftotext` (do pacote Poppler/Xpdf). No Windows ele costuma vir
+ * junto do Git, em C:\Program Files\Git\mingw64\bin — instalado, mas fora do
+ * PATH do PowerShell. Por isso o script procura em vez de exigir.
  *
  * Uso:
  *   node captura/inspecionar-autos.mjs              # só o diagnóstico
@@ -36,6 +38,58 @@ if (!fs.existsSync(PASTA)) {
   process.exit(1);
 }
 
+// ---------------------------------------------------------------------------
+// Onde está o pdftotext
+// ---------------------------------------------------------------------------
+// "ENOENT" quer dizer apenas "não achei o programa" — e no Windows isso quase
+// sempre significa que ele está instalado, mas fora do PATH do PowerShell.
+// Procurar nos lugares prováveis evita mandar o usuário instalar o que ele já tem.
+function localizarPdftotext() {
+  const candidatos = [
+    process.env.PDFTOTEXT,
+    'pdftotext',
+    'C:/Program Files/Git/mingw64/bin/pdftotext.exe',
+    'C:/Program Files (x86)/Git/mingw64/bin/pdftotext.exe',
+    process.env.LOCALAPPDATA && `${process.env.LOCALAPPDATA}/Programs/Git/mingw64/bin/pdftotext.exe`,
+    'C:/Program Files/poppler/bin/pdftotext.exe',
+    'C:/ProgramData/chocolatey/bin/pdftotext.exe',
+    'C:/Program Files/Xpdf/bin64/pdftotext.exe',
+    '/usr/bin/pdftotext',
+    '/usr/local/bin/pdftotext',
+    '/opt/homebrew/bin/pdftotext',
+  ].filter(Boolean);
+
+  for (const c of candidatos) {
+    try {
+      execFileSync(c, ['-v'], { stdio: 'ignore' });
+      return c;
+    } catch (e) {
+      // -v sai com código diferente de zero em algumas versões, mas se o
+      // programa existe o erro NÃO é ENOENT. Então esse caso conta como achado.
+      if (e && e.code !== 'ENOENT') return c;
+    }
+  }
+  return null;
+}
+
+const PDFTOTEXT = localizarPdftotext();
+
+if (!PDFTOTEXT) {
+  console.error(`
+  Não encontrei o programa pdftotext, que é quem lê o texto de dentro do PDF.
+
+  Ele costuma vir junto do Git para Windows. Confira se este arquivo existe:
+    C:\\Program Files\\Git\\mingw64\\bin\\pdftotext.exe
+
+  Se existir, rode assim (vale só para esta janela do PowerShell):
+    $env:PDFTOTEXT = "C:\\Program Files\\Git\\mingw64\\bin\\pdftotext.exe"
+    node captura/inspecionar-autos.mjs
+
+  Se não existir, instale o Poppler ou o Xpdf e rode de novo.
+`);
+  process.exit(1);
+}
+
 const pdfs = fs.readdirSync(PASTA).filter((f) => f.toLowerCase().endsWith('.pdf')).sort();
 
 if (!pdfs.length) {
@@ -55,7 +109,7 @@ function extrair(arquivo, primeira, ultima) {
   if (primeira) args.push('-f', String(primeira));
   if (ultima) args.push('-l', String(ultima));
   args.push(arquivo, '-');
-  return execFileSync('pdftotext', args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+  return execFileSync(PDFTOTEXT, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
 }
 
 // Pistas de que ali existe uma lista de andamentos, e não peça processual.
@@ -68,7 +122,8 @@ const PISTAS_CAPA = [
   /[óo]rg[ãa]o julgador/i, /valor da (causa|a[çc][ãa]o)/i, /autuad[oa]/i,
 ];
 
-console.log(`\n${pdfs.length} PDF(s) em captura/autos/\n`);
+console.log(`\n${pdfs.length} PDF(s) em captura/autos/`);
+console.log(`leitor: ${PDFTOTEXT}\n`);
 
 const resumo = [];
 
