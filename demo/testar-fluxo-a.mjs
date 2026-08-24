@@ -232,6 +232,42 @@ if (!SEM_PODER.telegram_user_id) {
 const desc = rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id, 'descartar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
 checar('descarte é registrado', desc.textoFinal.includes('❌ DESCARTADO'));
 
+// ---------------------------------------------------------------------------
+console.log('\n\x1b[1mEditar — o botão que era um beco\x1b[0m');
+memoriaNova();
+rodar(P, msg(ADVOGADO.telegram_user_id, `Como está o processo ${NUMERO}?`));
+const edi = rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id, 'editar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
+checar('editar pede o texto corrigido', /Mande agora a mensagem/i.test(edi.textoFinal));
+checar('editar deixa claro que nada foi enviado', !edi.textoFinal.includes('APROVADO'));
+checar('editar abre estado de edição na memória',
+  Boolean(MEMORIA.edicaoPendente && MEMORIA.edicaoPendente[String(ADVOGADO.telegram_user_id)]));
+checar('o estado de edição sabe de qual processo se trata',
+  MEMORIA.edicaoPendente[String(ADVOGADO.telegram_user_id)].processoId === APELIDO);
+
+const TEXTO_NOVO = 'Olá! Informo que houve nova decisão no seu processo. Estou à disposição.';
+const rep = rodar(P, msg(ADVOGADO.telegram_user_id, TEXTO_NOVO)).json;
+checar('a mensagem seguinte vira nova proposta', rep.rota === 'reproposta', `rota=${rep.rota}`);
+checar('a proposta reescrita traz o texto do humano', rep.textoProposta.includes(TEXTO_NOVO));
+checar('a proposta reescrita diz quem reescreveu', rep.textoProposta.includes(ADVOGADO.nome));
+checar('a proposta reescrita insiste que nada foi enviado', /Nada foi enviado/i.test(rep.textoProposta));
+checar('a nota de IA continua na reescrita', rep.textoProposta.includes(`<i>${NOTA_IA}</i>`));
+checar('a proposta reescrita começa pelo aviso de topo', rep.textoProposta.indexOf('⚠️') === 0);
+checar('o estado de edição se fecha depois de usado',
+  !MEMORIA.edicaoPendente[String(ADVOGADO.telegram_user_id)]);
+
+// Editar é reversível — e não pode virar armadilha que engole a conversa.
+rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id, 'editar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json);
+const canc = rodar(P, msg(ADVOGADO.telegram_user_id, 'cancelar')).json;
+checar('"cancelar" sai da edição', canc.rota === 'negado' && /Edição cancelada/i.test(canc.texto));
+checar('cancelar não deixa estado pendente para trás',
+  !MEMORIA.edicaoPendente[String(ADVOGADO.telegram_user_id)]);
+
+const reproporta = wf.nodes.find((n) => n.name === 'Repropor texto editado');
+checar('o texto reescrito volta COM os três botões',
+  reproporta.parameters.replyMarkup === 'inlineKeyboard'
+  && reproporta.parameters.inlineKeyboard.rows[0].row.buttons.length === 3);
+memoriaNova();
+
 // ===========================================================================
 console.log('\n\x1b[1mEstrutura do fluxo\x1b[0m');
 const proposta = wf.nodes.find(n => n.name === 'Propor envio (aguarda aprovação)');

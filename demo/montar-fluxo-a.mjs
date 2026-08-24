@@ -61,6 +61,21 @@ if (bruto.nomes_reais) console.log(`\x1b[33m              NOMES REAIS — este f
 console.log(`              ficha limitada a ${MOVS_NA_FICHA} movimentações por processo`);
 console.log(`lista       : ${path.basename(listaPath)} · ${lista.colaboradores.length} colaborador(es)`);
 
+// A nota de uso de IA (Recomendação nº 001/2024 do CFOAB, D-92) NÃO é pedida ao
+// modelo: ela é acrescentada pelo fluxo, em itálico, como nota de rodapé. Texto
+// obrigatório não se delega a quem pode variar a redação — e o itálico distingue
+// a nota da mensagem ao cliente, que é o que ele de fato deve ler.
+const NOTA_IA = 'Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.';
+
+// O aviso de topo diz ao colaborador o que ele está vendo. Vive aqui, e não em
+// cada nó, porque três nós precisam do MESMO texto — e sempre começa com ⚠️,
+// que é o marcador pelo qual a aprovação reconhece o bloco ao remontar.
+const AVISO_TOPO = instantaneo.origem === 'ensaio-ficticio'
+  ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>'
+  : bruto.nomes_reais
+  ? '⚠️ <b>DADOS REAIS DE CLIENTE — demonstração</b>'
+  : '⚠️ <b>Demonstração — dados reais do escritório, nomes anonimizados</b>';
+
 // ===========================================================================
 // O PORTEIRO — a Regra 1 em código
 // ===========================================================================
@@ -68,6 +83,8 @@ console.log(`lista       : ${path.basename(listaPath)} · ${lista.colaboradores.
 // Não é instrução de prompt: é verificação. Convencer a IA por conversa não
 // contorna nada, porque quem decide não é ela.
 const CODIGO_PORTEIRO = `
+const AVISO_TOPO = ${JSON.stringify(AVISO_TOPO)};
+const NOTA_IA = ${JSON.stringify(NOTA_IA)};
 const COLABORADORES = ${JSON.stringify(lista.colaboradores, null, 2)};
 const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
   id: p.id,
@@ -120,20 +137,6 @@ const base = {
   origemDados: ${JSON.stringify(instantaneo.origem)}
 };
 
-// --- ramo do clique nos botões --------------------------------------------
-if (cb) {
-  const [acao] = String(cb.data || '').split(':');
-
-  // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06).
-  // A recusa segue pelo MESMO caminho do clique legítimo — assim o botão
-  // recebe resposta e a tentativa fica registrada na trilha.
-  const efetiva = (acao === 'aprovar' && !base.podeAprovar) ? 'negado' : acao;
-
-  return { json: { ...base, rota: 'aprovacao', acao: efetiva, acaoPedida: acao,
-    callbackId: cb.id, messageId: msg.message_id,
-    textoOriginal: (msg.text || msg.caption || '') }};
-}
-
 // --- memória curta, por pessoa ---------------------------------------------
 // Guarda apenas o último processo que cada colaborador consultou, para que
 // "esse processo" tenha a que se referir. Nada de conteúdo de conversa: com um
@@ -148,8 +151,57 @@ try { memoria = $getWorkflowStaticData('global'); } catch (erro) { memoria = {};
 if (!memoria || typeof memoria !== 'object') memoria = {};
 if (!memoria.ultimoProcesso) memoria.ultimoProcesso = {};
 
+// --- ramo do clique nos botões --------------------------------------------
+if (cb) {
+  const [acao] = String(cb.data || '').split(':');
+
+  // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06).
+  // A recusa segue pelo MESMO caminho do clique legítimo — assim o botão
+  // recebe resposta e a tentativa fica registrada na trilha.
+  const efetiva = (acao === 'aprovar' && !base.podeAprovar) ? 'negado' : acao;
+
+  // O clique carrega o processo corrente: o botão Editar precisa saber sobre
+  // qual processo a reescrita será, e o callback do Telegram não diz isso.
+  return { json: { ...base, rota: 'aprovacao', acao: efetiva, acaoPedida: acao,
+    callbackId: cb.id, messageId: msg.message_id,
+    processoId: memoria.ultimoProcesso[String(de.id)] || null,
+    textoOriginal: (msg.text || msg.caption || '') }};
+}
+
+
 // --- ramo da mensagem de texto --------------------------------------------
 const texto = String((msg && msg.text) || '').trim();
+
+// --- edição pendente: o que o botão ✏️ Editar deixou em aberto -------------
+// Sem isto o botão Editar era um beco: marcava a mensagem e não levava a lugar
+// nenhum. Agora a próxima mensagem daquela pessoa É o texto corrigido, e volta
+// como nova proposta — com os mesmos três botões, porque texto editado por
+// humano continua precisando de aprovação de advogado (Regra 2).
+if (!memoria.edicaoPendente) memoria.edicaoPendente = {};
+const pendente = memoria.edicaoPendente[String(de.id)];
+if (pendente && texto) {
+  delete memoria.edicaoPendente[String(de.id)];
+
+  if (/^(cancelar|cancela|deixa|esquece|para|\\/cancelar)\\b/i.test(texto)) {
+    return { json: { ...base, rota: 'negado',
+      texto: 'Edição cancelada. Nada foi enviado ao cliente.' }};
+  }
+
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return { json: { ...base, rota: 'reproposta',
+    processoId: pendente.processoId,
+    processoNumero: pendente.processoNumero,
+    textoProposta: [
+      AVISO_TOPO,
+      '',
+      '<b>Proposta de mensagem ao cliente</b>',
+      '<i>Texto reescrito por ' + esc(base.nome) + '. Nada foi enviado — continua faltando aprovação de advogado.</i>',
+      '',
+      esc(texto),
+      '',
+      '<i>' + NOTA_IA + '</i>'
+    ].join('\\n') }};
+}
 
 // Saudação e comandos não são pergunta sobre processo. Sem esta porta, um "oi"
 // caía na busca de processo e, havendo um só, era respondido com o resumo
@@ -251,6 +303,7 @@ return { json: { ...base, rota: querRedigir ? 'redigir' : 'consulta',
 // ===========================================================================
 const CODIGO_CONTEXTO = `
 const INSTANTANEO = ${JSON.stringify(instantaneo)};
+const AVISO_TOPO = ${JSON.stringify(AVISO_TOPO)};
 
 const p = INSTANTANEO.processos.find(x => x.id === $json.processoId);
 if (!p) return { json: { ...$json, erro: 'processo não encontrado no instantâneo' } };
@@ -302,18 +355,9 @@ const ficha = semVazios([
   movs
 ]).join('\\n');
 
-const ehEnsaio = INSTANTANEO.origem === 'ensaio-ficticio';
-
-// O aviso de topo diz ao colaborador o que ele está vendo. Sempre começa com
-// ⚠️ — o nó de aprovação reconhece o bloco por esse marcador.
-const avisoTopo = ehEnsaio
-  ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>'
-  : INSTANTANEO.nomes_reais
-  ? '⚠️ <b>DADOS REAIS DE CLIENTE — demonstração</b>'
-  : '⚠️ <b>Demonstração — dados reais do escritório, nomes anonimizados</b>';
-
 return { json: { ...$json, ficha, aviso_origem: INSTANTANEO.aviso,
-  ehEnsaio, avisoTopo } };
+  ehEnsaio: INSTANTANEO.origem === 'ensaio-ficticio',
+  avisoTopo: AVISO_TOPO } };
 `.trim();
 
 // ===========================================================================
@@ -332,12 +376,6 @@ FORMA:
 - Use HTML simples do Telegram: <b>negrito</b>, <i>itálico</i>, <code>código</code>. Nunca use Markdown.
 - Comece com uma linha de resumo, depois os detalhes.
 - No máximo 12 linhas.`;
-
-// A nota de uso de IA (Recomendação nº 001/2024 do CFOAB, D-92) NÃO é pedida ao
-// modelo: ela é acrescentada pelo fluxo, em itálico, como nota de rodapé. Texto
-// obrigatório não se delega a quem pode variar a redação — e o itálico distingue
-// a nota da mensagem ao cliente, que é o que ele de fato deve ler.
-const NOTA_IA = 'Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório.';
 
 const SISTEMA_REDACAO = `Você redige, para um COLABORADOR do escritório, uma mensagem que será enviada AO CLIENTE por WhatsApp — mas somente depois que um advogado aprovar.
 
@@ -408,7 +446,10 @@ const nodes = [
           outputKey: 'aprovacao' },
         { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
           { operator: { type: 'string', operation: 'contains' }, leftValue: '={{ $json.rota }}', rightValue: 'negad' }] },
-          outputKey: 'direto' }
+          outputKey: 'direto' },
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' }, leftValue: '={{ $json.rota }}', rightValue: 'reproposta' }] },
+          outputKey: 'reproposta' }
       ] }, options: { fallbackOutput: 'none' } }, [220, 300]),
 
   no('Ficha do processo', 'n8n-nodes-base.code', 2,
@@ -462,10 +503,24 @@ const j = $json;
 const quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';
 const rotulo = {
   aprovar:   '✅ APROVADO E ENVIADO',
-  editar:    '✏️ EM EDIÇÃO',
+  editar:    '✏️ AGUARDANDO O TEXTO CORRIGIDO',
   descartar: '❌ DESCARTADO',
   negado:    '⛔ ENVIO NÃO AUTORIZADO'
 }[j.acao] || '—';
+
+// Editar abre um estado: a PRÓXIMA mensagem desta pessoa é o texto corrigido.
+// O Porteiro é quem fecha o estado, e devolve a proposta reescrita com os
+// mesmos três botões — texto editado por humano continua sem aprovação.
+if (j.acao === 'editar') {
+  let mem;
+  try { mem = $getWorkflowStaticData('global'); } catch (erro) { mem = {}; }
+  if (!mem.edicaoPendente) mem.edicaoPendente = {};
+  mem.edicaoPendente[String(j.userId)] = {
+    processoId: j.processoId || null,
+    processoNumero: j.processoNumero || null,
+    quando
+  };
+}
 
 // A trilha: quem decidiu, o quê e quando. Na demo vai para o log da execução;
 // no produto, vai para a auditoria (§7 do modelo de identidade).
@@ -495,11 +550,16 @@ const corpo = (iCabecalho >= 0 ? blocos.slice(iCabecalho + 1) : blocos.slice(tem
 
 const assinatura = j.acao === 'negado'
   ? 'tentativa de ' + j.nome + ' (' + j.papel + ') — só advogado aprova envio ao cliente'
+  : j.acao === 'editar'
+  ? j.nome + ' vai reescrever · ' + quando
   : 'por ' + j.nome + ' · ' + quando;
 
 // corpo JÁ vem escapado bloco a bloco acima — escapar de novo aqui viraria
 // &lt;i&gt; na tela. Só assinatura e aviso precisam de escape neste ponto.
-const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo;
+const instrucao = j.acao === 'editar'
+  ? '\\n\\n<i>Mande agora a mensagem como ela deve ficar. Escreva <b>cancelar</b> para desistir.</i>'
+  : '';
+const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + instrucao;
 
 return { json: { ...j, trilha, textoFinal: texto,
   aviso: j.acao === 'aprovar'
@@ -525,6 +585,19 @@ return { json: { ...j, trilha, textoFinal: texto,
     { chatId: '={{ $json.chatId }}', text: '={{ $json.texto }}',
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [460, 760],
     { credentials: { telegramApi: cred.telegram } }),
+
+  // O texto reescrito à mão volta com os MESMOS três botões. Editar não é
+  // atalho para enviar: quem reescreve pode não ser quem aprova (Regra 2).
+  no('Repropor texto editado', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: '={{ $json.chatId }}', text: '={{ $json.textoProposta }}',
+      replyMarkup: 'inlineKeyboard',
+      inlineKeyboard: { rows: [ { row: { buttons: [
+        { text: '✅ Aprovar e enviar', additionalFields: { callback_data: 'aprovar' } },
+        { text: '✏️ Editar',          additionalFields: { callback_data: 'editar' } },
+        { text: '❌ Descartar',       additionalFields: { callback_data: 'descartar' } }
+      ] } } ] },
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [460, 940],
+    { credentials: { telegramApi: cred.telegram } }),
 ];
 
 const connections = {
@@ -535,6 +608,7 @@ const connections = {
       [{ node: 'Ficha do processo (redação)', type: 'main', index: 0 }],
       [{ node: 'Registrar decisão', type: 'main', index: 0 }],
       [{ node: 'Responder sem consultar', type: 'main', index: 0 }],
+      [{ node: 'Repropor texto editado', type: 'main', index: 0 }],
   ] },
   'Ficha do processo':           { main: [[{ node: 'Responder ao colaborador', type: 'main', index: 0 }]] },
   'Ficha do processo (redação)': { main: [[{ node: 'Redigir mensagem ao cliente', type: 'main', index: 0 }]] },
