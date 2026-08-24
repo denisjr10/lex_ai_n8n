@@ -270,38 +270,38 @@
       "parameters": {
         "chatId": "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
         "text": "={{ ($('Ficha do processo (redação)').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ Aprovar e enviar",
+                    "additionalFields": {
+                      "callback_data": "aprovar"
+                    }
+                  },
+                  {
+                    "text": "✏️ Editar",
+                    "additionalFields": {
+                      "callback_data": "editar"
+                    }
+                  },
+                  {
+                    "text": "❌ Descartar",
+                    "additionalFields": {
+                      "callback_data": "descartar"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "additionalFields": {
           "parse_mode": "HTML",
-          "appendAttribution": false,
-          "reply_markup": "inlineKeyboard",
-          "inlineKeyboard": {
-            "rows": [
-              {
-                "row": {
-                  "buttons": [
-                    {
-                      "text": "✅ Aprovar e enviar",
-                      "additionalFields": {
-                        "callback_data": "aprovar"
-                      }
-                    },
-                    {
-                      "text": "✏️ Editar",
-                      "additionalFields": {
-                        "callback_data": "editar"
-                      }
-                    },
-                    {
-                      "text": "❌ Descartar",
-                      "additionalFields": {
-                        "callback_data": "descartar"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "appendAttribution": false
         }
       },
       "name": "Propor envio (aguarda aprovação)",

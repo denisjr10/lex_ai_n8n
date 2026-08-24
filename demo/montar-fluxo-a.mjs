@@ -306,13 +306,16 @@ const nodes = [
   no('Propor envio (aguarda aprovação)', 'n8n-nodes-base.telegram', 1.2,
     { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
       text: "={{ ($('Ficha do processo (redação)').item.json.ehEnsaio ? '⚠️ <b>DADOS FICTÍCIOS — demonstração</b>\\n\\n' : '') + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text }}",
-      additionalFields: { parse_mode: 'HTML', appendAttribution: false,
-        reply_markup: 'inlineKeyboard',
-        inlineKeyboard: { rows: [ { row: { buttons: [
-          { text: '✅ Aprovar e enviar', additionalFields: { callback_data: 'aprovar' } },
-          { text: '✏️ Editar',          additionalFields: { callback_data: 'editar' } },
-          { text: '❌ Descartar',       additionalFields: { callback_data: 'descartar' } }
-        ] } } ] } } }, [960, 300],
+      // ATENÇÃO: replyMarkup e inlineKeyboard são parâmetros de TOPO do nó.
+      // Dentro de additionalFields eles são simplesmente ignorados — a mensagem
+      // chega sem botão nenhum, e sem erro que denuncie o problema.
+      replyMarkup: 'inlineKeyboard',
+      inlineKeyboard: { rows: [ { row: { buttons: [
+        { text: '✅ Aprovar e enviar', additionalFields: { callback_data: 'aprovar' } },
+        { text: '✏️ Editar',          additionalFields: { callback_data: 'editar' } },
+        { text: '❌ Descartar',       additionalFields: { callback_data: 'descartar' } }
+      ] } } ] },
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [960, 300],
     { credentials: { telegramApi: cred.telegram } }),
 
   no('Registrar decisão', 'n8n-nodes-base.code', 2,
