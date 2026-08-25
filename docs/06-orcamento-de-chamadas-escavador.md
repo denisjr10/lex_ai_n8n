@@ -4,10 +4,10 @@
 |---|---|
 | Versão | 2.6 — **regra de cobrança do teste confirmada pelo suporte; totais recalculados** |
 | Data | 2026-08-25 |
-| Estado | 🔴 **Bloqueado pelo Escavador.** Blocos A e B autorizados e tentados em 23/08; a API recusou com saldo bloqueado |
+| Estado | ✅ **Desbloqueado em 25/08.** Blocos A e B autorizados; a tentativa de 23/08 caiu no bloqueio e foi refeita a zero custo |
 | Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
 | Liberado em | **13/08/2026** |
-| **Expira em** | 🔴 **Expirou em 23/08.** A prorrogação prometida em 21/08 **não foi aplicada** — a API recusa com "saldo bloqueado" (R-37, §5.1) |
+| **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08, depois do desbloqueio. **7 dias** |
 | Gastas até agora | **0** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
@@ -22,7 +22,7 @@
 | Alcance | ✅ As 3 chamadas valem **só para o P1 (TJAP, saúde pública)**. Os demais ficam guardados, e ampliar exige novo aval |
 | 🔄 Alvo trocado | **24/08:** o P1 anterior (TJPB, alimentos) está em **segredo de justiça**. Substituído — ver §0.1 |
 | Token | ✅ **Fornecido e funcional** — a API autenticou; a recusa veio da cobrança, não da identidade |
-| 🔴 Bloqueio | **Saldo bloqueado.** A prorrogação prometida em 21/08 não foi aplicada à conta — ver §5 |
+| ✅ Saldo | **Liberado em 25/08 às 10:22**, a pedido do usuário. Painel: **"Válido até 01/09/2026"** — ver §5.2 |
 
 ### 0.1 Os processos — e por que o alvo mudou em 24/08
 
@@ -77,13 +77,13 @@ Três consequências que mudam o planejamento:
 
 **3. 16 chamadas é pouco para 83 operações mapeadas.** O objetivo do teste não é cobrir a API — é validar **contrato**: autenticação funciona, o plano cobre V1 e V2, o formato dos dados é o que o mapeamento previu, e o webhook chega. Cobertura vem depois, com plano pago.
 
-## 1-A. Prazo — prorrogação prometida em 21/08, mas não aplicada
+## 1-A. Prazo — **válido até 01/09/2026**
 
 O saldo foi liberado em **13/08** com validade de 10 dias, o que o faria expirar em 23/08. **Em 21/08 o suporte concedeu mais 10 dias**, por escrito, reconhecendo que o teste começou antes de a arquitetura estar pronta para exercitar callback.
 
 > *"Normalmente o saldo de teste não é renovável. Mas, como você ainda não utilizou os créditos e precisa validar justamente a parte de callback agora que a arquitetura está avançando, vou abrir uma exceção e estender o período por mais 10 dias."* — suporte Escavador B2B, 21/08/2026
 
-🔴 **A prorrogação não chegou a valer.** Em 23/08 a API recusou a primeira chamada com `403 — "Seu saldo está bloqueado"`. O que segue nesta seção descreve o que a prorrogação *deveria* ter mudado, e continua válido **se e quando** ela for de fato aplicada à conta. Ver §5.1 e **R-37**.
+⚠️ **A prorrogação não chegou a valer sozinha.** Em 23/08 a API recusou a primeira chamada com `403 — "Seu saldo está bloqueado"` (§5.1, R-37). Foi preciso apontar o bloqueio ao suporte em 25/08, e aí sim ele liberou — **com validade até 01/09/2026**, conforme o painel (§5.2). O que segue nesta seção passou a valer de fato.
 
 **A data efetiva é a da barra lateral do painel** ("Válido até") — não a da conversa. Promessa em atendimento não é estado de sistema, e essa é a lição que o R-37 registra.
 
@@ -150,7 +150,7 @@ A leitura foi confirmada: **a tabela exibida é o catálogo pré-pago** (por iss
 
 A postura de orçar pelo pior caso, adotada enquanto a resposta não vinha, era a certa — e o pior caso se confirmou. É a Regra 8 funcionando: na dúvida, orçar caro e não gastar.
 
-> 🔴 **Tudo isto vale a partir do desbloqueio.** Na mesma conversa de 25/08 o suporte descreveu o período de teste como se estivesse correndo — *"quando o período de teste acabar, a conta volta para os valores normais"* —, mas a API recusa desde 23/08 com `403 · saldo bloqueado` (§5.1, R-37). **A prorrogação continua não aplicada, e isso não foi levantado nesta conversa.** É o próximo contato a fazer, e é o único item que trava a execução.
+> ✅ **Destravado no mesmo dia.** O usuário apontou o bloqueio ao suporte às 10:16 de 25/08 e a resposta veio às 10:22: *"Liberado novamente"*. O painel passou a exibir **"Válido até 01/09/2026"**. Ver §5.2.
 
 ## 2. Princípio de alocação
 
@@ -297,6 +297,22 @@ Isso **muda o disjuntor** (§11 das diretrizes, D-33): um servidor MCP que só t
 > **A trava do script funcionou como projetada.** A fila abortou na primeira chamada, que é a mais barata do catálogo por escolha de ordenação. As duas de R$ 3,00 nunca aconteceram. Sem essa trava, o mesmo 403 teria sido recebido três vezes.
 
 As respostas brutas ficam em `docs/amostras/escavador/` (a criar), com CPF, CNPJ e nome de parte **substituídos por marcadores** antes do commit — dado de cliente não entra no repositório (LGPD, §9 das diretrizes).
+
+### 5.2 O desbloqueio — 25/08/2026
+
+O usuário apontou o bloqueio ao suporte, e a solução veio em **seis minutos**:
+
+> — *"O saldo está constando aqui como bloqueado."* (10:16)
+> — *"Liberado novamente."* (10:22)
+
+**O painel passou a exibir "Válido até 01/09/2026"** — sete dias a partir do desbloqueio, e não os dez prometidos em 21/08 contados de 23/08. A data que vale é a do painel, e é ela que este documento adota.
+
+**R-37 encerrado.** A lição, porém, fica registrada e não expira com o risco: **promessa em atendimento não é estado de sistema.** A prorrogação foi concedida por escrito em 21/08 e simplesmente não existiu na conta até alguém tentar usar. Duas consequências permanentes para o projeto:
+
+1. **Antes de qualquer execução paga, conferir o painel** — saldo e "Válido até". É gratuito e leva segundos
+2. **O disjuntor do MCP trata `403` como falta de saldo**, não como problema de permissão (§5.1). Foi a tentativa recusada que ensinou isso, e ela custou R$ 0,00
+
+**Estado atual:** R$ 50,00 intactos, 7 dias de validade, Blocos A e B autorizados, alvo definido (P1, TJAP, sem segredo de justiça). **Nada impede a execução.**
 
 ## 6. Pendências que a cota de teste **não** resolve
 

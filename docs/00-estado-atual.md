@@ -6,7 +6,7 @@
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
-| Crédito Escavador | 🔴 **BLOQUEADO.** A API recusa com `403 · "Seu saldo está bloqueado"`. A prorrogação prometida em 21/08 **não foi aplicada** (R-37). R$ 0,00 gastos — nada foi debitado. **O desbloqueio não foi cobrado na conversa de 25/08 e é o próximo contato a fazer** |
+| Crédito Escavador | ✅ **LIBERADO em 25/08 às 10:22**, após o usuário apontar o bloqueio ao suporte. O painel exibe **"Válido até 01/09/2026"** — 7 dias. R$ 50,00 intactos, R$ 0,00 gastos. R-37 encerrado, com a lição preservada |
 | Regras de cobrança | ✅ **Confirmadas pelo suporte em 25/08** — teste debita R$ 3,00 por requisição paga; tabela do painel é o catálogo do pré-pago; callback é grátis; monitoramento cobra na criação e a cada renovação; "200 itens" são aparições. Ver `07-painel-escavador-achados.md` §11 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
