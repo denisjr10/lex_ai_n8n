@@ -314,7 +314,7 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 |---|---|---|
 | Monitorar cada processo no tribunal (V2) | Um monitoramento por processo | 200 × R$ 3,00/mês = **R$ 600,00/mês** |
 | Monitorar cada processo, variante mensal com documentos públicos | Idem, frequência menor | 200 × R$ 0,18/mês = **R$ 36,00/mês** |
-| **Monitorar a OAB dos advogados no diário oficial (V1)** | Um monitoramento por advogado, captura toda publicação que o mencione | **R$ 3,00/mês** até 200 itens |
+| **Monitorar a OAB dos advogados no diário oficial (V1)** | Um monitoramento por advogado, captura toda publicação que o mencione | **R$ 3,00/mês por advogado** · escritório com 5 advogados: **R$ 15,00/mês** |
 
 **Recomendação de produto:** a vigilância de prazo se apoia primariamente no **monitoramento de diário oficial por OAB (V1)**, complementada por monitoramento de processo apenas onde houver razão específica. Três motivos:
 
@@ -322,7 +322,9 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 2. **O custo não cresce com a carteira.** Um monitoramento por advogado cobre todos os processos em que ele está constituído, inclusive os que o escritório ainda não cadastrou
 3. **Custa duas ordens de grandeza menos** que a alternativa por processo
 
-🚧 **Depende de confirmação:** o "até 200 itens" do monitoramento em diários oficiais se refere a 200 **termos vigiados** ou a 200 **aparições por mês**? A diferença é grande e a pergunta está na lista ao suporte (§13).
+✅ **Confirmado pelo suporte em 25/08:** o "até 200 itens" são **aparições encontradas**, não termos vigiados. Ou seja, a assinatura é **por termo** — R$ 3,00/mês por OAB vigiada, com franquia de 200 aparições/mês e **+ R$ 0,05 a cada 200 aparições** adicionais.
+
+Isso **confirma D-62 e melhora a conta**. O custo cresce com o número de advogados, não com o de processos, e o excedente por volume é desprezível: 2.000 aparições num mês custam R$ 3,00 + R$ 0,45. É a única das quatro rotas cobradas por bloco cujo excedente não é R$ 3,00 — e é justamente a que sustenta a vigilância de prazo. **R-25 não se aplica aqui** (ver `07-painel-escavador-achados.md` §11.5).
 
 ### 9.4 O atendimento ao cliente não consulta a API paga
 
@@ -379,7 +381,7 @@ Declaradas porque o questionário de descoberta ainda não voltou. Se uma cair, 
 | **P-03** | O Trello é quadro de trabalho, e a base interna é a fonte da verdade da demanda | Muda o desenho de E3 (D-09) |
 | **P-04** | Há saldo contratado no Escavador quando E1 entrar em operação | Sem saldo, o produto não funciona — a cota de teste expira em 23/08/2026 |
 | **P-05** | O escritório usará WhatsApp Business Platform oficial | Biblioteca não oficial arrisca banimento do número; E4 não vai ao ar |
-| **P-06** | Os preços do painel são de catálogo, não limitados pelo bônus | Todo o §9 precisa ser refeito. 🚧 Pergunta pendente ao suporte |
+| ~~**P-06**~~ | ✅ **Confirmada em 25/08.** Os preços do painel **são** o catálogo do pré-pago; o débito fixo de R$ 3,00 vale apenas enquanto durar a cota de teste | Deixou de ser premissa — o §9 se apoia em preço confirmado |
 | **P-07** | O volume da carteira cabe em um bloco de 200 na maioria das consultas | R-25 vira problema maior e RF-33 fica mais restritivo |
 
 ---
@@ -410,8 +412,8 @@ Numeração de `02-descoberta-perguntas-abertas.md`. 🚧 marca o que trava deci
 | 🚧 **D-09** | Trello é fonte da verdade ou visualização? — P-03 | Escritório |
 | 🚧 **12** | Prazo de escalada de alerta não lido — RF-13 | Escritório |
 | 🚧 **26 e 27** | Campos personalizados e automações Butler existentes — RF-20 | Escritório |
-| 🚧 Ao suporte do Escavador | "Até 200 itens" no monitoramento de diário: termos ou aparições? — §9.3 | Escavador |
-| 🚧 Ao suporte do Escavador | Os preços são de catálogo ou limitados pelo bônus? — P-06 | Escavador |
+| ~~Ao suporte do Escavador~~ | ✅ **Respondido em 25/08:** "até 200 itens" são **aparições**, não termos — §9.3 | Escavador |
+| ~~Ao suporte do Escavador~~ | ✅ **Respondido em 25/08:** a tabela é o **catálogo real do pré-pago**; o R$ 3,00 fixo vale só durante o bônus — P-06 encerrada | Escavador |
 
 ---
 

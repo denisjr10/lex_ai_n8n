@@ -346,6 +346,8 @@ Três propriedades desse formato:
 
 **`unidade` distingue três formas de cobrar** — por `chamada`, por `bloco_200` de resultados e por `mes` de assinatura. Sem essa distinção o orçamento erra sistematicamente: trata assinatura como gasto único e listagem grande como gasto pequeno.
 
+**Uma quarta propriedade, confirmada pelo suporte em 25/08:** o asterisco do painel marca **rotas de preço variável conforme os parâmetros** da requisição — pedir `autos` ou `documentos_publicos` muda o valor. Essas rotas levam `variavel: true` no catálogo, e a **reserva usa o pior caso da combinação de parâmetros**, nunca o preço base. É o mesmo princípio de R-28: onde a estimativa pode errar para baixo, reservar alto e devolver na reconciliação.
+
 **`lido_em` e `fonte` estão no arquivo.** Quando o suporte responder P-06 — se estes são preços de catálogo ou limitados pelo bônus —, muda-se um arquivo de dados, não o código. É por isso que a pendência não trava a construção.
 
 ### 6.2 Reserva antes, reconciliação depois
@@ -389,7 +391,10 @@ Por isso o chassi mantém uma tabela `assinatura`, separada do consumo por chama
 |---|---|
 | Tipo, alvo, frequência e custo mensal | Somar o compromisso mensal total, a qualquer momento |
 | Quem criou, quando, e com qual justificativa | Responsabilizar — assinatura órfã é dinheiro escorrendo |
+| **`proxima_renovacao`** | É a data que decide se remover ainda evita a próxima cobrança |
 | Estado e data de remoção | Detectar monitoramento removido, que é perda de alerta (R-14) |
+
+O suporte confirmou em 25/08 como a cobrança funciona: **cobra na criação e de novo a cada renovação mensal**, enquanto estiver ativo; **removido antes da renovação, não há cobrança no ciclo seguinte**. Por isso `proxima_renovacao` não é enfeite — é o campo que define a janela de decisão, e o chassi alerta antes dela, não depois.
 
 Regra de operação que vale desde o primeiro teste: **monitoramento criado para experimento é removido ao terminar o experimento**. Fica no chassi como alerta automático sobre assinatura criada em ambiente de desenvolvimento.
 
@@ -486,8 +491,9 @@ A regra que fecha o comportamento: **um dado velho identificado como velho é ú
 | 3 | **Deduplicar** | Chave de evento única; segunda entrega não repete efeito |
 | 4 | **Persistir cru** | O corpo recebido é guardado antes de ser interpretado |
 | 5 | **Invalidar cache** | Do recurso afetado, imediatamente |
-| 6 | **Alimentar a base interna** | Publicação, movimentação e alerta (§9.3) — é o que sustenta E2 e D-63 |
+| 6 | **Alimentar a base interna** | Publicação, movimentação e alerta (§9.3) — é o que sustenta E2 e D-63. ✅ **Receber callback não custa crédito** (confirmado em 25/08): a base se enche de graça |
 | 7 | **Disparar o fluxo n8n** | O n8n é acionado pelo receptor, não pelo fornecedor |
+| 7-A | **Nunca enriquecer sozinho** | Evento incompleto **não** dispara chamada paga automática. Enriquecer é decisão explícita e orçada (D-104) |
 | 8 | **Auditar** | Todo evento recebido vira registro, inclusive o rejeitado |
 
 ### 8.2 Validação por fornecedor
@@ -765,8 +771,8 @@ Duas escolhas de ordem que merecem justificativa:
 | **D-09** — Trello fonte da verdade ou visualização | Escritório | Modelagem da demanda e da sincronização |
 | Perguntas 26 e 27 — campos personalizados e Butler | Escritório | Qualquer escrita no Trello |
 | Pergunta 12 — prazo de escalada | Escritório | Configuração do rito de alerta |
-| **P-06** — preços de catálogo ou limitados pelo bônus | Suporte Escavador | Confirmação do §6, sem reescrita |
-| "Até 200 itens": termos ou aparições? | Suporte Escavador | Dimensionamento da vigilância (D-62) |
+| ~~**P-06** — preços de catálogo ou limitados pelo bônus~~ | ✅ **Respondido em 25/08** — a tabela é o catálogo do pré-pago | O §6 fica como está; o desenho "preço é dado" evitou reescrita |
+| ~~"Até 200 itens": termos ou aparições?~~ | ✅ **Respondido em 25/08** — são **aparições** | D-62 confirmada e barateada (D-106) |
 | Acesso à instância n8n | Usuário/escritório | §12.2 de `01` e os fluxos |
 | Número CNJ real | Escritório | Marco 10, verificação ponta a ponta |
 

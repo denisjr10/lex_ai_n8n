@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.2 |
-| Data | 2026-08-20 |
+| Versão | 1.3 — acrescenta as respostas do suporte (§11) |
+| Data | 2026-08-25 |
 | Estado | ✅ Levantado |
 | Fonte | Painel autenticado `api.escavador.com`, lido diretamente pelo navegador controlado na máquina do usuário |
 | Custo do levantamento | **R$ 0,00** — nenhuma chamada à API foi feita |
@@ -63,7 +63,7 @@ Uma ressalva de precisão: o painel diz **"Sem contrato ativo"**. Ou seja, não 
 
 ## 5. Preços — API V2 (20 serviços)
 
-Transcrição literal da tela em 2026-08-20. O `*` aparece no painel **sem nota de rodapé** explicando o que significa — isso é uma pergunta para o suporte.
+Transcrição literal da tela em 2026-08-20. O `*` aparece no painel sem nota de rodapé; ✅ **o suporte esclareceu em 25/08** — indica rota de **preço variável conforme os parâmetros** da requisição (§11.4).
 
 ### Atualização das informações dos processos
 
@@ -105,7 +105,9 @@ Transcrição literal da tela em 2026-08-20. O `*` aparece no painel **sem nota 
 | Monitoramento de Processo Mensal com Documentos Públicos | R$ 0,18 / mês |
 | Monitoramento de novos processos | R$ 3,00 / mês até 200 itens · + R$ 3,00 a cada 200 |
 
-> Curiosidade que merece confirmação: o monitoramento **com** documentos públicos é mais barato que o **sem**. Pode ser erro de cadastro do painel, pode ser política de preço. Perguntar antes de desenhar em cima disso.
+> Curiosidade que merece confirmação: o monitoramento **com** documentos públicos é mais barato que o **sem**. Pode ser erro de cadastro do painel, pode ser política de preço.
+>
+> 🔴 **Continua em aberto.** Foi perguntado ao suporte em 25/08 e é a única das seis perguntas que não veio respondida. Não desenhar em cima disso — D-62 apoia a vigilância em diário oficial (V1), que não depende desta resposta.
 
 ## 5-A. Conferência pelo Playground — e as rotas gratuitas
 
@@ -193,6 +195,8 @@ Nenhum serviço custa **mais** de R$ 3,00, e vários custam bem menos. Duas leit
 
 Não dá para distinguir as duas com certeza sem perguntar ao suporte. **A evidência do Playground (§5-A) pende para a Leitura B:** rotas gratuitas e de R$ 0,05 convivem com as de R$ 3,00, o que não aconteceria sob um valor único de teste.
 
+> ✅ **Encerrado em 25/08 pelo suporte, e as duas leituras estavam certas sobre objetos diferentes:** a **tabela** é o catálogo real do pré-pago (Leitura B), e o **débito durante o bônus** é de R$ 3,00 por requisição paga (Leitura A). Ver §11.1.
+
 O que **vale sob qualquer leitura**, e é o achado operacional do dia:
 
 > **O teto de "16 requisições" é o pior caso, não um limite fixo.** R$ 50,00 compram 16 chamadas se todas custarem R$ 3,00 — ou **1.000 chamadas** de `Envolvidos do processo` a R$ 0,05.
@@ -220,7 +224,9 @@ Registrado como **R-25**. O tratamento tem três partes, e vale como requisito d
 2. **Contar antes de listar, quando o volume for suspeito.** `Resumo do envolvido` (R$ 3,00) devolve a *quantidade* de processos sem trazer a lista. Para um envolvido grande, contar primeiro evita gastar às cegas
 3. **Teto por chamada e por papel** — um número máximo de blocos que a ferramenta aceita sem aprovação humana. Acima dele, a IA propõe e o humano aprova (Regra 2)
 
-Vale a distinção: nos **monitoramentos**, a mesma regra de blocos é **mensal e recorrente** — 200 itens monitorados por R$ 3,00/mês, e assim por diante. Ali o custo por bloco não é um susto único, é assinatura.
+Vale a distinção: nos **monitoramentos**, a mesma regra de blocos é **mensal e recorrente** — 200 itens por R$ 3,00/mês, e assim por diante. Ali o custo por bloco não é um susto único, é assinatura.
+
+> ✅ **Precisado em 25/08 (§11.5):** no Monitoramento em Diários Oficiais, os 200 itens são **aparições encontradas**, não termos vigiados — e o excedente custa **R$ 0,05 a cada 200**, não R$ 3,00. É a única das quatro rotas por bloco cujo excedente é desprezível, e é justamente a que sustenta a vigilância de prazo (D-62).
 
 ## 8. O painel substitui chamadas do orçamento
 
@@ -295,6 +301,8 @@ A tela *Certificados Digitais* está vazia. O R-12 (a API armazena certificado, 
 
 ## 10. O que perguntar ao suporte — custo zero
 
+> ✅ **Encerrada em 25/08/2026.** Todas as perguntas essenciais foram respondidas — ver §11. Fica aberta apenas a nº 6 (monitoramento com documentos públicos mais barato), que o suporte não abordou e que não bloqueia nada. A lista abaixo fica como registro do que foi perguntado e por quê.
+>
 > **Revisado em 21/08/2026**, depois da resposta do suporte. A prorrogação foi concedida (mais 10 dias) e duas perguntas caíram.
 
 **Essenciais — fazer agora:**
@@ -316,7 +324,68 @@ A tela *Certificados Digitais* está vazia. O R-12 (a API armazena certificado, 
 - ~~Limite de requisições por minuto~~ — ✅ já respondido pela documentação e pelo SDK oficial: **500 req/min por conta** (`mapeamento-escavador.md` §2.2). Perguntar o que a fonte primária já responde contraria a Regra 3 do orçamento
 - ~~Ambiente de homologação sem cobrança~~ — deixou de ser decisivo: a fundação é construída e testada sobre **gravações anonimizadas**, sem tocar na API (D-78). Se o assunto surgir naturalmente, vale perguntar; provocar a pergunta, não
 
-## 11. Fontes
+## 11. Respostas do suporte — 25/08/2026
+
+As cinco perguntas foram respondidas por escrito, no WhatsApp do Escavador B2B. Nenhuma custou crédito, e todas fecham pendência.
+
+### 11.1 Cobrança durante a cota de teste — **R$ 3,00 fixos**
+
+> *"Durante o período de teste, toda requisição paga custa R$ 3,00, independentemente do valor exibido na tabela do pré-pago. As rotas gratuitas continuam sem consumo. Quando o período de teste acabar, a conta volta para os valores normais de cada rota."*
+
+Isso resolve a contradição da §7 de forma limpa, e as duas leituras estavam **as duas certas, sobre coisas diferentes**:
+
+| Objeto | Veredito |
+|---|---|
+| **A tabela exibida** | É o **catálogo real do pré-pago** — Leitura B. Vale para orçar o produto |
+| **O débito durante o bônus** | **R$ 3,00 por requisição paga** — Leitura A. Vale para orçar o teste |
+
+Três consequências:
+
+1. **P-06 encerrada.** O modelo de custo do PRD §9 se apoia em preços reais e continua válido
+2. **O teto de 16 requisições volta a valer** — mas só para requisições **pagas**. As rotas de status são gratuitas e não consomem cota, o que dá fôlego ao Bloco C
+3. **A calibragem de preço por rota morreu no teste.** D-55 previa medir o preço real conferindo *Uso dos Créditos* depois da primeira chamada; durante o bônus toda chamada paga marca R$ 3,00, então não há o que medir. A medição só é possível no pré-pago
+
+### 11.2 Monitoramento — cobra na criação e a cada renovação
+
+> *"A cobrança acontece na criação e se repete mensalmente enquanto o monitoramento permanecer ativo. Se você criar e remover antes da próxima renovação, não haverá nova cobrança no ciclo seguinte."*
+
+O modelo é o de assinatura, como o desenho já supunha (D-32). O que a resposta acrescenta é **a data de renovação como objeto de primeira classe**: a janela para remover sem pagar de novo vai da criação até a renovação seguinte.
+
+Consequência direta para o teste: o monitoramento do Bloco C **precisa ser removido antes da renovação**, com data anotada. Esquecer é cobrança nova — e, no pré-pago, cobrança recorrente indefinida (R-13).
+
+### 11.3 Callback — **não consome crédito**
+
+> *"O recebimento do callback não gera uma cobrança adicional. O custo está relacionado ao monitoramento. Só haverá outro consumo se, a partir dele, o seu sistema fizer uma nova requisição em alguma rota paga."*
+
+**É a melhor notícia do dia para o produto**, e confirma o desenho de D-63 e D-76: a base interna de vigilância é alimentada de graça, e o custo de E2 é a mensalidade do monitoramento — não o volume de eventos.
+
+A ressalva final do suporte é exatamente o risco a controlar: *"só haverá outro consumo se, a partir dele, o seu sistema fizer uma nova requisição paga"*. Um evento que chega incompleto convida o sistema a completar a informação com uma chamada paga — e, sendo automática, ela multiplica pelo número de eventos. **Enriquecer evento é decisão explícita e orçada, nunca reflexo do receptor.**
+
+### 11.4 O asterisco — preço variável por parâmetro
+
+> *"Indica rotas cujo valor pode variar conforme os parâmetros utilizados na requisição, como quando são solicitados recursos adicionais."*
+
+Confirma o que o mapeamento já registrava em §2.3: pedir `autos` ou `documentos_publicos` altera o custo. O que muda é que agora o `*` é **informação utilizável**: o catálogo de preços marca essas rotas como variáveis, e a reserva de orçamento usa o **pior caso** da combinação de parâmetros, não o preço base (§6.2 da Spec, e o tratamento de R-28).
+
+### 11.5 "Até 200 itens" — são **aparições**, não termos
+
+> *"O 'até 200 itens' se refere à quantidade de resultados/aparições encontradas para o monitoramento, e não a 200 termos diferentes."*
+
+Era a pergunta que dimensionava D-62, e a resposta **confirma a decisão e melhora a conta**:
+
+| | Como fica |
+|---|---|
+| Unidade de assinatura | **Um monitoramento por termo vigiado** — uma OAB, um nome, um documento |
+| Preço | **R$ 3,00/mês por termo**, com franquia de **200 aparições/mês** |
+| Excedente | **+ R$ 0,05 a cada 200 aparições** adicionais |
+
+Escritório com 5 advogados: **R$ 15,00/mês**, cobrindo toda publicação que mencione qualquer um deles, em qualquer processo — inclusive nos que o escritório ainda não cadastrou.
+
+E há uma assimetria que vale registrar: esta é a **única** das quatro rotas cobradas por bloco cujo excedente é desprezível. Nas rotas de listagem da V2, cada bloco de 200 custa mais R$ 3,00; aqui, mais R$ 0,05. Sessenta vezes menos. O R-25 continua valendo para as rotas de listagem, mas **não** para a vigilância em diário oficial — que é justamente onde o volume seria imprevisível.
+
+---
+
+## 12. Fontes
 
 Todas lidas em 2026-08-20 no painel autenticado, via navegador controlado na máquina do usuário:
 

@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.5 — **alvo trocado: o P1 anterior estava em segredo de justiça** |
-| Data | 2026-08-24 |
+| Versão | 2.6 — **regra de cobrança do teste confirmada pelo suporte; totais recalculados** |
+| Data | 2026-08-25 |
 | Estado | 🔴 **Bloqueado pelo Escavador.** Blocos A e B autorizados e tentados em 23/08; a API recusou com saldo bloqueado |
 | Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
 | Liberado em | **13/08/2026** |
@@ -127,9 +127,18 @@ Em 2026-08-20 o painel autenticado foi lido inteiro, **sem gastar crédito**. Os
 
 Ela **depende do número CNJ do processo**. Enquanto ele não chega, a recomendação é **não gastar nada**: qualquer chamada que não precise de CNJ custa R$ 3,00 e ensina menos.
 
-## 1-C. 🚧 A pergunta que ainda decide o tamanho deste orçamento
+## 1-C. ✅ Resolvido em 25/08 — **R$ 3,00 por requisição paga**
 
-Há uma contradição aberta entre duas informações do próprio suporte, e ela vale entre **16 chamadas** e **cerca de mil**:
+> *"Durante o período de teste, toda requisição paga custa R$ 3,00, independentemente do valor exibido na tabela do pré-pago. As rotas gratuitas continuam sem consumo. Quando o período de teste acabar, a conta volta para os valores normais de cada rota."* — suporte Escavador B2B, 25/08/2026
+
+**As duas leituras estavam certas sobre objetos diferentes:** a tabela do painel é o catálogo real do pré-pago, e o débito durante o bônus é fixo. Consequências para este orçamento:
+
+1. **O teto de 16 requisições volta a valer** — mas conta só as **pagas**. Rotas gratuitas não consomem cota nem saldo
+2. **A calibragem de preço morreu no teste.** D-55 previa medir o preço real de cada rota conferindo *Uso dos Créditos*; durante o bônus toda chamada paga marca R$ 3,00. A medição fica para o pré-pago — e, de todo modo, o catálogo já está transcrito
+3. **Escolher a variante barata de uma rota não economiza nada agora.** `documentos_publicos` a R$ 0,20 custa os mesmos R$ 3,00 durante o teste. A escolha volta a importar no pré-pago
+4. **O total revisado sobe de ~R$ 15,23 para R$ 21,00** — ver §3
+
+O registro histórico da contradição, que levou à pergunta:
 
 | Fonte | O que diz |
 |---|---|
@@ -137,16 +146,11 @@ Há uma contradição aberta entre duas informações do próprio suporte, e ela
 | Suporte por escrito (14/08) | *"Não, após o período de teste a tabela retorna aos valores do pré pago. **Cada rota possui uma cobrança**."* |
 | Painel e Playground (20/08) | Preços diferenciados por rota — **R$ 0,00**, R$ 0,05, R$ 0,08, R$ 0,20, R$ 0,75 e R$ 3,00 |
 
-A leitura mais provável concilia as três: **a tabela exibida é o catálogo pré-pago** (por isso tem preços diferenciados), mas **o débito durante a cota de teste pode ser de R$ 3,00 fixos por requisição**, independentemente da rota.
+A leitura foi confirmada: **a tabela exibida é o catálogo pré-pago** (por isso tem preços diferenciados), e **o débito durante a cota de teste é de R$ 3,00 fixos por requisição paga**.
 
-Se for assim, o orçamento revisado de ~R$ 15,23 em 9 chamadas passa a custar **R$ 27,00**, e as rotas de status deixam de ser gratuitas enquanto durar o bônus.
+A postura de orçar pelo pior caso, adotada enquanto a resposta não vinha, era a certa — e o pior caso se confirmou. É a Regra 8 funcionando: na dúvida, orçar caro e não gastar.
 
-**Como resolver, em ordem de custo:**
-
-1. **Perguntar ao suporte** — custo zero, e é a pergunta de maior valor que resta (§10 dos [achados](07-painel-escavador-achados.md))
-2. **Medir na primeira chamada** — executar a chamada A1 (`envolvidos`, catálogo R$ 0,05) e conferir *Uso dos Créditos* logo depois. Se o saldo cair R$ 0,05, vale a tabela; se cair R$ 3,00, vale o fixo. A calibragem é gratuita e vem de carona (D-55)
-
-Enquanto a resposta não vier, **o orçamento opera pelo pior caso: R$ 3,00 por chamada.** É a postura que a Regra 8 exige — na dúvida, orçar caro e não gastar.
+> 🔴 **Tudo isto vale a partir do desbloqueio.** Na mesma conversa de 25/08 o suporte descreveu o período de teste como se estivesse correndo — *"quando o período de teste acabar, a conta volta para os valores normais"* —, mas a API recusa desde 23/08 com `403 · saldo bloqueado` (§5.1, R-37). **A prorrogação continua não aplicada, e isso não foi levantado nesta conversa.** É o próximo contato a fazer, e é o único item que trava a execução.
 
 ## 2. Princípio de alocação
 
@@ -165,13 +169,15 @@ Ordem de prioridade:
 
 > ⚠️ **Os blocos abaixo foram revistos na versão 2.0.** Os valores são os do painel; onde há `*`, o painel exibe um asterisco sem nota de rodapé (§10 dos achados).
 
-### Bloco A — Autenticação e calibragem · 1 chamada · **R$ 0,05**
+### Bloco A — Autenticação · 1 chamada · **R$ 3,00**
 
 Era de 4 chamadas e R$ 12,00. O painel respondeu A3 (catálogo e diário oficial), A4 (jurisprudência ativa) e a maior parte de A1 e A2 de graça.
 
 | # | Chamada | Preço | O que responde |
 |---|---|---|---|
-| A1 | `GET /api/v2/processos/numero_cnj/{cnj}/envolvidos?limit=20` | **R$ 0,05** | Autenticação na V2 · envelope e paginação · modelo do envolvido · **e o preço realmente cobrado** (conferir em *Uso dos Créditos* logo depois) |
+| A1 | `GET /api/v2/processos/numero_cnj/{cnj}/envolvidos?limit=20` | **R$ 3,00** (catálogo: R$ 0,05) | Autenticação na V2 · envelope e paginação · modelo do envolvido |
+
+> A calibragem saiu do nome do bloco: com R$ 3,00 fixos no teste, não há preço a medir (§1-C). Continua valendo conferir *Uso dos Créditos* depois da chamada — mas para confirmar o débito fixo, não para descobrir o preço da rota.
 
 **Chamadas removidas do Bloco A:**
 
@@ -194,9 +200,9 @@ Todas sobre **o mesmo processo real do escritório** usado em A1, para que as re
 | B2 | `GET /api/v2/processos/numero_cnj/{cnj}/movimentacoes?limit=20&ordem=desc` | R$ 3,00 * | Modelo da movimentação — é a peça que dispara prazo |
 | B4 | `GET /api/v2/envolvido/processos?cpf_cnpj={cnpj}&limit=5` | R$ 3,00 (até 200 itens) | Caminho "todos os processos deste cliente" — a consulta mais comum do agente |
 
-> Bônus barato, se A1 mostrar que o processo já tem resumo por IA: `Resumo de um Processo por IA` custa **R$ 0,05**. Vale a pena — o resumo é matéria-prima direta para o agente.
+> ~~Bônus barato: `Resumo de um Processo por IA` custa R$ 0,05.~~ **Não durante o teste** — custaria os mesmos R$ 3,00. Fica como candidato natural para a primeira semana do plano pré-pago.
 
-### Bloco C — Assincronia e webhook · 3 chamadas · **R$ 3,18**
+### Bloco C — Assincronia e webhook · 3 chamadas · **R$ 6,00**
 
 **Passo zero, gratuito e a fazer já:** cadastrar a URL de callback e gerar o token de validação em `api.escavador.com/callbacks`. O campo está vazio — não há integração do escritório a quebrar (pendência 7 encerrada). Isso não consome crédito e é pré-requisito de C1.
 
@@ -204,13 +210,15 @@ C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL,
 
 | # | Chamada | Preço | O que responde |
 |---|---|---|---|
-| C1 | `POST .../solicitar-atualizacao` — `documentos_publicos: false`, `autos: false` | R$ 3,00 * | Formato do aceite assíncrono. Configuração mínima de propósito. **Se `documentos_publicos: true` custa só R$ 0,20**, vale considerar a variante barata |
-| C2 | `GET .../status-atualizacao` | **Gratuito** | Máquina de estados da atualização. O Playground confirma: custo zero. Pode ser repetida à vontade |
-| C4 | `POST /api/v2/monitoramentos/processos` — frequência **mensal com documentos públicos** | **R$ 0,18 / mês** | Contrato de criação de monitoramento, na variante mais barata da tabela |
+| C1 | `POST .../solicitar-atualizacao` — `documentos_publicos: false`, `autos: false` | R$ 3,00 | Formato do aceite assíncrono. Configuração mínima de propósito. A variante barata (`documentos_publicos`, catálogo R$ 0,20) não economiza no teste |
+| C2 | `GET .../status-atualizacao` | **Gratuito** | Máquina de estados da atualização. O Playground confirma: custo zero. **Não consome cota** e pode ser repetida à vontade |
+| C4 | `POST /api/v2/monitoramentos/processos` — frequência **mensal com documentos públicos** | **R$ 3,00** (catálogo: R$ 0,18/mês) | Contrato de criação de monitoramento |
 
-> ⚠️ **C4 gera custo recorrente.** O monitoramento criado deve ser removido assim que o contrato for confirmado (remover não custa no plano; na cota de teste, custa uma chamada — decidir na hora se compensa).
+> ⚠️ **C4 gera custo recorrente, e agora sabemos exatamente como** (§11.2 dos achados): cobra **na criação** e **de novo a cada renovação mensal**, enquanto estiver ativo. Removido antes da renovação, não há cobrança no ciclo seguinte.
 >
-> O callback **recebido** não é requisição nossa e não consome cota.
+> **Ação obrigatória:** anotar a data de criação e **remover o monitoramento antes de completar um mês**. Esquecer é cobrança nova — e, no pré-pago, recorrência indefinida (R-13).
+>
+> ✅ **O callback recebido não consome crédito nem cota** — confirmado pelo suporte em 25/08. O custo é do monitoramento, não do volume de eventos.
 
 ### Bloco D — Erros · 2 chamadas · R$ 6,00
 
@@ -221,19 +229,22 @@ C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL,
 
 ### Total revisado
 
-| Bloco | Chamadas | Custo |
-|---|---|---|
-| A — autenticação e calibragem | 1 | R$ 0,05 |
-| B — estrutura de dados | 3 | R$ 9,00 |
-| C — assincronia e webhook | 3 | R$ 3,18 (C2 é gratuita) |
-| D — erros | 2 | ~R$ 3,00 (D2 provavelmente não cobra) |
-| **Total** | **9** | **~R$ 15,23 de R$ 50,00** |
+Recalculado em 25/08 pela regra confirmada: **R$ 3,00 por requisição paga; rotas gratuitas não consomem saldo nem cota.**
 
-**Sobram cerca de R$ 35,00** — folga que na versão 1.1 não existia. Ela deve ser gasta, não guardada: crédito não usado até 23/08 evapora. Destino recomendado, em ordem:
+| Bloco | Pagas | Gratuitas | Custo |
+|---|---|---|---|
+| A — autenticação | 1 | — | R$ 3,00 |
+| B — estrutura de dados | 3 | — | R$ 9,00 |
+| C — assincronia e webhook | 2 | 1 (C2) | R$ 6,00 |
+| D — erros | 1 | 1 (D2, provável) | R$ 3,00 |
+| **Total** | **7** | **2** | **R$ 21,00 de R$ 50,00** |
 
-1. **Um segundo processo, de outro tribunal** — a variação de formato entre tribunais é incógnita real do modelo de dados do MCP
-2. **A V1 na prática** — uma consulta de diário oficial, que é o gatilho de prazo e a parte que a V2 não cobre
-3. **Repetir A1 em processos diferentes a R$ 0,05** — dezenas de amostras do modelo de envolvido por quase nada
+**Sobram R$ 29,00 — cerca de 9 requisições pagas.** Devem ser gastas, não guardadas: crédito não usado evapora no fim da prorrogação. Destino recomendado, em ordem:
+
+1. **A V1 na prática** — uma consulta de diário oficial. É o gatilho de prazo, é a parte que a V2 não cobre, e responde de quebra a única pergunta de autenticação em aberto: **a V1 aceita o mesmo token?**
+2. **Um monitoramento em diário oficial por OAB** — é o coração de E2 e de D-62. Vale exercitar o ciclo completo: criar, receber a aparição por callback, conferir o formato. Mesma regra de C4: **anotar a data e remover antes da renovação**
+3. **Um segundo processo, de outro tribunal** — a variação de formato entre tribunais é incógnita real do modelo de dados do MCP
+4. ~~Repetir A1 em processos diferentes a R$ 0,05~~ — sem sentido no teste: cada repetição custa R$ 3,00 cheios
 
 ## 4. O que **não** entra no orçamento
 
