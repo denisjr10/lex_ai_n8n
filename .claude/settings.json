@@ -12,6 +12,42 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guarda-escavador.mjs",
+            "timeout": 10,
+            "statusMessage": "Conferindo o orçamento do Escavador..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guarda-segredo.mjs",
+            "timeout": 20,
+            "statusMessage": "Conferindo segredo e dado de cliente..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/fechar-ciclo.mjs",
+            "timeout": 15,
+            "statusMessage": "Conferindo se o ciclo foi fechado..."
+          }
+        ]
+      }
     ]
   }
 }

@@ -131,6 +131,12 @@ $RECYCLE.BIN/
 .claude/settings.local.json
 .claude/scratchpad/
 
+# Fotografias da arvore de trabalho tiradas pelo hook estado-do-repo.mjs no
+# inicio de cada sessao, e lidas pelo fechar-ciclo.mjs no fim. Sao descartaveis
+# e especificas de cada sessao. Precisam ficar fora do Git tambem para nao
+# aparecerem no proprio "git status" que o fechar-ciclo inspeciona.
+.claude/.sessoes/
+
 # Resultados das rodadas do conselho: sao gerados e mudam a cada execucao.
 # Continuam no disco para voce auditar - so nao entram no historico.
 .conselho/

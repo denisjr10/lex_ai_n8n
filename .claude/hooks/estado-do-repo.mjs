@@ -12,7 +12,7 @@
 // Só leitura local, sem rede — não faz fetch, não escreve nada.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
@@ -27,6 +27,25 @@ const git = (...args) => {
   } catch {
     return ''
   }
+}
+
+// --- Fotografia da árvore de trabalho ----------------------------------
+// O hook fechar-ciclo.mjs (evento Stop) precisa distinguir o que ESTA sessão
+// alterou do que já estava pendente antes dela começar. Como o projeto é
+// tocado por várias sessões em paralelo, a foto é guardada por session_id.
+try {
+  const pedacos = []
+  if (!process.stdin.isTTY) for await (const p of process.stdin) pedacos.push(p)
+  const entrada = JSON.parse(Buffer.concat(pedacos).toString('utf8') || '{}')
+  const sessao = String(entrada.session_id || 'sem-id').replace(/[^A-Za-z0-9_-]/g, '')
+  mkdirSync(join(raiz, '.claude', '.sessoes'), { recursive: true })
+  writeFileSync(
+    join(raiz, '.claude', '.sessoes', `${sessao}.json`),
+    JSON.stringify({ pendenciasNoInicio: git('status', '--porcelain').split('\n').filter(Boolean) }),
+  )
+} catch {
+  // Fotografar é um luxo. Se falhar, a sessão segue normalmente e o
+  // fechar-ciclo apenas fica calado.
 }
 
 const linhas = []
@@ -45,6 +64,18 @@ add('> trabalhado por várias sessões em paralelo — o disco pode estar à fre
 add('> do que você tem em contexto. **Leia um arquivo antes de editá-lo.**')
 add()
 add(`**Branch:** ${branch || '(desconhecida)'}`)
+add()
+
+// --- Orçamento do Escavador -------------------------------------------
+// Regra 8 do CLAUDE.md. Fica no topo do contexto porque é a única coisa
+// deste projeto cujo erro custa dinheiro e não se desfaz.
+add('**Orçamento do Escavador — leia antes de qualquer chamada à API:**')
+add('cota de teste de R$ 50,00, **R$ 3,00 por requisição** (qualquer rota, não')
+add('existe rota gratuita), teto de 16 requisições, painel exibindo validade até')
+add('01/09/2026, sem recarga contratada. Toda chamada precisa constar de')
+add('`docs/06-orcamento-de-chamadas-escavador.md`. O hook `guarda-escavador.mjs`')
+add('bloqueia em código as que não constam — se ele barrar, pare e pergunte ao')
+add('usuário em vez de contornar.')
 add()
 
 if (commits) {

@@ -48,6 +48,29 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 | **Spec Técnica — Parte I: chassi, motor de custo, cache, callbacks, esquema de dados** | `09-spec-tecnica.md` |
 | **Nota Técnica 02 — ClickUp no lugar de Workspace, Chat e Trello: viabilidade, recursos e custo** | `10-clickup-avaliacao.md` |
 | **Nota Técnica 03 — Demonstração ao vivo para o escritório, antes do contrato** | `11-nota-tecnica-demo.md` |
+| **Hooks do Claude Code — as regras inegociáveis viraram barreira em código** | `.claude/hooks/LEIA-ME.md` |
+
+## As regras saíram do prompt e viraram barreira — 25/08/2026
+
+Quatro hooks passaram a rodar automaticamente, declarados em
+`.claude/settings.json`. A motivação é a Regra 1 do próprio projeto: privilégio
+se aplica em código, nunca por instrução no prompt. As regras inegociáveis do
+`CLAUDE.md` dependiam de o agente lembrar delas — agora o programa as aplica.
+
+| Hook | Evento | Protege |
+|---|---|---|
+| `estado-do-repo.mjs` | `SessionStart` | Injeta estado do Git, orçamento do Escavador e o cabeçalho deste documento antes da primeira pergunta |
+| `guarda-escavador.mjs` | `PreToolUse` | Regra 8 — bloqueia chamada à API paga; ler documentação continua livre |
+| `guarda-segredo.mjs` | `PreToolUse` | R-12 e D-95 — bloqueia `git add -f`, caminho proibido e segredo em commit; CNJ pergunta em vez de bloquear |
+| `fechar-ciclo.mjs` | `Stop` | Cobra a atualização deste documento quando a sessão mexeu na memória do projeto |
+
+O `estado-do-repo.mjs` foi criado por uma sessão paralela mais cedo no mesmo
+dia; os outros três foram somados a ele, e ele ganhou a fotografia da árvore de
+trabalho que o `fechar-ciclo` consome. Todos são Node puro, sem dependência
+externa e sem acesso à rede.
+
+**Reinicie o Claude Code depois de mexer em `.claude/settings.json`** — uma
+sessão que começou antes da mudança segue com a configuração antiga.
 
 ## O que os mapeamentos concluíram
 
