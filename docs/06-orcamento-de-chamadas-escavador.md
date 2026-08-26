@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.8 — **Blocos A e B executados. A tarifa plana de R$ 3,00 não se confirmou: o débito segue o catálogo por rota** (§5.3) |
+| Versão | 2.9 — **C4 retirado do orçamento (D-110). Bloco C reduzido a C1 + C2, e ganhou script próprio** (`captura/atualizar.mjs`) |
 | Data | 2026-08-26 |
-| Estado | ✅ **Em execução.** A e B feitos; receptor de callback de pé e URL cadastrada; falta a vigilância por OAB e o Bloco C |
+| Estado | ✅ **Em execução.** A e B feitos; receptor de callback de pé e URL cadastrada. **Autorizados e prontos para rodar:** a vigilância por OAB e o Bloco C (C1 + C2) |
 | Saldo | **R$ 47,00** de R$ 50,00 · **R$ 3,00 gastos em 4 chamadas**, sendo 2 gratuitas |
 | Liberado em | **13/08/2026** |
 | **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08. **6 dias a partir de hoje** |
@@ -22,10 +22,10 @@
 | Item | Situação |
 |---|---|
 | **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) · **R$ 9,00** |
-| **Bloco C** | ✅ **Autorizado em 26/08** — C1 `solicitar-atualizacao` (R$ 3,00) e C2 `status` (gratuita). **C4 sob revisão** — ver §0.3 |
+| **Bloco C** | ✅ **Autorizado em 26/08, reduzido em 26/08** — C1 `solicitar-atualizacao` (R$ 3,00) e C2 `status` (gratuita). **C4 RETIRADO** por decisão do usuário — D-110 |
 | **Vigilância por OAB** | ✅ **Autorizada em 26/08** — `POST /api/v1/monitoramentos`, tipo `termo`. Assinatura mensal, **remoção obrigatória** antes da renovação |
 | Bloco D | 🟡 Não autorizado. Parte dele já foi respondida de graça pelo 403 de 23/08 (§5.1) |
-| **Teto desta autorização** | **R$ 18,00** em 6 chamadas pagas, de R$ 50,00 |
+| **Teto desta autorização** | **R$ 15,00** em 5 chamadas pagas, de R$ 50,00 — eram R$ 18,00 antes de C4 sair |
 | Processos disponíveis | **8**, extraídos dos autos em PDF fornecidos pelo escritório — ver §0.1 |
 | Alcance | ✅ As 3 chamadas valem **só para o P1 (TJAP, saúde pública)**. Os demais ficam guardados, e ampliar exige novo aval |
 | 🔄 Alvo trocado | **24/08:** o P1 anterior (TJPB, alimentos) está em **segredo de justiça**. Substituído — ver §0.1 |
@@ -260,19 +260,29 @@ Todas sobre **o mesmo processo real do escritório** usado em A1, para que as re
 
 > ~~Bônus barato: `Resumo de um Processo por IA` custa R$ 0,05.~~ **Não durante o teste** — custaria os mesmos R$ 3,00. Fica como candidato natural para a primeira semana do plano pré-pago.
 
-### Bloco C — Assincronia e webhook · 3 chamadas · **R$ 6,00**
+### Bloco C — Assincronia e webhook · 2 chamadas · **R$ 3,00**
 
 **Passo zero, gratuito e a fazer já:** cadastrar a URL de callback e gerar o token de validação em `api.escavador.com/callbacks`. O campo está vazio — não há integração do escritório a quebrar (pendência 7 encerrada). Isso não consome crédito e é pré-requisito de C1.
 
 C3 saiu: a tela *Callbacks* já mostra o histórico de entregas — evento, URL, tentativas, status e payload — de graça.
 
+**C4 saiu em 26/08, por decisão do usuário (D-110).** Ele validaria o contrato de `POST /api/v2/monitoramentos/processos` — monitoramento **por processo**, que é exatamente a rota que a **D-62 rejeitou** em favor da vigilância em diário oficial por termo. Gastar R$ 3,00 e assinar custo recorrente para conhecer o contrato de algo que o projeto decidiu não usar é pagar duas vezes pela mesma resposta: a vigilância por OAB, já autorizada, exercita o mesmo ciclo (criar → cobrar → renovar → remover) na rota que **vai** para produção.
+
+**Como rodar** — `captura/atualizar.mjs`, script próprio, separado do `capturar.mjs` porque aquele tem fila fixa de GETs e teto travado na autorização dos Blocos A e B:
+
+```
+node captura/atualizar.mjs solicitar                          # ensaio, não gasta
+node captura/atualizar.mjs solicitar --executar --confirmo-custo   # C1, R$ 3,00
+node captura/atualizar.mjs status --executar                  # C2, gratuita, repita à vontade
+```
+
 | # | Chamada | Preço | O que responde |
 |---|---|---|---|
-| C1 | `POST .../solicitar-atualizacao` — `documentos_publicos: false`, `autos: false` | R$ 3,00 | Formato do aceite assíncrono. Configuração mínima de propósito. A variante barata (`documentos_publicos`, catálogo R$ 0,20) não economiza no teste |
+| C1 | `POST .../solicitar-atualizacao` — corpo `{enviar_callback: 1, documentos_publicos: 0, autos: 0}` | R$ 3,00 | Formato do aceite assíncrono **e disparo real do callback** — a única prova de ponta a ponta de que o receptor no n8n atende. Configuração mínima de propósito |
 | C2 | `GET .../status-atualizacao` | **Gratuito** | Máquina de estados da atualização. O Playground confirma: custo zero. **Não consome cota** e pode ser repetida à vontade |
-| C4 | `POST /api/v2/monitoramentos/processos` — frequência **mensal com documentos públicos** | **R$ 3,00** (catálogo: R$ 0,18/mês) | Contrato de criação de monitoramento |
+| ~~C4~~ | ~~`POST /api/v2/monitoramentos/processos`~~ | ~~R$ 3,00~~ | **RETIRADO em 26/08 (D-110)** — valida a rota que a D-62 rejeitou |
 
-> ⚠️ **C4 gera custo recorrente, e agora sabemos exatamente como** (§11.2 dos achados): cobra **na criação** e **de novo a cada renovação mensal**, enquanto estiver ativo. Removido antes da renovação, não há cobrança no ciclo seguinte.
+> ⚠️ **O aprendizado do C4 sobrevive à retirada dele** (§11.2 dos achados): monitoramento cobra **na criação** e **de novo a cada renovação mensal**, enquanto estiver ativo. Removido antes da renovação, não há cobrança no ciclo seguinte. Isso vale igual para a vigilância por OAB, que ficou no lugar do C4.
 >
 > **Ação obrigatória:** anotar a data de criação e **remover o monitoramento antes de completar um mês**. Esquecer é cobrança nova — e, no pré-pago, recorrência indefinida (R-13).
 >
@@ -293,9 +303,9 @@ Recalculado em 25/08 pela regra confirmada: **R$ 3,00 por requisição paga; rot
 |---|---|---|---|
 | A — autenticação | 1 | — | R$ 3,00 |
 | B — estrutura de dados | 3 | — | R$ 9,00 |
-| C — assincronia e webhook | 2 | 1 (C2) | R$ 6,00 |
+| C — assincronia e webhook | 1 | 1 (C2) | R$ 3,00 |
 | D — erros | 1 | 1 (D2, provável) | R$ 3,00 |
-| **Total** | **7** | **2** | **R$ 21,00 de R$ 50,00** |
+| **Total** | **6** | **2** | **R$ 18,00 de R$ 50,00** |
 
 **Sobram R$ 29,00 — cerca de 9 requisições pagas.** Devem ser gastas, não guardadas: crédito não usado evapora no fim da prorrogação. Destino recomendado, em ordem:
 

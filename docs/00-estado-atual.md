@@ -6,6 +6,7 @@
 | Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00.** Blocos A e B executados em 26/08 e custaram **R$ 3,00**, não os R$ 9,00 orçados — o débito segue o catálogo por rota, e **não** a tarifa plana que o suporte informou (D-108). Expira **01/09** |
 | Callback | ✅ **De pé.** Receptor ativo no n8n (`OymAtbNYI1pjfWkA`), URL cadastrada no painel: `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **Nenhuma.** Ver §"Assinaturas do Escavador" — é a seção que precisa ser conferida em toda sessão |
+| Bloco C | ✅ **Pronto para rodar.** `captura/atualizar.mjs` escrito e ensaiado. **C4 retirado** (D-110) — validava a rota que a D-62 rejeitou. Sobraram C1 (R$ 3,00) e C2 (gratuita) |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
@@ -25,7 +26,13 @@
 |---|---|---|---|---|---|
 | _(nenhuma)_ | — | — | — | — | — |
 
-**Quando criar uma, preencha aqui na mesma hora.** O comando `node captura/monitorar.mjs criar` imprime a linha pronta.
+**Quando criar uma, preencha aqui na mesma hora.** O comando abaixo imprime a linha pronta para colar, com a data-limite já calculada:
+
+```bash
+node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
+```
+
+A vigilância por OAB está **autorizada e ensaiada** (alvo em `captura/monitoramento.local.json`, 5 diários, termo de 19 caracteres), aguardando só a execução.
 
 Conferência gratuita, a qualquer momento — e vale fazer se esta tabela parecer velha:
 
@@ -100,7 +107,24 @@ O `fechar-ciclo.mjs` cobra a atualização deste documento ao fim de cada sessã
 
 O segundo é o mais perigoso dos dois: falso positivo em barreira é o que ensina a próxima sessão a desligar a barreira. Ambos os hooks agora têm teste (`testar-fechar-ciclo.mjs`, 8 casos, com repositório Git descartável).
 
-**O que falta:** criar a vigilância por OAB (R$ 3,00/mês) e exercitar o Bloco C. Ambos destravados — o callback já está cadastrado.
+### O Bloco C ganhou script, e o C4 saiu do orçamento
+
+`captura/atualizar.mjs` — separado do `capturar.mjs` de propósito: aquele tem fila fixa de GETs e teto travado na autorização dos Blocos A e B, e mexer nele para acomodar um POST significaria afrouxar as travas que já protegeram duas execuções.
+
+**A documentação oficial corrigiu o contrato antes de a chamada custar.** O orçamento previa `documentos_publicos: false, autos: false`; a documentação mostra que os campos são texto e valem `1`/`0`, **não booleanos JSON**. Mandar `true` onde a API espera `1` seria o mesmo erro do `origens_ids` da semana passada: um 422 que custa igual a um 200. Segunda vez que ler a documentação de graça evita gastar R$ 3,00.
+
+**C4 retirado por decisão do usuário (D-110).** Ele validaria monitoramento **por processo** — a rota que a D-62 rejeitou. A vigilância por OAB exercita o mesmo ciclo de cobrança na rota que vai para produção.
+
+### O disjuntor de crédito tinha uma brecha e um exagero
+
+Auditado ao acrescentar o script novo:
+
+1. **Brecha (D-111):** o `atualizar.mjs` nasceu depois do hook e passava por fora dele. Por alguns minutos existiu um script que debita R$ 3,00 sem barreira. Regra derivada: script pago novo entra no hook no **mesmo commit** em que nasce
+2. **Exagero (D-112):** o hook lia `--executar` como sinônimo de "gasta", e barrava `listar`, `status`, `aparicoes` e — pior — **`remover`**, a única operação que *para* a cobrança mensal. Um hook de custo impedindo reduzir custo é um hook que a próxima sessão desliga. Liberação por lista explícita; subcomando desconhecido continua bloqueado
+
+`testar-guarda-escavador.mjs` passou de 15 para **20 casos**. As duas suítes passam inteiras.
+
+**O que falta:** as duas chamadas pagas — criar a vigilância por OAB (R$ 3,00/mês) e o C1 do Bloco C (R$ 3,00). Ambas ensaiadas, ambas destravadas, ambas dependendo só de o usuário rodar.
 
 > ⚠️ Este documento tem um bloco duplicado (as seções "As duas demos ficaram prontas", "Próximo passo", "Decisões", "Pendências" e "Riscos ativos" aparecem duas vezes). Provável colisão entre sessões paralelas. Não foi corrigido aqui para não atropelar outra sessão que possa estar com o arquivo aberto.
 
@@ -291,7 +315,23 @@ Três caminhos que não competem entre si:
 
 1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
 2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
-3. **Executar a captura** (Blocos A e B) — ✅ **autorizada em 21/08**, com dois processos reais já conferidos. Falta apenas o **valor do token** na sessão e o esclarecimento de §0 do orçamento (3 chamadas em um processo, ou 3 em cada um?). Ela valida contrato **e** abastece a demonstração, de uma vez só
+3. ~~**Executar a captura** (Blocos A e B)~~ — ✅ **feita em 26/08.** Custou R$ 3,00, não os R$ 9,00 orçados (D-108)
+
+**As duas chamadas pagas que restam autorizadas** — ambas gastam dinheiro, e por isso passam pela mão do usuário, não pela do agente. O hook `guarda-escavador.mjs` bloqueia o agente em código:
+
+```bash
+node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
+```
+
+```bash
+node captura/atualizar.mjs solicitar --executar --confirmo-custo
+```
+
+Depois do C1, o acompanhamento é **gratuito** e pode ser repetido à vontade:
+
+```bash
+node captura/atualizar.mjs status --executar
+```
 
 A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
 
@@ -381,7 +421,23 @@ Três caminhos que não competem entre si:
 
 1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
 2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
-3. **Executar a captura** (Blocos A e B) — ✅ **autorizada em 21/08**, com dois processos reais já conferidos. Falta apenas o **valor do token** na sessão e o esclarecimento de §0 do orçamento (3 chamadas em um processo, ou 3 em cada um?). Ela valida contrato **e** abastece a demonstração, de uma vez só
+3. ~~**Executar a captura** (Blocos A e B)~~ — ✅ **feita em 26/08.** Custou R$ 3,00, não os R$ 9,00 orçados (D-108)
+
+**As duas chamadas pagas que restam autorizadas** — ambas gastam dinheiro, e por isso passam pela mão do usuário, não pela do agente. O hook `guarda-escavador.mjs` bloqueia o agente em código:
+
+```bash
+node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
+```
+
+```bash
+node captura/atualizar.mjs solicitar --executar --confirmo-custo
+```
+
+Depois do C1, o acompanhamento é **gratuito** e pode ser repetido à vontade:
+
+```bash
+node captura/atualizar.mjs status --executar
+```
 
 A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
 

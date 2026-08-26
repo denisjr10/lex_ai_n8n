@@ -175,7 +175,7 @@ Notas:
 
 | Operação | Método e rota | Parâmetros | Custo | Faixa |
 |---|---|---|---|---|
-| Solicitar atualização de um processo | `POST /api/v2/processos/numero_cnj/{numero}/solicitar-atualizacao` | corpo: `enviar_callback`, `documentos_publicos`, `autos`, `utilizar_certificado`, `certificado_id`, `usuario`, `senha`, `documentos_especificos` | ⚠️ **alto** | A1 |
+| Solicitar atualização de um processo | `POST /api/v2/processos/numero_cnj/{numero}/solicitar-atualizacao` | corpo: `enviar_callback`, `documentos_publicos`, `autos`, `utilizar_certificado`, `certificado_id`, `usuario`, `senha`, `documentos_especificos` — **valores são `1`/`0`, não booleanos JSON** (lido na documentação oficial em 26/08) | ⚠️ **alto** | A1 |
 | Status da atualização de um processo | `GET /api/v2/processos/numero_cnj/{numero}/status-atualizacao` | `numero*` | 🆓 | A0 |
 | Solicitar atualização em lote | `POST /api/v2/processos/lote/solicitar-atualizacao` | corpo: `processos*`, `enviar_callback`, `documentos_publicos`, `autos`, `utilizar_certificado`, `certificado_id`, `usuario`, `senha`, `ignorar_atualizados` | ⚠️ **alto ×N** | A1 |
 | Status do lote | `GET /api/v2/processos/lote/{id}/status` | `id*` | 🆓 | A0 |

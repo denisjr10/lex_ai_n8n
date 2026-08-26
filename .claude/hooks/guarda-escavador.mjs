@@ -28,7 +28,12 @@ const MENCIONA_ESCAVADOR = /escavador\.com/i
 // O lookahead exclui `--check`, que so confere sintaxe e nao roda uma linha.
 // Falso positivo em hook de seguranca nao e detalhe: hook que barra o trabalho
 // legitimo e hook que a proxima sessao aprende a desligar.
-const SCRIPT_QUE_COBRA = /\b(node|npx|bun|deno)\b(?![^|;&]*--check\b)[^|;&]*\b(capturar|monitorar)\.mjs/i
+//
+// A lista de scripts precisa crescer junto com a captura. `atualizar.mjs`
+// nasceu depois deste hook, e por um momento existiu um script que debita
+// R$ 3,00 e passava por fora do disjuntor. Barreira que nao conhece o script
+// novo e barreira que da falsa seguranca, que e pior que barreira nenhuma.
+const SCRIPT_QUE_COBRA = /\b(node|npx|bun|deno)\b(?![^|;&]*--check\b)[^|;&]*\b(capturar|monitorar|atualizar)\.mjs/i
 
 function negar(motivo) {
   process.stdout.write(JSON.stringify({
@@ -62,11 +67,23 @@ if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
   // chamada real, que e o oposto do que este hook quer.
   const ehEnsaio = !/--executar\b/.test(comando)
 
-  if (SCRIPT_QUE_COBRA.test(comando) && !ehEnsaio) {
+  // `--executar` NAO e sinonimo de "gasta". Os dois scripts com subcomando tem
+  // operacoes gratuitas que tambem precisam de --executar para valer: conferir
+  // o inventario de assinaturas (`listar`), acompanhar uma atualizacao
+  // (`status`) e, sobretudo, REMOVER um monitoramento — a operacao que existe
+  // para PARAR a cobranca mensal. Barrar `remover` seria o hook de custo
+  // impedindo a unica acao que reduz custo.
+  //
+  // A lista e explicita, nunca por exclusao: subcomando desconhecido cai no
+  // bloqueio. Falha fecha.
+  const OPERACAO_GRATUITA = /\b(monitorar|atualizar)\.mjs\s+(origens|listar|aparicoes|remover|status)\b/i
+
+  if (SCRIPT_QUE_COBRA.test(comando) && !ehEnsaio && !OPERACAO_GRATUITA.test(comando)) {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
-      'Este comando executa captura/capturar.mjs, que chama a API do Escavador ' +
-      'e debita R$ 3,00 do saldo de teste (R$ 50,00 / 16 requisicoes).\n\n' +
+      'Este comando executa um dos scripts que chamam a API do Escavador ' +
+      '(capturar.mjs, monitorar.mjs ou atualizar.mjs) e debita credito do ' +
+      'saldo de teste (R$ 50,00 / 16 requisicoes).\n\n' +
       'O que fazer: NAO tente contornar. Releia as respostas ja capturadas em ' +
       'captura/respostas-brutas/ (Regra 5 do orcamento: nunca repita uma chamada ' +
       `ja feita). Se a chamada for mesmo necessaria, confira ${ORCAMENTO} e peca ` +

@@ -25,6 +25,7 @@ const HOOK = join(AQUI, 'guarda-escavador.mjs')
 // inteiro aqui, rodar este teste seria barrado pelo próprio hook que ele testa.
 const PAGO = ['captura/', 'captu', 'rar.mjs'].join('')
 const MONITOR = ['captura/', 'monito', 'rar.mjs'].join('')
+const ATUALIZA = ['captura/', 'atuali', 'zar.mjs'].join('')
 
 const CASOS = [
   // --- o que deve PASSAR: ler, procurar, documentar, e outras APIs ---------
@@ -38,10 +39,15 @@ const CASOS = [
   ['permitido', 'git comum',                     'Bash', { command: 'git status --short' }],
   ['permitido', 'ENSAIO da captura (sem gastar)', 'Bash', { command: `node ${PAGO}` }],
   ['permitido', 'ENSAIO do monitoramento',       'Bash', { command: `node ${MONITOR} criar` }],
+  ['permitido', 'ENSAIO do Bloco C',             'Bash', { command: `node ${ATUALIZA} solicitar` }],
+  ['permitido', 'status do Bloco C e gratuito',  'Bash', { command: `node ${ATUALIZA} status --executar` }],
+  ['permitido', 'REMOVER assinatura (para custo)','Bash', { command: `node ${MONITOR} remover 12345 --executar` }],
+  ['permitido', 'listar assinaturas (gratuito)', 'Bash', { command: `node ${MONITOR} listar --executar` }],
 
   // --- o que deve SER BARRADO: qualquer caminho até a API paga -------------
   ['deny', 'executar a captura',                 'Bash', { command: `node ${PAGO} --executar` }],
   ['deny', 'executar o monitoramento',           'Bash', { command: `node ${MONITOR} criar --executar` }],
+  ['deny', 'executar o Bloco C pago',            'Bash', { command: `node ${ATUALIZA} solicitar --executar --confirmo-custo` }],
   ['deny', 'curl direto na API',                 'Bash', { command: 'curl https://api.escavador.com/api/v1/origens' }],
   ['deny', 'Invoke-RestMethod na API',           'PowerShell', { command: 'Invoke-RestMethod https://api.escavador.com/api/v2/processos' }],
   ['deny', 'WebFetch em rota paga',              'WebFetch', { url: 'https://api.escavador.com/api/v2/processos/numero_cnj/0000000-00.0000.0.00.0000' }],
