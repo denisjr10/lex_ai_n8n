@@ -224,6 +224,23 @@ if (NUMERO_CLIENTE === '5500000000000') {
   console.log('  Copie para demo/listas/clientes.json e ponha o número real antes de publicar.');
 }
 
+// --- promessas sem mecanismo ---------------------------------------------
+// Achado de revisão externa: a recusa de prazo dizia "vou avisar a equipe", e
+// nenhum nó fazia esse aviso. O prompt mandava prometer verificação que
+// ninguém faria. Promessa sem mecanismo é dívida que o cliente cobra.
+const prazoTxt = String(rodar(P, zap(NUMERO_CLIENTE, "Qual o prazo?")).json.texto);
+checar('a recusa de prazo não promete aviso que ninguém dá',
+  !/vou avisar|aviso a equipe|avisar a equipe/i.test(prazoTxt), prazoTxt);
+checar('a recusa de prazo oferece um caminho que EXISTE',
+  /falar com uma pessoa/i.test(prazoTxt), prazoTxt);
+const sisCli = wf.nodes.find(n => n.name === 'Responder ao cliente')
+  .parameters.messages.messageValues[0].message;
+checar('o prompt proíbe prometer verificação ou retorno',
+  /NUNCA prometa que alguém vai verificar/i.test(sisCli));
+const envioB = wf.nodes.find(n => n.type === 'n8n-nodes-base.httpRequest');
+checar('o envio ao cliente tenta de novo antes de desistir',
+  envioB.retryOnFail === true && envioB.maxTries >= 2);
+
 console.log(falhas === 0
   ? '\n\x1b[32mtudo passou\x1b[0m — o que é nosso está de pé\n'
   : `\n\x1b[31m${falhas} falha(s)\x1b[0m — NÃO publique\n`);

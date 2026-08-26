@@ -570,7 +570,11 @@ const ADVOGADOS = ${JSON.stringify(
 const j = $json;
 const quando = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';
 const ROTULOS = {
-  aprovar:     '✅ APROVADO E ENVIADO',
+  // Repare que não diz "E ENVIADO". Este rótulo é escrito no momento em que o
+  // botão é clicado — antes da chamada à Uazapi. Afirmar aqui que a mensagem
+  // saiu seria uma mentira sempre que o envio falhasse, e a tela continuaria
+  // dizendo que o cliente foi avisado quando ele não foi.
+  aprovar:     '✅ APROVADO',
   editar:      '✏️ AGUARDANDO O TEXTO CORRIGIDO',
   descartar:   '❌ DESCARTADO',
   encaminhado: '📨 ENVIADO PARA APROVAÇÃO',
@@ -644,7 +648,11 @@ const instrucao = acaoReal === 'editar'
   : acaoReal === 'encaminhado'
   ? '\\n\\n<i>Você não aprova envio ao cliente, mas o trabalho não se perdeu: a proposta foi para ' + esc(advogado.nome) + '. Você recebe o desfecho aqui.</i>'
   : '';
-const texto = aviso + '<b>' + rotulo + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + instrucao;
+// A MESMA mensagem é reescrita conforme os fatos mudam: aprovada, depois
+// entregue — ou aprovada e não entregue. Por isso montar(), e não um texto só.
+const montar = (rot, rodape) =>
+  aviso + '<b>' + rot + '</b>\\n<i>' + esc(assinatura) + '</i>\\n\\n' + corpo + (rodape || instrucao);
+const texto = montar(rotulo);
 
 // --- para quem vai, se for ------------------------------------------------
 // O destinatário sai da lista, casado pelo processo. Não sai da conversa, nem
@@ -675,10 +683,32 @@ const mascarado = destino && destino.numero
   ? '•••• ' + destino.numero.slice(-4)
   : null;
 
-const confirmacao = acaoReal !== 'aprovar' ? null
+// --- três estados da MESMA mensagem, na ordem em que os fatos acontecem ----
+// textoFinal      é escrito ao clicar          — "aprovado", ainda enviando
+// textoFinalEnviado  depois que a Uazapi aceitou — "aprovado e entregue"
+// textoFinalFalhou   se a Uazapi recusou        — "aprovado e NÃO entregue"
+//
+// Antes existia um rótulo só, escrito no clique, dizendo "APROVADO E ENVIADO".
+// Se a Uazapi falhasse, a tela continuava afirmando que o cliente tinha sido
+// avisado. Numa demonstração isso é constrangedor; num escritório, é o
+// advogado achando que o cliente foi informado quando não foi.
+const textoFinal = !enviarAoCliente && acaoReal === 'aprovar'
+  ? montar('⚠️ APROVADO, MAS SEM DESTINATÁRIO',
+      '\\n\\n<i>Nenhum cliente está vinculado a este processo na lista do escritório. Nada saiu daqui.</i>')
   : enviarAoCliente
-  ? '📤 <b>Enviado ao cliente no WhatsApp</b>\\n<i>' + esc(destino.nome) + ' · ' + mascarado + ' · ' + quando + '</i>'
-  : '⚠️ <b>Aprovado, mas não enviado</b>\\n<i>Nenhum cliente está vinculado a este processo na lista do escritório. Nada saiu daqui.</i>';
+  ? montar('✅ APROVADO', '\\n\\n<i>Enviando ao cliente…</i>')
+  : texto;
+
+const textoFinalEnviado = enviarAoCliente
+  ? montar('📤 APROVADO E ENTREGUE',
+      '\\n\\n<i>Entregue a ' + esc(destino.nome) + ' · ' + mascarado + ' · ' + quando + '</i>')
+  : null;
+
+const textoFinalFalhou = enviarAoCliente
+  ? montar('❌ APROVADO, MAS NÃO ENTREGUE',
+      '\\n\\n<i>A aprovação está registrada, e a mensagem NÃO chegou ao cliente — o WhatsApp recusou o envio. ' +
+      'Ninguém foi avisado no lugar dele. Tente de novo, ou avise o cliente por outro caminho.</i>')
+  : null;
 
 // A proposta que sobe para o advogado. Ela chega COM os três botões, e os
 // botões carregam o processo e quem redigiu — é assim que a decisão volta para
@@ -707,8 +737,9 @@ const desfecho = encaminhar ? 'encaminhar'
   : acaoReal !== 'aprovar' ? 'nada'
   : enviarAoCliente ? 'enviar' : 'sem-destino';
 
-return { json: { ...j, trilha, textoFinal: texto,
-  acao: acaoReal, enviarAoCliente, textoAoCliente, confirmacao, desfecho,
+return { json: { ...j, trilha,
+  textoFinal, textoFinalEnviado, textoFinalFalhou,
+  acao: acaoReal, enviarAoCliente, textoAoCliente, desfecho,
   textoEncaminhado, avisoAoAutor,
   advogadoChatId: encaminhar ? advogado.id : null,
   advogadoNome: advogado ? advogado.nome : null,
@@ -781,15 +812,35 @@ return { json: { ...j, trilha, textoFinal: texto,
       // versionado. O número vem do nó de decisão, não da expressão.
       jsonBody: `=${'{{'} JSON.stringify({ number: $('Registrar decisão').item.json.clienteNumero, text: $('Registrar decisão').item.json.textoAoCliente, linkPreview: false, delay: 1200 }) ${'}}'}`,
       options: {} }, [1460, 540],
-    cred.uazapi ? { credentials: { httpHeaderAuth: cred.uazapi } } : {}),
+    { // Uma falha de rede não pode virar "o cliente não foi avisado". Três
+      // tentativas espaçadas cobrem a instabilidade comum; o que passar disso
+      // é problema real, e problema real tem que aparecer — por isso a saída
+      // de erro, e não `continueRegularOutput`, que engoliria a falha e
+      // seguiria para o nó que diz "entregue".
+      retryOnFail: true, maxTries: 3, waitBetweenTries: 2000,
+      onError: 'continueErrorOutput',
+      ...(cred.uazapi ? { credentials: { httpHeaderAuth: cred.uazapi } } : {}) }),
 
-  // A confirmação vem DEPOIS do envio, e por isso diz a verdade: se a Uazapi
-  // falhar, o nó anterior falha e esta mensagem não chega. Confirmar antes de
-  // enviar seria mentir com aparência de funcionamento.
-  no('Confirmar ao colaborador', 'n8n-nodes-base.telegram', 1.2,
-    { chatId: "={{ $('Registrar decisão').item.json.chatId }}",
-      text: "={{ $('Registrar decisão').item.json.confirmacao }}",
-      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1700, 540],
+  // A MESMA mensagem é reescrita, agora que o envio aconteceu de fato. Não é
+  // mensagem nova: o colaborador vê o rótulo mudar de "APROVADO · enviando…"
+  // para "APROVADO E ENTREGUE", no lugar onde ele clicou.
+  no('Marcar como entregue', 'n8n-nodes-base.telegram', 1.2,
+    { resource: 'message', operation: 'editMessageText',
+      chatId: "={{ $('Registrar decisão').item.json.chatId }}",
+      messageId: "={{ $('Registrar decisão').item.json.messageId }}",
+      text: "={{ $('Registrar decisão').item.json.textoFinalEnviado }}",
+      additionalFields: { parse_mode: 'HTML' } }, [1700, 460],
+    { credentials: { telegramApi: cred.telegram } }),
+
+  // E o caminho que faltava: o envio falhou. Ninguém foi avisado, e a tela tem
+  // que dizer isso. Silêncio aqui é pior do que erro — o advogado sairia
+  // achando que o cliente foi informado.
+  no('Marcar falha no envio', 'n8n-nodes-base.telegram', 1.2,
+    { resource: 'message', operation: 'editMessageText',
+      chatId: "={{ $('Registrar decisão').item.json.chatId }}",
+      messageId: "={{ $('Registrar decisão').item.json.messageId }}",
+      text: "={{ $('Registrar decisão').item.json.textoFinalFalhou }}",
+      additionalFields: { parse_mode: 'HTML' } }, [1700, 620],
     { credentials: { telegramApi: cred.telegram } }),
 
   // --- o que o estagiário não pode aprovar sobe para quem pode -------------
@@ -823,13 +874,6 @@ return { json: { ...j, trilha, textoFinal: texto,
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1940, 700],
     { credentials: { telegramApi: cred.telegram } }),
 
-  // Aprovado sem cliente vinculado: o colaborador precisa saber que NÃO saiu.
-  // Silêncio aqui seria lido como sucesso.
-  no('Avisar que não saiu', 'n8n-nodes-base.telegram', 1.2,
-    { chatId: "={{ $('Registrar decisão').item.json.chatId }}",
-      text: "={{ $('Registrar decisão').item.json.confirmacao }}",
-      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1460, 700],
-    { credentials: { telegramApi: cred.telegram } }),
 ];
 
 const connections = {
@@ -855,18 +899,23 @@ const connections = {
   'Atualizar mensagem': { main: [[{ node: 'Desfecho da aprovação', type: 'main', index: 0 }]] },
   'Desfecho da aprovação': { main: [
       [{ node: 'Enviar ao cliente (WhatsApp)', type: 'main', index: 0 }],
-      [{ node: 'Avisar que não saiu', type: 'main', index: 0 }],
+      // 'sem-destino' — a própria mensagem já foi reescrita com o aviso de que
+      // nada saiu; só falta avisar quem redigiu, se não foi quem decidiu.
+      [{ node: 'Tem quem avisar?', type: 'main', index: 0 }],
       [{ node: 'Encaminhar ao advogado', type: 'main', index: 0 }],
       // 'nada' — editar, descartar, negado. Nada sai daqui para o cliente, mas
       // quem redigiu ainda pode precisar saber o que houve.
       [{ node: 'Tem quem avisar?', type: 'main', index: 0 }],
   ] },
-  'Enviar ao cliente (WhatsApp)': { main: [[{ node: 'Confirmar ao colaborador', type: 'main', index: 0 }]] },
-  // Os três caminhos que terminam convergem no mesmo aviso a quem redigiu, e
-  // sempre DEPOIS do que aconteceu de fato — nunca antes.
-  'Confirmar ao colaborador': { main: [[{ node: 'Tem quem avisar?', type: 'main', index: 0 }]] },
-  'Avisar que não saiu':      { main: [[{ node: 'Tem quem avisar?', type: 'main', index: 0 }]] },
-  'Tem quem avisar?':         { main: [[{ node: 'Avisar quem redigiu', type: 'main', index: 0 }]] },
+  // Duas saídas: a primeira é sucesso, a segunda é a saída de erro do nó. Quem
+  // redigiu só é avisado pelo caminho de sucesso — dizer a ele que a mensagem
+  // foi entregue quando ela não foi seria repetir o defeito num terceiro lugar.
+  'Enviar ao cliente (WhatsApp)': { main: [
+      [{ node: 'Marcar como entregue', type: 'main', index: 0 }],
+      [{ node: 'Marcar falha no envio', type: 'main', index: 0 }],
+  ] },
+  'Marcar como entregue': { main: [[{ node: 'Tem quem avisar?', type: 'main', index: 0 }]] },
+  'Tem quem avisar?':     { main: [[{ node: 'Avisar quem redigiu', type: 'main', index: 0 }]] },
 };
 
 const workflow = {

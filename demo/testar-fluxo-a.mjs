@@ -208,8 +208,12 @@ const R = codigo('Registrar decisão');
 
 const aprov = rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id, 'aprovar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
 checar('advogado aprova', aprov.acao === 'aprovar');
-checar('mensagem final ganha o cabeçalho de aprovação', aprov.textoFinal.includes('✅ APROVADO E ENVIADO'),
+checar('mensagem final ganha o cabeçalho de aprovação', aprov.textoFinal.includes('APROVADO'),
   `recebido: ${JSON.stringify(aprov.textoFinal.slice(0, 100))}`);
+// O defeito que o Codex encontrou: o rótulo escrito NO CLIQUE afirmava um
+// envio que ainda não tinha acontecido.
+checar('o rótulo do clique não afirma entrega que ainda não houve',
+  !/ENTREGUE|E ENVIADO/.test(aprov.textoFinal), aprov.textoFinal.slice(0, 120));
 checar('cabeçalho da proposta sai da mensagem', !aprov.textoFinal.includes('Nada foi enviado'));
 checar('corpo da mensagem ao cliente é preservado', aprov.textoFinal.includes('encontra-se arquivado'));
 checar('aviso de dados fictícios é preservado', aprov.textoFinal.includes('DADOS FICTÍCIOS'));
@@ -315,9 +319,16 @@ if (!PROC_COM_CLIENTE) {
     `final: ${JSON.stringify(env.textoAoCliente.slice(-140))}`);
   checar('a mensagem ao cliente abre com o aviso de demonstração',
     env.textoAoCliente.indexOf('⚠️') === 0);
-  checar('a confirmação ao colaborador mascara o número',
-    /•••• \d{4}/.test(env.confirmacao) && !env.confirmacao.includes(env.clienteNumero),
-    env.confirmacao);
+  checar('o rótulo do clique diz que está enviando, não que enviou',
+    /Enviando ao cliente/i.test(env.textoFinal) && !/ENTREGUE/.test(env.textoFinal),
+    env.textoFinal.slice(0, 160));
+  checar('só o texto pós-envio afirma a entrega',
+    env.textoFinalEnviado.includes('APROVADO E ENTREGUE'), env.textoFinalEnviado.slice(0, 120));
+  checar('o texto pós-envio mascara o número',
+    /•••• \d{4}/.test(env.textoFinalEnviado) && !env.textoFinalEnviado.includes(env.clienteNumero));
+  checar('existe um texto para o caso de o envio falhar',
+    /NÃO ENTREGUE/.test(env.textoFinalFalhou) && /Ninguém foi avisado/i.test(env.textoFinalFalhou),
+    String(env.textoFinalFalhou).slice(0, 160));
 
   // Os três desfechos que NÃO podem enviar nada.
   for (const acao of ['editar', 'descartar']) {
@@ -339,7 +350,10 @@ if (PROC_SEM_CLIENTE) {
   checar('processo sem cliente vinculado não inventa destinatário',
     s.desfecho === 'sem-destino' && s.clienteNumero === null, `desfecho=${s.desfecho}`);
   checar('e o colaborador é avisado de que NÃO saiu',
-    /não enviado|Nada saiu/i.test(String(s.confirmacao)), String(s.confirmacao));
+    /SEM DESTINATÁRIO/.test(String(s.textoFinal)) && /Nada saiu/i.test(String(s.textoFinal)),
+    String(s.textoFinal).slice(0, 160));
+  checar('sem destinatário não existe texto de entrega',
+    s.textoFinalEnviado === null && s.textoFinalFalhou === null);
 }
 memoriaNova();
 
@@ -450,6 +464,23 @@ checar('o encaminhamento vai para o advogado, não para quem clicou',
 const filtro = wf.nodes.find(n => n.name === 'Tem quem avisar?');
 checar('o aviso a quem redigiu só sai se houver o que dizer',
   filtro.parameters.conditions.conditions[0].operator.operation === 'notEmpty');
+
+// --- chamada externa: repetição controlada e saída de erro ----------------
+// Achado de revisão externa: nenhuma chamada externa tinha retentativa nem
+// caminho de falha, e a interface afirmava o envio antes de ele acontecer.
+checar('o envio tenta de novo antes de desistir',
+  envio.retryOnFail === true && envio.maxTries >= 2, JSON.stringify({r: envio.retryOnFail, m: envio.maxTries}));
+checar('o envio tem saída de erro, em vez de engolir a falha',
+  envio.onError === 'continueErrorOutput', String(envio.onError));
+const saidas = wf.connections['Enviar ao cliente (WhatsApp)'].main;
+checar('a saída de erro leva a um nó que conta a verdade',
+  saidas.length === 2 && saidas[1][0].node === 'Marcar falha no envio',
+  JSON.stringify(saidas.map(x => x.map(y => y.node))));
+checar('quem redigiu só é avisado pelo caminho de sucesso',
+  saidas[0][0].node === 'Marcar como entregue'
+  && !JSON.stringify(wf.connections['Marcar falha no envio'] || {}).includes('Tem quem avisar'));
+checar('a mensagem entregue é a MESMA, reescrita — não uma nova',
+  wf.nodes.find(n => n.name === 'Marcar como entregue').parameters.operation === 'editMessageText');
 
 checar('nenhum nó nasce ativo', wf.active !== true);
 

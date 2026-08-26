@@ -203,7 +203,11 @@ if (PERGUNTA_DE_PRAZO.test(texto)) {
   return { json: { ...base, rota: 'direto', texto: [
     'Sobre prazo eu não informo — essa é uma orientação que só um advogado do escritório pode dar, olhando o processo.',
     '',
-    'Vou avisar a equipe do seu contato. Se for urgente, ligue para o escritório.'
+    // Antes esta linha dizia "vou avisar a equipe do seu contato". Nenhum nó
+    // fazia esse aviso. Promessa sem mecanismo é a mesma falha que já tínhamos
+    // corrigido quando o modelo improvisou "vou verificar e retorno" — só que
+    // desta vez estava escrita por nós, em código, o que é pior.
+    'Se quiser falar com uma pessoa do escritório, é só dizer aqui. Se for urgente, ligue para o escritório.'
   ].join('\\n') }};
 }
 
@@ -299,7 +303,7 @@ return { json: { ...$json, ficha } };
 const SISTEMA_CLIENTE = `Você é o atendimento automatizado de um escritório de advocacia, falando DIRETAMENTE COM O CLIENTE por WhatsApp.
 
 REGRAS ABSOLUTAS:
-- Baseie-se EXCLUSIVAMENTE na ficha fornecida. Se a informação não está lá, diga que vai verificar com o escritório.
+- Baseie-se EXCLUSIVAMENTE na ficha fornecida. Se a informação não está lá, diga que ela não aparece no que você tem e que o escritório pode responder. NUNCA prometa que alguém vai verificar, apurar, checar ou retornar: você não abre chamado nem cria tarefa, e uma promessa dessas deixa o cliente esperando por algo que ninguém vai fazer.
 - NUNCA fale de prazo, data limite ou tempo de duração. Nem estime. Se o assunto aparecer, diga que só um advogado do escritório orienta sobre isso.
 - NUNCA opine sobre chance de êxito, nem prometa resultado, nem crie urgência (Provimento 205/2021 da OAB: comunicação informativa e sóbria).
 - NUNCA cite outro processo, outra pessoa ou qualquer coisa fora desta ficha.
@@ -358,7 +362,14 @@ const envio = (nome, expressaoTexto, pos) => no(nome, 'n8n-nodes-base.httpReques
   specifyBody: 'json',
   jsonBody: expressaoTexto,
   options: {},
-}, pos, cred.uazapi ? { credentials: { httpHeaderAuth: cred.uazapi } } : {});
+}, pos, {
+  // Aqui a falha é menos grave que no fluxo A — ninguém fica achando que o
+  // cliente foi avisado; o cliente simplesmente não recebe resposta e repete a
+  // pergunta. Ainda assim, instabilidade de rede não deveria custar uma
+  // resposta ao cliente, e três tentativas resolvem a maioria delas.
+  retryOnFail: true, maxTries: 3, waitBetweenTries: 2000,
+  ...(cred.uazapi ? { credentials: { httpHeaderAuth: cred.uazapi } } : {}),
+});
 
 const CORPO_ENVIO = (numero, texto) =>
   `=${'{{'} JSON.stringify({ number: ${numero}, text: ${texto}, linkPreview: false, delay: 1200 }) ${'}}'}`;
