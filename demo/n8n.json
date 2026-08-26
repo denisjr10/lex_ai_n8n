@@ -1,3 +1,6 @@
 {
-  "baseUrl": "https://auto.criativeia.com.br"
+  "baseUrl": "https://auto.criativeia.com.br",
+
+  "_webhookBaseUrl": "Onde os webhooks ATENDEM, que nesta instancia NAO e o mesmo host do editor. O n8n publica webhook no endereco de WEBHOOK_URL, nao no endereco em que voce abre a interface. Confira sempre em 'Production URL' dentro do no Webhook.",
+  "webhookBaseUrl": "https://callback.criativeia.com.br"
 }

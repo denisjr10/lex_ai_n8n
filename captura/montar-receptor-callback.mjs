@@ -241,11 +241,31 @@ try {
     aviso('fluxo publicado mas INATIVO. Sem --ativar, o endereço não responde');
   }
 
-  const url = `${base}/webhook/${CAMINHO}`;
+  // O endereço do EDITOR não é necessariamente o endereço em que os webhooks
+  // atendem. O n8n publica webhook no host de WEBHOOK_URL, e nesta instância
+  // ele é outro domínio. Imprimir o host do editor manda cadastrar uma URL que
+  // pode responder hoje e parar de responder quando o editor for fechado ao
+  // público — e o sintoma seria a vigilância silenciar sem avisar (R-02).
+  const baseWebhook = (cfg.webhookBaseUrl || '').replace(/\/+$/, '');
+  const url = `${(baseWebhook || base)}/webhook/${CAMINHO}`;
+
   console.log(`\n${cor.neg}A URL de callback${cor.off}\n`);
   console.log(`  ${cor.neg}${url}${cor.off}\n`);
+
+  if (!baseWebhook) {
+    aviso('demo/n8n.json não declara "webhookBaseUrl" — usei o host do editor, que pode não ser o certo');
+    info('confira em "Production URL" dentro do nó Webhook no n8n e grave o host lá');
+  } else if (baseWebhook !== base) {
+    info(`webhook atende em ${baseWebhook}, e o editor fica em ${base} — é esperado nesta instância`);
+  }
+
   info('cadastre-a no painel: api.escavador.com/callbacks — cadastrar não custa crédito');
-  info(`teste (grátis, não é a API do Escavador):  curl -X POST ${url} -H "Content-Type: application/json" -d "{}"`);
+  console.log('');
+  info('confira antes de cadastrar (grátis — chama o seu n8n, não a API do Escavador):');
+  console.log(`      curl -X POST ${url} -H "Content-Type: application/json" -d "{}"`);
+  info('deve responder {"message":"Workflow was started"}. Um 404 significa que o');
+  info('fluxo não está ativo, ou que você copiou a "Test URL" (/webhook-test/),');
+  info('que só vive enquanto o botão "Listen for test event" está apertado.');
   console.log('');
 } catch (e) {
   console.error(`\n${cor.rub} ERRO ${cor.off} ${e.message}`);
