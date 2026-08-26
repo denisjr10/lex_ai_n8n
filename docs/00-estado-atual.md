@@ -3,14 +3,14 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-08-26 |
-| Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00.** Blocos A e B executados em 26/08 e custaram **R$ 3,00**, não os R$ 9,00 orçados — o débito segue o catálogo por rota, e **não** a tarifa plana que o suporte informou (D-108). Expira **01/09** |
+| Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00 — CONFERIDO no painel em 26/08.** 18 requisições feitas, e o painel bate linha a linha com o nosso registro. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
-| 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08 às 15:09. **Remover até 22/09.** Ver §"Assinaturas do Escavador" |
+| 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
-| Regras de cobrança | ⚠️ **Metade confirmada, metade desmentida.** Valem: callback é grátis; monitoramento cobra na criação e a cada renovação; "200 itens" são aparições. **Não vale** a tarifa plana de R$ 3,00 — a medição de 26/08 mostrou débito por rota (D-108). Ver `06-orcamento...` §5.3 |
+| Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
 
@@ -34,7 +34,15 @@ node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
 
 A vigilância por OAB **já existe** — criada em 26/08 às 15:09, id `2813617`, 5 diários dos 181 disponíveis, franquia de **1000 aparições/mês**. O script agora recusa criar uma segunda (Regra 5 virou código).
 
-**Para encerrar, quando o teste terminar:**
+**Ainda não remova (D-121).** Falta a última medição do experimento: **a aparição** — a peça que dispara prazo, o contrato central de E2 e da D-62, e o único que nunca foi visto. A rota é **gratuita**:
+
+```bash
+node captura/monitorar.mjs aparicoes 2813617 --executar
+```
+
+O custo de esperar é zero: a assinatura já foi paga e só renova em **26/09**, bem depois de o crédito expirar em 01/09. Vale rodar a cada dia ou dois — diário oficial publica em dias úteis, e o termo é o nome de uma advogada só, então pode levar dias até aparecer alguma coisa.
+
+**Depois de capturar uma aparição — ou até 22/09, o que vier primeiro:**
 
 ```bash
 node captura/monitorar.mjs remover 2813617 --executar
@@ -190,23 +198,41 @@ Spec §8.3 reescrita: a chave é **sempre o resumo do conteúdo, com o envelope 
 
 **O que falta:** nada do Bloco C. A vigilância em diário (id `2813617`) segue ativa, **para remover até 22/09**.
 
+### O painel foi conferido, e fecha duas contas — 26/08
+
+O histórico de requisições do painel bate **linha a linha** com `captura/registro-de-execucao.local.json`: 18 requisições, 17 em 26/08 e uma em 23/08, nenhuma a mais e nenhuma a menos. O nosso registro é confiável — o que importa, porque é dele que sai todo o controle de gasto.
+
+**1. Os dois 422 não cobraram.** Saldo segue **R$ 47,00**. Pendência encerrada.
+
+**2. O "teto de 16 requisições" não existe.** Foram **18** requisições e o saldo não se mexeu além dos R$ 3,00 medidos. O número 16 nunca foi um limite do fornecedor — era R$ 50,00 ÷ R$ 3,00, uma conta nossa, feita sobre a tarifa plana que também não existe. **A cota é de dinheiro, e só.** Rota gratuita não consome nada (D-119).
+
+Isso muda o planejamento: sobram **R$ 47,00**, não "12 requisições". Chamada gratuita passa a ser ilimitada de fato — e a maior parte do que ainda queremos saber está em rota gratuita.
+
+#### ⚠️ O texto de erro do painel não é o erro que a API devolveu
+
+| Requisição | Corpo que a API devolveu | Texto no painel |
+|---|---|---|
+| `POST /v1/monitoramentos` 422 | *"Você já monitora este termo"* | *"Muitas requisições foram feitas em pouco tempo"* |
+| `POST .../solicitar-atualizacao` 422 | *"Não é possível solicitar atualização de documentos públicos e autos ao mesmo tempo"* | *"Muitas requisições foram feitas em pouco tempo"* |
+| `GET .../envolvidos` 403 (23/08) | *"Seu saldo está bloqueado"* | *"O token utilizado não possui permissão para acessar este recurso"* |
+
+O painel exibe um **texto genérico por código HTTP**, não o motivo real. Nos três casos ele aponta para a causa errada — e nos dois primeiros aponta para *limite de vazão*, que mandaria alguém esperar e tentar de novo quando o problema era o corpo da requisição. Tentar de novo custa dinheiro.
+
+**Consequência de projeto:** o diagnóstico vem do **corpo da resposta**, que o `capturar.mjs` e o `atualizar.mjs` já gravam em `respostas-brutas/`. O painel serve para conferir **saldo e volume**, nunca para descobrir por que algo falhou (D-120, R-44).
+
+É a terceira vez que uma fonte oficial do Escavador diz uma coisa e o sistema faz outra — depois da tarifa plana (D-108) e da prorrogação que não existia na conta (R-37).
+
 ### 🔴 A chave de API do n8n vazou duas vezes no mesmo dia
 
 Primeiro por um comando do assistente que imprimiu o JWT inteiro no histórico. Depois — pior — pela própria ferramenta criada para evitar isso: o `guardar-segredo.mjs` prometia esconder a digitação, **não escondeu no PowerShell**, e ainda imprimiu com todas as letras *"o valor não foi exibido em momento nenhum"*.
 
 O bloqueio de eco era um remendo em `process.stdout.write`, que não segura o eco do terminal do Windows. Reescrito para desligar o eco onde ele mora — modo cru — e para **recusar** quando não conseguir, em vez de tentar (D-114, R-42).
 
-**Estado:** a chave precisa de uma terceira rotação. Nenhuma das duas anteriores deve continuar válida.
+**✅ Encerrado em 26/08.** A correção foi exercitada com valor descartável antes do uso real — o eco ficou mudo —, a chave nova foi gravada e **as duas anteriores foram revogadas** pelo usuário. A chave nova já foi usada para ler as execuções do n8n, então está funcionando.
 
-**Antes de colar a chave nova, exercite a ferramenta com lixo:**
+Fica a regra, que é o que sobrevive ao incidente: **ferramenta de segredo se testa com lixo antes de receber o segredo** (D-114).
 
-```bash
-node guardar-segredo.mjs demo/teste-eco.local
-```
-
-Digite qualquer coisa. Se aparecer na tela, **pare** — a correção não pegou nesse terminal, e o caminho seguro é abrir `demo/n8n.local` num editor e colar lá, salvando em UTF-8.
-
-> ⚠️ Este documento tem um bloco duplicado (as seções "As duas demos ficaram prontas", "Próximo passo", "Decisões", "Pendências" e "Riscos ativos" aparecem duas vezes). Provável colisão entre sessões paralelas. Não foi corrigido aqui para não atropelar outra sessão que possa estar com o arquivo aberto.
+> ✅ O bloco duplicado que existia neste documento (seções repetidas de "As duas demos" até "Riscos ativos") foi removido em 26/08. Era colisão entre sessões paralelas.
 
 ## Onde estamos
 
@@ -389,80 +415,7 @@ E o fio entre as duas: **aprovar no Telegram envia de verdade no WhatsApp do cli
 
 O que continua valendo do risco R-33: isto é demonstração. Não tem Policy Gate, não tem motor de custo, e usa WhatsApp não oficial em instância gratuita que **expira em 1 hora**.
 
-## Próximo passo
-
-Três caminhos que não competem entre si:
-
-1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
-2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
-3. ~~**Executar a captura** (Blocos A e B)~~ — ✅ **feita em 26/08.** Custou R$ 3,00, não os R$ 9,00 orçados (D-108)
-
-**As duas chamadas pagas que restam autorizadas** — ambas gastam dinheiro, e por isso passam pela mão do usuário, não pela do agente. O hook `guarda-escavador.mjs` bloqueia o agente em código:
-
-```bash
-node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
-```
-
-```bash
-node captura/atualizar.mjs solicitar --executar --confirmo-custo
-```
-
-Depois do C1, o acompanhamento é **gratuito** e pode ser repetido à vontade:
-
-```bash
-node captura/atualizar.mjs status --executar
-```
-
-A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
-
-## Decisões
-
-**D-01 a D-46** estão em `01-diretrizes-gerais.md` §13.
-
-- ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável)
-- 🟡 Propostas aguardando aval do usuário: todas as demais, exceto as abaixo
-- 🔴 Em aberto, dependem do escritório: **D-07** (advogado vê toda a base ou só sua carteira) e **D-09** (Trello é gestão de casos ou quadro de tarefas)
-
-## Pendências com o escritório
-
-**Elevadas em urgência pelos mapeamentos:**
-
-- **Pergunta 58** — plano contratado do Escavador. Se não cobrir V1, o escritório fica sem monitoramento de diário oficial (R-15)
-- **Pergunta 66** — é possível criar conta de serviço dedicada no Trello? Se não, R-20 fica sem tratamento
-- **Pergunta 27** — Power-Ups e automações Butler ativos no Trello. Butler reage às nossas escritas; precisa ser inventariado antes da primeira gravação
-
-Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11), **D-07**, **D-09**, e o restante do questionário. As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` §15 e `mapeamento-trello.md` §13.
-
-## Pendências com o usuário
-
-- **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
-- ~~**Dados do painel do Escavador**~~ ✅ **Levantados em 20/08** — ver `07-painel-escavador-achados.md`, inclusive a tela de criação de token. Resta do Escavador apenas a **resposta do suporte** às perguntas da §10 (mensagem enviada em 20/08)
-- **Número CNJ de um processo real do escritório** — trava a primeira chamada, que custa R$ 0,05 e resolve quatro perguntas de uma vez
-- **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
-- **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
-- Acesso à instância n8n e à infraestrutura, para calibrar §12.2 de `01`
-- Aval sobre as decisões propostas (D-03 a D-46)
-
-## Riscos ativos
-
-| Risco | Situação |
-|---|---|
-| **R-16** — Trello não tem escopo por quadro; token vê a conta inteira | **Grave e estrutural.** Tratado por desenho (D-36), mas o isolamento passa a depender do nosso código. Precisa ser dito ao escritório |
-| **R-11** — conta única do Workspace compartilhada por toda a equipe | **Grave e aberto.** Inviabiliza privilégio por papel, aprovação nominal e auditoria |
-| **R-12** — API do Escavador armazena certificado digital, senha e semente de 2FA | **Gravíssimo.** Tratado por desenho: rotas fora de todo perfil (D-30) |
-| **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
-| **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |
-| **R-24** — token do Escavador não tem escopo; alcança toda a API da organização | **Novo e grave.** Espelha o R-16 do Trello. Privilégio fica só no código do MCP. Agrava R-12 |
-| **R-26** — o `mcp-core` concentra a fronteira de segurança dos dois servidores | **Novo e grave.** Consequência aceita de R-16 + R-24: com uma fronteira só, ela precisa ser auditada como tal (D-78) |
-| **R-27** — janela entre revogar a sessão MCP e ela expirar | **Novo, moderado.** Sessão de minutos, lista de revogação, A4 reconsultando o Policy Gate |
-| **R-28** — reserva por estimativa pode subestimar o custo nas rotas por bloco | **Novo, financeiro.** Reserva pelo pior caso permitido e teto de blocos por papel |
-| **R-29 a R-32** — riscos do ClickUp: API de Chat experimental, sem identidade de robô, migração descarta o mapeamento do Trello, concentração em fornecedor único em dólar | **Novos, moderados e condicionais** — só se materializam se a migração for adotada (`10-clickup-avaliacao.md` §11) |
-| ~~R-23~~ — o painel não exibiria a expiração do bônus | ✅ Encerrado no mesmo dia: o painel exibe "Válido até 23/08/2026" |
-| **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
-| R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
-| R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |
-| Demais (R-02 a R-10) | Registrados em `01` §15, tratados por desenho |
-### A primeira chamada real foi feita — e recusada, sem custo
+## A primeira chamada real foi feita — e recusada, sem custo
 
 Com token e processo em mãos, `captura/capturar.mjs --executar` disparou a chamada A1. A resposta:
 
@@ -481,45 +434,41 @@ HTTP 403
 
 **O que destrava:** reabrir com o suporte do Escavador anexando a mensagem de 21/08. Enquanto o painel não mostrar "Válido até" numa data futura, não adianta tentar de novo — cada tentativa é só outro 403.
 
-## As duas demos ficaram prontas, e ligadas — 24/08/2026
-
-A **Demo A** (colaborador no Telegram) e a **Demo B** (cliente no WhatsApp) estão publicadas e ativas, sobre os 8 processos reais anonimizados. **Custo em crédito do Escavador: R$ 0,00.**
-
-O que a Demo A faz: identifica quem falou pelo `user_id`, encontra o processo por número, apelido interno ou nome da parte, responde sobre o andamento, redige mensagem ao cliente e propõe com três botões — aprovar, editar, descartar. Editar não é atalho: o texto reescrito à mão volta com os mesmos três botões, porque quem reescreve pode não ser quem aprova.
-
-O que a Demo B faz: **o escopo vem da lista, nunca da mensagem.** Pergunta sobre prazo é recusada em código, antes de chegar ao modelo. Processo de outra pessoa citado por número é recusado em código — defeito encontrado no teste ao vivo do usuário, em que o modelo improvisou uma promessa de retorno sobre caso alheio.
-
-E o fio entre as duas: **aprovar no Telegram envia de verdade no WhatsApp do cliente** (D-99). Quem não é advogado não perde o trabalho: o clique dele **encaminha** a proposta ao advogado, com os mesmos três botões, e o desfecho volta para quem redigiu (D-100). A trilha passa a registrar as duas pessoas — quem redigiu e quem aprovou. O destinatário sai da mesma lista que a Demo B usa para decidir escopo — não sai da conversa, nem da redação do modelo, nem de um número digitado. É a Regra 1 aplicada ao caminho de volta: o poder de escolher para quem o escritório fala não mora dentro de um texto.
-
-**155 verificações automáticas** rodam sem n8n, sem Telegram, sem WhatsApp e sem gastar token de modelo.
-
-O que continua valendo do risco R-33: isto é demonstração. Não tem Policy Gate, não tem motor de custo, e usa WhatsApp não oficial em instância gratuita que **expira em 1 hora**.
-
 ## Próximo passo
 
-Três caminhos que não competem entre si:
+> Atualizado em 26/08, depois de a captura, o Bloco C e o callback fecharem.
 
-1. **Construir os marcos 1 a 5** da §15 da Spec — esqueleto, chassi, auditoria, motor de custo, cache. Nenhum consome crédito do Escavador nem depende de resposta do escritório
-2. **Levar ao escritório** as cinco perguntas que destravam a Parte II, com destaque para a conta compartilhada, registrada como bloqueio de projeto (D-67)
-3. ~~**Executar a captura** (Blocos A e B)~~ — ✅ **feita em 26/08.** Custou R$ 3,00, não os R$ 9,00 orçados (D-108)
+### Agora, e sem gastar nada
 
-**As duas chamadas pagas que restam autorizadas** — ambas gastam dinheiro, e por isso passam pela mão do usuário, não pela do agente. O hook `guarda-escavador.mjs` bloqueia o agente em código:
+**1. Capturar uma aparição de diário oficial** — é a última peça de contrato que falta, e a mais importante de todas: é ela que dispara prazo, sustenta E2 e justifica a D-62. Gratuita, repetível:
 
 ```bash
-node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
+node captura/monitorar.mjs aparicoes 2813617 --executar
 ```
 
-```bash
-node captura/atualizar.mjs solicitar --executar --confirmo-custo
-```
+Rode a cada dia ou dois até aparecer algo. Diário publica em dia útil, e o termo é o nome de uma advogada só.
 
-Depois do C1, o acompanhamento é **gratuito** e pode ser repetido à vontade:
+**2. Construir os marcos 1 a 5 da §15 da Spec** — esqueleto, chassi, auditoria, motor de custo, cache. Não consome crédito e não depende de resposta do escritório. É o maior bloco de trabalho disponível, e agora com fundamento medido: a Spec §8.3 foi reescrita pelo que o callback ensinou, e o catálogo de preços tem números reais em vez de suposições.
 
-```bash
-node captura/atualizar.mjs status --executar
-```
+**3. Levar ao escritório as cinco perguntas** que destravam a Parte II, com destaque para a conta compartilhada (D-67), que é bloqueio de projeto.
 
-A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando essas respostas chegarem.
+### Antes de 01/09, quando o crédito expira
+
+Sobram **R$ 47,00** e **nenhum limite de requisições** (D-119) — as gratuitas não consomem nada. O que ainda vale medir, em ordem de utilidade:
+
+| O que | Custo | Por quê |
+|---|---|---|
+| **Aparição de diário** | gratuito | O contrato que falta. Prioridade máxima |
+| **Um processo de outro tribunal** | ~R$ 3,00 | Variação de formato entre tribunais é incógnita real do modelo de dados. Os 8 processos do escritório já estão em mãos |
+| **Bloco D — formato dos erros** | ~R$ 0,00 | Boa parte já foi respondida de graça pelo 403 de 23/08 e pelos três 422 de 26/08. Ver `06-orcamento...` §5.1 |
+
+> ⚠️ **Crédito não usado evapora em 01/09.** Não há recarga contratada, e recarga é decisão do usuário, tomada com o registro à vista — nunca consequência de chamada exploratória.
+
+### Depois
+
+A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando as respostas do escritório chegarem.
+
+E a assinatura `2813617` precisa ser removida até **22/09**, depois de capturada a aparição (D-121).
 
 ## Decisões
 
@@ -541,13 +490,15 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 
 ## Pendências com o usuário
 
-- **Token do Escavador gerado** ✅ — mas ainda não usado. Aguarda aval do orçamento de chamadas
+- ~~**Token do Escavador**~~ ✅ **Usado em 26/08** — 18 requisições, autenticação V1 e V2 confirmadas com o mesmo token
 - ~~**Dados do painel do Escavador**~~ ✅ **Levantados em 20/08** — ver `07-painel-escavador-achados.md`, inclusive a tela de criação de token. Resta do Escavador apenas a **resposta do suporte** às perguntas da §10 (mensagem enviada em 20/08)
-- **Número CNJ de um processo real do escritório** — trava a primeira chamada, que custa R$ 0,05 e resolve quatro perguntas de uma vez
-- **URL pública de callback** — sem ela, o Bloco C do orçamento não pode ser executado
+- ~~**Número CNJ de um processo real**~~ ✅ **Resolvido** — 8 processos, dos autos em PDF do escritório. P1 (TJAP) é o alvo autorizado
+- ~~**URL pública de callback**~~ ✅ **De pé e provada em 26/08** — `callback.criativeia.com.br/webhook/escavador-callback`, validada nos dois caminhos
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
-- Acesso à instância n8n e à infraestrutura, para calibrar §12.2 de `01`
-- Aval sobre as decisões propostas (D-03 a D-46)
+- ~~Acesso à instância n8n~~ ✅ **Em uso** — chave de API guardada em `demo/n8n.local`, rotacionada em 26/08 depois de dois vazamentos (R-42)
+- **Aparição de diário oficial** — gratuita, e é o último contrato não validado. Rodar `aparicoes 2813617` até capturar uma
+- **Remover a assinatura `2813617`** até **22/09**, depois de capturada a aparição (D-121)
+- **Aval sobre as decisões propostas — D-03 a D-121.** São 119 decisões aguardando, e o PRD (v1.1) e a Spec Parte I (v1.1) aguardam junto
 
 ## Riscos ativos
 
@@ -567,4 +518,9 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 | **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
 | R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
 | R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |
+| **R-40** — cegueira por cota: o monitoramento atinge a franquia mensal e para de capturar, sem erro | **Novo e grave.** Franquia real medida: **1000/mês**, não os 200 documentados. Alarme a 70% (D-107) |
+| **R-41** — não existe conferência de inventário de assinaturas | **Novo, e já se realizou** em 26/08: uma assinatura ficou ativa e fora do inventário por horas. Tratado por código no `monitorar.mjs` e pela tabela no topo deste documento |
+| **R-42** — segredo exibido na tela por ferramenta que prometia escondê-lo | ✅ **Encerrado em 26/08.** Ferramenta reescrita em modo cru, chave rotacionada, anteriores revogadas (D-114) |
+| **R-43** — reentrega de callback com identificador diferente a cada vez | **Novo e grave.** Medido: 3 entregas, 3 `uuid`, 2 corpos idênticos. Deduplicação por resumo do conteúdo (D-116, D-117) |
+| **R-44** — fonte oficial do Escavador contradiz o comportamento do sistema (3ª vez) | **Novo, moderado e insidioso.** Declaração vira premissa só depois de medida (D-120) |
 | Demais (R-02 a R-10) | Registrados em `01` §15, tratados por desenho |

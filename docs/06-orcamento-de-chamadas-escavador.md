@@ -5,7 +5,7 @@
 | Versão | 3.0 — **Vigilância criada (id `2813617`) e C2 confirmada gratuita. C1 voltou 422 por erro de corpo nosso, já corrigido** |
 | Data | 2026-08-26 |
 | Estado | ✅ **Em execução.** A, B, vigilância e C2 feitos. **Falta só o C1** (R$ 3,00), com o corpo corrigido |
-| Saldo | **R$ 47,00** de R$ 50,00 — ⚠️ **a confirmar no painel**, por causa dos dois 422 sem cabeçalho de custo |
+| Saldo | ✅ **R$ 47,00** de R$ 50,00 — **conferido no painel em 26/08.** Os dois 422 não cobraram |
 | Liberado em | **13/08/2026** |
 | **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08. **6 dias a partir de hoje** |
 | Gastas até agora | **9 chamadas · R$ 3,00 medidos** — A1 R$ 0,05 · B1 R$ 2,95 · B2, origens, V1-criar e C2 R$ 0,00 · **dois 422 sem cabeçalho de custo, a conferir no painel** |
@@ -347,7 +347,11 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 
 **Gasto total até aqui: R$ 3,00 de R$ 50,00.** Restam **R$ 47,00** e 5 dias.
 
-> ⚠️ **Os dois 422 de 26/08 não trouxeram o cabeçalho `Creditos-Utilizados`.** Provavelmente não cobraram — mas *provavelmente* não é confirmação, e o saldo de R$ 47,00 só é certo depois de conferir "Uso dos Créditos" no painel. **Pendência aberta.**
+> ✅ **Encerrado em 26/08.** O painel foi conferido e bate **linha a linha** com `registro-de-execucao.local.json`: 18 requisições, nenhuma a mais. Os dois 422 **não cobraram**, e o saldo é R$ 47,00.
+>
+> 🔑 **E o teto de 16 requisições não existe (D-119).** Foram 18 chamadas com o saldo intacto. O número 16 era R$ 50,00 ÷ R$ 3,00 — conta nossa, sobre uma tarifa plana que também não existe. **A cota é de dinheiro, e só**; rota gratuita não consome nada. Sobram **R$ 47,00**, não "12 requisições".
+>
+> ⚠️ **O texto de erro do painel não é o erro que a API devolveu.** Ele rotulou os dois 422 — de causas distintas — como *"muitas requisições foram feitas em pouco tempo"*, e o 403 de saldo bloqueado de 23/08 como *"token sem permissão"*. Nos três casos apontou a causa errada, e nos dois primeiros mandaria esperar e repetir uma chamada que falhou por corpo inválido. **Diagnóstico sai do corpo bruto gravado em `captura/respostas-brutas/`, nunca do painel** (D-120, R-44).
 
 > 🔎 **A máquina de estados do C2, no estado de repouso.** Sem solicitação em curso, `ultima_verificacao` vem `null` e `opcoes` vem vazio; o que existe é a data da última verificação feita pelo próprio Escavador. Ou seja: **`null` não significa erro, significa "nada pedido"**. O chassi precisa distinguir os dois, e essa é metade da resposta que o C1 vai completar.
 

@@ -43,16 +43,16 @@ O projeto opera hoje sobre uma **cota de teste**, liberada pelo suporte do Escav
 
 | Item | Valor |
 |---|---|
-| Saldo | **R$ 50,00** |
-| Custo por requisição | **R$ 3,00 — plano, para qualquer rota** |
-| Teto de requisições | **16** |
-| Validade | **10 dias** a partir da liberação |
+| Saldo | **R$ 47,00** de R$ 50,00 — conferido no painel em 26/08 |
+| Custo por requisição | **Varia por rota.** ~~R$ 3,00 plano~~ — o suporte afirmou tarifa plana, a medição desmentiu: R$ 0,05, R$ 2,95 e R$ 0,00 no mesmo dia (D-108) |
+| Teto de requisições | **Não existe** (D-119). 18 requisições feitas com o saldo intacto — a cota é de dinheiro, e só |
+| Validade | **Até 01/09/2026**, lido no painel |
 
 Não há recarga contratada. Uma recarga paga só acontece quando for **realmente necessária** — e essa é uma decisão do usuário, nunca uma consequência de uma chamada exploratória.
 
 **Regras operacionais:**
 
-1. **Toda chamada gasta R$ 3,00.** Não existe rota gratuita durante a cota de teste. Rotas marcadas 🆓 nos mapeamentos custam o mesmo que as pagas
+1. **O custo varia por rota, e existem rotas gratuitas.** Medido em 26/08: `movimentacoes`, `origens`, `status-atualizacao`, `solicitar-atualizacao`, criar monitoramento e as entregas de callback vieram todas com `Creditos-Utilizados: 0`. A regra da tarifa plana caiu (D-108) — **mas isso não afrouxa nada**: gratuito se confirma pelo cabeçalho medido, nunca por suposição, e chamada fora do orçamento continua exigindo aval
 2. **Só chame o que está no orçamento** de `docs/06-orcamento-de-chamadas-escavador.md`. Chamada fora dele exige aval explícito do usuário, na hora
 3. **Não gaste chamada para descobrir o que a documentação já responde.** Consulte `docs/mapeamento-escavador.md`, o OpenAPI e o SDK oficial primeiro
 4. **Uma chamada, um objetivo registrado.** Toda resposta recebida vai para o orçamento com o que ela ensinou — resposta não anotada é crédito jogado fora
@@ -60,7 +60,9 @@ Não há recarga contratada. Uma recarga paga só acontece quando for **realment
 6. **Nada de laço, lote ou varredura.** Nenhum script que chame a API mais de uma vez por execução
 7. **Cuidado com custo recorrente.** Criar monitoramento gera cobrança periódica. Se criar um para teste, remova ao terminar
 
-**A tabela de preços por rota continua pendente.** Como a cota de teste cobra R$ 3,00 fixo, ela não revela o preço real de nada — os preços continuam vindo só do painel autenticado.
+**A tabela de preços por rota está sendo construída pela medição.** A cota de teste cobra pelo catálogo real, então cada chamada calibra um preço — o valor medido fica na §5 de `docs/06-orcamento-de-chamadas-escavador.md`, com data.
+
+**Declaração do fornecedor é indício, nunca fonte (R-44).** Três vezes o Escavador disse uma coisa e o sistema fez outra: a tarifa plana que não existe, a prorrogação prometida que não constava da conta (R-37), e o texto de erro do painel, que é genérico por código HTTP e aponta a causa errada. **Diagnóstico sai do corpo bruto gravado em `captura/respostas-brutas/`, nunca do painel** (D-120).
 
 ## Convenções de trabalho
 
