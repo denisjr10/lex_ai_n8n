@@ -2,13 +2,13 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.9 — **C4 retirado do orçamento (D-110). Bloco C reduzido a C1 + C2, e ganhou script próprio** (`captura/atualizar.mjs`) |
+| Versão | 3.0 — **Vigilância criada (id `2813617`) e C2 confirmada gratuita. C1 voltou 422 por erro de corpo nosso, já corrigido** |
 | Data | 2026-08-26 |
-| Estado | ✅ **Em execução.** A e B feitos; receptor de callback de pé e URL cadastrada. **Autorizados e prontos para rodar:** a vigilância por OAB e o Bloco C (C1 + C2) |
-| Saldo | **R$ 47,00** de R$ 50,00 · **R$ 3,00 gastos em 4 chamadas**, sendo 2 gratuitas |
+| Estado | ✅ **Em execução.** A, B, vigilância e C2 feitos. **Falta só o C1** (R$ 3,00), com o corpo corrigido |
+| Saldo | **R$ 47,00** de R$ 50,00 — ⚠️ **a confirmar no painel**, por causa dos dois 422 sem cabeçalho de custo |
 | Liberado em | **13/08/2026** |
 | **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08. **6 dias a partir de hoje** |
-| Gastas até agora | **4 chamadas · R$ 3,00** (A1 R$ 0,05 · B1 R$ 2,95 · B2 R$ 0,00 · origens R$ 0,00) |
+| Gastas até agora | **9 chamadas · R$ 3,00 medidos** — A1 R$ 0,05 · B1 R$ 2,95 · B2, origens, V1-criar e C2 R$ 0,00 · **dois 422 sem cabeçalho de custo, a conferir no painel** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
@@ -23,7 +23,7 @@
 |---|---|
 | **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) · **R$ 9,00** |
 | **Bloco C** | ✅ **Autorizado em 26/08, reduzido em 26/08** — C1 `solicitar-atualizacao` (R$ 3,00) e C2 `status` (gratuita). **C4 RETIRADO** por decisão do usuário — D-110 |
-| **Vigilância por OAB** | ✅ **Autorizada em 26/08** — `POST /api/v1/monitoramentos`, tipo `termo`. Assinatura mensal, **remoção obrigatória** antes da renovação |
+| **Vigilância por OAB** | ✅ **CRIADA em 26/08 às 15:09 — id `2813617`.** Assinatura mensal ativa. 🔴 **Remover até 22/09** — `node captura/monitorar.mjs remover 2813617 --executar` |
 | Bloco D | 🟡 Não autorizado. Parte dele já foi respondida de graça pelo 403 de 23/08 (§5.1) |
 | **Teto desta autorização** | **R$ 15,00** em 5 chamadas pagas, de R$ 50,00 — eram R$ 18,00 antes de C4 sair |
 | Processos disponíveis | **8**, extraídos dos autos em PDF fornecidos pelo escritório — ver §0.1 |
@@ -338,8 +338,16 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 | B1 | 2026-08-26 13:36 UTC | `GET /api/v2/processos/numero_cnj/{cnj}` | **200** | **295** → R$ 2,95 | R$ 47,00 | Modelo do processo. Preço de catálogo era R$ 3,00 com `*`: o asterisco é real, e o valor varia |
 | B2 | 2026-08-26 13:37 UTC | `GET /api/v2/.../movimentacoes?limit=20&ordem=desc` | **200** | **0** → **R$ 0,00** | R$ 47,00 | Modelo da movimentação — **de graça**. A peça que dispara prazo não custou nada |
 | V1-origens | 2026-08-26 13:37 UTC | `GET /api/v1/origens` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ **A V1 aceita o mesmo token** — última pergunta de autenticação encerrada, sem custo. E os 185 diários, com os 5 do Amapá |
+| V1-criar | 2026-08-26 15:09 UTC | `POST /api/v1/monitoramentos` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ **Vigilância criada — id `2813617`**, 5 diários de 181, franquia **1000/mês** (não os 200 documentados). **Criar a assinatura debitou 0 da cota**: a cobrança do monitoramento não passa pelo cabeçalho, só aparece no inventário |
+| V1-criar | 2026-08-26 17:43 UTC | `POST /api/v1/monitoramentos` | **422** | ausente | R$ 47,00 (a confirmar) | ❌ *"Você já monitora este termo"* — tentativa duplicada, porque ninguém leu o registro de 15:09. **A API impediu a segunda assinatura; o script não impedia.** Agora impede (D-115) |
+| C1 | 2026-08-26 17:44 UTC | `POST /api/v2/.../solicitar-atualizacao` | **422** | ausente | R$ 47,00 (a confirmar) | ❌ *"Não é possível solicitar atualização de documentos públicos e autos ao mesmo tempo"* — mandamos os dois como `0`, e **a API decide pela presença da chave, não pelo valor** (D-113). Corpo corrigido para só `enviar_callback: 1` |
+| C2 | 2026-08-26 17:45 UTC | `GET /api/v2/.../status-atualizacao` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ **Gratuita, confirmado.** Campos: `numero_cnj`, `data_ultima_verificacao`, `tempo_desde_ultima_verificacao` (texto pronto, *"há 1 semana"*), `ultima_verificacao` (**null** quando não há solicitação em curso) e `opcoes` |
 
 **Gasto total até aqui: R$ 3,00 de R$ 50,00.** Restam **R$ 47,00** e 5 dias.
+
+> ⚠️ **Os dois 422 de 26/08 não trouxeram o cabeçalho `Creditos-Utilizados`.** Provavelmente não cobraram — mas *provavelmente* não é confirmação, e o saldo de R$ 47,00 só é certo depois de conferir "Uso dos Créditos" no painel. **Pendência aberta.**
+
+> 🔎 **A máquina de estados do C2, no estado de repouso.** Sem solicitação em curso, `ultima_verificacao` vem `null` e `opcoes` vem vazio; o que existe é a data da última verificação feita pelo próprio Escavador. Ou seja: **`null` não significa erro, significa "nada pedido"**. O chassi precisa distinguir os dois, e essa é metade da resposta que o C1 vai completar.
 
 ### 5.3 A regra dos R$ 3,00 fixos não se confirmou — 26/08
 

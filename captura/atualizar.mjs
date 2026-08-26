@@ -26,10 +26,16 @@
  *   recorrente para validar o contrato de algo que não vamos usar é pagar duas
  *   vezes pela mesma resposta.
  *
- * CONTRATO DO CORPO — lido na documentação oficial em 26/08, de graça
- *   Os campos são form-data de texto e valem `1`, não booleanos JSON. Mandar
- *   `true` onde a API espera `1` é o mesmo erro do `origens_ids`: um 422 que
- *   custa igualzinho a um 200.
+ * CONTRATO DO CORPO — metade lida na documentação, metade aprendida no 422
+ *   1. Os campos são form-data de texto e valem `1`, não booleanos JSON.
+ *      Lido na documentação oficial em 26/08, de graça
+ *   2. `documentos_publicos` e `autos` são mutuamente exclusivos, e a API
+ *      decide pela PRESENÇA da chave, não pelo valor: mandar os dois zerados
+ *      é pedir os dois, e volta 422. Aprendido gastando uma tentativa em
+ *      26/08 — a documentação não dizia
+ *
+ *   O padrão, agora com três casos: nesta API, campo ausente e campo com
+ *   valor falso NÃO são a mesma coisa.
  *
  * TRAVAS
  *   1. Sem --executar, não chama nada
@@ -158,13 +164,22 @@ if (op.paga) {
 // `enviar_callback: 1` é o ponto inteiro do Bloco C: sem ele a API responde o
 // aceite e nunca bate no n8n, e o receptor continua sem prova de que funciona.
 //
-// `documentos_publicos` e `autos` ficam DESLIGADOS de propósito. Ligar autos
-// puxa documento restrito, o que muda o custo e traz dado que não precisamos
-// para validar contrato — e a Regra 4 diz uma chamada, um objetivo.
+// `documentos_publicos` e `autos` são OMITIDOS, não zerados.
+//
+// A primeira versão mandava `documentos_publicos: 0, autos: 0`, achando que
+// zero significava "não quero nenhum dos dois". A API respondeu 422:
+// "Não é possível solicitar atualização de documentos públicos e autos ao
+// mesmo tempo." Ou seja: ela decide pela PRESENÇA da chave, não pelo valor.
+// Mandar os dois zerados é pedir os dois.
+//
+// É a terceira vez nesta semana que o contrato real difere do que o
+// mapeamento supunha — depois de `origens_ids` obrigatório e de `1`/`0` em vez
+// de booleanos. Vale como padrão: nesta API, campo ausente e campo com valor
+// falso não são a mesma coisa.
 // ---------------------------------------------------------------------------
 let corpoEnvio = null;
 if (comando === 'solicitar') {
-  corpoEnvio = { enviar_callback: 1, documentos_publicos: 0, autos: 0 };
+  corpoEnvio = { enviar_callback: 1 };
 }
 
 // ---------------------------------------------------------------------------

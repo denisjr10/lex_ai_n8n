@@ -5,8 +5,8 @@
 | Atualizado em | 2026-08-26 |
 | Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00.** Blocos A e B executados em 26/08 e custaram **R$ 3,00**, não os R$ 9,00 orçados — o débito segue o catálogo por rota, e **não** a tarifa plana que o suporte informou (D-108). Expira **01/09** |
 | Callback | ✅ **De pé.** Receptor ativo no n8n (`OymAtbNYI1pjfWkA`), URL cadastrada no painel: `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
-| 🔴 **Assinaturas ativas** | **Nenhuma.** Ver §"Assinaturas do Escavador" — é a seção que precisa ser conferida em toda sessão |
-| Bloco C | ✅ **Pronto para rodar.** `captura/atualizar.mjs` escrito e ensaiado. **C4 retirado** (D-110) — validava a rota que a D-62 rejeitou. Sobraram C1 (R$ 3,00) e C2 (gratuita) |
+| 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08 às 15:09. **Remover até 22/09.** Ver §"Assinaturas do Escavador" |
+| Bloco C | 🟡 **Metade feito.** C2 `status` respondeu 200 (gratuita, confirmada). **C1 falta** — voltou 422 por erro de corpo nosso, já corrigido. **C4 retirado** (D-110) |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
@@ -24,7 +24,7 @@
 
 | Alvo | id | Criado em | **Remover até** | Ambiente | Estado |
 |---|---|---|---|---|---|
-| _(nenhuma)_ | — | — | — | — | — |
+| vigilância em diário (termo/OAB) | `2813617` | 2026-08-26 | **2026-09-22** | teste | ativa |
 
 **Quando criar uma, preencha aqui na mesma hora.** O comando abaixo imprime a linha pronta para colar, com a data-limite já calculada:
 
@@ -32,7 +32,13 @@
 node captura/monitorar.mjs criar --executar --confirmo-custo-recorrente
 ```
 
-A vigilância por OAB está **autorizada e ensaiada** (alvo em `captura/monitoramento.local.json`, 5 diários, termo de 19 caracteres), aguardando só a execução.
+A vigilância por OAB **já existe** — criada em 26/08 às 15:09, id `2813617`, 5 diários dos 181 disponíveis, franquia de **1000 aparições/mês**. O script agora recusa criar uma segunda (Regra 5 virou código).
+
+**Para encerrar, quando o teste terminar:**
+
+```bash
+node captura/monitorar.mjs remover 2813617 --executar
+```
 
 Conferência gratuita, a qualquer momento — e vale fazer se esta tabela parecer velha:
 
@@ -124,7 +130,48 @@ Auditado ao acrescentar o script novo:
 
 `testar-guarda-escavador.mjs` passou de 15 para **20 casos**. As duas suítes passam inteiras.
 
-**O que falta:** as duas chamadas pagas — criar a vigilância por OAB (R$ 3,00/mês) e o C1 do Bloco C (R$ 3,00). Ambas ensaiadas, ambas destravadas, ambas dependendo só de o usuário rodar.
+### As execuções de 17h ensinaram três coisas, e duas foram erro nosso
+
+**1. A vigilância já existia — e ninguém tinha registrado.** O `criar` das 17:43 voltou 422 *"Você já monitora este termo"*. O motivo estava no disco desde as 15:09: uma criação com HTTP 200, id `2813617`, gravada no registro de execução e na resposta bruta. Nem o script conferia, nem eu li antes de mandar rodar.
+
+Foi o **R-41 se realizando em horas** — uma assinatura mensal ativa, sem dono e fora do inventário — e o único motivo de não terem virado duas assinaturas cobrando em paralelo foi a API ter recusado. Depender da gentileza do fornecedor não é controle. O `monitorar.mjs criar` agora lê o registro e recusa em código.
+
+**2. A franquia real é 1000, não 200.** A documentação diz padrão de 200 aparições/mês; a criação voltou `limite_aparicoes: 1000`. O padrão depende da conta — então não se supõe, lê-se da resposta. A D-107 foi corrigida.
+
+**3. Nesta API, campo ausente ≠ campo com valor falso.** O C1 mandou `documentos_publicos: 0, autos: 0` e levou 422: *"Não é possível solicitar atualização de documentos públicos e autos ao mesmo tempo."* A API decide pela **presença** da chave. Zerar os dois é pedir os dois. Corrigido para mandar só `enviar_callback: 1`.
+
+Terceiro caso do mesmo padrão na semana, depois de `origens_ids` obrigatório e de `1`/`0` em vez de booleanos.
+
+### Custo das quatro execuções: R$ 0,00
+
+| Chamada | HTTP | `Creditos-Utilizados` |
+|---|---|---|
+| `V1-criar` (15:09) | 200 | **0** |
+| `V1-criar` (17:43) | 422 | cabeçalho ausente |
+| `C1 solicitar` | 422 | cabeçalho ausente |
+| `C2 status` | 200 | **0** |
+
+Os dois 422 não trouxeram o cabeçalho de custo — provavelmente não cobraram, mas *provavelmente* não é confirmação. **Conferir "Uso dos Créditos" no painel** antes de tratar o saldo de R$ 47,00 como certo.
+
+E fica o dado que interessa: **criar a assinatura debitou 0 da cota de teste.** A cobrança do monitoramento não passa pelo cabeçalho — ela é da assinatura, e por isso o inventário é a única forma de enxergá-la.
+
+**O que falta:** o C1 (R$ 3,00), agora com o corpo corrigido. É a única chamada paga em aberto.
+
+### 🔴 A chave de API do n8n vazou duas vezes no mesmo dia
+
+Primeiro por um comando do assistente que imprimiu o JWT inteiro no histórico. Depois — pior — pela própria ferramenta criada para evitar isso: o `guardar-segredo.mjs` prometia esconder a digitação, **não escondeu no PowerShell**, e ainda imprimiu com todas as letras *"o valor não foi exibido em momento nenhum"*.
+
+O bloqueio de eco era um remendo em `process.stdout.write`, que não segura o eco do terminal do Windows. Reescrito para desligar o eco onde ele mora — modo cru — e para **recusar** quando não conseguir, em vez de tentar (D-114, R-42).
+
+**Estado:** a chave precisa de uma terceira rotação. Nenhuma das duas anteriores deve continuar válida.
+
+**Antes de colar a chave nova, exercite a ferramenta com lixo:**
+
+```bash
+node guardar-segredo.mjs demo/teste-eco.local
+```
+
+Digite qualquer coisa. Se aparecer na tela, **pare** — a correção não pegou nesse terminal, e o caminho seguro é abrir `demo/n8n.local` num editor e colar lá, salvando em UTF-8.
 
 > ⚠️ Este documento tem um bloco duplicado (as seções "As duas demos ficaram prontas", "Próximo passo", "Decisões", "Pendências" e "Riscos ativos" aparecem duas vezes). Provável colisão entre sessões paralelas. Não foi corrigido aqui para não atropelar outra sessão que possa estar com o arquivo aberto.
 

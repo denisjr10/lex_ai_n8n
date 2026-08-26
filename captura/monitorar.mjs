@@ -17,8 +17,10 @@
  *   3. `POST /monitoramentos/testcallback` aparece como "PAGA". O mapeamento
  *      dizia 🆓. Não é rota de teste barata — custa como qualquer outra
  *   4. `variacoes` aceita no máximo 3
- *   5. `limite_aparicoes` tem padrão de 200/mês, e ao atingir o limite o
- *      monitoramento PARA de capturar até o mês seguinte
+ *   5. `limite_aparicoes` tem padrão DOCUMENTADO de 200/mês, mas a criação de
+ *      26/08 voltou com 1000. O padrão real depende da conta, então não se
+ *      supõe: lê-se da resposta. Ao atingir o limite, o monitoramento PARA de
+ *      capturar até o mês seguinte, sem erro e sem aviso (R-40)
  *
  * TRAVAS
  *   1. Sem --executar, não chama nada
@@ -148,11 +150,43 @@ if (comando === 'criar') {
   ok(`alvo: termo com ${corpoEnvio.termo.length} caracteres (não exibido — dado de pessoa)`);
   ok(`diários vigiados: ${corpoEnvio.origens_ids.length}`);
   info(`variações: ${corpoEnvio.variacoes?.length ?? 0} · auxiliares: ${corpoEnvio.termos_auxiliares?.length ?? 0}`);
-  info(`limite de aparições: ${corpoEnvio.limite_aparicoes ?? 'padrão da API (200/mês)'}`);
+  info(`limite de aparições: ${corpoEnvio.limite_aparicoes ?? 'o que a API decidir — medido em 26/08: 1000/mês, não os 200 da documentação'}`);
 }
 
 if ((comando === 'aparicoes' || comando === 'remover') && !idArg) {
   morrer(`o comando "${comando}" precisa do id do monitoramento`);
+}
+
+// ---------------------------------------------------------------------------
+// Regra 5 do orçamento — chamada já feita nunca se repete
+//
+// Esta trava faltava, e a falta apareceu em 26/08: a vigilância foi criada às
+// 15:09 com sucesso, e às 17:43 uma segunda tentativa foi disparada porque
+// ninguém — nem o script, nem o assistente — leu o registro que estava no
+// disco. A API salvou o dia com um 422 "Você já monitora este termo", mas
+// salvar o dia não é trabalho da API: se ela tivesse aceitado, seriam duas
+// assinaturas mensais correndo, e a segunda sem dono e sem alarme (R-41).
+//
+// A memória de que algo foi feito precisa morar onde a próxima sessão vai
+// olhar, e ser conferida por código — não por lembrança.
+// ---------------------------------------------------------------------------
+if (comando === 'criar' && fs.existsSync(ARQ_REGISTRO)) {
+  const anterior = JSON.parse(fs.readFileSync(ARQ_REGISTRO, 'utf8'));
+  const jaCriado = (anterior.chamadas || []).find(
+    (c) => c.id === 'V1-criar' && c.http >= 200 && c.http < 300
+  );
+  if (jaCriado) {
+    morrer(
+      'já existe um monitoramento criado com sucesso por este script.\n' +
+      `      Foi em ${jaCriado.momento?.slice(0, 19).replace('T', ' ')} — ver ${jaCriado.arquivo}\n\n` +
+      '      Criar de novo seria uma SEGUNDA assinatura mensal, cobrando em\n' +
+      '      paralelo. Confira o inventário antes, de graça:\n' +
+      '        node captura/monitorar.mjs listar --executar\n\n' +
+      '      Se for mesmo caso de criar outra (outro advogado, outro termo),\n' +
+      '      isso é decisão do usuário — peça na hora, e registre a assinatura\n' +
+      '      nova na tabela de docs/00-estado-atual.md.'
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -280,7 +314,7 @@ if (comando === 'criar' && dados?.monitoramento) {
   console.log('');
   ok(`monitoramento criado — ${cor.neg}id ${m.id}${cor.off}`);
   info(`diários monitorados: ${m.numero_diarios_monitorados} de ${m.numero_diarios_disponiveis}`);
-  info(`limite de aparições: ${m.limite_aparicoes ?? '200/mês (padrão)'}`);
+  info(`limite de aparições: ${m.limite_aparicoes ?? 'não informado'} — anote, é o teto que cega em silêncio (R-40)`);
   // A data-limite precisa sobreviver a esta sessão. A conversa some; o
   // documento fica. Por isso a linha sai pronta para colar, em vez de sair
   // como conselho — conselho no terminal ninguém copia.

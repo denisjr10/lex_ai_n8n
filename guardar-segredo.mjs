@@ -21,7 +21,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import readline from 'node:readline';
 
 const destino = process.argv[2];
 
@@ -60,20 +59,68 @@ if (!process.stdin.isTTY) {
   process.exit(1);
 }
 
+// ---------------------------------------------------------------------------
 // Leitura sem eco na tela
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-const escrever = process.stdout.write.bind(process.stdout);
-let escondendo = false;
-process.stdout.write = (chunk, ...resto) => escondendo ? true : escrever(chunk, ...resto);
+//
+// A PRIMEIRA VERSÃO FALHOU, E FALHOU DA PIOR MANEIRA: ela usava `readline` e
+// silenciava `process.stdout.write` por remendo. No PowerShell do Windows isso
+// não segurou — o token colado apareceu na tela inteiro, e o script ainda
+// imprimiu, confiante, "o valor não foi exibido em momento nenhum". Ferramenta
+// de segredo que erra calada é pior que nenhuma: ela faz a pessoa relaxar.
+//
+// Agora o eco é desligado onde ele de fato mora — no terminal, via modo cru
+// (raw mode: o terminal para de imprimir o que é digitado e entrega tecla a
+// tecla ao programa). E, se o modo cru não estiver disponível, o script
+// RECUSA em vez de tentar. Falha fecha, igual ao resto do projeto.
+// ---------------------------------------------------------------------------
+if (typeof process.stdin.setRawMode !== 'function') {
+  console.error('\n  RECUSADO: este terminal não permite desligar o eco da digitação.');
+  console.error('  Sem isso o segredo apareceria na tela — foi exatamente o que');
+  console.error('  aconteceu em 26/08, e custou uma chave de API.');
+  console.error('\n  Alternativa segura: grave o arquivo direto, sem passar por aqui —');
+  console.error(`  abra ${destino} num editor de texto, cole o valor, salve em UTF-8.\n`);
+  process.exit(1);
+}
 
 console.log(`\nGravando em: ${destino}`);
 console.log('Cole o valor e tecle Enter. Nada aparecerá na tela — é assim mesmo.\n');
-process.stdout.write = escrever;
 process.stdout.write('valor: ');
-escondendo = true;
 
-const valor = await new Promise((resolve) => rl.question('', (r) => { rl.close(); resolve(r); }));
-process.stdout.write = escrever;
+const valor = await new Promise((resolve, reject) => {
+  const entrada = process.stdin;
+  let acumulado = '';
+
+  entrada.setRawMode(true);
+  entrada.resume();
+  entrada.setEncoding('utf8');
+
+  const encerrar = (fn, arg) => {
+    entrada.setRawMode(false);
+    entrada.pause();
+    entrada.removeListener('data', aoReceber);
+    fn(arg);
+  };
+
+  function aoReceber(pedaco) {
+    for (const ch of pedaco) {
+      if (ch === '\r' || ch === '\n') return encerrar(resolve, acumulado);
+      if (ch === '\u0003') {                      // Ctrl+C
+        process.stdout.write('\n');
+        return encerrar(reject, new Error('cancelado'));
+      }
+      if (ch === '\u0008' || ch === '\u007f') {  // Backspace / Delete
+        acumulado = acumulado.slice(0, -1);
+        continue;
+      }
+      if (ch < ' ') continue;                     // outros controles: ignora
+      acumulado += ch;
+    }
+    // Nada é escrito na tela. Nem asterisco: o comprimento de um token
+    // também é informação, e não há motivo para exibi-lo enquanto se digita.
+  }
+
+  entrada.on('data', aoReceber);
+});
 console.log('');
 
 const limpo = String(valor).replace(/\s+/g, '');
