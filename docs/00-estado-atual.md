@@ -3,16 +3,42 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-08-26 |
-| Execução paga | 🟡 **Preparada, não disparada.** Blocos A, B, C e a vigilância por OAB estão autorizados (orçamento §0) e os scripts prontos. Falta o passo que só o usuário faz: cadastrar a URL de callback no painel. Ver §"A execução paga ficou pronta" |
+| Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00.** Blocos A e B executados em 26/08 e custaram **R$ 3,00**, não os R$ 9,00 orçados — o débito segue o catálogo por rota, e **não** a tarifa plana que o suporte informou (D-108). Expira **01/09** |
+| Callback | ✅ **De pé.** Receptor ativo no n8n (`OymAtbNYI1pjfWkA`), URL cadastrada no painel: `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
+| 🔴 **Assinaturas ativas** | **Nenhuma.** Ver §"Assinaturas do Escavador" — é a seção que precisa ser conferida em toda sessão |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
-| Crédito Escavador | ✅ **LIBERADO em 25/08 às 10:22**, após o usuário apontar o bloqueio ao suporte. O painel exibe **"Válido até 01/09/2026"** — 7 dias. R$ 50,00 intactos, R$ 0,00 gastos. R-37 encerrado, com a lição preservada |
-| Regras de cobrança | ✅ **Confirmadas pelo suporte em 25/08** — teste debita R$ 3,00 por requisição paga; tabela do painel é o catálogo do pré-pago; callback é grátis; monitoramento cobra na criação e a cada renovação; "200 itens" são aparições. Ver `07-painel-escavador-achados.md` §11 |
+| Regras de cobrança | ⚠️ **Metade confirmada, metade desmentida.** Valem: callback é grátis; monitoramento cobra na criação e a cada renovação; "200 itens" são aparições. **Não vale** a tarifa plana de R$ 3,00 — a medição de 26/08 mostrou débito por rota (D-108). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
 
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
+
+---
+
+## Assinaturas do Escavador — conferir em toda sessão
+
+> **Por que esta seção existe no topo:** monitoramento cobra **todo mês**, sozinho, sem gerar chamada nenhuma. Um esquecido em ambiente de teste vira dinheiro escorrendo indefinidamente (R-13). A conversa não sobrevive à sessão; esta tabela sim.
+
+| Alvo | id | Criado em | **Remover até** | Ambiente | Estado |
+|---|---|---|---|---|---|
+| _(nenhuma)_ | — | — | — | — | — |
+
+**Quando criar uma, preencha aqui na mesma hora.** O comando `node captura/monitorar.mjs criar` imprime a linha pronta.
+
+Conferência gratuita, a qualquer momento — e vale fazer se esta tabela parecer velha:
+
+```bash
+node captura/monitorar.mjs listar --executar
+```
+
+**A regra dos dois regimes**, que confunde e precisa ficar escrita:
+
+| | Remove? |
+|---|---|
+| **Teste** | ✅ Sim, ao terminar o experimento. Ele não protege ninguém — só valida contrato |
+| **Produção** | ❌ **Nunca por rotina.** É o produto. Remover é a operação de maior dano silencioso do projeto (R-14, D-29), reservada a evento de cadastro decidido por gente |
 
 ---
 
@@ -39,7 +65,42 @@ E duas pendências antigas caíram na mesma leitura: **500 requisições por min
 
 **O disjuntor tinha três falsos positivos, e todos foram corrigidos:** ele barrava `cat` no script pago (ler código é grátis), barrava a documentação em `/v1/docs` (que é justamente o que evita gastar) e barrava o ensaio sem `--executar` (que existe para não gastar). Falso positivo em barreira de segurança não é incômodo: é o que ensina a próxima sessão a desligar a barreira.
 
-**O que trava a execução agora** é um passo que só o usuário faz: cadastrar a URL do receptor em `api.escavador.com/callbacks` e gerar o token de validação. Cadastrar não custa crédito.
+### O que foi executado, e o que custou
+
+| Chamada | HTTP | Débito medido | Catálogo |
+|---|---|---|---|
+| A1 · envolvidos | 200 | **R$ 0,05** | R$ 0,05 — exato |
+| B1 · capa | 200 | **R$ 2,95** | R$ 3,00 `*` |
+| B2 · movimentações | 200 | **R$ 0,00** | R$ 3,00 `*` |
+| origens (V1) | 200 | **R$ 0,00** | gratuita |
+
+**Total: R$ 3,00.** O orçamento previa R$ 9,00 para os Blocos A e B, pela tarifa plana que o suporte informou por escrito. **A tarifa plana não existe** — o débito segue o catálogo por rota. Virou **D-108: o custo real vem da medição, não da declaração do fornecedor.** É a segunda vez que a palavra do suporte não corresponde ao sistema; a primeira foi o R-37.
+
+De quebra, e de graça: **a V1 aceita o mesmo token** (última pergunta de autenticação encerrada) e **as movimentações não custaram nada** — justamente a peça que dispara prazo.
+
+### O callback está de pé
+
+Receptor publicado e **ativo** no n8n (`OymAtbNYI1pjfWkA`), URL **cadastrada no painel** em 26/08. O painel não exibiu verificação própria no cadastro.
+
+⚠️ **A URL não é a do host do editor.** O n8n publica webhook em `WEBHOOK_URL`, que nesta instância é outro domínio:
+
+| | |
+|---|---|
+| Editor abre em | `auto.criativeia.com.br` |
+| **Webhook atende em** | **`callback.criativeia.com.br/webhook/escavador-callback`** |
+
+O usuário percebeu a divergência antes de cadastrar. O erro seria mudo — a URL do editor responde hoje e pararia de responder no dia em que ele fosse fechado ao público. `demo/n8n.json` passou a declarar `webhookBaseUrl` para o engano não se repetir.
+
+### O hook do estado tinha dois furos, e os dois foram fechados
+
+O `fechar-ciclo.mjs` cobra a atualização deste documento ao fim de cada sessão. Auditado a pedido do usuário, revelou:
+
+1. **Quem commitava antes de parar escapava da conferência.** O hook só olhava o que estava *por commitar*; árvore limpa fazia ele sair calado — justamente nas sessões mais produtivas, que são as que commitam. Agora ele compara também com o commit em que a sessão começou (`commitNoInicio`, gravado pelo `estado-do-repo.mjs`)
+2. **A primeira linha do `git status` era sempre mal interpretada.** O helper fazia `.trim()` na saída inteira, comendo o espaço inicial de `" M arquivo"`, e o `slice(3)` cortava um caractere a mais — `docs/00-estado-atual.md` virava `ocs/00-estado-atual.md`. Se este documento calhasse de ser a primeira linha, o hook bloquearia a parada **mesmo com ele atualizado**
+
+O segundo é o mais perigoso dos dois: falso positivo em barreira é o que ensina a próxima sessão a desligar a barreira. Ambos os hooks agora têm teste (`testar-fechar-ciclo.mjs`, 8 casos, com repositório Git descartável).
+
+**O que falta:** criar a vigilância por OAB (R$ 3,00/mês) e exercitar o Bloco C. Ambos destravados — o callback já está cadastrado.
 
 > ⚠️ Este documento tem um bloco duplicado (as seções "As duas demos ficaram prontas", "Próximo passo", "Decisões", "Pendências" e "Riscos ativos" aparecem duas vezes). Provável colisão entre sessões paralelas. Não foi corrigido aqui para não atropelar outra sessão que possa estar com o arquivo aberto.
 

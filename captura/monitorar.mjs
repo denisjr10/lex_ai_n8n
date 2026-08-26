@@ -281,9 +281,20 @@ if (comando === 'criar' && dados?.monitoramento) {
   ok(`monitoramento criado — ${cor.neg}id ${m.id}${cor.off}`);
   info(`diários monitorados: ${m.numero_diarios_monitorados} de ${m.numero_diarios_disponiveis}`);
   info(`limite de aparições: ${m.limite_aparicoes ?? '200/mês (padrão)'}`);
+  // A data-limite precisa sobreviver a esta sessão. A conversa some; o
+  // documento fica. Por isso a linha sai pronta para colar, em vez de sair
+  // como conselho — conselho no terminal ninguém copia.
+  const hoje = new Date().toISOString().slice(0, 10);
+  const limite = new Date(Date.now() + 27 * 864e5).toISOString().slice(0, 10);
+
   console.log('');
-  aviso(`ANOTE A DATA DE HOJE. Remova antes de ${new Date(Date.now() + 27 * 864e5).toISOString().slice(0, 10)}`);
+  aviso(`ISTO COBRA TODO MÊS. Remova antes de ${cor.neg}${limite}${cor.off}`);
   info(`node captura/monitorar.mjs remover ${m.id} --executar`);
+  console.log('');
+  console.log(`${cor.neg}Cole esta linha na tabela "Assinaturas do Escavador" de docs/00-estado-atual.md:${cor.off}\n`);
+  console.log(`| vigilância em diário (OAB) | ${m.id} | ${hoje} | **${limite}** | teste | ativa |`);
+  console.log('');
+  info('sem isso, a próxima sessão não sabe que existe uma assinatura correndo (R-13)');
 }
 
 if (comando === 'listar' && dados?.items) {

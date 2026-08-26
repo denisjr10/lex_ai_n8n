@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.3 — acrescenta as respostas do suporte (§11) |
-| Data | 2026-08-25 |
+| Versão | 1.4 — **a medição de 26/08 desmentiu a tarifa plana informada pelo suporte** (§11.1) |
+| Data | 2026-08-26 |
 | Estado | ✅ Levantado |
 | Fonte | Painel autenticado `api.escavador.com`, lido diretamente pelo navegador controlado na máquina do usuário |
 | Custo do levantamento | **R$ 0,00** — nenhuma chamada à API foi feita |
@@ -337,13 +337,26 @@ Isso resolve a contradição da §7 de forma limpa, e as duas leituras estavam *
 | Objeto | Veredito |
 |---|---|
 | **A tabela exibida** | É o **catálogo real do pré-pago** — Leitura B. Vale para orçar o produto |
-| **O débito durante o bônus** | **R$ 3,00 por requisição paga** — Leitura A. Vale para orçar o teste |
+| ~~**O débito durante o bônus**~~ | ~~**R$ 3,00 por requisição paga** — Leitura A~~ ⚠️ **DESMENTIDO PELA MEDIÇÃO EM 26/08** |
 
-Três consequências:
+> 🔴 **A metade "Leitura A" desta conclusão não sobreviveu ao teste.** Em 26/08 quatro chamadas reais foram medidas pelo cabeçalho `Creditos-Utilizados`, e **o débito seguiu o catálogo por rota**, não a tarifa plana:
+>
+> | Chamada | Medido | Catálogo |
+> |---|---|---|
+> | `envolvidos` | **R$ 0,05** | R$ 0,05 — exato |
+> | `capa do processo` | **R$ 2,95** | R$ 3,00 `*` (preço variável, D-105) |
+> | `movimentações` | **R$ 0,00** | R$ 3,00 `*` — veio grátis |
+> | `origens` (V1) | **R$ 0,00** | não listada = gratuita (D-59) |
+>
+> Registro completo em `06-orcamento-de-chamadas-escavador.md` §5.3. Virou **D-108: o custo real vem da medição, não da declaração do fornecedor.** É a segunda vez que a palavra do suporte não corresponde ao estado do sistema — a primeira foi o R-37, a prorrogação prometida por escrito que não existia na conta.
+>
+> Isto **não desqualifica o suporte**, que respondeu rápido e resolveu o bloqueio em seis minutos. Desqualifica apenas o uso de declaração como fonte de número que se pode medir.
 
-1. **P-06 encerrada.** O modelo de custo do PRD §9 se apoia em preços reais e continua válido
+Consequências, revistas em 26/08:
+
+1. **P-06 encerrada.** O modelo de custo do PRD §9 se apoia em preços reais e continua válido — e agora com quatro pontos medidos concordando com o catálogo
 2. **O teto de 16 requisições volta a valer** — mas só para requisições **pagas**. As rotas de status são gratuitas e não consomem cota, o que dá fôlego ao Bloco C
-3. **A calibragem de preço por rota morreu no teste.** D-55 previa medir o preço real conferindo *Uso dos Créditos* depois da primeira chamada; durante o bônus toda chamada paga marca R$ 3,00, então não há o que medir. A medição só é possível no pré-pago
+3. ~~**A calibragem de preço por rota morreu no teste.**~~ ✅ **Ao contrário: está viva.** D-55 previa medir o preço real pelo cabeçalho, e foi exatamente o que funcionou. A §1-C do orçamento tinha dado a calibragem por morta com base na resposta do suporte; a medição a ressuscitou no primeiro dia de execução
 
 ### 11.2 Monitoramento — cobra na criação e a cada renovação
 

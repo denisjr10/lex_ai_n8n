@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.0 |
-| Data | 2026-08-20 |
+| Versão | 1.1 — **RF-35 e RF-36:** a franquia de aparições pode desligar a vigilância em silêncio (§9.3) |
+| Data | 2026-08-26 |
 | Estado | 🟡 **Proposta — aguarda aval do usuário** |
 | Fase | 2 — PRD e Spec |
 | Antecede | `09-spec-tecnica.md` — **Parte I escrita em 20/08**; Parte II depende das respostas da §13 |
@@ -134,6 +134,8 @@ Numerados `RF-nn`. Cada um traz **critério de aceite** — a condição objetiv
 | **RF-13** | Alerta com indício de prazo tem prioridade máxima e exige confirmação de leitura de um advogado | Alerta de prazo não lido em N horas escala. 🚧 N depende da pergunta 12 |
 | **RF-14** | Remover um item de vigilância exige confirmação explícita e fica registrado | Remoção nunca acontece como efeito colateral de outra operação (R-14) |
 | **RF-15** | Falha na recepção de eventos é visível | Se nenhum evento chega em janela esperada, o sistema alerta o administrador. Silêncio nunca é interpretado como "nada aconteceu" |
+| **RF-35** | O esgotamento da franquia de aparições é alarmado **antes** de cegar | Ao atingir **70%** de `limite_aparicoes` no ciclo, o sistema alerta o administrador. Em 100% a captura do mês já parou (R-40), e o alerta chegaria tarde |
+| **RF-36** | O inventário de vigilâncias é conferido contra o quadro de advogados | Rotina periódica compara os monitoramentos ativos com a lista de advogados. **Faltou** → alarme de prazo. **Sobrou** → alarme de custo. Ambas as listagens são gratuitas (R-41) |
 
 > **RF-11 é uma restrição de produto, não uma limitação técnica.** Calcular prazo processual envolve contagem em dias úteis, suspensão, feriado forense local, prerrogativa e intimação ficta. Errar por um dia é dano irreversível. A plataforma **sinaliza indício**; quem conta prazo é advogado.
 
@@ -325,6 +327,19 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 ✅ **Confirmado pelo suporte em 25/08:** o "até 200 itens" são **aparições encontradas**, não termos vigiados. Ou seja, a assinatura é **por termo** — R$ 3,00/mês por OAB vigiada, com franquia de 200 aparições/mês e **+ R$ 0,05 a cada 200 aparições** adicionais.
 
 Isso **confirma D-62 e melhora a conta**. O custo cresce com o número de advogados, não com o de processos, e o excedente por volume é desprezível: 2.000 aparições num mês custam R$ 3,00 + R$ 0,45. É a única das quatro rotas cobradas por bloco cujo excedente não é R$ 3,00 — e é justamente a que sustenta a vigilância de prazo. **R-25 não se aplica aqui** (ver `07-painel-escavador-achados.md` §11.5).
+
+> 🔴 **A franquia de 200 aparições não é só preço — é um interruptor de desligamento.** A documentação oficial da V1, lida em 26/08, é explícita: *"Ao atingir este limite dentro do mês, o monitoramento interrompe a captura de novos dados até ao próximo mês."*
+>
+> A assinatura segue ativa, paga e saudável em qualquer listagem — e para de ver. **Nada distingue "cegou no dia 12" de "mês tranquilo".** Um escritório movimentado estoura 200 aparições/mês sem esforço.
+>
+> Duas consequências de produto, registradas como **D-107** e **R-40**:
+>
+> 1. **`limite_aparicoes` é dimensionado com folga larga, e o valor é decisão do escritório** — não do agente, e não o padrão da API. O excedente custa R$ 0,05 por 200: apertar a franquia economiza centavos e compra risco de prazo
+> 2. **O consumo da franquia é alarmado a 70%**, não a 100%. Em 100% já cegou
+>
+> Isso acrescenta um requisito não funcional à E2: **o sistema precisa saber a diferença entre "não há publicação" e "não estou mais olhando"**.
+
+**E como isso é operado em produção**, já que a distinção confunde: a assinatura de vigilância **fica ligada indefinidamente**. Removê-la é a operação de maior dano silencioso do projeto (R-14), restrita a `remover_monitoramento` — ferramenta separada, escopo separado, confirmação explícita (D-29) — e reservada a eventos de cadastro: o advogado sai do escritório, transfere a OAB, o escritório deixa de atuar numa jurisdição. **Remoção rotineira só existe em ambiente de teste**, onde a assinatura serve para validar contrato e não protege ninguém.
 
 ### 9.4 O atendimento ao cliente não consulta a API paga
 

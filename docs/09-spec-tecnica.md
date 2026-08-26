@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.0 |
-| Data | 2026-08-20 |
+| Versão | 1.1 — **§6.4.1 nova:** a franquia de aparições é um quarto modo de falha silenciosa da vigilância |
+| Data | 2026-08-26 |
 | Estado | 🟡 **Proposta — aguarda aval do usuário** |
 | Fase | 2 — PRD e Spec |
 | Recorte | **Parte I** — o que não depende de resposta do escritório |
@@ -393,10 +393,34 @@ Por isso o chassi mantém uma tabela `assinatura`, separada do consumo por chama
 | Quem criou, quando, e com qual justificativa | Responsabilizar — assinatura órfã é dinheiro escorrendo |
 | **`proxima_renovacao`** | É a data que decide se remover ainda evita a próxima cobrança |
 | Estado e data de remoção | Detectar monitoramento removido, que é perda de alerta (R-14) |
+| **`franquia_mensal` e `aparicoes_no_ciclo`** | A cota de captura e quanto dela já se gastou — ver §6.4.1 |
 
 O suporte confirmou em 25/08 como a cobrança funciona: **cobra na criação e de novo a cada renovação mensal**, enquanto estiver ativo; **removido antes da renovação, não há cobrança no ciclo seguinte**. Por isso `proxima_renovacao` não é enfeite — é o campo que define a janela de decisão, e o chassi alerta antes dela, não depois.
 
 Regra de operação que vale desde o primeiro teste: **monitoramento criado para experimento é removido ao terminar o experimento**. Fica no chassi como alerta automático sobre assinatura criada em ambiente de desenvolvimento.
+
+> ⚠️ **Isto vale para experimento, e só para experimento.** Em produção a assinatura de vigilância **fica ligada indefinidamente** — é o produto. Remover é a operação de maior potencial de dano silencioso do projeto (R-14, D-29), reservada a eventos de cadastro decididos por gente: o advogado sai do escritório, transfere a OAB, o escritório deixa de atuar numa jurisdição. O campo `ambiente` da tabela existe exatamente para o chassi saber qual dos dois regimes se aplica, e nunca cobrar remoção de uma assinatura de produção.
+
+### 6.4.1 A franquia de aparições — o quarto silêncio
+
+Descoberto em 26/08, na documentação oficial da V1, depois de a §6.4 já estar escrita:
+
+> `limite_aparicoes` — *"Limite máximo de novos resultados capturados por mês. Quando o parâmetro não é informado, o limite padrão é de 200 aparições por mês. **Ao atingir este limite dentro do mês, o monitoramento interrompe a captura de novos dados até ao próximo mês.**"*
+
+**Isto não é um controle de custo. É um modo de falha.** A assinatura continua ativa, continua paga, e aparece saudável em qualquer inventário — e simplesmente para de ver. Nada distingue "cegou no dia 12" de "mês tranquilo".
+
+A vigilância tem, portanto, **quatro** modos de falhar em silêncio, e não três:
+
+| # | Falha | Detecção |
+|---|---|---|
+| 1 | Assinatura removida por engano | Conferência de inventário contra o quadro de advogados (**R-41**) |
+| 2 | Assinatura ativa que parou de entregar | Detector de silêncio — eventos/dia caindo a zero (§9.3) |
+| 3 | Renovação não ocorrida por falta de saldo | `proxima_renovacao` com alerta antecipado |
+| 4 | **Franquia esgotada — captura interrompida** | `aparicoes_no_ciclo` contra `franquia_mensal`, **alarme a 70%** |
+
+**Por que 70% e não 100%:** em 100% já cegou. O alarme precisa chegar enquanto ainda há o que fazer — aumentar a franquia, ou apurar por que o volume saltou.
+
+**Por que a franquia é generosa por padrão:** o excedente custa **R$ 0,05 a cada 200 aparições** (D-106) — sessenta vezes menos que qualquer outra rota por bloco. Apertar a franquia economiza centavos e compra risco de prazo. É o raro caso em que a escolha barata é a errada, e o chassi deve recusar franquia abaixo do piso configurado pelo escritório. Registrado como **D-107** e **R-40**.
 
 ### 6.5 Blocos de 200 — o tratamento de R-25
 
@@ -563,7 +587,7 @@ Restrição que sustenta a Regra 7 e o R-11: **um `identificador_externo` perten
 | `catalogo_preco` | `id` · `fornecedor` · `rota` · `classificacao` · `preco_centavos` · `unidade` · `adicional_centavos` · `lido_em` · `fonte` | Espelho do arquivo versionado (§6.1) |
 | `custo_observado` | `rota` · `media_movel_centavos` · `amostras` · `atualizado_em` | Estimativa aprendida das respostas reais (D-33) |
 | `reserva_orcamento` | `id` · `requisicao_id` · `orcamento_id` · `estimado_centavos` · `real_centavos` · `estado` · `criada_em` · `reconciliada_em` | Reserva antes, reconciliação depois |
-| `assinatura` | `id` · `fornecedor` · `tipo` · `alvo` · `frequencia` · `custo_mensal_centavos` · `criado_por` · `criado_em` · `estado` · `removido_em` · `ambiente` | Custo recorrente visível (D-32, R-13) |
+| `assinatura` | `id` · `fornecedor` · `tipo` · `alvo` · `frequencia` · `custo_mensal_centavos` · `criado_por` · `criado_em` · `estado` · `removido_em` · `ambiente` · `proxima_renovacao` · **`franquia_mensal`** · **`aparicoes_no_ciclo`** · **`ciclo_reiniciado_em`** | Custo recorrente visível (D-32, R-13) e cegueira por cota detectável (D-107, R-40) |
 | `tarefa_assincrona` | `id` · `fornecedor` · `tipo` · `identificador_externo` · `requisicao_id` · `solicitada_por` · `estado` · `concluida_em` · `resultado_ref` | Liga o pedido ao callback que volta |
 | `evento_callback` | `id` · `fornecedor` · `chave_evento` (única) · `tipo` · `recebido_em` · `origem_valida` · `tentativas` · `payload_ref` · `processado_em` · `estado` | Idempotência e depuração |
 | `cache_entrada` | `chave` · `inquilino_id` · `tipo_dado` · `conteudo` · `obtido_em` · `expira_em` · `custo_origem_centavos` · `negativo` | Cache, inclusive negativo |

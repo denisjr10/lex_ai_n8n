@@ -2,13 +2,13 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.7 — **Blocos C e D autorizados; a documentação oficial da V1 corrigiu o mapeamento em cinco pontos** |
+| Versão | 2.8 — **Blocos A e B executados. A tarifa plana de R$ 3,00 não se confirmou: o débito segue o catálogo por rota** (§5.3) |
 | Data | 2026-08-26 |
-| Estado | ✅ **Desbloqueado.** Blocos A, B e C autorizados, mais a vigilância por OAB. Ver §0 |
-| Saldo | R$ 50,00 · ✅ débito confirmado: **R$ 3,00 por requisição paga** (§1-C) |
+| Estado | ✅ **Em execução.** A e B feitos; receptor de callback de pé e URL cadastrada; falta a vigilância por OAB e o Bloco C |
+| Saldo | **R$ 47,00** de R$ 50,00 · **R$ 3,00 gastos em 4 chamadas**, sendo 2 gratuitas |
 | Liberado em | **13/08/2026** |
 | **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08. **6 dias a partir de hoje** |
-| Gastas até agora | **0** |
+| Gastas até agora | **4 chamadas · R$ 3,00** (A1 R$ 0,05 · B1 R$ 2,95 · B2 R$ 0,00 · origens R$ 0,00) |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
@@ -79,10 +79,14 @@ Antes de gastar na vigilância por OAB, a documentação em `api.escavador.com/v
 | 4 | `variacoes` sem limite | **Máximo 3** | Trava de validação, não de custo |
 | 5 | `limite_aparicoes` sem menção | Padrão **200/mês**, e **para de capturar** ao atingir | 🔴 **Risco de prazo**, não de dinheiro: vigilância que parou é publicação que ninguém viu (R-02) |
 
-E duas pendências antigas foram encerradas de graça, pela mesma leitura:
+E a mesma leitura expôs **uma desatualização entre os nossos próprios documentos** — o que é um achado de processo, não de API:
 
-- **Limite de requisições: 500 por minuto.** Estava 🔴 em §6 e em `mapeamento-escavador.md` §15
-- **Ambiente de homologação: não existe.** A seção "Diferença entre homologação e produção" traz só conselho genérico de configuração — nenhum sandbox é oferecido, confirmando o que o painel já indicava
+| Item | §6 **deste** documento dizia | O que já era sabido |
+|---|---|---|
+| Limite de requisições | 🔴 *"Não aparece no painel. Perguntar ao suporte"* | **500/min**, registrado em `mapeamento-escavador.md` §2.2 **desde o mapeamento**, confirmado na documentação *e* no SDK (`DEFAULT_RATE_LIMIT = 500`) |
+| Ambiente de homologação | ⚠️ *"Perguntar ao suporte"* | Encerrado em `07-painel-escavador-achados.md` §10 em 25/08: não há sandbox, e a pergunta foi rebaixada de propósito |
+
+> **A lição não é sobre o Escavador, é sobre nós.** Duas perguntas seguiam marcadas como abertas neste documento depois de terem sido respondidas em outro. Numa sessão apressada, elas viram mensagem ao suporte — ou pior, chamada paga. **A §6 abaixo foi corrigida**, e o padrão a manter é: pendência se encerra em todos os documentos que a citam, não só naquele em que foi resolvida.
 
 > **É a Regra 3 do orçamento pagando de novo.** Ler documentação custou zero e evitou pelo menos duas chamadas perdidas — R$ 6,00 — além de um monitoramento mudo por limite de aparições. O mapeamento foi escrito a partir do OpenAPI; a página de documentação é mais completa que ele.
 
@@ -175,7 +179,13 @@ Em 2026-08-20 o painel autenticado foi lido inteiro, **sem gastar crédito**. Os
 
 Ela **depende do número CNJ do processo**. Enquanto ele não chega, a recomendação é **não gastar nada**: qualquer chamada que não precise de CNJ custa R$ 3,00 e ensina menos.
 
-## 1-C. ✅ Resolvido em 25/08 — **R$ 3,00 por requisição paga**
+## 1-C. ~~✅ Resolvido em 25/08~~ — ⚠️ **SUPERADO PELA MEDIÇÃO EM 26/08**
+
+> 🔴 **Leia a §5.3 antes desta seção.** O que segue é o que o suporte informou por escrito em 25/08, e o que este orçamento assumiu por um dia. A execução de 26/08 mediu os débitos reais e **desmentiu a tarifa plana**: A1 custou R$ 0,05, B1 custou R$ 2,95 e B2 custou R$ 0,00. O débito segue o catálogo por rota.
+>
+> A seção fica preservada de propósito. O registro de que a fonte oficial informou uma coisa e o sistema fez outra é, ele mesmo, um dado sobre a confiabilidade da fonte — e é a segunda vez (a primeira foi o R-37, a prorrogação prometida que não existia na conta). Virou **D-108: o custo real vem da medição, não da declaração**.
+
+### O que o suporte informou — 25/08
 
 > *"Durante o período de teste, toda requisição paga custa R$ 3,00, independentemente do valor exibido na tabela do pré-pago. As rotas gratuitas continuam sem consumo. Quando o período de teste acabar, a conta volta para os valores normais de cada rota."* — suporte Escavador B2B, 25/08/2026
 
@@ -314,8 +324,47 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 | # | Data/hora | Rota | HTTP | `Creditos-Utilizados` | Saldo restante | O que ensinou |
 |---|---|---|---|---|---|---|
 | A1 | 2026-08-23 15:13 UTC | `GET /api/v2/.../envolvidos?limit=20` | **403** | **ausente** | R$ 50,00 (nada debitado) | Ver §5.1 — três achados, custo zero |
-| B1 | — | — | — | — | — | **Não executada.** A fila abortou em A1, de propósito |
-| B2 | — | — | — | — | — | **Não executada.** Idem |
+| A1 | 2026-08-26 13:36 UTC | `GET /api/v2/.../envolvidos?limit=20` | **200** | **5** → R$ 0,05 | R$ 49,95 | Autenticação V2 ok, envelope e paginação. **E derrubou a regra dos R$ 3,00 fixos** — ver §5.3 |
+| B1 | 2026-08-26 13:36 UTC | `GET /api/v2/processos/numero_cnj/{cnj}` | **200** | **295** → R$ 2,95 | R$ 47,00 | Modelo do processo. Preço de catálogo era R$ 3,00 com `*`: o asterisco é real, e o valor varia |
+| B2 | 2026-08-26 13:37 UTC | `GET /api/v2/.../movimentacoes?limit=20&ordem=desc` | **200** | **0** → **R$ 0,00** | R$ 47,00 | Modelo da movimentação — **de graça**. A peça que dispara prazo não custou nada |
+| V1-origens | 2026-08-26 13:37 UTC | `GET /api/v1/origens` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ **A V1 aceita o mesmo token** — última pergunta de autenticação encerrada, sem custo. E os 185 diários, com os 5 do Amapá |
+
+**Gasto total até aqui: R$ 3,00 de R$ 50,00.** Restam **R$ 47,00** e 5 dias.
+
+### 5.3 A regra dos R$ 3,00 fixos não se confirmou — 26/08
+
+O suporte afirmou por escrito, em 25/08:
+
+> *"Durante o período de teste, toda requisição paga custa R$ 3,00, independentemente do valor exibido na tabela do pré-pago."*
+
+**A medição desmente.** Os quatro débitos lidos do cabeçalho `Creditos-Utilizados`, em centavos:
+
+| Chamada | Medido | Catálogo do painel | Bate? |
+|---|---|---|---|
+| A1 · envolvidos | **5** (R$ 0,05) | R$ 0,05 | ✅ exato |
+| B1 · capa | **295** (R$ 2,95) | R$ 3,00 `*` | ≈ (o `*` é preço variável — D-105) |
+| B2 · movimentações | **0** | R$ 3,00 `*` | ❌ veio grátis |
+| origens (V1) | **0** | não listada | ✅ D-59: ausência da tabela = gratuita |
+
+**O débito segue o catálogo por rota, não a tarifa plana.** Três consequências:
+
+1. **O orçamento tinha inflado.** Blocos A e B custaram **R$ 3,00**, não os R$ 21,00 recalculados na v2.6 pelo pior caso. Sobram R$ 47,00, não R$ 29,00
+2. **Escolher a variante barata volta a economizar** — a §1-C dizia que não fazia diferença no teste. Faz
+3. **D-55 ressuscita.** A calibragem de preço pela medição, que a §1-C tinha dado por morta durante o bônus, está viva e já produziu quatro pontos de dado
+
+**A postura de orçar pelo pior caso continua certa** — foi ela que impediu de gastar contando com preços baixos. O que muda é a fonte: **medição acima de declaração**. Registrado como **D-108**.
+
+> ⚠️ **A §1-C deste documento e a §11.1 dos achados ficam marcadas como superadas por medição.** Não foram apagadas: o registro de que o suporte informou uma coisa e o sistema fez outra é, ele mesmo, um dado sobre a confiabilidade da fonte — a mesma lição do R-37, em que uma prorrogação prometida por escrito não existia na conta.
+
+### 5.4 O receptor de callback ficou de pé — 26/08
+
+Publicado no n8n como `[LEX] Receptor de callback do Escavador` (`OymAtbNYI1pjfWkA`), **ativo**. Custo: R$ 0,00 — é infraestrutura nossa, não a API do Escavador.
+
+**A URL não é a que o editor do n8n sugere.** O n8n publica webhook no host de `WEBHOOK_URL`, que nesta instância é outro domínio: o editor abre em `auto.criativeia.com.br`, e o webhook atende em `callback.criativeia.com.br`. O usuário percebeu a divergência antes de cadastrar. Fica registrado porque o erro seria mudo: a URL do editor responde hoje, e pararia de responder no dia em que o editor fosse fechado ao público — vigilância silenciando sem erro, que é R-02.
+
+**Também não confundir com a "Test URL"** (`/webhook-test/`): ela só vive enquanto o botão *Listen for test event* está apertado, recebe uma execução e devolve 404 depois. Cadastrada no Escavador, funcionaria uma vez.
+
+Verificado ao vivo: duas chamadas de teste chegaram e o porteiro carimbou `veredito=RECUSADO` nas duas, por ausência do cabeçalho `Authorization` — a validação por segredo compartilhado funcionando. **URL cadastrada no painel em 26/08**, sem que o painel exibisse qualquer verificação própria.
 
 ### 5.1 O que a chamada A1 ensinou — por R$ 0,00
 
@@ -374,10 +423,10 @@ Revisado em 2026-08-20 — a maior parte foi resolvida pelo painel:
 | ~~Quais rotas são gratuitas (§15.2)~~ | ✅ Nenhuma é gratuita; várias são baratas |
 | ~~Uma URL de callback por conta é suficiente? (§15.7)~~ | ✅ Campo vazio — nada a quebrar |
 | ~~Quantos tokens existem e de quem são (R-11)~~ | ✅ Um token, `Testes_Claude`, nunca usado |
-| Existe ambiente de homologação? (§15.5) | ⚠️ Não há sandbox; o Playground usa token real. **Perguntar ao suporte** |
-| Limite de requisições por minuto | 🔴 Não aparece no painel. **Perguntar ao suporte** |
-| A tabela de preços é catálogo ou está limitada pelo bônus? | 🔴 **Perguntar ao suporte** — e a chamada A1 dá um indício de graça |
-| Formato dos erros 402 e 429 (§15.4) | 🔴 Só se observa gastando — Bloco D |
+| ~~Existe ambiente de homologação? (§15.5)~~ | ✅ **Encerrada** — não há sandbox. Já estava resolvida em `07-painel-escavador-achados.md` §10 (25/08); esta linha estava desatualizada |
+| ~~Limite de requisições por minuto~~ | ✅ **Encerrada — 500/min.** Já estava em `mapeamento-escavador.md` §2.2 desde o mapeamento, confirmado na documentação e no SDK; esta linha estava desatualizada |
+| ~~A tabela de preços é catálogo ou está limitada pelo bônus?~~ | ✅ **Encerrada pela medição em 26/08** — é o catálogo real, e o débito o segue. Ver §5.3 |
+| Formato dos erros 402 e 429 (§15.4) | 🟡 Parcialmente respondido de graça: o **403** de saldo bloqueado está documentado em §5.1. Faltam 402 e 429 |
 
 ## 7. Decisões que este documento propõe
 

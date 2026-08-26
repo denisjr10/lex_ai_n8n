@@ -329,7 +329,7 @@ Estes catálogos são o caso mais claro de cache longo: mudam raramente e são c
 >
 > **Não existe `tipo` de OAB.** Vigiar uma OAB em diário oficial é `tipo = termo` com a OAB (ou o nome do advogado) como termo — a resposta traz `oab_principal` e `variacoes[].formato_oab`, sinal de que a API reconhece e expande formatos de OAB sozinha. D-62 continua de pé; muda só o modo de expressá-la.
 >
-> **Limite de requisições: 500 por minuto** (documentação, seção *Limite de requisições*). Encerra a pendência de §15.
+> A mesma leitura **confirmou** o limite de **500 requisições por minuto** já registrado em §2.2 — não é achado novo, é terceira fonte concordando (documentação, SDK e agora a página de introdução).
 
 ### 5.6 Monitoramento no site do tribunal
 

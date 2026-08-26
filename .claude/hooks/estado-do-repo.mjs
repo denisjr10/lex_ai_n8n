@@ -41,7 +41,20 @@ try {
   mkdirSync(join(raiz, '.claude', '.sessoes'), { recursive: true })
   writeFileSync(
     join(raiz, '.claude', '.sessoes', `${sessao}.json`),
-    JSON.stringify({ pendenciasNoInicio: git('status', '--porcelain').split('\n').filter(Boolean) }),
+    JSON.stringify({
+      // Sem trim: o formato porcelain e "XY caminho", e arquivo so modificado
+      // sai como " M caminho". Um trim na saida inteira come o espaco da
+      // primeira linha e desloca o caminho em um caractere — a fotografia
+      // deixaria de bater com o status lido depois pelo fechar-ciclo.
+      pendenciasNoInicio: execFileSync('git', ['-C', raiz, 'status', '--porcelain'], {
+        encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+      }).split('\n').filter(Boolean),
+      // O commit em que a sessao comecou. Sem ele, o fechar-ciclo so enxerga o
+      // que esta por commitar — e uma sessao que commita antes de parar passa
+      // batida, com a arvore limpa e o estado desatualizado. Aconteceu em
+      // 26/08: dois commits, e o segundo nao tocou o 00-estado-atual.md.
+      commitNoInicio: git('rev-parse', 'HEAD'),
+    }),
   )
 } catch {
   // Fotografar é um luxo. Se falhar, a sessão segue normalmente e o

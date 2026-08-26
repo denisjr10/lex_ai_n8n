@@ -41,6 +41,28 @@ function git(...args) {
   }
 }
 
+/** `git status --porcelain` SEM trim, e por um motivo especifico.
+ *
+ *  O formato e "XY caminho", com X e Y ocupando uma coluna cada. Arquivo
+ *  apenas modificado sai como " M caminho" — com espaco na primeira coluna.
+ *  Um .trim() na saida inteira come esse espaco na PRIMEIRA linha, e ai o
+ *  slice(3) de caminhoDe() corta um caractere a mais: " M docs/00-estado.md"
+ *  virava "ocs/00-estado.md".
+ *
+ *  O efeito pratico era um falso positivo: se o 00-estado-atual.md fosse a
+ *  primeira linha do status, o hook nao o reconhecia e bloqueava a parada
+ *  mesmo com o documento devidamente atualizado. Defeito encontrado em 26/08.
+ */
+function statusPorcelain() {
+  try {
+    return execFileSync('git', ['status', '--porcelain'], {
+      cwd: RAIZ, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024,
+    }).split('\n').filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
 async function lerEntrada() {
   const pedacos = []
   for await (const p of process.stdin) pedacos.push(p)
@@ -63,23 +85,48 @@ const entrada = await lerEntrada()
 // Ja estamos dentro de um ciclo provocado por este hook: nao insista.
 if (entrada.stop_hook_active) process.exit(0)
 
-const agora = git('status', '--porcelain').split('\n').filter(Boolean)
-if (agora.length === 0) process.exit(0)
+const agora = statusPorcelain()
 
 // Sem fotografia do inicio nao da para saber o que e desta sessao. Fica quieto.
 let antes = null
+let commitNoInicio = null
 try {
   const sessao = String(entrada.session_id || 'sem-id').replace(/[^A-Za-z0-9_-]/g, '')
-  antes = new Set(JSON.parse(readFileSync(join(PASTA_SESSOES, `${sessao}.json`), 'utf8')).pendenciasNoInicio)
+  const foto = JSON.parse(readFileSync(join(PASTA_SESSOES, `${sessao}.json`), 'utf8'))
+  antes = new Set(foto.pendenciasNoInicio)
+  commitNoInicio = foto.commitNoInicio || null
 } catch {
   process.exit(0)
 }
 
-const novidades = agora.filter(l => !antes.has(l)).map(caminhoDe).filter(c => RELEVANTE.test(c))
+// --- O que esta sessao mexeu -----------------------------------------------
+// Duas fontes, e as duas sao necessarias:
+//
+//   1. o que esta por commitar agora
+//   2. o que ESTA SESSAO JA COMMITOU
+//
+// A segunda existe porque, sem ela, commitar antes de parar apagava o rastro:
+// a arvore ficava limpa, o hook saia calado, e o 00-estado-atual.md envelhecia
+// justamente nas sessoes mais produtivas — as que commitam. Esse era o caso
+// mais comum de estado desatualizado, nao o mais raro.
+const porCommitar = agora.filter(l => !antes.has(l)).map(caminhoDe)
+
+let jaCommitado = []
+if (commitNoInicio) {
+  const saida = git('diff', '--name-only', `${commitNoInicio}..HEAD`)
+  jaCommitado = saida ? saida.split('\n').filter(Boolean).map(c => c.replace(/\\/g, '/')) : []
+}
+
+const mexidos = [...new Set([...porCommitar, ...jaCommitado])]
+const novidades = mexidos.filter(c => RELEVANTE.test(c))
 if (novidades.length === 0) process.exit(0)
 
-const caminhosAgora = agora.map(caminhoDe)
-const estadoMexido = caminhosAgora.some(c => c.toLowerCase() === DOC_ESTADO)
+// O estado conta como atualizado se foi tocado em qualquer uma das duas
+// fontes — por commitar agora, ou ja commitado nesta sessao.
+const estadoMexido = mexidos.some(c => c.toLowerCase() === DOC_ESTADO)
+
+// Nada por commitar e o estado ja registrado: o ciclo fechou. Sai calado.
+if (agora.length === 0 && estadoMexido) process.exit(0)
 const lista = novidades.slice(0, 12).map(c => `  - ${c}`).join('\n')
 const resto = novidades.length > 12 ? `\n  ...e mais ${novidades.length - 12}` : ''
 
