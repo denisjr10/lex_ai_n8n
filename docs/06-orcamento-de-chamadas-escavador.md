@@ -342,6 +342,8 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 | V1-criar | 2026-08-26 17:43 UTC | `POST /api/v1/monitoramentos` | **422** | ausente | R$ 47,00 (a confirmar) | ❌ *"Você já monitora este termo"* — tentativa duplicada, porque ninguém leu o registro de 15:09. **A API impediu a segunda assinatura; o script não impedia.** Agora impede (D-115) |
 | C1 | 2026-08-26 17:44 UTC | `POST /api/v2/.../solicitar-atualizacao` | **422** | ausente | R$ 47,00 (a confirmar) | ❌ *"Não é possível solicitar atualização de documentos públicos e autos ao mesmo tempo"* — mandamos os dois como `0`, e **a API decide pela presença da chave, não pelo valor** (D-113). Corpo corrigido para só `enviar_callback: 1` |
 | C2 | 2026-08-26 17:45 UTC | `GET /api/v2/.../status-atualizacao` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ **Gratuita, confirmado.** Campos: `numero_cnj`, `data_ultima_verificacao`, `tempo_desde_ultima_verificacao` (texto pronto, *"há 1 semana"*), `ultima_verificacao` (**null** quando não há solicitação em curso) e `opcoes` |
+| C1 | 2026-08-26 18:09 UTC | `POST /api/v2/.../solicitar-atualizacao` — corpo `{enviar_callback: 1}` | **201** | **0** → **R$ 0,00** | R$ 47,00 | ✅ **Aceite assíncrono, e de graça.** Solicitação `55413945`, `status: PENDENTE`, `enviar_callback: "SIM"`. Ver §5.5 |
+| C2 | 2026-08-26 18:11 UTC | `GET /api/v2/.../status-atualizacao` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ Com solicitação em curso, `ultima_verificacao` deixa de ser `null` e passa a **espelhar o objeto do C1**. Ver §5.5 |
 
 **Gasto total até aqui: R$ 3,00 de R$ 50,00.** Restam **R$ 47,00** e 5 dias.
 
@@ -373,6 +375,35 @@ O suporte afirmou por escrito, em 25/08:
 **A postura de orçar pelo pior caso continua certa** — foi ela que impediu de gastar contando com preços baixos. O que muda é a fonte: **medição acima de declaração**. Registrado como **D-108**.
 
 > ⚠️ **A §1-C deste documento e a §11.1 dos achados ficam marcadas como superadas por medição.** Não foram apagadas: o registro de que o suporte informou uma coisa e o sistema fez outra é, ele mesmo, um dado sobre a confiabilidade da fonte — a mesma lição do R-37, em que uma prorrogação prometida por escrito não existia na conta.
+
+### 5.5 A máquina de estados da atualização — 26/08, por R$ 0,00
+
+O Bloco C entregou o que existia para entregar, e **sem debitar um centavo**: tanto o C1 quanto o C2 voltaram `Creditos-Utilizados: 0`.
+
+**O objeto da solicitação, idêntico nas duas rotas:**
+
+| Campo | No aceite (C1, HTTP 201) | O que significa |
+|---|---|---|
+| `id` | `55413945` | Identificador da solicitação. É a chave de idempotência natural |
+| `status` | `PENDENTE` | O estado. Único valor observado até agora |
+| `motivo_erro` | `null` | Preenchido quando falha — é onde o diagnóstico vai morar |
+| `criado_em` | `2026-08-26T18:09:14+00:00` | Início do relógio |
+| `concluido_em` | `null` | **Enquanto for `null`, não terminou** |
+| `enviar_callback` | `"SIM"` | Texto, não booleano — coerente com o `1`/`0` do corpo |
+| `opcoes` | `[]` | Vazio nesta configuração mínima |
+
+**A descoberta que o chassi precisa:** o status **não fica na raiz** da resposta do C2. Ele vem dentro de `ultima_verificacao`, e esse campo tem dois significados distintos:
+
+| `ultima_verificacao` | Leitura correta |
+|---|---|
+| `null` | **Nada foi pedido.** Não é erro, não é falha — é repouso. O que existe é `data_ultima_verificacao`, a verificação que o Escavador faz por conta própria |
+| objeto com `status` | Há uma solicitação, e o estado dela está aí dentro |
+
+Confundir os dois é ler "nunca pedi" como "deu errado" — e um chassi que erra nisso ou alarma à toa, ou fica esperando para sempre. **`concluido_em` é o sinal confiável de término**, mais que o texto do `status`.
+
+> ⚠️ **O callback só dispara na conclusão.** Enquanto o estado é `PENDENTE`, o n8n **não recebe nada** — e isso é o comportamento correto, não uma falha de configuração. O receptor só pode ser considerado reprovado se `concluido_em` estiver preenchido **e** mesmo assim não houver execução no fluxo.
+
+**Ainda em aberto:** os demais estados (sucesso, erro, e como se distingue "terminou com novidade" de "terminou sem nada"). Todos se descobrem repetindo o C2, que é **gratuito**.
 
 ### 5.4 O receptor de callback ficou de pé — 26/08
 

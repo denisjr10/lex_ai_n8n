@@ -6,7 +6,7 @@
 | Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00.** Blocos A e B executados em 26/08 e custaram **R$ 3,00**, não os R$ 9,00 orçados — o débito segue o catálogo por rota, e **não** a tarifa plana que o suporte informou (D-108). Expira **01/09** |
 | Callback | ✅ **De pé.** Receptor ativo no n8n (`OymAtbNYI1pjfWkA`), URL cadastrada no painel: `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08 às 15:09. **Remover até 22/09.** Ver §"Assinaturas do Escavador" |
-| Bloco C | 🟡 **Metade feito.** C2 `status` respondeu 200 (gratuita, confirmada). **C1 falta** — voltou 422 por erro de corpo nosso, já corrigido. **C4 retirado** (D-110) |
+| Bloco C | ✅ **Feito, e custou R$ 0,00.** C1 voltou **201** com solicitação `55413945` em `PENDENTE`; C2 confirmada gratuita. Máquina de estados registrada em `06-orcamento...` §5.5. **Aguardando a conclusão** para provar o callback |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
@@ -155,7 +155,17 @@ Os dois 422 não trouxeram o cabeçalho de custo — provavelmente não cobraram
 
 E fica o dado que interessa: **criar a assinatura debitou 0 da cota de teste.** A cobrança do monitoramento não passa pelo cabeçalho — ela é da assinatura, e por isso o inventário é a única forma de enxergá-la.
 
-**O que falta:** o C1 (R$ 3,00), agora com o corpo corrigido. É a única chamada paga em aberto.
+### O Bloco C fechou, e não custou nada
+
+O C1 com o corpo corrigido voltou **HTTP 201** e `Creditos-Utilizados: 0` — solicitação `55413945`, estado `PENDENTE`, `enviar_callback: "SIM"`. O C2 também veio a zero. **A quarta medição seguida contradizendo a tarifa plana de R$ 3,00** (D-108).
+
+**O n8n não recebeu nada, e está certo assim.** O callback só dispara na **conclusão**; enquanto o estado for `PENDENTE`, não há entrega a fazer. O receptor só pode ser dado como reprovado se `concluido_em` estiver preenchido **e** mesmo assim não houver execução no fluxo.
+
+**A descoberta que o chassi precisa:** o status não fica na raiz da resposta — vem dentro de `ultima_verificacao`, e esse campo é `null` quando **nada foi pedido**. `null` ali não é erro, é repouso. Confundir os dois faz o chassi ou alarmar à toa, ou esperar para sempre. O sinal confiável de término é **`concluido_em`**, não o texto do status. Detalhes em `06-orcamento...` §5.5.
+
+O `atualizar.mjs status` lia o campo errado e dizia "não trouxe um campo status óbvio" com o estado ali, um nível abaixo. Corrigido — agora ele explica o que está acontecendo em vez de despejar JSON.
+
+**O que falta:** repetir o `status` (gratuito) até `concluido_em` deixar de ser `null`, e então conferir se a execução apareceu no n8n. É a última peça do Bloco C, e não custa nada.
 
 ### 🔴 A chave de API do n8n vazou duas vezes no mesmo dia
 

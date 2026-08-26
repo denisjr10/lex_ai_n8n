@@ -325,9 +325,37 @@ if (comando === 'solicitar') {
 
 if (comando === 'status') {
   console.log('');
-  const estado = dados?.status ?? dados?.resposta?.status ?? null;
-  if (estado) ok(`estado: ${estado}`);
-  else info('a resposta não trouxe um campo "status" óbvio — leia a bruta salva acima');
+
+  // O status NÃO fica na raiz: ele vem dentro de `ultima_verificacao`, e esse
+  // campo é `null` enquanto nunca se pediu nada. A primeira versão procurava
+  // na raiz e dizia "não trouxe um campo status óbvio" mesmo com o estado ali,
+  // um nível abaixo — leitura ruim que parece falha da API.
+  const v = dados?.ultima_verificacao ?? null;
+
+  if (!v) {
+    info('nenhuma atualização foi solicitada para este processo.');
+    info(`o Escavador verificou por conta própria ${dados?.tempo_desde_ultima_verificacao ?? 'em data não informada'}`);
+    info('"null" aqui não é erro: é "nada pedido"');
+  } else {
+    ok(`estado: ${cor.neg}${v.status}${cor.off}   (solicitação ${v.id})`);
+    info(`pedida em  : ${v.criado_em ?? '—'}`);
+    info(`concluída  : ${v.concluido_em ?? 'ainda não'}`);
+    info(`callback   : ${v.enviar_callback}`);
+    if (v.motivo_erro) aviso(`motivo do erro: ${v.motivo_erro}`);
+
+    console.log('');
+    if (v.status === 'PENDENTE') {
+      info('PENDENTE significa que o Escavador ainda está no tribunal.');
+      info('O callback só dispara na CONCLUSÃO — enquanto está pendente, o n8n');
+      info('não recebe nada, e isso é o comportamento correto, não uma falha.');
+      info('Repita este comando daqui a pouco; ele é gratuito.');
+    } else if (v.concluido_em) {
+      info('concluída — a entrega no n8n já deveria ter acontecido.');
+      info('Se não apareceu execução no fluxo do receptor, o problema é a URL');
+      info('ou o token, e essa é a resposta que o Bloco C existe para dar.');
+    }
+  }
+
   console.log('');
   console.log('  Transcreva os estados observados para a §5 de docs/06-orcamento-de-chamadas-escavador.md.');
   console.log('  A máquina de estados é o que o chassi vai precisar para saber quando parar de esperar.');
