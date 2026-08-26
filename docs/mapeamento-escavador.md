@@ -310,14 +310,26 @@ Estes catálogos são o caso mais claro de cache longo: mudam raramente e são c
 
 | Operação | Método e rota | Parâmetros | Custo | Faixa |
 |---|---|---|---|---|
-| Criar monitoramento | `POST /api/v1/monitoramentos` | corpo: `tipo*`, `termo`, `origens_ids`, `processo_id`, `variacoes`, `termos_auxiliares`, `limite_aparicoes` | 💰 recorrente | **A2** |
+| Criar monitoramento | `POST /api/v1/monitoramentos` | corpo: `tipo*` (`termo`\|`processo`), `termo`, **`origens_ids`**, `processo_id`, `variacoes`, `termos_auxiliares`, `limite_aparicoes` | 💰 assinatura | **A2** |
 | Listar | `GET /api/v1/monitoramentos` | `page` | 🆓 | A0 |
 | Buscar | `GET /api/v1/monitoramentos/{id}` | `id*` | 🆓 | A0 |
 | Editar | `PUT /api/v1/monitoramentos/{id}` | corpo: `origens_ids`, `variacoes` | 🆓 | **A2** |
 | Remover | `DELETE /api/v1/monitoramentos/{id}` | `id*` | 🆓 | **A2 destrutivo** |
 | Origens monitoradas | `GET /api/v1/monitoramentos/{id}/origens` | `id*` | 🆓 | A0 |
 | Aparições | `GET /api/v1/monitoramentos/{id}/aparicoes` | `id*` | 🆓 | A0 |
-| Testar callback | `POST /api/v1/monitoramentos/testcallback` | corpo: `callback*`, `tipo` | 🆓 | A0 |
+| Testar callback | `POST /api/v1/monitoramentos/testcallback` | corpo: `callback*`, `tipo` (`movimentacao`\|`diario`) | 💰 **paga** | A0 |
+| Origens dos diários | `GET /api/v1/origens` | — | 🆓 | A0 |
+
+> ⚠️ **Corrigido em 26/08 pela documentação oficial** (`api.escavador.com/v1/docs`), que é mais completa que o OpenAPI de onde esta tabela nasceu. Quatro correções, duas delas com custo:
+>
+> 1. **`origens_ids` é obrigatório** quando `tipo = termo` — a tabela o listava como opcional. Omitir devolve 422, e **422 custa o mesmo que 200**
+> 2. **`testcallback` é PAGA**, não gratuita. Não existe rota barata para ensaiar o webhook
+> 3. **`variacoes` aceita no máximo 3**
+> 4. **`limite_aparicoes` tem padrão de 200/mês** e, ao atingir o teto, **o monitoramento para de capturar até o mês seguinte**. Isso é risco de prazo (R-02), não de dinheiro: vigilância silenciada por cota é publicação que ninguém vê. O valor precisa ser decidido pelo escritório, com folga, e o silêncio precisa ser alarmado
+>
+> **Não existe `tipo` de OAB.** Vigiar uma OAB em diário oficial é `tipo = termo` com a OAB (ou o nome do advogado) como termo — a resposta traz `oab_principal` e `variacoes[].formato_oab`, sinal de que a API reconhece e expande formatos de OAB sozinha. D-62 continua de pé; muda só o modo de expressá-la.
+>
+> **Limite de requisições: 500 por minuto** (documentação, seção *Limite de requisições*). Encerra a pendência de §15.
 
 ### 5.6 Monitoramento no site do tribunal
 

@@ -2,22 +2,30 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 2.6 — **regra de cobrança do teste confirmada pelo suporte; totais recalculados** |
-| Data | 2026-08-25 |
-| Estado | ✅ **Desbloqueado em 25/08.** Blocos A e B autorizados; a tentativa de 23/08 caiu no bloqueio e foi refeita a zero custo |
-| Saldo | R$ 50,00 · 🚧 **débito real por chamada em aberto** — ver §1-C |
+| Versão | 2.7 — **Blocos C e D autorizados; a documentação oficial da V1 corrigiu o mapeamento em cinco pontos** |
+| Data | 2026-08-26 |
+| Estado | ✅ **Desbloqueado.** Blocos A, B e C autorizados, mais a vigilância por OAB. Ver §0 |
+| Saldo | R$ 50,00 · ✅ débito confirmado: **R$ 3,00 por requisição paga** (§1-C) |
 | Liberado em | **13/08/2026** |
-| **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08, depois do desbloqueio. **7 dias** |
+| **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08. **6 dias a partir de hoje** |
 | Gastas até agora | **0** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
-## 0. Autorização vigente — 24/08/2026
+## 0. Autorização vigente — 26/08/2026
+
+> **Ampliada em 26/08.** O usuário autorizou, no chat: executar os Blocos A e B,
+> exercitar o Bloco C e criar **um monitoramento em diário oficial por OAB**.
+> É o aval explícito na hora que a Regra 8 exige, e fica registrado aqui antes
+> de qualquer execução.
 
 | Item | Situação |
 |---|---|
-| **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) |
-| Blocos C e D | 🟡 Não autorizados ainda |
+| **Blocos A e B** | ✅ **Autorizados** — 3 chamadas (A1 `envolvidos`, B1 `capa`, B2 `movimentações`) · **R$ 9,00** |
+| **Bloco C** | ✅ **Autorizado em 26/08** — C1 `solicitar-atualizacao` (R$ 3,00) e C2 `status` (gratuita). **C4 sob revisão** — ver §0.3 |
+| **Vigilância por OAB** | ✅ **Autorizada em 26/08** — `POST /api/v1/monitoramentos`, tipo `termo`. Assinatura mensal, **remoção obrigatória** antes da renovação |
+| Bloco D | 🟡 Não autorizado. Parte dele já foi respondida de graça pelo 403 de 23/08 (§5.1) |
+| **Teto desta autorização** | **R$ 18,00** em 6 chamadas pagas, de R$ 50,00 |
 | Processos disponíveis | **8**, extraídos dos autos em PDF fornecidos pelo escritório — ver §0.1 |
 | Alcance | ✅ As 3 chamadas valem **só para o P1 (TJAP, saúde pública)**. Os demais ficam guardados, e ampliar exige novo aval |
 | 🔄 Alvo trocado | **24/08:** o P1 anterior (TJPB, alimentos) está em **segredo de justiça**. Substituído — ver §0.1 |
@@ -58,6 +66,46 @@ Não é detalhe de estilo: valor fora do conjunto arrisca um **422**, e um 422 c
 **Lição para o registro:** ler o OpenAPI antes de executar custou zero e evitou até duas chamadas perdidas — R$ 6,00 no pior caso. É a Regra 3 do orçamento funcionando.
 
 **Os números em si não entram no repositório** (D-95). Eles ficam em arquivo local ignorado pelo Git, lido pelo script de captura. Número de processo é público em regra, mas *a lista de processos deste escritório* é informação sobre a carteira do cliente, e §9 das diretrizes mantém dado de cliente fora do histórico.
+
+### 0.3 A documentação oficial da V1 corrigiu o mapeamento — 26/08, custo zero
+
+Antes de gastar na vigilância por OAB, a documentação em `api.escavador.com/v1/docs` foi lida inteira. Ela **contradiz o nosso mapeamento em cinco pontos**, e dois deles custariam dinheiro:
+
+| # | O mapeamento dizia | A documentação diz | Consequência |
+|---|---|---|---|
+| 1 | `origens_ids` **opcional** | **Obrigatório** quando `tipo = termo` | 🔴 **422 pago.** Um erro de parâmetro custa os mesmos R$ 3,00 de um acerto |
+| 2 | `POST /monitoramentos/testcallback` **🆓** | **"Paga"** | 🔴 **R$ 3,00 inesperados.** Não é a rota barata de teste que supúnhamos |
+| 3 | `POST /monitoramentos` **💰 recorrente** | **"Grátis"** no rótulo da rota | ⚠️ Contradiz o suporte (*"cobra na criação"*). Ver §0.4 |
+| 4 | `variacoes` sem limite | **Máximo 3** | Trava de validação, não de custo |
+| 5 | `limite_aparicoes` sem menção | Padrão **200/mês**, e **para de capturar** ao atingir | 🔴 **Risco de prazo**, não de dinheiro: vigilância que parou é publicação que ninguém viu (R-02) |
+
+E duas pendências antigas foram encerradas de graça, pela mesma leitura:
+
+- **Limite de requisições: 500 por minuto.** Estava 🔴 em §6 e em `mapeamento-escavador.md` §15
+- **Ambiente de homologação: não existe.** A seção "Diferença entre homologação e produção" traz só conselho genérico de configuração — nenhum sandbox é oferecido, confirmando o que o painel já indicava
+
+> **É a Regra 3 do orçamento pagando de novo.** Ler documentação custou zero e evitou pelo menos duas chamadas perdidas — R$ 6,00 — além de um monitoramento mudo por limite de aparições. O mapeamento foi escrito a partir do OpenAPI; a página de documentação é mais completa que ele.
+
+### 0.4 O que ainda não fecha: "Grátis" na rota, cobrado na assinatura
+
+O rótulo da rota `POST /api/v1/monitoramentos` diz **"Grátis"**. O painel lista *Monitoramento em Diários Oficiais* a **R$ 3,00 até 200 itens**. O suporte disse, por escrito, que **cobra na criação e a cada renovação**.
+
+A leitura que concilia os três: **a requisição HTTP não debita por si**, mas registrar o monitoramento **abre uma assinatura**, e é a assinatura que cobra — a primeira vez no ato, depois a cada mês.
+
+**Como este orçamento trata:** pelo pior caso, **R$ 3,00 na criação**. Se o débito não aparecer em *Uso dos Créditos*, ganhamos R$ 3,00 e um achado — e aí sim vale perguntar ao suporte, porque a diferença entre "grátis" e "assinatura" muda o modelo de custo de E2 inteiro.
+
+### 0.5 Ordem de execução, e o que trava o quê
+
+| Passo | O que é | Custo | Depende de |
+|---|---|---|---|
+| 1 | **Blocos A e B** — `captura/capturar.mjs --executar` | R$ 9,00 | Nada. Pode rodar agora |
+| 2 | `GET /api/v1/origens` — `monitorar.mjs origens` | **R$ 0,00** | Nada. **Responde de graça se a V1 aceita o mesmo token** |
+| 3 | Publicar o receptor no n8n | R$ 0,00 | Token de validação do callback |
+| 4 | Cadastrar a URL no painel | R$ 0,00 | Passo 3. **Só o usuário faz** — é o painel autenticado dele |
+| 5 | **Vigilância por OAB** — `monitorar.mjs criar` | R$ 3,00/mês | Passos 2 e 4 |
+| 6 | **Bloco C** — C1 e C2 | R$ 3,00 | Passo 4 |
+
+> **O passo 2 é o melhor negócio do orçamento inteiro:** gratuito, obrigatório para o passo 5, e encerra sozinho a última pergunta de autenticação em aberto — *a V1 aceita este mesmo token?* (§Bloco A). Era a pergunta que valia gastar R$ 3,00 "junto com uma chamada útil da V1". Não vale mais: ela sai de graça.
 
 ---
 

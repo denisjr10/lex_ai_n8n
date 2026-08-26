@@ -2,7 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-25 |
+| Atualizado em | 2026-08-26 |
+| Execução paga | 🟡 **Preparada, não disparada.** Blocos A, B, C e a vigilância por OAB estão autorizados (orçamento §0) e os scripts prontos. Falta o passo que só o usuário faz: cadastrar a URL de callback no painel. Ver §"A execução paga ficou pronta" |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
@@ -14,6 +15,33 @@
 > Documento vivo. É o primeiro que uma sessão nova deve ler.
 
 ---
+
+## A execução paga ficou pronta — 26/08/2026
+
+O usuário autorizou, no chat, executar os Blocos A e B, exercitar o Bloco C e criar uma vigilância em diário oficial por OAB. **Nada foi gasto ainda:** R$ 50,00 intactos.
+
+**Antes de gastar, a documentação oficial da V1 foi lida inteira — de graça — e desmentiu o nosso mapeamento em cinco pontos.** Dois deles custariam dinheiro:
+
+- **`origens_ids` é obrigatório** para monitoramento por termo, e o mapeamento dizia opcional. Omitir devolve **422, que custa os mesmos R$ 3,00 de um acerto**
+- **`testcallback` é rota PAGA**, não gratuita como o mapeamento afirmava. Não havia ensaio barato do webhook, ao contrário do que planejávamos
+- **`limite_aparicoes` tem padrão de 200/mês e, ao atingir o teto, o monitoramento PARA de capturar.** Isto não é risco de dinheiro, é **risco de prazo (R-02)**: vigilância silenciada por cota é publicação que ninguém vê
+- `variacoes` aceita no máximo 3; e **não existe `tipo` de OAB** — vigiar OAB é `tipo = termo`
+
+E duas pendências antigas caíram na mesma leitura: **500 requisições por minuto** e **não existe ambiente de homologação**.
+
+**O que foi construído:**
+
+| Arquivo | O que faz |
+|---|---|
+| `captura/monitorar.mjs` | Vigilância V1: `origens` e `listar` grátis, `criar` com trava de custo recorrente, `remover` para encerrar a assinatura |
+| `captura/montar-receptor-callback.mjs` | Publica no n8n o endereço público que recebe os callbacks. ACK imediato, conferência do `Authorization` em tempo constante, e o corpo é registrado — nunca interpretado (Regra 4) |
+| `.claude/hooks/testar-guarda-escavador.mjs` | **15 casos.** O disjuntor de crédito passou a ter teste |
+
+**O disjuntor tinha três falsos positivos, e todos foram corrigidos:** ele barrava `cat` no script pago (ler código é grátis), barrava a documentação em `/v1/docs` (que é justamente o que evita gastar) e barrava o ensaio sem `--executar` (que existe para não gastar). Falso positivo em barreira de segurança não é incômodo: é o que ensina a próxima sessão a desligar a barreira.
+
+**O que trava a execução agora** é um passo que só o usuário faz: cadastrar a URL do receptor em `api.escavador.com/callbacks` e gerar o token de validação. Cadastrar não custa crédito.
+
+> ⚠️ Este documento tem um bloco duplicado (as seções "As duas demos ficaram prontas", "Próximo passo", "Decisões", "Pendências" e "Riscos ativos" aparecem duas vezes). Provável colisão entre sessões paralelas. Não foi corrigido aqui para não atropelar outra sessão que possa estar com o arquivo aberto.
 
 ## Onde estamos
 

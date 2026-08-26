@@ -20,7 +20,15 @@ const ORCAMENTO = 'docs/06-orcamento-de-chamadas-escavador.md'
 const INVOCADORES = /\b(curl|wget|Invoke-RestMethod|Invoke-WebRequest|node|npx|npm|pnpm|yarn|python|python3|py|deno|bun|http|https)\b/i
 
 const MENCIONA_ESCAVADOR = /escavador\.com/i
-const SCRIPT_QUE_COBRA = /capturar\.mjs/i
+
+// Bloqueia EXECUTAR o script, nao MENCIONAR o script. A primeira versao casava
+// o nome puro, e com isso barrava `cat captura/capturar.mjs` — ler codigo e de
+// graca, e um hook que barra leitura ensina a contornar o hook.
+//
+// O lookahead exclui `--check`, que so confere sintaxe e nao roda uma linha.
+// Falso positivo em hook de seguranca nao e detalhe: hook que barra o trabalho
+// legitimo e hook que a proxima sessao aprende a desligar.
+const SCRIPT_QUE_COBRA = /\b(node|npx|bun|deno)\b(?![^|;&]*--check\b)[^|;&]*\b(capturar|monitorar)\.mjs/i
 
 function negar(motivo) {
   process.stdout.write(JSON.stringify({
@@ -48,7 +56,13 @@ const alvo = entrada.tool_input || {}
 if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
   const comando = String(alvo.command || '')
 
-  if (SCRIPT_QUE_COBRA.test(comando)) {
+  // Os dois scripts pagos so chamam a rede com --executar. Sem a bandeira eles
+  // imprimem o plano e saem. Barrar o ensaio seria barrar exatamente a etapa
+  // que existe para NAO gastar — e empurrar quem trabalha direto para a
+  // chamada real, que e o oposto do que este hook quer.
+  const ehEnsaio = !/--executar\b/.test(comando)
+
+  if (SCRIPT_QUE_COBRA.test(comando) && !ehEnsaio) {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
       'Este comando executa captura/capturar.mjs, que chama a API do Escavador ' +
@@ -85,7 +99,10 @@ if (ferramenta === 'WebFetch') {
 
   const ehApi = /(^|\.)api\.escavador\.com$/i.test(host)
   const ehRotaDeApi = /escavador\.com/i.test(host) && /^\/api\/v[12]\b/i.test(caminho)
-  const ehDocumentacao = /^\/docs?\b/i.test(caminho)
+  // A documentacao V1 e V2 mora em /v1/docs e /v2/docs, nao so em /docs. A
+  // primeira versao so liberava a raiz e barrava justamente a pagina que
+  // responde de graca o que a chamada paga responderia por R$ 3,00.
+  const ehDocumentacao = /(^|\/)docs?(\/|$|#)/i.test(caminho)
 
   if ((ehApi && !ehDocumentacao) || ehRotaDeApi) {
     negar(
