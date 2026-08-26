@@ -4,9 +4,9 @@
 |---|---|
 | Atualizado em | 2026-08-26 |
 | Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00.** Blocos A e B executados em 26/08 e custaram **R$ 3,00**, não os R$ 9,00 orçados — o débito segue o catálogo por rota, e **não** a tarifa plana que o suporte informou (D-108). Expira **01/09** |
-| Callback | ✅ **De pé.** Receptor ativo no n8n (`OymAtbNYI1pjfWkA`), URL cadastrada no painel: `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
+| Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08 às 15:09. **Remover até 22/09.** Ver §"Assinaturas do Escavador" |
-| Bloco C | ✅ **Feito, e custou R$ 0,00.** C1 voltou **201** com solicitação `55413945` em `PENDENTE`; C2 confirmada gratuita. Máquina de estados registrada em `06-orcamento...` §5.5. **Aguardando a conclusão** para provar o callback |
+| Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 128 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 49 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
@@ -165,7 +165,30 @@ O C1 com o corpo corrigido voltou **HTTP 201** e `Creditos-Utilizados: 0` — so
 
 O `atualizar.mjs status` lia o campo errado e dizia "não trouxe um campo status óbvio" com o estado ali, um nível abaixo. Corrigido — agora ele explica o que está acontecendo em vez de despejar JSON.
 
-**O que falta:** repetir o `status` (gratuito) até `concluido_em` deixar de ser `null`, e então conferir se a execução apareceu no n8n. É a última peça do Bloco C, e não custa nada.
+### O callback chegou, e trouxe um problema de arquitetura junto
+
+A solicitação `55413945` concluiu às **21:54:35**, 3h45 depois de pedida. O n8n registrou a entrega **2 segundos depois**, com `veredito: autentico`. O ciclo assíncrono inteiro — pedir, esperar, receber, validar — está provado.
+
+**Os dois caminhos do receptor foram exercitados**, e isso é o que o torna confiável:
+
+| Entregas | O que era | Veredito |
+|---|---|---|
+| 2, às 15:05 | `curl` com `{"teste": true}`, **sem `Authorization`** | ✅ `RECUSADO` |
+| 3, entre 20:16 e 22:20 | Escavador, com `Authorization` | ✅ `autentico` |
+
+#### 🔴 O `uuid` do Escavador não serve para deduplicar
+
+A **mesma solicitação chegou três vezes**, com `uuid` diferente em cada uma — e duas com corpo idêntico, salvo o próprio `uuid`. Ou seja: o `uuid` identifica a **tentativa de entrega**, não o evento.
+
+A Spec dizia para preferir o identificador do fornecedor e só cair no resumo do conteúdo quando ele faltasse. **A preferência estava invertida.** Seguir a versão antiga faria a terceira entrega passar como novidade — e neste domínio "novidade" vira prazo lançado, tarefa criada e advogado avisado. Duas vezes, sem erro nenhum aparecer.
+
+Pior: a mesma `atualizacao.id` **concluiu duas vezes**, com `concluido_em` diferente (19:47 e 21:54). Chave por `id` sozinha descartaria a segunda — que é a que vale.
+
+Spec §8.3 reescrita: a chave é **sempre o resumo do conteúdo, com o envelope de entrega removido antes do resumo**. D-116, D-117, D-118 e R-43 registrados; detalhes medidos em `06-orcamento...` §5.6.
+
+**Custo do Bloco C inteiro: R$ 0,00.** Estava orçado em R$ 3,00.
+
+**O que falta:** nada do Bloco C. A vigilância em diário (id `2813617`) segue ativa, **para remover até 22/09**.
 
 ### 🔴 A chave de API do n8n vazou duas vezes no mesmo dia
 

@@ -13,6 +13,7 @@
  *   node demo/n8n.mjs listar             # workflows (id, nome, ativo)
  *   node demo/n8n.mjs execucoes [limite] # últimas execuções, para acompanhamento
  *   node demo/n8n.mjs ver <id>           # um workflow, em JSON
+ *   node demo/n8n.mjs execucao <id> <arquivo>  # o conteudo de uma execucao, para arquivo
  */
 
 import fs from 'node:fs';
@@ -110,8 +111,34 @@ try {
     console.log(JSON.stringify(await api(`/workflows/${arg}`), null, 2));
   }
 
+  // Ler o CONTEÚDO de uma execução — não o fluxo, o que passou por ele.
+  // Faltava, e a falta apareceu na hora de conferir o que o Escavador
+  // entregou no callback: `ver` pede workflow e devolvia 404 para um id de
+  // execução, o que parece erro de permissão e é só comando errado.
+  //
+  // ⚠️ A saída traz o payload inteiro, com dado de processo e de pessoa.
+  // Por isso ela vai para arquivo, não para a tela: despejar isso no terminal
+  // é o mesmo descuido do token, com LGPD junto.
+  else if (comando === 'execucao') {
+    if (!arg) { console.error('informe o id da execução (veja em: node demo/n8n.mjs execucoes)'); process.exit(1); }
+    const destino = process.argv[4];
+    const dados = await api(`/executions/${arg}?includeData=true`);
+    const texto = JSON.stringify(dados, null, 2);
+
+    if (!destino) {
+      console.error('\n  informe também o arquivo de saída:');
+      console.error(`    node demo/n8n.mjs execucao ${arg} <arquivo.json>`);
+      console.error('\n  o conteúdo tem dado de processo e de pessoa — não vai para a tela.\n');
+      process.exit(1);
+    }
+    fs.writeFileSync(destino, texto + '\n');
+    console.log(`\n  execução ${arg} · ${dados.status ?? '?'} · iniciada ${dados.startedAt ?? '?'}`);
+    console.log(`  gravado em ${destino} (${texto.length} caracteres)`);
+    console.log('  confira se o destino está no .gitignore antes de qualquer commit.\n');
+  }
+
   else {
-    console.log('comandos: verificar · listar · execucoes [limite] · ver <id>');
+    console.log('comandos: verificar · listar · execucoes [limite] · ver <id> · execucao <id> <arquivo>');
   }
 } catch (e) {
   console.error(`\nfalhou: ${e.message}`);

@@ -538,7 +538,25 @@ O `X-Trello-Client-Identifier` merece a ênfase que o mapeamento já dava: sem e
 
 *Idempotência* é a propriedade de receber a mesma mensagem duas vezes e produzir um efeito só. É obrigatória aqui porque os dois fornecedores reentregam.
 
-A chave de deduplicação é construída pelo receptor, com o identificador do evento quando existe e um resumo criptográfico do conteúdo quando não existe. A tabela `evento_callback` guarda a chave com restrição de unicidade — a segunda entrega é reconhecida pelo banco, não por lógica que alguém pode esquecer de escrever.
+A chave de deduplicação é **sempre um resumo criptográfico do conteúdo**, nunca o identificador que o fornecedor manda no envelope. A tabela `evento_callback` guarda a chave com restrição de unicidade — a segunda entrega é reconhecida pelo banco, não por lógica que alguém pode esquecer de escrever.
+
+> ⚠️ **Esta regra mudou em 26/08, e mudou por medição.** A versão anterior dizia "o identificador do evento quando existe, e o resumo do conteúdo quando não existe". O exercício do Bloco C mostrou que essa preferência estaria **exatamente invertida** no Escavador.
+>
+> A solicitação `55413945` foi entregue **três vezes** no receptor, cada uma com um `uuid` diferente — e duas delas com **conteúdo idêntico, byte a byte**, salvo o próprio `uuid`:
+>
+> | Entrega | `uuid` | `concluido_em` no corpo |
+> |---|---|---|
+> | 20:16 | `ea94bb1a…` | `19:47:17` |
+> | 21:54 | `b246bf30…` | `21:54:35` |
+> | 22:20 | `d92becdc…` | `21:54:35` ← **mesmo conteúdo da anterior** |
+>
+> O `uuid` identifica a **tentativa de entrega**, não o evento. Deduplicar por ele deixaria a terceira entrega passar como se fosse novidade — e, no domínio deste projeto, "novidade" vira prazo lançado, tarefa criada e advogado avisado. Duas vezes.
+>
+> Serve para rastrear entrega em log e em conversa com o suporte. **Nunca para decidir se algo já foi processado.**
+
+**E o identificador da solicitação também não basta.** A mesma `atualizacao.id` concluiu duas vezes, com `concluido_em` diferente (19:47 e depois 21:54). Uma chave `id` sozinha descartaria a segunda conclusão, que é a que vale — o `status-atualizacao` confirmou `21:54:35` como estado final. A chave precisa incluir **o que mudou**, não só de quem se trata: `fornecedor + tipo de evento + resumo do corpo, com o envelope de entrega removido antes do resumo`.
+
+O envelope removido inclui `uuid` e os cabeçalhos de transporte. Se ele entrar no resumo, duas entregas idênticas geram resumos diferentes e a deduplicação não deduplica nada.
 
 ### 8.4 Reconciliação e silêncio
 

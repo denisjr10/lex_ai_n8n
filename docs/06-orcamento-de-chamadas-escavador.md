@@ -405,6 +405,49 @@ Confundir os dois é ler "nunca pedi" como "deu errado" — e um chassi que erra
 
 **Ainda em aberto:** os demais estados (sucesso, erro, e como se distingue "terminou com novidade" de "terminou sem nada"). Todos se descobrem repetindo o C2, que é **gratuito**.
 
+### 5.6 O ciclo de callback fechou de ponta a ponta — 26/08, de graça
+
+A solicitação `55413945` concluiu em `2026-08-26T21:54:35Z`, **3h45 depois** de pedida. O receptor no n8n registrou a entrega **2 segundos depois** da conclusão, com `veredito: autentico`.
+
+**O envelope entregue pelo Escavador:**
+
+| Campo | Valor |
+|---|---|
+| `event` | `atualizacao_processo_concluida` |
+| `uuid` | identificador da **entrega** — muda a cada reentrega (ver abaixo) |
+| `atualizacao` | o mesmo objeto do C1: `id`, `status`, `motivo_erro`, `criado_em`, `numero_cnj`, `concluido_em`, `opcoes`, `enviar_callback` |
+
+Origem: `GuzzleHttp/7`, IP `167.235.88.201`, `Authorization` presente. Corpo de 312 bytes.
+
+**Os dois caminhos foram provados, e é isso que torna o receptor confiável:**
+
+| Entregas | Origem | Veredito |
+|---|---|---|
+| 2, às 15:05 | `curl`, corpo `{"teste": true}`, **sem `Authorization`** | ✅ `RECUSADO` |
+| 3, entre 20:16 e 22:20 | Escavador, com `Authorization` | ✅ `autentico` |
+
+Aceitar o legítimo prova metade. **Recusar o ilegítimo prova a outra** (D-118).
+
+#### O achado que muda a arquitetura
+
+A **mesma solicitação foi entregue três vezes**, com `uuid` diferente em cada uma — e duas delas com corpo idêntico:
+
+| Entrega | `uuid` | `concluido_em` no corpo |
+|---|---|---|
+| 20:16 | `ea94bb1a…` | `19:47:17` |
+| 21:54 | `b246bf30…` | `21:54:35` |
+| 22:20 | `d92becdc…` | `21:54:35` ← **repetição pura** |
+
+O `uuid` identifica a **tentativa de entrega**, não o evento. A Spec §8.3 dizia para preferir o identificador do fornecedor e cair no resumo do conteúdo só quando ele faltasse — **a preferência estava invertida**, e seguir a versão antiga teria deixado a terceira entrega passar como novidade.
+
+Neste domínio, "novidade" vira prazo lançado, tarefa criada e advogado avisado. Duas vezes. Spec §8.3 reescrita; D-116, D-117 e R-43 registrados.
+
+**Segundo detalhe:** a mesma `atualizacao.id` concluiu **duas vezes**, com `concluido_em` diferente. Chave por `id` sozinha descartaria a segunda — que é a que vale, confirmada pelo `status-atualizacao`.
+
+#### Custo do Bloco C inteiro
+
+**R$ 0,00.** C1 (`201`), C2 (5 chamadas, todas `200`) e as três entregas de callback: `Creditos-Utilizados: 0` em todas. Estava orçado em R$ 3,00.
+
 ### 5.4 O receptor de callback ficou de pé — 26/08
 
 Publicado no n8n como `[LEX] Receptor de callback do Escavador` (`OymAtbNYI1pjfWkA`), **ativo**. Custo: R$ 0,00 — é infraestrutura nossa, não a API do Escavador.
