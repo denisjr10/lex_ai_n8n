@@ -142,19 +142,45 @@ function lerToken() {
 /** Achata um objeto em caminhos de campo. O que interessa nao e o VALOR (dado
  *  de cliente, que nao sai daqui), e sim o CONJUNTO DE CAMPOS e o tipo de cada
  *  um. Comparar dois conjuntos de caminhos responde a pergunta do bloco sem
- *  imprimir uma linha de dado pessoal. */
+ *  imprimir uma linha de dado pessoal.
+ *
+ *  ⚠️ A PRIMEIRA VERSAO DESTA FUNCAO ME FEZ TIRAR UMA CONCLUSAO ERRADA.
+ *
+ *  Ela descia so no PRIMEIRO elemento de cada lista. Com isso, o resultado
+ *  dependia da ORDEM em que o tribunal devolveu os envolvidos: no civel o
+ *  primeiro da lista era um reu sem CPF, no trabalhista era o autor com CPF, e
+ *  o relatorio anunciou "cpf: null -> string" como se fosse diferenca entre os
+ *  ramos da Justica. Nao era. CPF vem nos dois — a amostra e que era torta.
+ *
+ *  Uma ferramenta de comparacao que confunde "o contrato nao tem este campo"
+ *  com "esta instancia veio vazia" nao serve para desenhar modelo de dados:
+ *  ela produz diferenca onde nao ha, e esconde diferenca onde ha.
+ *
+ *  Agora ela UNE a forma de TODOS os elementos da lista. E, quando dois tipos
+ *  aparecem no mesmo caminho (`null` numa linha e `string` noutra), registra
+ *  os dois — porque "as vezes vem nulo" e justamente o que o modelo precisa
+ *  saber. */
 function caminhos(valor, prefixo = '', saida = new Map()) {
-  if (valor === null) { saida.set(prefixo, 'null'); return saida; }
+  const anotar = (caminho, tipo) => {
+    const antes = saida.get(caminho);
+    if (!antes) { saida.set(caminho, tipo); return; }
+    if (antes === tipo) return;
+    const juntos = new Set([...antes.split('|'), tipo]);
+    saida.set(caminho, [...juntos].sort().join('|'));
+  };
+
+  if (valor === null) { anotar(prefixo, 'null'); return saida; }
   if (Array.isArray(valor)) {
-    saida.set(prefixo, `array[${valor.length}]`);
-    if (valor.length) caminhos(valor[0], `${prefixo}[]`, saida);
+    anotar(prefixo, valor.length ? 'array' : 'array-vazio');
+    // TODOS os elementos, nao so o primeiro.
+    for (const item of valor) caminhos(item, `${prefixo}[]`, saida);
     return saida;
   }
   if (typeof valor === 'object') {
     for (const [k, v] of Object.entries(valor)) caminhos(v, prefixo ? `${prefixo}.${k}` : k, saida);
     return saida;
   }
-  saida.set(prefixo, typeof valor);
+  anotar(prefixo, typeof valor);
   return saida;
 }
 
@@ -213,6 +239,17 @@ function comparar() {
       for (const k of tipoMudou.slice(0, 25)) info(`~ ${k}: ${a.get(k)} -> ${b.get(k)}`);
     }
     if (!soCivel.length && !soTrab.length && !tipoMudou.length) info('nenhuma diferenca de forma — o modelo aguenta os dois ramos');
+
+    // "array-vazio" de um lado e "array" do outro NAO e diferenca de contrato:
+    // e uma lista que veio vazia nesta instancia. Dizer isso em voz alta evita
+    // exatamente o erro que esta ferramenta ja induziu uma vez.
+    const soVazio = tipoMudou.filter(k => {
+      const par = [a.get(k), b.get(k)];
+      return par.every(t => t === 'array' || t === 'array-vazio');
+    });
+    if (soVazio.length) {
+      info(`  (${soVazio.length} desses e so lista vazia de um lado — nao e diferenca de contrato)`);
+    }
     console.log('');
   }
 

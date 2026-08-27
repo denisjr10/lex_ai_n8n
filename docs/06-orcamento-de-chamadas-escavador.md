@@ -2,13 +2,13 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 3.0 — **Vigilância criada (id `2813617`) e C2 confirmada gratuita. C1 voltou 422 por erro de corpo nosso, já corrigido** |
-| Data | 2026-08-26 |
-| Estado | ✅ **Em execução.** A, B, vigilância e C2 feitos. **Falta só o C1** (R$ 3,00), com o corpo corrigido |
-| Saldo | ✅ **R$ 47,00** de R$ 50,00 — **conferido no painel em 26/08.** Os dois 422 não cobraram |
+| Versão | 4.0 — **Bloco E executado.** O contrato da V2 é o mesmo entre ramos da Justiça; o que varia é quanto dele vem preenchido (§5.8) |
+| Data | 2026-08-27 |
+| Estado | ✅ **Blocos A, B, C e E executados.** Vigilância ativa. Falta capturar uma aparição — gratuita |
+| Saldo | ✅ **R$ 44,00** de R$ 50,00 — R$ 47,00 conferidos no painel em 26/08, menos os R$ 3,00 do Bloco E |
 | Liberado em | **13/08/2026** |
-| **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08. **6 dias a partir de hoje** |
-| Gastas até agora | **9 chamadas · R$ 3,00 medidos** — A1 R$ 0,05 · B1 R$ 2,95 · B2, origens, V1-criar e C2 R$ 0,00 · **dois 422 sem cabeçalho de custo, a conferir no painel** |
+| **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08 |
+| Gastas até agora | **12 chamadas · R$ 6,00 medidos** — A1 e E1 R$ 0,05 cada · B1 e E2 R$ 2,95 cada · B2, origens, V1-criar, aparições e C1/C2 R$ 0,00 |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
 
@@ -25,13 +25,13 @@
 | **Bloco C** | ✅ **Autorizado em 26/08, reduzido em 26/08** — C1 `solicitar-atualizacao` (R$ 3,00) e C2 `status` (gratuita). **C4 RETIRADO** por decisão do usuário — D-110 |
 | **Vigilância por OAB** | ✅ **CRIADA em 26/08 às 15:09 — id `2813617`.** Assinatura mensal ativa. 🔴 **Remover até 22/09** — `node captura/monitorar.mjs remover 2813617 --executar` |
 | Bloco D | 🟡 Não autorizado. Parte dele já foi respondida de graça pelo 403 de 23/08 (§5.1) |
-| **Bloco E** | ✅ **AUTORIZADO em 27/08** — E1 `envolvidos` (R$ 0,05) e E2 `capa` (R$ 3,00) **no P4, trabalhista do TRT8**. Teto duplo: 2 chamadas **e** R$ 4,00. Ver §3, Bloco E |
+| **Bloco E** | ✅ **EXECUTADO em 27/08 — R$ 3,00, dentro do teto de R$ 4,00.** E1 R$ 0,05 e E2 R$ 2,95, os mesmos precos do civel. **A hipotese que justificou o bloco estava errada, e isso e a melhor noticia:** a V2 normaliza a nomenclatura das partes, e o contrato e o mesmo entre os ramos — ver §5.8 |
 | **Teto desta autorização** | **R$ 18,05** em 7 chamadas pagas, de R$ 50,00 — R$ 15,00 dos Blocos A/B/C mais R$ 3,05 do Bloco E |
 | Processos disponíveis | **8**, extraídos dos autos em PDF fornecidos pelo escritório — ver §0.1 |
 | Alcance | ✅ As 3 chamadas valem **só para o P1 (TJAP, saúde pública)**. Os demais ficam guardados, e ampliar exige novo aval |
 | 🔄 Alvo trocado | **24/08:** o P1 anterior (TJPB, alimentos) está em **segredo de justiça**. Substituído — ver §0.1 |
 | Token | ✅ **Fornecido e funcional** — a API autenticou; a recusa veio da cobrança, não da identidade |
-| ✅ Saldo | **Liberado em 25/08 às 10:22**, a pedido do usuário. Painel: **"Válido até 01/09/2026"** — ver §5.2 |
+| ✅ Saldo | **R$ 44,00** depois do Bloco E. Painel: **"Válido até 01/09/2026"** — ver §5.2 |
 
 ### 0.1 Os processos — e por que o alvo mudou em 24/08
 
@@ -369,7 +369,10 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 
 | V1-aparicoes | 2026-08-27 04:13 UTC | `GET /api/v1/monitoramentos/2813617/aparicoes` | **200** | **0** → R$ 0,00 | R$ 47,00 | ⏳ **Gratuita, confirmado.** `items: []` — **nenhuma aparição ainda**, 12 horas depois de criada a vigilância. Ensinou o envelope de listagem da V1 (`items` + `links` + `paginator`, `per_page: 20`), que é diferente do da V2. Ver §5.7 |
 
-**Gasto total até aqui: R$ 3,00 de R$ 50,00.** Restam **R$ 47,00** e 5 dias.
+| E1 | 2026-08-27 12:12 UTC | `GET /api/v2/.../envolvidos?limit=20` — **TRT8** | **200** | **5** → R$ 0,05 | R$ 46,95 | Mesmo preço do cível. E o contrato do envolvido é **idêntico** entre os ramos — ver §5.8 |
+| E2 | 2026-08-27 12:12 UTC | `GET /api/v2/processos/numero_cnj/{cnj}` — **TRT8** | **200** | **295** → R$ 2,95 | **R$ 44,00** | Mesmo preço do cível. A capa também é o mesmo contrato: o que muda é **quanto dele vem preenchido** — ver §5.8 |
+
+**Gasto total até aqui: R$ 6,00 de R$ 50,00.** Restam **R$ 44,00** e 5 dias.
 
 > ✅ **Encerrado em 26/08.** O painel foi conferido e bate **linha a linha** com `registro-de-execucao.local.json`: 18 requisições, nenhuma a mais. Os dois 422 **não cobraram**, e o saldo é R$ 47,00.
 >
@@ -475,6 +478,62 @@ Neste domínio, "novidade" vira prazo lançado, tarefa criada e advogado avisado
 #### Custo do Bloco C inteiro
 
 **R$ 0,00.** C1 (`201`), C2 (5 chamadas, todas `200`) e as três entregas de callback: `Creditos-Utilizados: 0` em todas. Estava orçado em R$ 3,00.
+
+### 5.8 O Bloco E respondeu — e desmentiu a hipótese que o justificou · 27/08 · R$ 3,00
+
+Duas chamadas, R$ 0,05 e R$ 2,95 — **exatamente o mesmo preço do cível**. Primeira confirmação de que o preço segue a **rota**, e não o tribunal.
+
+#### A hipótese estava errada, e isso é a melhor notícia possível
+
+O bloco foi orçado para descobrir se o trabalhista chama as partes de RECLAMANTE e RECLAMADO em vez de AUTOR e RÉU. **A V2 normaliza:**
+
+| | `tipo` (bruto) | `tipo_normalizado` | `polo` |
+|---|---|---|---|
+| Cível TJAP | `"AUTOR"`, `"Réu"`, `"Polo Passivo"`, `null` | `"Autor"`, `"Réu"`, `null` | `ATIVO`, `PASSIVO`, `null` |
+| Trabalhista TRT8 | `"AUTOR"`, `"Polo Ativo"`, `"Réu"`, `"Polo Passivo"`, `null` | `"Autor"`, `"Réu"`, `null` | `ATIVO`, `PASSIVO`, `null` |
+
+`tipo_normalizado` é **vocabulário fechado nos dois ramos**. Isso simplifica o modelo de dados do MCP de forma significativa: não é preciso tabela de tradução por ramo da Justiça.
+
+**E o campo `tipo` cru não serve para nada.** Ele mistura `"AUTOR"` maiúsculo com `"Polo Ativo"` capitalizado, e vem `null` em várias participações. Quem ler `tipo` escreve regra sobre um vocabulário aberto e inconsistente.
+
+#### O contrato é o mesmo; o que varia é o preenchimento
+
+| | Campos | Em comum | Diferenças reais |
+|---|---|---|---|
+| `envolvidos` | 37 × 37 | **37** | **nenhuma** |
+| capa | 106 × 104 | 97 | 4, e todas do mesmo tipo |
+
+As quatro diferenças da capa são **um campo que existe virando `null`**:
+
+| Campo | Cível TJAP | Trabalhista TRT8 |
+|---|---|---|
+| `fontes[].capa.orgao_julgador_normatizado` | objeto com 7 subcampos | **`null` inteiro** |
+| `fontes[].capa.situacao` | `string` | `null` |
+| `unidade_origem.endereco` | `string` | `null` |
+| `unidade_origem.classificacao` | `string` | `null` |
+
+Nenhum campo novo apareceu, e nenhum sumiu do contrato. `assuntos_normalizados` e `informacoes_complementares` aparecem como "diferença" só porque vieram vazios de um lado e cheios do outro — **lista vazia não é diferença de contrato**.
+
+> ⚠️ **`orgao_julgador_normatizado` é o campo perigoso.** Ele é um objeto que pode vir `null` por inteiro. `capa.orgao_julgador_normatizado.nome` funciona no TJAP e **quebra** no TRT8 — e o defeito só aparece no dia em que o escritório cadastrar o primeiro processo trabalhista.
+
+#### A ferramenta de comparação me fez errar uma vez
+
+A primeira versão do `--comparar` descia só no **primeiro** elemento de cada lista. O resultado dependia da ordem em que o tribunal devolveu os envolvidos, e ela anunciou `cpf: null → string` como se fosse diferença entre os ramos.
+
+**Não era.** CPF de parte pessoa física vem nos **dois** — no cível o primeiro da lista era um réu sem CPF, no trabalhista era o autor com CPF. Ferramenta que confunde *"o contrato não tem este campo"* com *"esta instância veio vazia"* produz diferença onde não há e esconde diferença onde há. Corrigida: agora **une a forma de todos os elementos** e avisa quando a diferença é só lista vazia.
+
+Fica o registro do fato que a correção confirmou: **a capa traz CPF de parte pessoa física, sempre, nos dois ramos.** Dado pessoal em resposta de rota comum — não é exceção, é o caso normal.
+
+#### E o nosso importador de PDF não fala a mesma língua que a API
+
+O mesmo processo trabalhista, pelos dois caminhos:
+
+| Origem | `tipo` | `tipo_normalizado` |
+|---|---|---|
+| API V2 | `"AUTOR"` / `"Réu"` | `"Autor"` / `"Réu"` |
+| `importar-autos.mjs`, do PDF | `"RECLAMANTE"` / `"RECLAMADO"` | `"RECLAMANTE"` / `"RECLAMADO"` |
+
+A D-98 registrou que os autos foram convertidos "para o mesmo contrato que a API produziria". **Para o trabalhista, não foram.** O importador copiou o vocabulário do PDF; a API normaliza. Os 8 processos da demo treinam o sistema num vocabulário que a API não usa — e testes construídos sobre eles passariam contra dados que a produção nunca vai ver.
 
 ### 5.7 A aparição ainda não veio — 27/08, e a espera não custa nada
 
