@@ -25,7 +25,8 @@
 | **Bloco C** | ✅ **Autorizado em 26/08, reduzido em 26/08** — C1 `solicitar-atualizacao` (R$ 3,00) e C2 `status` (gratuita). **C4 RETIRADO** por decisão do usuário — D-110 |
 | **Vigilância por OAB** | ✅ **CRIADA em 26/08 às 15:09 — id `2813617`.** Assinatura mensal ativa. 🔴 **Remover até 22/09** — `node captura/monitorar.mjs remover 2813617 --executar` |
 | Bloco D | 🟡 Não autorizado. Parte dele já foi respondida de graça pelo 403 de 23/08 (§5.1) |
-| **Teto desta autorização** | **R$ 15,00** em 5 chamadas pagas, de R$ 50,00 — eram R$ 18,00 antes de C4 sair |
+| **Bloco E** | ✅ **AUTORIZADO em 27/08** — E1 `envolvidos` (R$ 0,05) e E2 `capa` (R$ 3,00) **no P4, trabalhista do TRT8**. Teto duplo: 2 chamadas **e** R$ 4,00. Ver §3, Bloco E |
+| **Teto desta autorização** | **R$ 18,05** em 7 chamadas pagas, de R$ 50,00 — R$ 15,00 dos Blocos A/B/C mais R$ 3,05 do Bloco E |
 | Processos disponíveis | **8**, extraídos dos autos em PDF fornecidos pelo escritório — ver §0.1 |
 | Alcance | ✅ As 3 chamadas valem **só para o P1 (TJAP, saúde pública)**. Os demais ficam guardados, e ampliar exige novo aval |
 | 🔄 Alvo trocado | **24/08:** o P1 anterior (TJPB, alimentos) está em **segredo de justiça**. Substituído — ver §0.1 |
@@ -295,6 +296,26 @@ node captura/atualizar.mjs status --executar                  # C2, gratuita, re
 | D1 | `GET /api/v2/processos/numero_cnj/0000000-00.0000.0.00.0000` | Formato do erro para CNJ inválido/inexistente |
 | D2 | Qualquer rota com token propositalmente inválido | Formato do 401. **Provavelmente não consome cota** — rejeição antes do processamento. A confirmar em A1, comparando o saldo |
 
+### Bloco E — Variação entre ramos da Justiça · 2 chamadas · **R$ 3,05**
+
+> ✅ **Autorizado pelo usuário em 27/08, no chat.** É o item 3 da lista de destinos recomendados abaixo, promovido a bloco.
+
+| # | Chamada | O que responde |
+|---|---|---|
+| E1 | `GET /api/v2/processos/numero_cnj/{P4}/envolvidos?limit=20` — R$ 0,05 | Como o trabalhista nomeia as partes (RECLAMANTE/RECLAMADO contra AUTOR/RÉU), e se o modelo do envolvido é o mesmo do cível |
+| E2 | `GET /api/v2/processos/numero_cnj/{P4}` — R$ 3,00 | A capa fora do TJAP: fontes, graus, sistema (PJe), unidade de origem, valor da causa, e quais campos vêm nulos em outro ramo |
+
+**Por que este processo.** O alvo é o **P4 — reclamação trabalhista, rito sumaríssimo, 4ª Vara do Trabalho de Macapá, TRT da 8ª Região.** Não é só "outro tribunal": é **outro ramo da Justiça**, que é o teste forte. Entre os 8 processos dos autos, é o único fora do TJAP que **não** está em segredo de justiça — o outro candidato (TJPB) é vara de família com parte menor de idade, e continua fora de qualquer autorização.
+
+**Por que gastar isto agora.** Todo o modelo de dados do servidor MCP vai ser desenhado sobre respostas de **um** processo, de **um** tribunal, de **um** ramo. Não há nenhuma prova de que a forma se repete fora dali. Descobrir a variação agora custa R$ 3,05; descobrir depois custa reescrever o modelo com o MCP já construído em cima dele. E o crédito expira em 01/09 — não gastar não devolve nada.
+
+**Como se executa.** Script próprio, `captura/comparar-tribunal.mjs`, pelas mesmas razões que o Bloco C ganhou o seu: o script dos Blocos A e B tem teto de 3 chamadas já atingido e autorização congelada em "só o P1", e alterar teto e alvo de um artefato auditado apaga a auditoria.
+
+**Duas travas novas em relação aos blocos anteriores:**
+
+1. **Teto de gasto, além do teto de chamadas.** R$ 4,00, verificado *dentro* do laço: se E1 vier muito mais cara que a tabela diz, E2 não sai. A tabela de preços deste projeto já foi desmentida pela medição (D-108) — usá-la para autorizar a chamada seguinte repetiria o erro que gerou a regra
+2. **Modo `--comparar`, gratuito.** O diff de formato é feito lendo o disco, e compara **caminhos de campo e tipos**, nunca valores. A pergunta do bloco é sobre forma; dado pessoal não precisa aparecer na tela para respondê-la
+
 ### Total revisado
 
 Recalculado em 25/08 pela regra confirmada: **R$ 3,00 por requisição paga; rotas gratuitas não consomem saldo nem cota.**
@@ -305,13 +326,14 @@ Recalculado em 25/08 pela regra confirmada: **R$ 3,00 por requisição paga; rot
 | B — estrutura de dados | 3 | — | R$ 9,00 |
 | C — assincronia e webhook | 1 | 1 (C2) | R$ 3,00 |
 | D — erros | 1 | 1 (D2, provável) | R$ 3,00 |
-| **Total** | **6** | **2** | **R$ 18,00 de R$ 50,00** |
+| **E — variação entre ramos** | **2** | — | **R$ 3,05** |
+| **Total** | **8** | **2** | **R$ 21,05 de R$ 50,00** |
 
 **Sobram R$ 29,00 — cerca de 9 requisições pagas.** Devem ser gastas, não guardadas: crédito não usado evapora no fim da prorrogação. Destino recomendado, em ordem:
 
 1. **A V1 na prática** — uma consulta de diário oficial. É o gatilho de prazo, é a parte que a V2 não cobre, e responde de quebra a única pergunta de autenticação em aberto: **a V1 aceita o mesmo token?**
 2. **Um monitoramento em diário oficial por OAB** — é o coração de E2 e de D-62. Vale exercitar o ciclo completo: criar, receber a aparição por callback, conferir o formato. Mesma regra de C4: **anotar a data e remover antes da renovação**
-3. **Um segundo processo, de outro tribunal** — a variação de formato entre tribunais é incógnita real do modelo de dados do MCP
+3. ✅ **Um segundo processo, de outro tribunal** — **autorizado em 27/08 e virou o Bloco E**, com um alvo melhor do que "outro tribunal": outro **ramo** da Justiça (trabalhista, TRT8)
 4. ~~Repetir A1 em processos diferentes a R$ 0,05~~ — sem sentido no teste: cada repetição custa R$ 3,00 cheios
 
 ## 4. O que **não** entra no orçamento
@@ -344,6 +366,8 @@ Preencher **a cada chamada**, imediatamente. Resposta não registrada é crédit
 | C2 | 2026-08-26 17:45 UTC | `GET /api/v2/.../status-atualizacao` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ **Gratuita, confirmado.** Campos: `numero_cnj`, `data_ultima_verificacao`, `tempo_desde_ultima_verificacao` (texto pronto, *"há 1 semana"*), `ultima_verificacao` (**null** quando não há solicitação em curso) e `opcoes` |
 | C1 | 2026-08-26 18:09 UTC | `POST /api/v2/.../solicitar-atualizacao` — corpo `{enviar_callback: 1}` | **201** | **0** → **R$ 0,00** | R$ 47,00 | ✅ **Aceite assíncrono, e de graça.** Solicitação `55413945`, `status: PENDENTE`, `enviar_callback: "SIM"`. Ver §5.5 |
 | C2 | 2026-08-26 18:11 UTC | `GET /api/v2/.../status-atualizacao` | **200** | **0** → R$ 0,00 | R$ 47,00 | ✅ Com solicitação em curso, `ultima_verificacao` deixa de ser `null` e passa a **espelhar o objeto do C1**. Ver §5.5 |
+
+| V1-aparicoes | 2026-08-27 04:13 UTC | `GET /api/v1/monitoramentos/2813617/aparicoes` | **200** | **0** → R$ 0,00 | R$ 47,00 | ⏳ **Gratuita, confirmado.** `items: []` — **nenhuma aparição ainda**, 12 horas depois de criada a vigilância. Ensinou o envelope de listagem da V1 (`items` + `links` + `paginator`, `per_page: 20`), que é diferente do da V2. Ver §5.7 |
 
 **Gasto total até aqui: R$ 3,00 de R$ 50,00.** Restam **R$ 47,00** e 5 dias.
 
@@ -451,6 +475,35 @@ Neste domínio, "novidade" vira prazo lançado, tarefa criada e advogado avisado
 #### Custo do Bloco C inteiro
 
 **R$ 0,00.** C1 (`201`), C2 (5 chamadas, todas `200`) e as três entregas de callback: `Creditos-Utilizados: 0` em todas. Estava orçado em R$ 3,00.
+
+### 5.7 A aparição ainda não veio — 27/08, e a espera não custa nada
+
+Primeira leitura das aparições da vigilância `2813617`, ~13 horas depois de criada:
+
+```
+items: []      paginator: { current_page: 1, per_page: 20, total: 0, total_pages: 1 }
+```
+
+**Vazio não é falha.** Diário oficial publica em dia útil, e a vigilância acompanha o nome de **uma** advogada em 5 diários do Amapá. Um dia sem publicação em que esse nome apareça é o resultado esperado, não um defeito. O que o vazio prova é outra coisa: **a rota responde, autentica e não cobra** — `Creditos-Utilizados: 0`, segunda medição da mesma rota.
+
+**O que a chamada ensinou, mesmo vazia:** o envelope de listagem da V1 **não é o da V2**.
+
+| | V1 (`/monitoramentos/{id}/aparicoes`) | V2 (`/processos/...`) |
+|---|---|---|
+| Coleção | `items` | `items` |
+| Navegação | `links` — `next`, `prev`, `first`, `last`, com URL pronta | `links.next`, cursor |
+| Contagem | `paginator` — `current_page`, `per_page`, `total`, `total_pages` | não devolve total |
+| Página | **20 por página**, e a URL de página é montada com `?page=N` | por cursor |
+
+Isso é requisito do chassi, não curiosidade: a V1 devolve **`total`** e a V2 não. Ou seja, no Escavador V1 dá para saber quantos itens existem *antes* de paginar — e é exatamente essa informação que o motor de custo precisa para reservar pelo pior caso em vez de pela média (§6.5 da Spec, D-58). O `sdk-escavador` vai ter de normalizar dois envelopes de paginação diferentes sob um só.
+
+**Cadência recomendada:** uma leitura por dia útil, até aparecer a primeira. A rota é gratuita e o comando é
+
+```
+node captura/monitorar.mjs aparicoes 2813617 --executar
+```
+
+Enquanto não aparecer nenhuma, **a vigilância não se remove** (D-121): a aparição é o último contrato não validado do projeto, e a assinatura só renova em 26/09 — depois de o crédito expirar em 01/09. Esperar é grátis; remover cedo custa a informação.
 
 ### 5.4 O receptor de callback ficou de pé — 26/08
 

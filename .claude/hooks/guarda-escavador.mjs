@@ -4,11 +4,21 @@
 //
 // Evento: PreToolUse | Ferramentas: Bash, PowerShell, WebFetch
 //
-// Por que existe: a cota de teste tem R$ 50,00 e 16 requisicoes, a R$ 3,00
-// cada, sem rota gratuita. A Regra 8 do CLAUDE.md diz que nenhuma chamada
+// Por que existe: a cota de teste tem R$ 50,00, sem recarga contratada e com
+// validade ate 01/09/2026. A Regra 8 do CLAUDE.md diz que nenhuma chamada
 // acontece fora do orcamento aprovado — mas regra em prompt depende de o
 // agente lembrar. Este hook transforma a regra em barreira: o programa
 // bloqueia antes de o comando rodar.
+//
+// A COTA E DE DINHEIRO, E SO. Duas "regras" que este hook repetiu por dias
+// nao existem, e a medicao as derrubou:
+//   - a tarifa plana de R$ 3,00 (D-108): o debito varia por rota — R$ 0,05,
+//     R$ 2,95 e R$ 0,00 foram medidos no mesmo dia
+//   - o teto de 16 requisicoes (D-119): eram R$ 50 / R$ 3, uma conta NOSSA
+//     sobre uma tarifa que nao existe. 18 requisicoes sairam com saldo intacto
+// Isso nao afrouxa nada: rota gratuita se confirma pelo cabeçalho
+// Creditos-Utilizados medido, nunca por suposicao, e chamada fora do
+// orcamento continua exigindo aval do usuario na hora.
 //
 // Falha fecha: qualquer duvida, nega e manda perguntar ao usuario.
 // ==========================================================================
@@ -33,7 +43,9 @@ const MENCIONA_ESCAVADOR = /escavador\.com/i
 // nasceu depois deste hook, e por um momento existiu um script que debita
 // R$ 3,00 e passava por fora do disjuntor. Barreira que nao conhece o script
 // novo e barreira que da falsa seguranca, que e pior que barreira nenhuma.
-const SCRIPT_QUE_COBRA = /\b(node|npx|bun|deno)\b(?![^|;&]*--check\b)[^|;&]*\b(capturar|monitorar|atualizar)\.mjs/i
+// `comparar-tribunal.mjs` (Bloco E) entrou aqui no mesmo commit em que nasceu,
+// justamente para nao repetir aquele intervalo.
+const SCRIPT_QUE_COBRA = /\b(node|npx|bun|deno)\b(?![^|;&]*--check\b)[^|;&]*\b(capturar|monitorar|atualizar|comparar-tribunal)\.mjs/i
 
 function negar(motivo) {
   process.stdout.write(JSON.stringify({
@@ -61,7 +73,7 @@ const alvo = entrada.tool_input || {}
 if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
   const comando = String(alvo.command || '')
 
-  // Os dois scripts pagos so chamam a rede com --executar. Sem a bandeira eles
+  // Os scripts pagos so chamam a rede com --executar. Sem a bandeira eles
   // imprimem o plano e saem. Barrar o ensaio seria barrar exatamente a etapa
   // que existe para NAO gastar — e empurrar quem trabalha direto para a
   // chamada real, que e o oposto do que este hook quer.
@@ -82,8 +94,9 @@ if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
       'Este comando executa um dos scripts que chamam a API do Escavador ' +
-      '(capturar.mjs, monitorar.mjs ou atualizar.mjs) e debita credito do ' +
-      'saldo de teste (R$ 50,00 / 16 requisicoes).\n\n' +
+      'e pode debitar credito do saldo de teste (R$ 50,00, sem recarga, ' +
+      'validade 01/09/2026). Quanto ele debita depende da rota: ja se mediu ' +
+      'de R$ 0,00 a R$ 3,00 na mesma cota.\n\n' +
       'O que fazer: NAO tente contornar. Releia as respostas ja capturadas em ' +
       'captura/respostas-brutas/ (Regra 5 do orcamento: nunca repita uma chamada ' +
       `ja feita). Se a chamada for mesmo necessaria, confira ${ORCAMENTO} e peca ` +
@@ -94,9 +107,9 @@ if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
   if (MENCIONA_ESCAVADOR.test(comando) && INVOCADORES.test(comando)) {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
-      'Este comando parece fazer uma chamada de rede ao Escavador. Cada ' +
-      'requisicao debita R$ 3,00 do saldo de teste, sem rota gratuita, e o ' +
-      'saldo nao se recarrega sozinho.\n\n' +
+      'Este comando parece fazer uma chamada de rede ao Escavador. O debito ' +
+      'varia por rota e so se conhece DEPOIS, pelo cabecalho ' +
+      'Creditos-Utilizados — e o saldo nao se recarrega sozinho.\n\n' +
       'O que fazer: pare e pergunte ao usuario. Antes disso, verifique se a ' +
       'resposta ja nao esta em docs/mapeamento-escavador.md, no OpenAPI ou em ' +
       'captura/respostas-brutas/ (Regra 3 do orcamento: nao gaste chamada para ' +
@@ -124,8 +137,8 @@ if (ferramenta === 'WebFetch') {
   if ((ehApi && !ehDocumentacao) || ehRotaDeApi) {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
-      `Esta URL bate na API paga do Escavador (${host}${caminho}) — R$ 3,00 por ` +
-      'requisicao, saldo de teste sem recarga.\n\n' +
+      `Esta URL bate na API do Escavador (${host}${caminho}), que cobra por ` +
+      'rota, com saldo de teste sem recarga.\n\n' +
       'O que fazer: se voce quer ler DOCUMENTACAO, use docs.escavador.com ou o ' +
       'OpenAPI, que sao de graca. Se voce quer DADO da API, pare e peca aval ' +
       'explicito ao usuario.'

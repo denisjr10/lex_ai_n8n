@@ -26,6 +26,7 @@ const HOOK = join(AQUI, 'guarda-escavador.mjs')
 const PAGO = ['captura/', 'captu', 'rar.mjs'].join('')
 const MONITOR = ['captura/', 'monito', 'rar.mjs'].join('')
 const ATUALIZA = ['captura/', 'atuali', 'zar.mjs'].join('')
+const BLOCO_E = ['captura/', 'compa', 'rar-tribunal.mjs'].join('')
 
 const CASOS = [
   // --- o que deve PASSAR: ler, procurar, documentar, e outras APIs ---------
@@ -43,11 +44,14 @@ const CASOS = [
   ['permitido', 'status do Bloco C e gratuito',  'Bash', { command: `node ${ATUALIZA} status --executar` }],
   ['permitido', 'REMOVER assinatura (para custo)','Bash', { command: `node ${MONITOR} remover 12345 --executar` }],
   ['permitido', 'listar assinaturas (gratuito)', 'Bash', { command: `node ${MONITOR} listar --executar` }],
+  ['permitido', 'ENSAIO do Bloco E',              'Bash', { command: `node ${BLOCO_E}` }],
+  ['permitido', 'diff do Bloco E le so o disco',  'Bash', { command: `node ${BLOCO_E} --comparar` }],
 
   // --- o que deve SER BARRADO: qualquer caminho até a API paga -------------
   ['deny', 'executar a captura',                 'Bash', { command: `node ${PAGO} --executar` }],
   ['deny', 'executar o monitoramento',           'Bash', { command: `node ${MONITOR} criar --executar` }],
   ['deny', 'executar o Bloco C pago',            'Bash', { command: `node ${ATUALIZA} solicitar --executar --confirmo-custo` }],
+  ['deny', 'executar o Bloco E (outro tribunal)','Bash', { command: `node ${BLOCO_E} --executar` }],
   ['deny', 'curl direto na API',                 'Bash', { command: 'curl https://api.escavador.com/api/v1/origens' }],
   ['deny', 'Invoke-RestMethod na API',           'PowerShell', { command: 'Invoke-RestMethod https://api.escavador.com/api/v2/processos' }],
   ['deny', 'WebFetch em rota paga',              'WebFetch', { url: 'https://api.escavador.com/api/v2/processos/numero_cnj/0000000-00.0000.0.00.0000' }],
