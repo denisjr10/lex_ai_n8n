@@ -325,7 +325,9 @@ Estes catálogos são o caso mais claro de cache longo: mudam raramente e são c
 > 1. **`origens_ids` é obrigatório** quando `tipo = termo` — a tabela o listava como opcional. Omitir devolve 422, e **422 custa o mesmo que 200**
 > 2. **`testcallback` é PAGA**, não gratuita. Não existe rota barata para ensaiar o webhook
 > 3. **`variacoes` aceita no máximo 3**
-> 4. **`limite_aparicoes` tem padrão de 200/mês** e, ao atingir o teto, **o monitoramento para de capturar até o mês seguinte**. Isso é risco de prazo (R-02), não de dinheiro: vigilância silenciada por cota é publicação que ninguém vê. O valor precisa ser decidido pelo escritório, com folga, e o silêncio precisa ser alarmado
+> 4. **`limite_aparicoes` tem padrão de 200/mês** — mas a criação real de 26/08 devolveu **1000**, então o padrão depende da conta e o chassi **lê o teto da resposta**, nunca o supõe (D-107). Ao atingir o teto, **o monitoramento para de capturar até o mês seguinte**. Isso é risco de prazo (R-02), não de dinheiro: vigilância silenciada por cota é publicação que ninguém vê. O valor precisa ser decidido pelo escritório, com folga, e o silêncio precisa ser alarmado
+> 5. 🔴 **`limite_aparicoes` não está entre os campos editáveis desta rota.** O `PUT /api/v1/monitoramentos/{id}` da tabela acima aceita `origens_ids` e `variacoes` — e só. **A franquia escolhida na criação vale o ciclo inteiro**, e não há como aumentá-la quando o alarme tocar. Isso transforma o dimensionamento na criação de conselho prudente em **único controle disponível**, e muda o que o alarme de 70% pede: um procedimento, não um ajuste de número (**R-46**, **D-150**, [PRD §9.3.1](08-prd.md)). *Lido do OpenAPI; ainda não medido contra a API — conferir antes de implementar*
+> 6. ℹ️ **Compare com a V2:** o `PATCH /api/v2/monitoramentos/novos-processos/{id}` (§4.5) **aceita** `limite_aparicoes`. As duas rotas se parecem e se comportam diferente — mais um caso do padrão que D-113 e R-44 registram: nesta API, a semelhança de nome não garante semelhança de contrato
 >
 > **Não existe `tipo` de OAB.** Vigiar uma OAB em diário oficial é `tipo = termo` com a OAB (ou o nome do advogado) como termo — a resposta traz `oab_principal` e `variacoes[].formato_oab`, sinal de que a API reconhece e expande formatos de OAB sozinha. D-62 continua de pé; muda só o modo de expressá-la.
 >
@@ -406,7 +408,7 @@ Duas escolhas merecem explicação:
 |---|---|
 | **Cliente** | `escavador:processo:read:own`, `escavador:movimentacao:read:own` |
 | **Colaborador** | `escavador:processo:read:carteira`, `escavador:movimentacao:read:carteira`, `escavador:documento:read:carteira`, `escavador:resumo_ia:read:carteira`, `escavador:monitoramento:read`, `escavador:catalogo:read`, `escavador:busca:read`, `escavador:diario:read`, `escavador:jurisprudencia:read` |
-| **Advogado** | Tudo do colaborador com abrangência conforme **D-07**, mais `escavador:autos:read:carteira`, `escavador:processo:atualizar`, `escavador:monitoramento:write`, `escavador:monitoramento:delete` |
+| **Advogado** | Tudo do colaborador com abrangência **`any`** — ✅ **D-07 resolvida em 27/08: base inteira** (D-146) —, mais `escavador:autos:read:carteira`, `escavador:processo:atualizar`, `escavador:monitoramento:write`, `escavador:monitoramento:delete`. **Exceção:** processo sigiloso exige escopo próprio, que `any` não concede |
 | **Administrador** | `escavador:saldo:read`, `escavador:callback:read`, `escavador:callback:write`, `escavador:catalogo:read`. **Sem escopo de dado de cliente** (D-26) |
 | **Certificados** | Nenhum papel recebe `escavador:certificado:*` nesta fase (D-12) |
 

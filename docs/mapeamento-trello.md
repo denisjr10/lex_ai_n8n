@@ -114,7 +114,7 @@ O Trello limita quantos objetos cabem num quadro, e expõe isso pela própria AP
 
 Os valores variam por conta e plano — a documentação é explícita em não garantir números. Os exemplos que ela mostra incluem **5.000 cards abertos por quadro** e 1.520 membros por quadro.
 
-> **Implicação prática, e é relevante para um escritório:** se o Trello for o sistema de gestão de casos (D-09), um escritório com muitos processos ativos pode se aproximar do teto de cards abertos por quadro. O MCP deve **ler `limits` e avisar em `warn`**, antes de a escrita começar a falhar. É barato de implementar e evita uma falha silenciosa e confusa.
+> **Implicação prática, e continua relevante mesmo depois de D-09.** O Trello **não** é o sistema de gestão de casos — é visualização (D-152) —, mas um escritório com muitos processos ativos ainda pode se aproximar do teto de cards abertos por quadro, porque a vitrine reflete o volume da base. O MCP deve **ler `limits` e avisar em `warn`**, antes de a escrita começar a falhar. É barato de implementar e evita uma falha silenciosa e confusa.
 
 ### 2.7 Webhooks
 
@@ -419,7 +419,7 @@ O Trello não cobra nada, o que remove o freio natural que o custo dá no Escava
 
 ## 8. Campos personalizados — a ponte com a base interna
 
-D-09 ainda está em aberto (Trello é a fonte da verdade ou é visualização?), mas **os dois caminhos precisam da mesma peça**: uma forma de saber que o card X corresponde à demanda Y da base interna.
+✅ **D-09 foi resolvida em 27/08: o Trello é visualização**, e a base interna é a fonte da verdade (D-152). A peça abaixo continua sendo exatamente a mesma — o parágrafo original dizia que os dois caminhos precisavam dela, e estava certo: **uma forma de saber que o card X corresponde à demanda Y da base interna**. O que a resposta define é a **direção**: a demanda nasce na base e o card é derivado dela, nunca o contrário (RF-39 do PRD).
 
 Custom Fields são essa peça. Proposta de campos a criar nos quadros do escritório:
 

@@ -224,7 +224,12 @@ Resolve de uma vez: identidade individual, segundo fator, desligamento controlad
 
 Não é gasto criado por este projeto — é uma correção que o escritório precisaria fazer de qualquer forma. O projeto apenas trouxe o problema à superfície.
 
-**Caminho B — Identidade no painel, notificação no Telegram (se não houver orçamento)**
+✅ **Caminho B — Identidade no painel, notificação no Telegram — ESCOLHIDO PELO ESCRITÓRIO EM 27/08/2026 (D-147)**
+
+> *"O escritório vai optar por usar o Telegram como canal de mensagens com o agente. Isso para evitar mais gastos no início da implementação do projeto. Serão contas individuais por colaborador e por advogados, todos devidamente identificados. Foi informado acerca das implicações disso, e o escritório aceitou os riscos."*
+>
+> A recomendação do §1.6.4 era o Caminho A. O escritório optou pelo B, com ciência — é decisão dele, e está registrada. O Caminho A continua sendo a correção certa e pode ser retomado depois, **sem retrabalho na plataforma**: o núcleo de identidade não muda (§8 do documento 04). O que a escolha cobra está registrado em **R-47**, e o que ela **não** resolve, em **R-11** — e-mail e Drive seguem numa conta única, o que afeta a frente F3.
+
 
 A identidade sai do Google e passa a viver no **painel web** do projeto: login individual por pessoa, com segundo fator, na base de usuários da própria plataforma. O mensageiro vira apenas um cano de aviso.
 
@@ -352,8 +357,8 @@ O código custa mais nas primeiras semanas e menos em todas as seguintes. Como o
 |---|---|---|
 | **D-16** | Interface interna em dois níveis: mensageiro para notificação e ação rápida; painel web para conteúdo, edição e aprovação | Adotar |
 | **D-17** | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar |
-| **D-18** | Canal de notificação: **Telegram**, enquanto a equipe não tiver contas individuais do Workspace. Google Chat só passa a ser viável no Caminho A (§1.6.3) | Adotar |
-| **D-21** | Identidade individual é pré-requisito do projeto. Levar a conta compartilhada ao escritório e recomendar licenças individuais; desenhar o painel com identidade própria de qualquer forma (§1.6) | Adotar |
+| **D-18** | Canal de notificação: **Telegram**, enquanto a equipe não tiver contas individuais do Workspace. Google Chat só passa a ser viável no Caminho A (§1.6.3) | ✅ **Confirmada** (escritório, 27/08) — e o Telegram deixa de ser só cano de aviso: passa a carregar também a **identidade individual** (D-147) |
+| **D-21** | Identidade individual é pré-requisito do projeto. Levar a conta compartilhada ao escritório e recomendar licenças individuais; desenhar o painel com identidade própria de qualquer forma (§1.6) | ✅ **Confirmada e cumprida** (escritório, 27/08) — pelo **Caminho B**. A segunda metade da decisão ("desenhar o painel com identidade própria de qualquer forma") é o que evitou retrabalho |
 | **D-19** | MCP Escavador e MCP Trello em código, como serviços separados — **não** dentro do n8n | Adotar |
 | **D-20** | Hospedar os servidores MCP em contêineres no mesmo servidor do n8n, sem exposição pública | Adotar |
 

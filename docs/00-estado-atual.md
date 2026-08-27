@@ -8,7 +8,8 @@
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
 | ⏳ Aparição | **Ainda nenhuma**, em duas leituras (27/08 de madrugada e ao meio-dia), as duas gratuitas. Primeira leitura ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
-| Fase | **3 — construção.** **Marcos 1 e 2 fechados e verificados**: monorepo, esquema do banco e migrações; e o chassi — sessão, escopo, abrangência, erro e envelope — com a matriz de escopo passando inteira. PRD e Spec Parte I seguem aguardando aval; a Parte II depende do escritório |
+| 🟢 **O escritório respondeu** | **27/08.** Cinco perguntas que travavam o PRD voltaram: identidade individual **pelo Telegram** (D-147), advogado vê **a base inteira** (D-146), Trello é **visualização** (D-152), colaborador **também confere prazo** (D-145), e a infra é **do prestador** (D-148). **D-07 e D-09 estão resolvidas.** PRD na v2.0; D-142 a D-154 e R-46 a R-49 somados. Ver §"As respostas do escritório chegaram" |
+| Fase | **3 — construção.** **Marcos 1 e 2 fechados e verificados**: monorepo, esquema do banco e migrações; e o chassi — sessão, escopo, abrangência, erro e envelope — com a matriz de escopo passando inteira. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
 | Código | ✅ **Fundação e chassi de pé, os dois verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, e o **`mcp-core` com 44 testes passando** — a matriz de escopo inteira, `npm test` — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
@@ -335,6 +336,78 @@ E na chamada: **parâmetro que ninguém declarou é recusado, não ignorado.**
 
 **Auditoria indisponível bloqueia** (D-77), já valendo: se o registro falhar, a chamada devolve erro mesmo quando seria permitida. Há teste exercitando justamente o caminho feliz com a auditoria fora do ar.
 
+## As respostas do escritório chegaram — 27/08/2026
+
+Cinco perguntas travavam o PRD desde 20/08. Todas voltaram, e três delas mudaram desenho. O PRD subiu para a **versão 2.0**; a Spec, para a **1.2**.
+
+### O que o escritório respondeu
+
+| Pergunta | Resposta | Decisão |
+|---|---|---|
+| Conta compartilhada (16a–16c, P-01) | **Identidade individual pelo Telegram**, uma conta por colaborador e por advogado, todas identificadas. Não vão contratar licenças do Workspace agora, para evitar gasto no início — e **aceitaram os riscos por escrito** | **D-147** |
+| D-07 — advogado vê tudo ou só a carteira? | **A base inteira.** "Eles se ajudam nos processos um do outro" | **D-146** |
+| D-09 — Trello é fonte da verdade? | **Não. É quadro de trabalho** — visualização | **D-152** |
+| D-64 — quem confere indício de prazo? | Advogado conta o prazo, **mas os colaboradores também verificam** | **D-145** |
+| Instância n8n | **É a minha**, fornecida junto com o serviço | **D-148** |
+
+### As três que mudam desenho
+
+**1. A identidade individual existe — e R-11 só foi resolvido pela metade.**
+
+O Caminho B da Nota Técnica 01 foi o escolhido, e a aposta de desenho se pagou: o documento `04` valia igual nos dois caminhos, e **nada estrutural precisou mudar**. RF-01, aprovação nominal e a **faixa A4** (D-25) estão destravados.
+
+Mas a metade que não foi resolvida importa: **e-mail e Drive continuam numa conta única.** Quando E3 for construída, ela vai ler de uma caixa que nenhuma pessoa responde individualmente. R-11 fica aberto, com o escopo reduzido e escrito.
+
+E o Caminho B cobra um preço novo — **R-47**: a conta de Telegram é ancorada em número de telefone e **o escritório não a administra**. Desligar alguém do escritório não desliga o Telegram dela. O tratamento é revogar o vínculo na plataforma (que é o desligamento que de fato importa), exigir 2FA como condição do vínculo, e manter conteúdo confidencial fora do corpo da mensagem — só notificação e link.
+
+**2. Advogado com base inteira: a barreira sai, o espelho entra.**
+
+Bloquear atrapalharia exatamente a colaboração que o escritório descreveu como sua operação real. Então o controle removido é substituído por **registro**, não por permissão: acesso a processo fora da própria carteira é marcado como **acesso amplo** e vai a relatório mensal (RF-37). Segredo de justiça continua exigindo escopo próprio, que abrangência ampla **não** concede (RF-38).
+
+🚧 Ficou em aberto o mesmo ponto para o **colaborador** — a resposta falou só de advogados. Até que venha, ele segue em `carteira` (pergunta 4a, nova).
+
+**3. A aprovação humana deixou de ser pedágio em toda mensagem.**
+
+Foi a objeção mais forte do escritório, repetida três vezes: exigir aprovação de tudo anula o ganho de eficiência. A objeção está certa, e a resposta não foi afrouxar a Regra 2 — foi separar dois casos que estavam misturados (**D-142**):
+
+- **A3a — gabarito pré-aprovado:** texto aprovado por advogado **antes**, com lacunas preenchíveis apenas por campo verificado da base interna. Sai sozinho, registrado, amostrado depois e desligável na hora
+- **A3b — texto livre:** continua exigindo aprovação mensagem a mensagem
+
+O advogado continua aprovando o texto exato que sai — ele só aprova antes, uma vez, para todos os casos iguais. Aprovar mil vezes o mesmo parágrafo não é controle, é ritual. E o que **nunca** sai sem leitura humana continua sendo texto novo sobre situação imprevista, que é onde mora o risco.
+
+A autonomia cresce **pelo catálogo** (D-151): caso com 20 aprovações consecutivas sem edição vira candidato a gabarito. É a resposta à pergunta "em algum momento o agente responde sozinho?" — sim, e cada vez mais, mas por evidência medida, não por decisão de confiar.
+
+Risco novo que isso cria, e que precisa de antídoto: **R-49**, gabarito envelhece em silêncio. Tratamento: revisão datada, amostragem pós-envio, desligamento imediato por qualquer advogado, e taxa de correção pós-envio como contramétrica declarada.
+
+### 🔴 O achado técnico da rodada: a franquia de aparições não é editável
+
+Ao escrever o procedimento do alarme de 70%, a pergunta óbvia era "e aí, aumenta a franquia". O mapeamento respondeu que não: o `PUT /api/v1/monitoramentos/{id}` aceita **`origens_ids` e `variacoes`, e só** — `limite_aparicoes` não está lá. A rota equivalente da V2, que se parece com esta, **aceita**.
+
+Isso muda o tratamento de R-40 inteiro (**R-46**, **D-150**): **a criação é o único momento de controle**, e o alarme de 70% pede um *procedimento*, não um ajuste de número — refinar `variacoes` se for ruído, cobrir os processos críticos por V2 se for volume real, reforçar a conferência humana, e registrar o consumo do ciclo para dimensionar o próximo.
+
+*Lido do OpenAPI, não medido. Conferir antes de implementar — e é conferência gratuita.*
+
+### O canal do cliente passou a custar zero, e a decisão foi do escritório
+
+O escritório perguntou quanto custa uma consulta paga de cliente, e concluiu sozinho que o melhor é escalar para um humano em vez de gastar. **Está certo, e foi adotado** (D-144): capa e movimentações são as duas rotas de R$ 3,00 do catálogo, que é exatamente o que uma pergunta de cliente pediria.
+
+Agora o agente do cliente **nunca** dispara chamada paga. Dado ausente ou vencido vira escalada, com aviso honesto ao cliente. A exposição financeira do canal externo passa a ser **exatamente zero em crédito do Escavador** — e zero não precisa de teto, alarme nem disjuntor. Some junto a pergunta "qual é o teto por conversa?", que não tinha boa resposta.
+
+### O que ficou pendente, e de quem
+
+| Pendência | De quem |
+|---|---|
+| **Aval das decisões D-142 a D-152** | Usuário |
+| **Os números** — franquia de aparições, tetos de bloco, tetos de orçamento | Escritório. O texto para a conversa com a advogada proprietária está pronto no PRD §9.3.1 |
+| **Perguntas novas 4a, 4b, 4c e 20a–20d** | Escritório |
+| **Perguntas 26 e 27 (Trello)** | ⚙️ **Reatribuídas a nós** — o escritório não sabe responder. Depende da chave de API |
+| **D-62** — vigiar diário por nome de advogado | Escritório vai confirmar |
+| Saldo do Escavador, credenciais do Trello, WhatsApp oficial | Em providência |
+
+### Correção de numeração
+
+Duas decisões vindas do suporte do Escavador em 25/08 estavam numeradas **D-101 e D-102**, colidindo com as decisões da demo de 26/08. Foram renumeradas para **D-153** e **D-154**. Nenhum outro documento as referenciava — a correção não deixou ponta solta.
+
 ## Onde estamos
 
 Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador e Trello.
@@ -364,8 +437,8 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 | Mapeamento da API do Trello — 261 operações | `mapeamento-trello.md` |
 | Orçamento de chamadas da cota de teste do Escavador (rev. 2.0) | `06-orcamento-de-chamadas-escavador.md` |
 | **Achados do painel autenticado do Escavador — preços, tokens, callbacks, organização** | `07-painel-escavador-achados.md` |
-| **PRD — produto, entregas, requisitos, regras de negócio e modelo de custo** | `08-prd.md` |
-| **Spec Técnica — Parte I: chassi, motor de custo, cache, callbacks, esquema de dados** | `09-spec-tecnica.md` |
+| **PRD — produto, entregas, requisitos, regras de negócio e modelo de custo** — **v2.0**, com as respostas do escritório | `08-prd.md` |
+| **Spec Técnica — Parte I: chassi, motor de custo, cache, callbacks, esquema de dados** — **v1.2** | `09-spec-tecnica.md` |
 | **Nota Técnica 02 — ClickUp no lugar de Workspace, Chat e Trello: viabilidade, recursos e custo** | `10-clickup-avaliacao.md` |
 | **Nota Técnica 03 — Demonstração ao vivo para o escritório, antes do contrato** | `11-nota-tecnica-demo.md` |
 | **Hooks do Claude Code — as regras inegociáveis viraram barreira em código** | `.claude/hooks/LEIA-ME.md` |
@@ -442,6 +515,8 @@ O que mais muda o projeto:
 - **O painel substitui instrumentação nossa**: histórico de requisições filtrável por token, histórico de callbacks com payload e tentativas, e alerta de saldo por e-mail
 
 ## O PRD está escrito — 20/08/2026
+
+> ⚠️ **Superado em parte pela v2.0 (27/08).** O que segue descreve a v1.0. As mudanças estão em §"As respostas do escritório chegaram", acima.
 
 `08-prd.md`, versão 1.0, 🟡 aguardando aval. Ele define quatro entregas (E1 fundação e consulta · E2 vigilância de prazo · E3 demandas e organização · E4 atendimento ao cliente), 34 requisitos funcionais com critério de aceite, 18 regras de negócio, 17 não funcionais, métricas e modelo de custo com os preços reais.
 
@@ -555,9 +630,13 @@ node captura/monitorar.mjs aparicoes 2813617 --executar
 
 **Repetir a cada dia útil.** Enquanto não vier, a vigilância não se remove (D-121). Depois de capturada — ou até 22/09, o que vier primeiro — remover.
 
-### 3. Levar ao escritório as cinco perguntas
+### 3. ✅ Feito — as cinco perguntas voltaram em 27/08
 
-Destravam a Parte II da Spec, com destaque para a conta compartilhada (D-67), que é bloqueio de projeto. O usuário ficou de providenciar.
+Ver §"As respostas do escritório chegaram". **D-07 e D-09 resolvidas**, identidade individual destravada (D-147), e a Parte II da Spec deixou de ser ficção.
+
+### 3b. Levar ao escritório a rodada seguinte
+
+Quatro perguntas novas (4a, 4b, 4c, 20a–20d) e **os números** — franquia de aparições, tetos de bloco e de orçamento. O texto para a conversa com a advogada proprietária está pronto no **PRD §9.3.1**, e é o mais urgente dos dois: o número da franquia **não pode ser alterado depois de criado o monitoramento** (R-46).
 
 ### O que sobrou de crédito, e o que ele ainda pode comprar
 
@@ -579,21 +658,38 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-46** estão em `01-diretrizes-gerais.md` §13.
+**D-01 a D-154** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
 
-- ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável)
-- 🟡 Propostas aguardando aval do usuário: todas as demais, exceto as abaixo
-- 🔴 Em aberto, dependem do escritório: **D-07** (advogado vê toda a base ou só sua carteira) e **D-09** (Trello é gestão de casos ou quadro de tarefas)
+- ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
+- 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08
+- 🔴 Em aberto: **D-62** (vigiar diário por nome de advogado) — o escritório vai confirmar
+- ⚠️ **Renumeradas em 27/08:** as duas decisões do suporte do Escavador de 25/08 passaram de D-101/D-102 para **D-153/D-154**, por colisão de numeração com as decisões da demo
 
 ## Pendências com o escritório
 
-**Elevadas em urgência pelos mapeamentos:**
+> ✅ **Atualizado em 27/08.** As cinco que travavam o PRD foram respondidas — 16a–16c, D-07, D-09, D-64 e a instância n8n. O que segue abaixo é o que sobrou, mais o que nasceu das respostas.
 
-- **Pergunta 58** — plano contratado do Escavador. Se não cobrir V1, o escritório fica sem monitoramento de diário oficial (R-15)
+**Novas, nascidas das respostas de 27/08:**
+
+- **Pergunta 4a** — o **colaborador** também vê a base inteira, ou fica na carteira? A resposta falou só de advogados
+- **Perguntas 4b e 4c** — quantos processos ativos o escritório tem (ordem de grandeza basta), e existe algum cliente com mais de 200 processos? É o que fecha a premissa P-07 e dimensiona os tetos de bloco
+- **Perguntas 20a a 20d** — o rito do alerta de prazo: quanto tempo até chamar todos os advogados (proposta: 2 h úteis), até escalar para a sócia (4 h úteis), qual é o horário útil, e quanto tempo um pedido de aprovação pode ficar parado antes de vencer
+- **Os números** — franquia de aparições (proposta: 1.000/mês por advogado), tetos de bloco por papel, tetos de orçamento. **O texto pronto para a conversa com a advogada proprietária está no PRD §9.3.1**
+- **D-62** — o escritório vai confirmar a vigilância de diário por nome de advogado
+
+**Que continuam abertas:**
+
+- **Pergunta 58** — plano contratado do Escavador. Saldo em providência
 - **Pergunta 66** — é possível criar conta de serviço dedicada no Trello? Se não, R-20 fica sem tratamento
-- **Pergunta 27** — Power-Ups e automações Butler ativos no Trello. Butler reage às nossas escritas; precisa ser inventariado antes da primeira gravação
+- **Pergunta 16a** — quantas pessoas usam a conta compartilhada do Workspace. Não bloqueia mais nada agora, mas é o número necessário para reavaliar o Caminho A no futuro
+- **Pergunta 15** — caixas de e-mail a monitorar. Trava o desenho da frente F3
+- **Pergunta 30** — software de gestão jurídica
 
-Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11), **D-07**, **D-09**, e o restante do questionário. As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` §15 e `mapeamento-trello.md` §13.
+**Saíram da lista do escritório:**
+
+- ⚙️ **Perguntas 26 e 27** (campos personalizados e Butler no Trello) — o escritório informou que ninguém sabe responder. **Viraram levantamento técnico nosso**, assim que a chave de API chegar. A 27 é a crítica: o Butler reage às nossas escritas e precisa ser inventariado **antes** da primeira gravação
+
+As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` §15 e `mapeamento-trello.md` §13.
 
 ## Pendências com o usuário
 
@@ -605,14 +701,20 @@ Também abertas: perguntas **16a a 16c** (conta compartilhada do Workspace, R-11
 - ~~Acesso à instância n8n~~ ✅ **Em uso** — chave de API guardada em `demo/n8n.local`, rotacionada em 26/08 depois de dois vazamentos (R-42)
 - **Aparição de diário oficial** — gratuita, e é o último contrato não validado. Rodar `aparicoes 2813617` até capturar uma
 - **Remover a assinatura `2813617`** até **22/09**, depois de capturada a aparição (D-121)
-- **Aval sobre as decisões propostas — D-03 a D-121.** São 119 decisões aguardando, e o PRD (v1.1) e a Spec Parte I (v1.1) aguardam junto
+- ~~Acesso à instância n8n do cliente~~ ✅ **Resolvido em 27/08 (D-148)** — a instância é a do prestador, fornecida com o serviço. Cria obrigação contratual nova: sob a LGPD, o escritório é controlador e o prestador é operador (R-48). **Precisa de cláusula antes de o primeiro dado real entrar**
+- **Levar ao escritório os números e as quatro perguntas novas** — o texto para a advogada proprietária está pronto no PRD §9.3.1
+- **Aval sobre as decisões propostas — D-03 a D-152.** O PRD (v2.0) e a Spec Parte I (v1.2) aguardam junto. **D-142 a D-152 são as novas**, e três delas mudam desenho: a divisão da faixa A3 (D-142), o canal do cliente a custo zero (D-144) e a franquia de aparições não editável (D-150)
 
 ## Riscos ativos
 
 | Risco | Situação |
 |---|---|
 | **R-16** — Trello não tem escopo por quadro; token vê a conta inteira | **Grave e estrutural.** Tratado por desenho (D-36), mas o isolamento passa a depender do nosso código. Precisa ser dito ao escritório |
-| **R-11** — conta única do Workspace compartilhada por toda a equipe | **Grave e aberto.** Inviabiliza privilégio por papel, aprovação nominal e auditoria |
+| **R-11** — conta única do Workspace compartilhada por toda a equipe | ⚠️ **Resolvido pela metade em 27/08.** A identidade **da plataforma** virou individual pelo Telegram (D-147), destravando privilégio por papel, aprovação nominal, auditoria e a faixa A4. **E-mail e Drive seguem na conta única** — E3 vai ler de uma caixa que ninguém responde individualmente. O escritório foi informado e aceitou |
+| **R-46** — a franquia de aparições **não é editável** depois de criada | **Novo e grave.** O `PUT` da V1 aceita só `origens_ids` e `variacoes`. O alarme de 70% pede procedimento, não ajuste de número (D-150). *Lido do OpenAPI; conferir por medição — é gratuito* |
+| **R-47** — identidade individual ancorada em conta de Telegram | **Novo, moderado a grave.** Número de telefone é o âncora (SIM swap, troca de chip), e **o escritório não administra as contas** — não há desligamento central. Tratado por revogação do vínculo na plataforma, 2FA obrigatório e conteúdo fora do corpo da mensagem |
+| **R-48** — a plataforma roda em infraestrutura do prestador | **Novo, jurídico.** Dado sob sigilo profissional em ambiente de terceiro. Escritório é controlador, prestador é operador — precisa de cláusula de finalidade, devolução, expurgo e continuidade |
+| **R-49** — gabarito pré-aprovado envelhece em silêncio | **Novo, moderado — e é o risco que a D-142 cria.** Texto aprovado uma vez segue saindo depois de a realidade mudar, e ninguém percebe porque não passa mais por ninguém. Tratado por revisão datada, amostragem pós-envio, desligamento imediato e contramétrica |
 | **R-12** — API do Escavador armazena certificado digital, senha e semente de 2FA | **Gravíssimo.** Tratado por desenho: rotas fora de todo perfil (D-30) |
 | **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
 | **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |

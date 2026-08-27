@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.1 — **§6.4.1 nova:** a franquia de aparições é um quarto modo de falha silenciosa da vigilância |
-| Data | 2026-08-26 |
+| Versão | 1.2 — **as respostas do escritório chegaram (27/08).** A franquia de aparições **não é editável** depois de criada (§6.4.1, R-46); `gabarito` e `envio_por_gabarito` entram no esquema (§9.1, D-142); o rito do alerta ganha confirmação de duas naturezas (§9.3, D-145); e a §16 mostra a Parte II quase destravada |
+| Data | 2026-08-27 |
 | Estado | 🟡 **Proposta — aguarda aval do usuário** |
 | Fase | 2 — PRD e Spec |
 | Recorte | **Parte I** — o que não depende de resposta do escritório |
@@ -26,19 +26,22 @@ O critério que separa as duas partes é simples:
 > **Está na Parte I** tudo que seria construído **exatamente igual** sob qualquer resposta que o escritório der.
 > **Fica para a Parte II** tudo cuja forma muda conforme a resposta.
 
-Exemplo do critério funcionando: *como* o servidor verifica se um usuário tem direito a um processo é Parte I — o mecanismo é o mesmo tanto faz se advogado enxerga a carteira ou a base inteira. *Qual* é a resposta certa (carteira ou base inteira) é D-07, e fica para a Parte II. O chassi lê a regra de uma tabela de configuração; a regra é que depende do escritório.
+Exemplo do critério funcionando: *como* o servidor verifica se um usuário tem direito a um processo é Parte I — o mecanismo é o mesmo tanto faz se advogado enxerga a carteira ou a base inteira. *Qual* é a resposta certa era D-07, e ficava para a Parte II. O chassi lê a regra de uma tabela de configuração; a regra é que dependia do escritório.
+
+> ✅ **E o critério se provou em 27/08.** A resposta veio — **base inteira** (D-146) — e **nenhuma linha da Parte I precisou mudar**: só o valor da abrangência na tabela de configuração. Era exatamente o que o corte prometia.
 
 ### 1.2 O que fica para a Parte II
 
 | Área | Depende de | Por quê |
 |---|---|---|
-| Matriz definitiva de escopos por papel | **D-07** — advogado vê carteira ou base inteira | Muda a abrangência concedida em quase todo escopo |
-| Modelagem da demanda e correspondência com o Trello | **D-09** — Trello é fonte da verdade ou visualização | Muda quem é dono do dado e a direção da sincronização |
-| Campos personalizados e convivência com o Butler | **Perguntas 26 e 27** | Escrever num quadro com automação desconhecida é gravar às cegas |
-| Rito de escalada de alerta não lido | **Pergunta 12** — o prazo N de RF-13 | O mecanismo é Parte I; o relógio é do escritório |
+| Matriz definitiva de escopos por papel | ~~**D-07**~~ ✅ **respondida em 27/08 — base inteira** (D-146). 🚧 Falta o colaborador (pergunta 4a) | Muda a abrangência concedida em quase todo escopo |
+| Modelagem da demanda e correspondência com o Trello | ~~**D-09**~~ ✅ **respondida em 27/08 — Trello é visualização** (D-152) | Muda quem é dono do dado e a direção da sincronização |
+| Campos personalizados e convivência com o Butler | **Perguntas 26 e 27** — ⚙️ reatribuídas a nós em 27/08; dependem da chave de API do Trello | Escrever num quadro com automação desconhecida é gravar às cegas |
+| Rito de escalada de alerta não lido | ~~**Pergunta 12**~~ → **Perguntas 20a–20c** — os prazos N1 e N2 de RF-13 | O mecanismo é Parte I; o relógio é do escritório |
+| Catálogo de gabaritos e enquadramento em A3a | **D-142**, e a pergunta 10 (as cinco perguntas mais frequentes dos clientes) | O gabarito é onde a eficiência mora; sem saber o que se repete, não há o que padronizar |
 | Fluxos n8n de E2, E3 e E4 | Todas as acima | Fluxo é onde mora a regra de negócio (Regra 3) |
 | Provedor e templates de WhatsApp | **P-05** | Não há como especificar contra provedor desconhecido |
-| Dimensionamento de infraestrutura | Acesso à instância n8n | §12.2 de `01` já registra que será revisada com dados reais |
+| Dimensionamento de infraestrutura | ~~Acesso à instância n8n~~ ✅ **resolvido — é a instância do prestador** (D-148) | §12.2 de `01` já registra que será revisada com dados reais |
 
 E fica para a Parte II uma coisa que **não** depende do escritório, mas depende do Escavador: o **preço definitivo do catálogo**, pendente da resposta do suporte (P-06). O desenho da Parte I trata preço como dado, não como código, exatamente para que essa resposta não custe reescrita.
 
@@ -418,7 +421,19 @@ A vigilância tem, portanto, **quatro** modos de falhar em silêncio, e não tr�
 | 3 | Renovação não ocorrida por falta de saldo | `proxima_renovacao` com alerta antecipado |
 | 4 | **Franquia esgotada — captura interrompida** | `aparicoes_no_ciclo` contra `franquia_mensal`, **alarme a 70%** |
 
-**Por que 70% e não 100%:** em 100% já cegou. O alarme precisa chegar enquanto ainda há o que fazer — aumentar a franquia, ou apurar por que o volume saltou.
+**Por que 70% e não 100%:** em 100% já cegou. O alarme precisa chegar enquanto ainda há o que fazer.
+
+> 🔴 **E o que há para fazer é menos do que a frase acima sugere — achado de 27/08 (R-46, D-150).** A rota de edição da V1, `PUT /api/v1/monitoramentos/{id}`, aceita apenas `origens_ids` e `variacoes`. **`limite_aparicoes` não está entre os campos editáveis** ([mapeamento](mapeamento-escavador.md) §5.5). Ou seja: **a franquia não pode ser aumentada no ciclo corrente.**
+>
+> Isso muda o que o alarme significa. Ele não avisa para ajustar um número — avisa para **agir por outro caminho**, e o chassi precisa entregar esse caminho junto do alarme:
+>
+> | Situação | O que o chassi propõe |
+> |---|---|
+> | Volume por **ruído** (homônimo capturando publicação alheia) | Refinar `variacoes` — é o único ajuste que a API permite no meio do ciclo |
+> | Volume **real** | Cobrir os processos com prazo próximo por monitoramento V2 até o ciclo virar; reforçar a conferência humana; e, se for recorrente, **recriar com franquia maior no mês seguinte** — o que cobra assinatura nova, e por isso é decisão do escritório |
+> | Em qualquer caso | Registrar o consumo real do ciclo. É ele que dimensiona o próximo, e é assim que o número deixa de ser chute |
+>
+> Consequência de projeto: **a criação é o único momento de controle.** O chassi recusa criar monitoramento sem `limite_aparicoes` explícito, registra quem escolheu o número e quando, e não aceita o padrão da API por omissão (RF-40 do PRD). *Levantado do OpenAPI, ainda não medido — conferir antes de implementar.*
 
 **Por que a franquia é generosa por padrão:** o excedente custa **R$ 0,05 a cada 200 aparições** (D-106) — sessenta vezes menos que qualquer outra rota por bloco. Apertar a franquia economiza centavos e compra risco de prazo. É o raro caso em que a escolha barata é a errada, e o chassi deve recusar franquia abaixo do piso configurado pelo escritório. Registrado como **D-107** e **R-40**.
 
@@ -575,7 +590,7 @@ Duas rotinas periódicas, e ambas existem por causa de um risco registrado:
 
 ## 9. Esquema de dados
 
-Três blocos: governança (já esboçado em `04` §2), chassi (novo) e vigilância (novo). O que depende de D-07 e D-09 está marcado 🚧 e fica para a Parte II.
+Três blocos: governança (já esboçado em `04` §2), chassi (novo) e vigilância (novo). ✅ **D-07 e D-09 foram resolvidas em 27/08** — base inteira e Trello como visualização —, então o que restava marcado 🚧 por causa delas está destravado. O que ainda depende do escritório são **números**, não estrutura.
 
 ### 9.1 Governança
 
@@ -587,12 +602,16 @@ Três blocos: governança (já esboçado em `04` §2), chassi (novo) e vigilânc
 | `cliente` | `id` · `nome` · `tipo` · `documento` · `status` |
 | `vinculo_canal_cliente` | `id` · `cliente_id` · `canal` · `identificador` · `verificado_em` · `verificado_por` · `revogado_em` |
 | `processo` | `id` · `numero_cnj` · `cliente_id` · `advogado_responsavel_id` · `area` · `status` · `sigiloso` |
-| `aprovacao` | `id` · `faixa` · `acao_proposta` · `conteudo_proposto` · `conteudo_final` · `solicitante` · `aprovador_id` · `papel_exigido` · `status` · `criada_em` · `expira_em` · `decidida_em` · `justificativa` |
+| `aprovacao` | `id` · `faixa` (A0 · A1 · A2 · **A3a** · **A3b** · A4) · `acao_proposta` · `conteudo_proposto` · `conteudo_final` · `solicitante` · `aprovador_id` · `papel_exigido` · `status` · `criada_em` · `expira_em` · `decidida_em` · `justificativa` |
+| `gabarito` | `id` · `nome` · `assunto` · `canal` · `corpo` · `campos_exigidos` · `versao` · `aprovado_por` · `aprovado_em` · `revisar_em` · `ativo` · `desativado_por` · `desativado_em` |
+| `envio_por_gabarito` | `id` · `gabarito_id` · `gabarito_versao` · `valores_das_lacunas` · `destinatario` · `cliente_id` · `processo_id` · `enviado_em` · `evento_auditoria_id` · `amostrado_em` · `amostrado_por` · `veredito_amostragem` |
 | `evento_auditoria` | `id` · `momento` · `requisicao_id` · `usuario_id` · `papel` · `canal` · `sessao_id` · `acao` · `recurso` · `parametros_resumidos` · `resultado` · `custo_centavos` · `aprovacao_id` · `origem_ip` |
 | `consumo` | `id` · `evento_auditoria_id` · `fornecedor` · `operacao` · `custo_centavos` · `usuario_id` · `cliente_id` · `processo_id` · `cache_hit` |
 | `orcamento` | `id` · `escopo` · `referencia` · `periodo` · `limite_centavos` · `consumido_centavos` · `reservado_centavos` · `estado` |
 
 Duas mudanças em relação a `04` §2, ambas vindas do chassi: `sessao` ganhou `inquilino_id` e `perfil`; `orcamento` ganhou `reservado_centavos`, sem o qual a reserva de §6.2 não existe.
+
+**Terceira mudança, de 27/08 (D-142):** as tabelas `gabarito` e `envio_por_gabarito`, que sustentam a faixa **A3a** — comunicação externa por texto aprovado antes. `gabarito_versao` e `valores_das_lacunas` são obrigatórios e imutáveis: sem eles a plataforma saberia **que** mandou uma mensagem, mas não **qual texto saiu**, e a Regra 2 viraria promessa. Com eles, qualquer envio automático é reconstruído letra por letra meses depois, mesmo que o gabarito tenha sido revisado três vezes desde então (RF-43).
 
 Restrição que sustenta a Regra 7 e o R-11: **um `identificador_externo` pertence a um único usuário por provedor.** É o que impede uma conta compartilhada de ser aceita em silêncio pelo sistema.
 
@@ -629,7 +648,9 @@ Quatro observações de desenho, e cada uma corresponde a um requisito do PRD:
 
 **`indicio_de_prazo` é um sinalizador, não uma data** — RF-11 e D-64. A plataforma sinaliza indício; quem conta prazo é advogado. Não existe campo `prazo_calculado` neste esquema, e a ausência é deliberada.
 
-**`lido_por` e `lido_em` existem porque RF-13 exige confirmação de leitura** — e `escalado_em` porque alerta não lido escala. O prazo da escalada é configuração, e é ele que depende do escritório (pergunta 12).
+**`lido_por` e `lido_em` existem porque RF-13 exige confirmação de leitura** — e `escalado_em` porque alerta não lido escala. O prazo da escalada é configuração, e é ele que depende do escritório (**perguntas 20a–20c**; a referência anterior à "pergunta 12" estava errada — aquela é sobre horário de atendimento).
+
+> **Atualização de 27/08 (D-145).** O escritório informou que **colaboradores também conferem prazo**. Isso muda dois campos de `alerta`: `lido_por` deixa de ser único e vira lista — colaborador e advogado confirmam separadamente —, e o encerramento da escalada passa a exigir que **pelo menos um dos confirmantes seja advogado**. O clique do colaborador registra a triagem e para o reenvio para ele, sem parar o relógio. Campos derivados: `confirmado_por_colaborador_em` e `confirmado_por_advogado_em`, sendo o segundo o que fecha `escalado_em`. O rito completo está no [PRD §5.2.1](08-prd.md).
 
 **`item_vigiado.desativado_por` e `desativado_em`** — desligar vigilância é a operação de maior potencial de dano silencioso do projeto (R-14). Quem desligou e quando fica registrado, e a remoção é ferramenta separada com confirmação explícita (D-29).
 
@@ -806,17 +827,21 @@ Duas escolhas de ordem que merecem justificativa:
 
 ## 16. O que a Parte II precisa, e de quem
 
-| Insumo | De quem | Destrava |
-|---|---|---|
-| Respostas às perguntas 16a–16c (conta compartilhada) | Escritório | RF-01, aprovação nominal, faixa A4 |
-| **D-07** — carteira ou base inteira | Escritório | Matriz definitiva de escopos |
-| **D-09** — Trello fonte da verdade ou visualização | Escritório | Modelagem da demanda e da sincronização |
-| Perguntas 26 e 27 — campos personalizados e Butler | Escritório | Qualquer escrita no Trello |
-| Pergunta 12 — prazo de escalada | Escritório | Configuração do rito de alerta |
-| ~~**P-06** — preços de catálogo ou limitados pelo bônus~~ | ✅ **Respondido em 25/08** — a tabela é o catálogo do pré-pago | O §6 fica como está; o desenho "preço é dado" evitou reescrita |
-| ~~"Até 200 itens": termos ou aparições?~~ | ✅ **Respondido em 25/08** — são **aparições** | D-62 confirmada e barateada (D-106) |
-| Acesso à instância n8n | Usuário/escritório | §12.2 de `01` e os fluxos |
-| Número CNJ real | Escritório | Marco 10, verificação ponta a ponta |
+> ✅ **Atualização de 27/08 — cinco dos nove insumos chegaram.** A Parte II deixou de ser ficção: a matriz definitiva de escopos e a modelagem da demanda estão destravadas. O que falta é levantamento nosso (Trello) e afinação de números com o escritório.
+
+| Insumo | De quem | Destrava | Estado |
+|---|---|---|---|
+| ~~Respostas às perguntas 16a–16c (conta compartilhada)~~ | Escritório | RF-01, aprovação nominal, faixa A4 | ✅ **Respondido em 27/08** — identidade individual pelo Telegram + painel, Caminho B (D-147). **D-25 destravada** |
+| ~~**D-07** — carteira ou base inteira~~ | Escritório | Matriz definitiva de escopos | ✅ **Respondido em 27/08 — base inteira.** Advogado recebe `any`, com acesso fora da carteira registrado (D-146). 🚧 Falta a mesma resposta para o colaborador (pergunta 4a) |
+| ~~**D-09** — Trello fonte da verdade ou visualização~~ | Escritório | Modelagem da demanda e da sincronização | ✅ **Respondido em 27/08 — visualização.** A base interna é a fonte da verdade (D-152) |
+| ~~Acesso à instância n8n~~ | Usuário/escritório | §12.2 de `01` e os fluxos | ✅ **Resolvido — é a instância do prestador** (D-148). Já em uso |
+| ~~Número CNJ real~~ | Escritório | Marco 10, verificação ponta a ponta | ✅ **Resolvido** — TJAP e TRT8 capturados |
+| Perguntas 26 e 27 — campos personalizados e Butler | ~~Escritório~~ → **Nós** | Qualquer escrita no Trello | 🟡 **Reatribuído em 27/08** — o escritório não sabe responder; vira levantamento técnico nosso com a chave de API |
+| ~~Pergunta 12~~ → **20a–20d** — prazos de escalada e de expiração de aprovação | Escritório | Configuração do rito de alerta e do ciclo de aprovação | 🚧 **Aberto.** O rito está desenhado com valores propostos (PRD §5.2.1 e §6.2.5); faltam os números |
+| Perguntas 4b–4c — volume da carteira | Escritório | Tetos de bloco e reserva pelo pior caso (§6.5) | 🚧 **Novo, aberto** — premissa P-07 |
+| Números dos tetos e da franquia de aparições | Escritório | Configuração do motor de custo e da vigilância | 🚧 **Aberto** — propostas em D-149 |
+| ~~**P-06** — preços de catálogo ou limitados pelo bônus~~ | Escavador | O §6 fica como está; o desenho "preço é dado" evitou reescrita | ✅ **Respondido em 25/08** — a tabela é o catálogo do pré-pago |
+| ~~"Até 200 itens": termos ou aparições?~~ | Escavador | D-62 confirmada e barateada (D-106) | ✅ **Respondido em 25/08** — são **aparições** |
 
 ---
 

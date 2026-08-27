@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Status | Aberto — aguardando respostas |
-| Versão | 0.1 |
-| Data | 2026-08-17 |
+| Status | **Parcialmente respondido** — cinco perguntas que travavam o PRD voltaram em 27/08; quatro novas nasceram delas |
+| Versão | 0.2 |
+| Data | 2026-08-27 (criado em 2026-08-17) |
 | Finalidade | Levantar as informações que faltam para fechar o PRD. Dividido por destinatário. |
 
 > **Como usar.** A Parte A é para o escritório (pode ser enviada como está). A Parte B é técnica, para quem administra os sistemas. A Parte C é sua, sobre contratos e infraestrutura. Nem toda pergunta bloqueia o início — as marcadas com 🚧 bloqueiam.
@@ -18,7 +18,10 @@
 1. Quantos advogados e quantos colaboradores? Há estagiários com acesso distinto?
 2. Existe hierarquia relevante além de "advogado / colaborador" — sócio, associado, coordenador de área?
 3. O escritório é dividido por áreas de atuação (cível, trabalhista, tributário…)? O acesso deve ser segmentado por área?
-4. 🚧 **Um advogado deve enxergar todos os processos do escritório ou apenas aqueles em que atua?** (Decisão D-07.)
+4. ✅ **RESPONDIDA em 27/08 — base inteira.** *"Os advogados têm acesso à base inteira, pois eles se ajudam nos processos um do outro."* Decisão D-07 resolvida; ver D-146 e PRD §3.1. Três desdobramentos:
+    - **4a.** 🚧 **E o colaborador?** A resposta falou de advogados. O colaborador (equipe administrativa, estagiários, paralegais) também enxerga a base inteira, ou fica restrito aos processos da área/carteira em que trabalha? *(Até a resposta, ele segue restrito — é o padrão seguro.)*
+    - **4b.** 🚧 **Quantos processos ativos o escritório tem, aproximadamente?** Cem, quinhentos, dois mil? Ordem de grandeza basta. *(A API cobra por bloco de 200 resultados — este número dimensiona o custo de qualquer consulta ampla. Premissa P-07.)*
+    - **4c.** 🚧 **Existe algum cliente que é parte em muitos processos** — uma empresa, um banco, uma prefeitura, uma operadora — que sozinho passe de 200 processos? *(Se existir, é ele que faz a conta explodir, e precisa de tratamento próprio.)*
 5. Quem será o responsável interno pelo projeto — a pessoa que aprova decisões e tira dúvidas?
 6. Quem aprova respostas a clientes hoje? Isso muda por tipo de assunto ou por valor da causa?
 
@@ -37,23 +40,27 @@
 
 15. 🚧 Quantas caixas de e-mail devem ser monitoradas, e quais? (Ex.: `contato@`, caixa pessoal de sócio, caixa de intimações.)
 16. ✅ **RESPONDIDA — Google Workspace Business Starter, com uma única conta compartilhada por toda a equipe.** Ver R-11 e Nota Técnica 01 §1.6. Desdobramentos nas perguntas 16a a 16c.
-    - **16a.** 🚧 Quantas pessoas usam essa conta hoje? *(Define o custo de migrar para licenças individuais.)*
-    - **16b.** 🚧 O escritório aceita contratar licenças individuais do Workspace (~R$ 35 a R$ 42 por pessoa/mês)? *(Caminho A — corrige identidade, auditoria e desligamento, e libera o Google Chat.)*
-    - **16c.** Se não: confirma ciência de que e-mail e documentos permanecerão sem responsabilização individual, e que a identidade do projeto viverá apenas no painel? *(Caminho B.)*
+    - **16a.** 🚧 Quantas pessoas usam essa conta hoje? *(Define o custo de migrar para licenças individuais. **Continua sem resposta** — e é o número que o escritório vai precisar quando reavaliar o Caminho A.)*
+    - **16b.** ✅ **RESPONDIDA em 27/08 — não, por ora.** O escritório optou por **não** contratar licenças individuais do Workspace agora, para evitar gasto no início da implementação.
+    - **16c.** ✅ **RESPONDIDA em 27/08 — sim, com ciência.** A identidade individual do projeto virá do **Telegram + painel** (Caminho B): uma conta por colaborador e por advogado, todas identificadas e cadastradas pelo escritório. *"Foi informado acerca das implicações disso, e o escritório aceitou os riscos."* Ver **D-147**; **R-11 permanece aberto para e-mail e Drive**, e **R-47** registra o risco novo (identidade ancorada em número de telefone, sem desligamento central).
 17. Volume aproximado de e-mails/dia e proporção de spam.
 18. Quais tipos de e-mail chegam com maior frequência? Quais são os críticos?
 19. Como intimações e comunicações de tribunal chegam hoje — e-mail, sistema do tribunal, ambos?
-20. Existe rotina atual de conferência de prazos? Quem faz e como?
+20. Existe rotina atual de conferência de prazos? Quem faz e como? *(Sabemos, desde 27/08, que **colaboradores também conferem** — o que muda a quem o alerta é entregue. Falta o resto do desenho, nas quatro perguntas abaixo.)*
+    - **20a.** 🚧 **Quanto tempo o escritório aceita que um alerta de prazo fique sem ninguém confirmar que leu, antes de o sistema chamar todos os advogados?** *(Nossa proposta: 2 horas úteis. É o "N1" do rito descrito no PRD §5.2.1.)*
+    - **20b.** 🚧 **E antes de escalar para a sócia responsável?** *(Nossa proposta: 4 horas úteis. É o "N2". E quem é essa pessoa, nominalmente?)*
+    - **20c.** 🚧 **Qual é o horário útil considerado?** *(O relógio da escalada só corre nele — publicação que chega às 18h de sexta começa a contar na segunda. Sem isso, o sistema acordaria a sócia às 3h da manhã.)*
+    - **20d.** 🚧 **Quanto tempo um pedido de aprovação pode ficar parado antes de vencer e precisar ser refeito?** *(Nossa proposta: 4 horas úteis para mensagem ao cliente, 2 horas úteis para ato com efeito de prazo. Aprovar um texto oito horas depois é autorizar a descrição de um mundo que já mudou — ver PRD §6.2.5.)*
 21. Que tipos de anexo aparecem — PDF pesquisável, PDF digitalizado, imagem, áudio, planilha, .docx?
 22. Existe modelo/padrão de resposta já usado pelo escritório?
 
 ### A4. Trello
 
-23. 🚧 O Trello é o sistema de gestão de casos ou apenas quadro de tarefas? (Decisão D-09.)
+23. ✅ **RESPONDIDA em 27/08 — quadro de trabalho.** *"O Trello é quadro de trabalho."* A fonte da verdade da demanda é a **base interna** da plataforma; o Trello é a vitrine onde a equipe trabalha. Decisão D-09 resolvida; ver D-152 e PRD §4.3.
 24. Quantos quadros, e qual a lógica deles — por área, por cliente, por fase, por pessoa?
 25. Qual o fluxo típico de um card, da criação ao encerramento?
-26. Quais campos personalizados (Custom Fields) estão em uso?
-27. Há Power-Ups ou automações (Butler) ativos? Quais?
+26. ⚙️ **REATRIBUÍDA em 27/08 — vira levantamento técnico nosso.** Quais campos personalizados (Custom Fields) estão em uso? *O escritório informou que ninguém sabe responder. Será levantado por nós com a API, assim que a chave do Trello chegar.*
+27. ⚙️ **REATRIBUÍDA em 27/08 — vira levantamento técnico nosso.** Há Power-Ups ou automações (Butler) ativos? Quais? *Idem. **Este é o mais crítico dos dois:** o Butler reage às nossas escritas, e uma automação desconhecida pode mover, arquivar ou notificar em cima do que a plataforma criar. Precisa ser inventariado **antes da primeira gravação no Trello**, não depois.*
 28. Todos usam o Trello de fato, ou ele coexiste com planilhas e grupos de WhatsApp?
 29. Plano contratado (Standard, Premium, Enterprise) e número de licenças.
 
@@ -143,14 +150,19 @@
 
 As perguntas 🚧 são as que travam alguma coisa:
 
-| Pergunta | Trava |
-|---|---|
-| 59 — especificação da API do Escavador | **Início do mapeamento (Fase 1)** |
-| 58 — plano contratado do Escavador | Escopo do MCP Escavador |
-| 41 — versão e hospedagem do n8n | Desenho da orquestração |
-| 4 — alcance do acesso do advogado | Matriz de privilégios (D-07) |
-| 23 — papel do Trello | Prioridade da frente Trello (D-09) |
-| 9 — situação do número de WhatsApp | Cronograma da frente F1 |
-| 15 — caixas de e-mail | Desenho da frente F3 |
-| 16a / 16b — licenças individuais do Workspace | **Modelo de identidade do projeto (D-21, R-11)** |
-| 30 — software de gestão jurídica | Arquitetura de integração |
+| Pergunta | Trava | Estado |
+|---|---|---|
+| ~~59 — especificação da API do Escavador~~ | Início do mapeamento (Fase 1) | ✅ Resolvida — os dois mapeamentos estão prontos |
+| ~~41 — versão e hospedagem do n8n~~ | Desenho da orquestração | ✅ Resolvida — a instância é do prestador e já está em uso (D-148) |
+| ~~4 — alcance do acesso do advogado~~ | Matriz de privilégios (D-07) | ✅ **Respondida em 27/08 — base inteira** (D-146) |
+| ~~23 — papel do Trello~~ | Prioridade da frente Trello (D-09) | ✅ **Respondida em 27/08 — quadro de trabalho** (D-152) |
+| ~~16b / 16c — licenças individuais do Workspace~~ | Modelo de identidade do projeto (D-21, R-11) | ✅ **Respondida em 27/08 — Caminho B, pelo Telegram** (D-147) |
+| **4a — alcance do acesso do colaborador** | Matriz definitiva de escopos (Spec Parte II) | 🚧 **Nova, aberta** |
+| **4b / 4c — volume da carteira e cliente de alto volume** | Tetos de bloco e premissa P-07 (PRD §9.2, §11.1) | 🚧 **Nova, aberta** |
+| **20a–20d — rito do alerta de prazo e expiração de aprovação** | Configuração de E2 e do ciclo de aprovação (RF-13, RN-09) | 🚧 **Nova, aberta** |
+| 58 — plano contratado do Escavador | Escopo do MCP Escavador | 🟡 Saldo em providência |
+| 9 — situação do número de WhatsApp | Cronograma da frente F1 | 🟡 Em providência |
+| 15 — caixas de e-mail | Desenho da frente F3 | 🔴 Aberta |
+| 16a — quantas pessoas usam a conta compartilhada | Custo de reavaliar o Caminho A no futuro | 🔴 Aberta |
+| 30 — software de gestão jurídica | Arquitetura de integração | 🔴 Aberta |
+| **Os números propostos** — franquia de aparições, tetos de bloco, tetos de orçamento | Configuração de E2 e do disjuntor (D-149) | 🔴 **Aberto — aguarda o de acordo do escritório** |
