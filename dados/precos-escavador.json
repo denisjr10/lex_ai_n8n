@@ -1,0 +1,132 @@
+{
+  "_leia-me": [
+    "Catalogo de precos do Escavador. PRECO E DADO, NUNCA CODIGO (Spec §6.1, D-71).",
+    "",
+    "Quando o fornecedor mudar a tabela, muda-se este arquivo — nao um `if`.",
+    "A migracao 004 cria a tabela `catalogo_preco`, que e o espelho disto no banco.",
+    "",
+    "TRES CLASSIFICACOES, E A TERCEIRA E A QUE IMPORTA:",
+    "  cobrada       — mediu-se, e cobra",
+    "  gratuita      — mediu-se, e NAO cobra (cabecalho Creditos-Utilizados: 0)",
+    "  desconhecida  — ninguem mediu ainda. O chassi trata como CARA (Regra 5)",
+    "",
+    "Gratuito se confirma pelo cabecalho MEDIDO, nunca por suposicao e nunca por",
+    "declaracao do fornecedor. O suporte do Escavador afirmou por escrito uma",
+    "tarifa plana de R$ 3,00 para toda rota; a medicao do mesmo dia devolveu",
+    "R$ 0,05, R$ 2,95 e R$ 0,00 (D-108). Foi a terceira vez que uma fonte oficial",
+    "do fornecedor contradisse o sistema (R-44) — por isso todo registro aqui tem",
+    "`fonte` e `lido_em`, e `fonte: medicao` vale mais que `fonte: suporte`."
+  ],
+
+  "fornecedor": "escavador",
+  "moeda": "BRL",
+  "unidade_de_preco": "centavos",
+  "versao": "2026-08-27",
+
+  "cota_de_teste": {
+    "_nota": "A cota e de DINHEIRO, e so. Nao existe teto de requisicoes (D-119): foram 18 chamadas com o saldo intacto. O numero 16 que circulou por dias era R$ 50,00 / R$ 3,00 — conta nossa, sobre uma tarifa que nao existe.",
+    "saldo_inicial_centavos": 5000,
+    "saldo_centavos": 4700,
+    "conferido_em": "2026-08-26",
+    "expira_em": "2026-09-01",
+    "recarga_contratada": false
+  },
+
+  "rotas": [
+    {
+      "rota": "GET /api/v2/processos/numero_cnj/{cnj}/envolvidos",
+      "classificacao": "cobrada",
+      "preco_centavos": 5,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "Cabecalho Creditos-Utilizados: 5. A mais barata medida ate agora, e por isso serve de calibragem: uma fila que comeca por ela descobre erro de token ou de CNJ por cinco centavos."
+    },
+    {
+      "rota": "GET /api/v2/processos/numero_cnj/{cnj}",
+      "classificacao": "cobrada",
+      "preco_centavos": 295,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "Preco de catalogo do painel era 'R$ 3,00*'. O asterisco e real: cobrou R$ 2,95."
+    },
+    {
+      "rota": "GET /api/v2/processos/numero_cnj/{cnj}/movimentacoes",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "A peca que dispara prazo nao custou nada. E a rota mais valiosa do projeto, e e de graca."
+    },
+    {
+      "rota": "POST /api/v2/processos/numero_cnj/{cnj}/solicitar-atualizacao",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "Estava orcada em R$ 3,00 e custou zero. O corpo aceita SO `enviar_callback`: a API decide pela PRESENCA da chave, nao pelo valor — mandar `documentos_publicos: 0` e `autos: 0` juntos devolve 422 (D-113)."
+    },
+    {
+      "rota": "GET /api/v2/processos/numero_cnj/{cnj}/status-atualizacao",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "Pode ser consultada a vontade. `ultima_verificacao: null` significa 'nada pedido', e nao erro — o chassi precisa distinguir os dois."
+    },
+    {
+      "rota": "GET /api/v1/origens",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "185 diarios, 5 do Amapa. Provou de graca que a V1 aceita o mesmo token da V2."
+    },
+    {
+      "rota": "GET /api/v1/monitoramentos/{id}/aparicoes",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "chamada",
+      "lido_em": "2026-08-27",
+      "fonte": "medicao",
+      "nota": "Duas medicoes, ambas zero. Envelope de listagem da V1: `items` + `links` + `paginator`, com `total` e 20 por pagina — diferente do cursor da V2 (D-125)."
+    },
+    {
+      "rota": "POST /api/v1/monitoramentos",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "chamada",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "assinatura": {
+        "gera_custo_recorrente": true,
+        "custo_mensal_centavos": 300,
+        "franquia_mensal_padrao": null,
+        "nota": "⚠️ A CHAMADA e gratuita; a ASSINATURA nao. Criar debitou 0 no cabecalho e mesmo assim gerou cobranca mensal (D-32, R-13). Custo que nao passa pelo caminho do custo por chamada e invisivel — e invisivel, no pre-pago, e indefinido. A franquia vem NA RESPOSTA e nao se supoe: a documentacao diz 200/mes, a criacao real devolveu 1000 (D-107, R-40)."
+      }
+    },
+    {
+      "rota": "CALLBACK (entrega recebida do Escavador)",
+      "classificacao": "gratuita",
+      "preco_centavos": 0,
+      "unidade": "evento",
+      "lido_em": "2026-08-26",
+      "fonte": "medicao",
+      "nota": "Tres entregas, todas com Creditos-Utilizados: 0. O custo e do monitoramento, nao do volume de eventos — e o que torna o webhook mais barato que a sondagem por um fator grande."
+    },
+    {
+      "rota": "GET /api/v1/busca",
+      "classificacao": "desconhecida",
+      "preco_centavos": null,
+      "unidade": "chamada",
+      "lido_em": "2026-08-27",
+      "fonte": "nao medida",
+      "nota": "Fora do orcamento por decisao (§4): resultado imprevisivel, alto risco de gastar sem aprender. Enquanto estiver aqui como desconhecida, o chassi a trata como cara."
+    }
+  ]
+}

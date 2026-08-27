@@ -37,14 +37,34 @@ const SEGREDOS = [
   { re: /\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\./, nome: 'um JWT' },
   { re: /\bsk-[A-Za-z0-9]{20,}/, nome: 'uma chave de API estilo sk-' },
   {
-    re: /\b(token|senha|password|api[_-]?key|apikey|secret|authorization)\b\s*[:=]\s*["']?([A-Za-z0-9._\-\/+]{16,})/i,
+    re: /\b(token|senha|password|api[_-]?key|apikey|secret|authorization)\b\s*[:=]\s*(["'`]?)([A-Za-z0-9._$\-\/+]{16,})/i,
     nome: 'um segredo atribuido a uma variavel',
-    grupoValor: 2,
+    grupoAspas: 2,
+    grupoValor: 3,
   },
 ]
 
 // Valores que sao claramente exemplo, nao segredo de verdade.
 const EH_EXEMPLO = /^(seu|sua|meu|exemplo|example|placeholder|cole|troque|substitua|xxx+|000+|aaa+|\.\.\.|process\.env|COLOQUE)/i
+
+// Valores que sao REFERENCIA a outro lugar, e nao o segredo em si.
+//
+// Este padrao nasceu de um falso positivo em 27/08: a linha
+//
+//     const senha = env.LEX_APP_PASSWORD
+//
+// foi bloqueada como "segredo atribuido a variavel". Ela e o contrario disso —
+// e o codigo LENDO a senha do ambiente em vez de guardar o valor no arquivo,
+// que e exatamente o que este guarda quer que aconteca.
+//
+// A distincao que resolve: segredo de verdade e um LITERAL entre aspas. Sem
+// aspas e com forma de caminho de identificador (`algo.OUTRO_ALGO`), o que
+// esta ali e o nome de onde o valor mora, nao o valor.
+//
+// Falso positivo em barreira de seguranca nao e incomodo: e o que ensina a
+// proxima sessao a desligar a barreira. Foi a licao do disjuntor de credito,
+// e vale igual aqui.
+const EH_REFERENCIA = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+$/
 
 // --- Dado de cliente: pergunta antes, nao bloqueia -------------------------
 const NUMERO_CNJ = /\b\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}\b/
@@ -148,7 +168,9 @@ if (/git\s+(?:-c\s+\S+\s+)?commit\b/i.test(comando)) {
     const m = texto.match(s.re)
     if (!m) continue
     const valor = s.grupoValor ? m[s.grupoValor] : m[0]
+    const aspas = s.grupoAspas ? m[s.grupoAspas] : ''
     if (s.grupoValor && EH_EXEMPLO.test(valor)) continue
+    if (s.grupoValor && !aspas && EH_REFERENCIA.test(valor)) continue
     responder('deny',
       'BLOQUEADO pelo guarda de segredo.\n' +
       `As linhas adicionadas neste commit contem o que parece ser ${s.nome}.\n` +

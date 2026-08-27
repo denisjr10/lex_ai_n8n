@@ -1,0 +1,32 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/dominio"
+    },
+    {
+      "path": "./packages/mcp-core"
+    },
+    {
+      "path": "./packages/sdk-escavador"
+    },
+    {
+      "path": "./packages/sdk-trello"
+    },
+    {
+      "path": "./mcp-servers/escavador"
+    },
+    {
+      "path": "./mcp-servers/trello"
+    },
+    {
+      "path": "./services/policy-gate"
+    },
+    {
+      "path": "./services/receptor-callbacks"
+    },
+    {
+      "path": "./services/auditoria"
+    }
+  ]
+}

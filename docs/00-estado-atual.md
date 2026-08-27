@@ -2,14 +2,15 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-26 |
+| Atualizado em | 2026-08-27 |
 | Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00 — CONFERIDO no painel em 26/08.** 18 requisições feitas, e o painel bate linha a linha com o nosso registro. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
+| ⏳ Aparição | **Ainda nenhuma.** Primeira leitura em 27/08, ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
-| Fase | **2 — PRD e Spec.** PRD escrito; **Spec Parte I (chassi) escrita**. Ambos aguardam aval. A Parte II depende do escritório |
+| Fase | **3 — construção começou.** O **marco 1 da Spec §15 está entregue**: monorepo, esquema do banco e migrações. PRD e Spec Parte I seguem aguardando aval; a Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | Captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | 🟡 **A fundação existe, e falta um teste.** Monorepo com 9 pacotes (TypeScript compila os 9), **7 migrações** com 22 tabelas, e `npm run banco:subir`. ⚠️ **As migrações nunca foram executadas** — o Docker não subiu na máquina em 27/08. Ver §"O marco 1". Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -234,6 +235,56 @@ Fica a regra, que é o que sobrevive ao incidente: **ferramenta de segredo se te
 
 > ✅ O bloco duplicado que existia neste documento (seções repetidas de "As duas demos" até "Riscos ativos") foi removido em 26/08. Era colisão entre sessões paralelas.
 
+## O marco 1 saiu do papel — 27/08/2026
+
+A construção começou. O marco 1 da §15 da Spec — **esqueleto do monorepo, esquema do banco e migrações** — está escrito. Detalhes em `docs/12-fundacao-marco-1.md`.
+
+### O que existe agora
+
+| Peça | O que é |
+|---|---|
+| `package.json` + `tsconfig.base.json` | Monorepo com **9 pacotes**, ligados por referências de projeto. `npx tsc --build` compila os 9 |
+| `infra/docker-compose.yml` | PostgreSQL 16, escutando **só em 127.0.0.1**, com `healthcheck` |
+| `dados/migracoes/*.sql` | **7 migrações, 22 tabelas** — governança, chassi e vigilância |
+| `ferramentas/banco/subir.mjs` | O "um comando": sobe, espera aceitar conexão, migra |
+| `ferramentas/banco/migrar.mjs` | Migrador próprio, sem biblioteca e sem `npm install` |
+| `dados/precos-escavador.json` | Catálogo de preços com o que foi **medido**, com `lido_em` e `fonte` |
+
+### ⚠️ O que ainda **não** foi provado
+
+**As migrações nunca rodaram.** Em 27/08 o Docker Desktop desta máquina foi iniciado e o daemon não respondeu em ~15 minutos. O SQL está escrito e revisado, mas **nenhuma linha dele passou por um PostgreSQL de verdade**.
+
+Isso não é detalhe: SQL que nunca rodou é SQL com erro de digitação até prova em contrário. O critério de aceite do marco — *"o banco sobe do zero com um comando"* — **ainda não foi verificado**.
+
+**O que fazer:** abrir o Docker Desktop, esperar ele dizer *"Engine running"*, e rodar
+
+```bash
+npm run banco:subir
+```
+
+Se as 7 migrações passarem, o marco 1 está fechado. Se alguma falhar, a transação é desfeita sozinha e o banco fica como estava — o erro aparece com o nome do arquivo e a linha.
+
+### As seis regras que viraram restrição do banco
+
+O trabalho principal não foi criar tabelas; foi transformar regra escrita em coisa que o banco recusa.
+
+| Regra | Como ficou no banco |
+|---|---|
+| **7** — nada de conta compartilhada | Índice único em `identidade_externa`: duas pessoas no mesmo número **colidem** |
+| **2** — ato jurídico exige advogado | `CHECK` que impede faixa A4 com papel que não seja advogado ou sócio |
+| **auditoria imutável** | Gatilho que recusa `UPDATE`, `DELETE` **e `TRUNCATE`** — vale até para o dono do banco — mais a ausência de permissão para a aplicação |
+| **5** — negar por padrão | `processo.sigiloso` nasce `true`; a aplicação recebe só `SELECT` e `INSERT`, e o resto é concedido tabela a tabela |
+| **6** — custo é requisito | `CHECK (consumido + reservado <= limite)`: o teto é do banco, não do código |
+| **idempotência** | Índice único sobre o resumo do **conteúdo**, não sobre o identificador do fornecedor |
+
+**Sobre o `TRUNCATE`:** ele não dispara gatilho por linha. Sem uma cláusula própria, a tabela "imutável" se esvazia inteira com um comando — e o gatilho existente daria uma impressão de proteção que não havia.
+
+### Três ausências deliberadas
+
+- **Não existe `alerta.prazo_calculado`.** A plataforma sinaliza indício; quem conta prazo é advogado (RF-11, D-64)
+- **Não existe `alerta.lido` booleano.** Existem `lido_por` e `lido_em`, porque escalar exige saber **quem** não leu
+- **Não existe `DELETE` para `publicacao` e `movimentacao`.** Apagar uma é apagar a justificativa de um aviso já dado. O único `DELETE` de todo o esquema é o do cache
+
 ## Onde estamos
 
 Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador e Trello.
@@ -436,39 +487,51 @@ HTTP 403
 
 ## Próximo passo
 
-> Atualizado em 26/08, depois de a captura, o Bloco C e o callback fecharem.
+> Atualizado em 27/08, depois de o marco 1 ficar escrito e do Bloco E entrar no orçamento.
 
-### Agora, e sem gastar nada
+### 1. Provar que o banco sobe — sem gastar nada
 
-**1. Capturar uma aparição de diário oficial** — é a última peça de contrato que falta, e a mais importante de todas: é ela que dispara prazo, sustenta E2 e justifica a D-62. Gratuita, repetível:
+O critério de aceite do marco 1 está escrito e **não verificado**. Com o Docker Desktop aberto:
+
+```bash
+npm run banco:subir
+```
+
+É o único passo que trava o marco 2: construir o chassi em cima de um esquema que nunca rodou seria empilhar em cima do não conferido.
+
+### 2. Capturar uma aparição de diário oficial — gratuito
+
+Ainda é a última peça de contrato que falta, e a mais importante: é ela que dispara prazo, sustenta E2 e justifica a D-62.
 
 ```bash
 node captura/monitorar.mjs aparicoes 2813617 --executar
 ```
 
-Rode a cada dia ou dois até aparecer algo. Diário publica em dia útil, e o termo é o nome de uma advogada só.
+Primeira leitura em 27/08 veio vazia, o que era esperado. **Repetir a cada dia útil.** Enquanto não vier, a vigilância não se remove (D-121).
 
-**2. Construir os marcos 1 a 5 da §15 da Spec** — esqueleto, chassi, auditoria, motor de custo, cache. Não consome crédito e não depende de resposta do escritório. É o maior bloco de trabalho disponível, e agora com fundamento medido: a Spec §8.3 foi reescrita pelo que o callback ensinou, e o catálogo de preços tem números reais em vez de suposições.
+### 3. Bloco E — as duas últimas chamadas pagas · ~R$ 3,05
 
-**3. Levar ao escritório as cinco perguntas** que destravam a Parte II, com destaque para a conta compartilhada (D-67), que é bloqueio de projeto.
+Autorizado em 27/08. O alvo é uma reclamação trabalhista do **TRT8** — outro *ramo* da Justiça, não só outro tribunal (D-122).
 
-### Antes de 01/09, quando o crédito expira
+```bash
+node captura/comparar-tribunal.mjs --executar
+```
 
-Sobram **R$ 47,00** e **nenhum limite de requisições** (D-119) — as gratuitas não consomem nada. O que ainda vale medir, em ordem de utilidade:
+O script recusa sozinho se o CNJ estiver malformado, se o processo estiver em segredo de justiça, se a chamada já tiver sido feita, ou se o gasto passar de R$ 4,00. Sem `--executar` ele só mostra o plano.
 
-| O que | Custo | Por quê |
-|---|---|---|
-| **Aparição de diário** | gratuito | O contrato que falta. Prioridade máxima |
-| **Um processo de outro tribunal** | ~R$ 3,00 | Variação de formato entre tribunais é incógnita real do modelo de dados. Os 8 processos do escritório já estão em mãos |
-| **Bloco D — formato dos erros** | ~R$ 0,00 | Boa parte já foi respondida de graça pelo 403 de 23/08 e pelos três 422 de 26/08. Ver `06-orcamento...` §5.1 |
+Depois, de graça: `node captura/comparar-tribunal.mjs --comparar` mostra o diff de formato entre o cível e o trabalhista, comparando **campos e tipos**, nunca valores.
 
-> ⚠️ **Crédito não usado evapora em 01/09.** Não há recarga contratada, e recarga é decisão do usuário, tomada com o registro à vista — nunca consequência de chamada exploratória.
+**Por que agora:** todo o modelo de dados do MCP seria desenhado sobre respostas de um processo só, de um tribunal só. E o crédito expira em **01/09** — não gastar não devolve nada.
+
+### 4. Levar ao escritório as cinco perguntas
+
+Destravam a Parte II da Spec, com destaque para a conta compartilhada (D-67), que é bloqueio de projeto. O usuário ficou de providenciar.
 
 ### Depois
 
-A **Parte II** da Spec — matriz definitiva de escopos, modelagem da demanda, fluxos n8n — é escrita quando as respostas do escritório chegarem.
+**Marcos 2 a 5** — `dominio` e `mcp-core` sem rede, auditoria, motor de custo, cache. Nenhum consome crédito nem depende do escritório.
 
-E a assinatura `2813617` precisa ser removida até **22/09**, depois de capturada a aparição (D-121).
+E a assinatura `2813617` precisa ser removida até **22/09**, depois de capturada a aparição.
 
 ## Decisões
 

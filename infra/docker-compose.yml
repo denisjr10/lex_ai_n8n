@@ -1,0 +1,52 @@
+# ==========================================================================
+# docker-compose.yml — o banco de desenvolvimento, do zero, com um comando
+#
+# Este arquivo sobe UM servico: o PostgreSQL que guarda governanca, chassi e
+# vigilancia (Spec §9). Nada mais mora aqui por enquanto — servico que ainda
+# nao existe nao ganha entrada no compose, senao o `up` passa a falhar por
+# motivo que nao interessa a quem so quer o banco.
+#
+# Uso:  npm run banco:subir     (sobe e aplica as migracoes)
+#       npm run banco:derrubar  (para, PRESERVANDO os dados)
+#       npm run banco:zerar     (para e APAGA o volume — pede confirmacao)
+#
+# ⚠️  Isto e ambiente de DESENVOLVIMENTO. A senha vem de infra/.env, que o Git
+#     ignora, e o padrao e propositalmente uma senha obvia: se ela vazar, nao
+#     protegia nada de verdade. Producao usa cofre e credencial rotacionada
+#     (Spec §13, tabela `credencial_inquilino`).
+# ==========================================================================
+
+name: lex
+
+services:
+  banco:
+    image: postgres:16-alpine
+    container_name: lex-banco
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lex}
+      POSTGRES_USER: ${POSTGRES_USER:-lex_dono}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-desenvolvimento-local}
+      # Comparacao e ordenacao sensiveis a acento e a caixa, em portugues.
+      # Sem isto, "ACAO" e "ação" ordenam de maneiras diferentes conforme a
+      # maquina de quem roda — e o teste passa aqui e falha no colega.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      # So no laco local. Banco de desenvolvimento nao escuta a rede.
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - dados-banco:/var/lib/postgresql/data
+    healthcheck:
+      # `--wait` do compose depende disto: sem healthcheck, o `up` devolve o
+      # controle assim que o container LIGA, que e antes de o banco ACEITAR
+      # conexao. A migracao entao falha por "connection refused" numa maquina
+      # lenta e passa numa rapida — o pior tipo de defeito.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lex_dono} -d ${POSTGRES_DB:-lex}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+volumes:
+  dados-banco:
+    name: lex-dados-banco

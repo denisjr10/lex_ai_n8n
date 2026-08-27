@@ -1,0 +1,29 @@
+{
+  "name": "lex-ai-n8n",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma de automacao e agentes de IA para escritorio de advocacia — monorepo",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/*",
+    "mcp-servers/*",
+    "services/*"
+  ],
+  "scripts": {
+    "banco:subir": "node ferramentas/banco/subir.mjs",
+    "banco:migrar": "node ferramentas/banco/migrar.mjs",
+    "banco:estado": "node ferramentas/banco/migrar.mjs --estado",
+    "banco:derrubar": "node ferramentas/banco/subir.mjs --derrubar",
+    "banco:zerar": "node ferramentas/banco/subir.mjs --zerar",
+    "verificar": "node ferramentas/banco/migrar.mjs --conferir && npm run tipos",
+    "tipos": "tsc --build",
+    "limpar": "tsc --build --clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

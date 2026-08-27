@@ -1,0 +1,21 @@
+{
+  "name": "@lex/mcp-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "O CHASSI. Escopo, custo, cache, vazao, erro e auditoria. E a fronteira de seguranca (Regra 1).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "tipos": "tsc --build"
+  },
+  "dependencies": {
+    "@lex/dominio": "*"
+  }
+}

@@ -1,0 +1,20 @@
+# Configuracao do banco de DESENVOLVIMENTO.
+#
+# Copie para infra/.env e ajuste se precisar. O Git ignora infra/.env.
+#
+# Nada aqui e segredo de verdade: e um banco local, escutando so em 127.0.0.1,
+# com dado de teste. Credencial de producao vive em cofre e chega por variavel
+# de ambiente da implantacao — nunca por arquivo no repositorio (Spec §3,
+# regra 3, e §13).
+
+POSTGRES_DB=lex
+POSTGRES_USER=lex_dono
+POSTGRES_PASSWORD=desenvolvimento-local
+
+# 5433, e nao 5432, de proposito: quem ja tem um PostgreSQL instalado na
+# maquina nao descobre o conflito de porta no meio da primeira migracao.
+POSTGRES_PORT=5433
+
+# Senha do papel da APLICACAO (lex_app), criado pela migracao 007. E o papel
+# que os servicos usam — e o que NAO pode alterar nem apagar auditoria.
+LEX_APP_PASSWORD=desenvolvimento-local-app
