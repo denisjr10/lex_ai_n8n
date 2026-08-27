@@ -8,6 +8,14 @@
  * Regra de dependência (Spec §3): este pacote não importa nenhum outro. Se ele
  * precisar de algo de fora, é sinal de que aquilo não era domínio.
  *
- * Preenchido no MARCO 2 (Spec §15). O marco 1 entrega o esqueleto e o banco.
+ * Escrito no MARCO 2.
  */
-export {}
+
+export * from './papel.js';
+export * from './faixa.js';
+export * from './escopo.js';
+export * from './sessao.js';
+export * from './erro.js';
+export * from './envelope.js';
+export * from './decisao.js';
+export * from './cnj.js';

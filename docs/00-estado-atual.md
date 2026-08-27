@@ -3,14 +3,14 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-08-27 |
-| Crédito Escavador | ✅ **R$ 47,00 de R$ 50,00 — CONFERIDO no painel em 26/08.** 18 requisições feitas, e o painel bate linha a linha com o nosso registro. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
+| Crédito Escavador | ✅ **R$ 44,00 de R$ 50,00** — R$ 47,00 conferidos no painel em 26/08, menos R$ 3,00 do Bloco E em 27/08. 21 requisições feitas; o painel batia linha a linha com o nosso registro na última conferência. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
-| ⏳ Aparição | **Ainda nenhuma.** Primeira leitura em 27/08, ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
+| ⏳ Aparição | **Ainda nenhuma**, em duas leituras (27/08 de madrugada e ao meio-dia), as duas gratuitas. Primeira leitura ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
-| Fase | **3 — construção.** O **marco 1 da Spec §15 está fechado e verificado**: monorepo, esquema do banco e migrações, com as regras provadas contra o banco de pé. PRD e Spec Parte I seguem aguardando aval; a Parte II depende do escritório |
+| Fase | **3 — construção.** **Marcos 1 e 2 fechados e verificados**: monorepo, esquema do banco e migrações; e o chassi — sessão, escopo, abrangência, erro e envelope — com a matriz de escopo passando inteira. PRD e Spec Parte I seguem aguardando aval; a Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | ✅ **A fundação está de pé e verificada.** Monorepo com 9 pacotes (os 9 compilam), **7 migrações** aplicadas num PostgreSQL 16 de verdade (23 tabelas), e **25 de 25 provas de regra passando** — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **Fundação e chassi de pé, os dois verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, e o **`mcp-core` com 44 testes passando** — a matriz de escopo inteira, `npm test` — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -289,6 +289,52 @@ O trabalho principal não foi criar tabelas; foi transformar regra escrita em co
 - **Não existe `alerta.lido` booleano.** Existem `lido_por` e `lido_em`, porque escalar exige saber **quem** não leu
 - **Não existe `DELETE` para `publicacao` e `movimentacao`.** Apagar uma é apagar a justificativa de um aviso já dado. O único `DELETE` de todo o esquema é o do cache
 
+## O marco 2 fechou — o chassi existe · 27/08/2026
+
+O `mcp-core` está escrito e testado. É o lugar onde a **Regra 1** deixa de ser princípio e vira código. Detalhes em `docs/13-chassi-marco-2.md`.
+
+### A ideia, em uma frase
+
+> **A ferramenta declara; o chassi decide.**
+
+Uma ferramenta não chama o Policy Gate, não lê token, não mede custo, não escreve auditoria e não decide se pode. Ela declara o que é — faixa, escopo, sujeito, entrada — e o chassi faz o resto.
+
+O motivo é de segurança, não de elegância: se cada ferramenta aplicasse o próprio controle, a fronteira de segurança passaria a depender da disciplina de quem escreve ferramenta, e bastaria **uma** esquecer **uma** linha. Com o chassi no caminho obrigatório, **não existe caminho alternativo até a API** — a ferramenta não recebe credencial, nem a sessão, nem cliente HTTP.
+
+### O critério de aceite: a matriz de escopo
+
+```bash
+npm test
+```
+
+**44 testes, 44 passando** — 25 deles a matriz de escopo (papel × ferramenta × abrangência).
+
+Cada caso confere **duas** coisas: o veredito, e **se a execução foi alcançada**. A segunda é a que mais importa: RF-07 tem duas metades — não vazar e **não pagar** —, e um teste que só olhasse o código de erro passaria mesmo se o chassi recusasse *depois* de chamar a API. O cenário conta as chamadas ao fornecedor, e toda recusa exige o contador em zero.
+
+### Cinco decisões que carregam peso
+
+**Decisão é valor, nunca exceção.** Exceção é um canal que se fecha sem querer — basta um `catch` vazio numa camada acima para uma recusa de privilégio virar silêncio, e silêncio, num sistema que nega por padrão, é indistinguível de permissão. O pior é que o defeito não apareceria em teste nenhum: a chamada **funcionaria**.
+
+**Não existe curinga, e `write` não implica `read`.** Curinga concede o que ainda não foi escrito, inclusive a ferramenta perigosa que alguém acrescenta daqui a seis meses.
+
+**Escopo sem abrangência escrita vale como `own`** — o mínimo, não o máximo. É o engano mais comum, e o padrão seguro é o estreito.
+
+**Chamada sem sujeito, sob `own` ou `carteira`, é recusada.** "Nada a conferir" não pode virar "tudo liberado" — é o que acontece quando alguém escreve uma ferramenta nova e esquece o `sujeito`.
+
+**A mensagem de recusa é idêntica à de "não encontrei".** Byte a byte. Se fossem distinguíveis, qualquer pessoa com acesso ao canal poderia varrer números e descobrir quais processos existem no acervo — o sistema viraria um oráculo de existência. Há teste comparando os dois textos.
+
+### Travas que agem na carga, e o servidor não sobe
+
+`definirFerramenta` recusa a declaração se houver campo de entrada com nome de credencial (`token`, `senha`, `api_key`, `chave`) ou escopo com abrangência. Sem a primeira, bastaria declarar `entrada: { token: texto() }` para o agente — que lê conteúdo externo, e conteúdo externo é hostil — escolher com qual credencial a plataforma fala com o fornecedor.
+
+E na chamada: **parâmetro que ninguém declarou é recusado, não ignorado.**
+
+### Duas coisas mais
+
+**`402` — sem saldo — nunca é repetível.** Repetir não resolve, e cada tentativa enche o histórico e pode gastar. É a interseção exata entre a Regra 5 e a Regra 6.
+
+**Auditoria indisponível bloqueia** (D-77), já valendo: se o registro falhar, a chamada devolve erro mesmo quando seria permitida. Há teste exercitando justamente o caminho feliz com a auditoria fora do ar.
+
 ## Onde estamos
 
 Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador e Trello.
@@ -491,51 +537,45 @@ HTTP 403
 
 ## Próximo passo
 
-> Atualizado em 27/08, depois de o marco 1 ficar escrito e do Bloco E entrar no orçamento.
+> Atualizado em 27/08, com os marcos 1 e 2 fechados e o Bloco E executado.
 
-### 1. ✅ Feito — o banco sobe, e as regras foram provadas
+### 1. Marco 3 — auditoria e consumo · sem gastar nada
 
-O marco 1 fechou em 27/08: 7 migrações aplicadas, 23 tabelas, **25 de 25 provas de regra passando**. O marco 2 está destravado.
+O próximo da fila, e o mais fácil de encaixar: **a tabela já existe** (migração 003, *append-only* provada contra o banco) e **a interface já está no chassi**. Falta a implementação que escreve no PostgreSQL em vez de na memória, mais a tabela `consumo`.
 
-Para conferir a qualquer momento, de graça:
-
-```bash
-npm run verificar
-```
+Termina quando recusa e sucesso geram registro reconstruível pelo `requisicao_id`.
 
 ### 2. Capturar uma aparição de diário oficial — gratuito
 
-Ainda é a última peça de contrato que falta, e a mais importante: é ela que dispara prazo, sustenta E2 e justifica a D-62.
+Duas leituras em 27/08, as duas vazias — o esperado para uma vigilância sobre o nome de uma advogada só.
 
 ```bash
 node captura/monitorar.mjs aparicoes 2813617 --executar
 ```
 
-Primeira leitura em 27/08 veio vazia, o que era esperado. **Repetir a cada dia útil.** Enquanto não vier, a vigilância não se remove (D-121).
+**Repetir a cada dia útil.** Enquanto não vier, a vigilância não se remove (D-121). Depois de capturada — ou até 22/09, o que vier primeiro — remover.
 
-### 3. Bloco E — as duas últimas chamadas pagas · ~R$ 3,05
-
-Autorizado em 27/08. O alvo é uma reclamação trabalhista do **TRT8** — outro *ramo* da Justiça, não só outro tribunal (D-122).
-
-```bash
-node captura/comparar-tribunal.mjs --executar
-```
-
-O script recusa sozinho se o CNJ estiver malformado, se o processo estiver em segredo de justiça, se a chamada já tiver sido feita, ou se o gasto passar de R$ 4,00. Sem `--executar` ele só mostra o plano.
-
-Depois, de graça: `node captura/comparar-tribunal.mjs --comparar` mostra o diff de formato entre o cível e o trabalhista, comparando **campos e tipos**, nunca valores.
-
-**Por que agora:** todo o modelo de dados do MCP seria desenhado sobre respostas de um processo só, de um tribunal só. E o crédito expira em **01/09** — não gastar não devolve nada.
-
-### 4. Levar ao escritório as cinco perguntas
+### 3. Levar ao escritório as cinco perguntas
 
 Destravam a Parte II da Spec, com destaque para a conta compartilhada (D-67), que é bloqueio de projeto. O usuário ficou de providenciar.
 
+### O que sobrou de crédito, e o que ele ainda pode comprar
+
+**R$ 44,00**, expirando em **01/09**. Sem teto de requisições, e rota gratuita não consome nada.
+
+| O que | Custo | Vale? |
+|---|---|---|
+| Aparição de diário | gratuito | **Sim** — é o contrato que falta |
+| Bloco D — formato dos erros | ~R$ 0,00 | Boa parte já foi respondida de graça pelo 403 de 23/08 e pelos 422 de 26/08 |
+| Um terceiro ramo (Justiça Federal, STJ) | ~R$ 3,00 | **Talvez.** O Bloco E mostrou que o contrato é o mesmo entre ramos; um terceiro ponto confirmaria a regra, mas o retorno já é menor |
+
+> ⚠️ **Crédito não usado evapora em 01/09.** Não há recarga contratada, e recarga é decisão do usuário, tomada com o registro à vista — nunca consequência de chamada exploratória.
+
 ### Depois
 
-**Marco 2** — `dominio` e `mcp-core` sem rede: sessão, escopo, abrangência, erro e envelope. Termina quando a matriz de escopo passa inteira. Depois vêm 3 (auditoria), 4 (motor de custo) e 5 (cache). Nenhum consome crédito nem depende do escritório.
+**Marcos 4 e 5** — motor de custo e cache. Nenhum consome crédito nem depende do escritório. A costura dos dois já está marcada no `chassi.ts`, nas etapas 9 e 10.
 
-E a assinatura `2813617` precisa ser removida até **22/09**, depois de capturada a aparição.
+A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 

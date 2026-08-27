@@ -20,9 +20,11 @@
     "banco:conferir": "node ferramentas/banco/conferir-regras.mjs",
     "banco:derrubar": "node ferramentas/banco/subir.mjs --derrubar",
     "banco:zerar": "node ferramentas/banco/subir.mjs --zerar",
-    "verificar": "node ferramentas/banco/migrar.mjs --conferir && node ferramentas/banco/conferir-regras.mjs && npm run tipos",
+    "verificar": "node ferramentas/banco/migrar.mjs --conferir && node ferramentas/banco/conferir-regras.mjs && npm run testes",
     "tipos": "tsc --build",
-    "limpar": "tsc --build --clean"
+    "testes": "npm run tipos && node --test \"testes/**/*.test.mjs\"",
+    "limpar": "tsc --build --clean",
+    "test": "npm run testes"
   },
   "devDependencies": {
     "typescript": "^5.6.0"
