@@ -4,7 +4,7 @@
 |---|---|
 | Versão | 1.0 |
 | Data | 2026-08-27 |
-| Estado | 🟡 **Escrito, não verificado** — o critério de aceite depende de uma execução que ainda não aconteceu. Ver §1.1 |
+| Estado | 🟢 **Entregue e verificado** — as 7 migrações aplicaram, e as 25 provas de regra passam. Ver §1.1 |
 | Fase | 3 — construção |
 | Marco | **1 de 10** (Spec `09-spec-tecnica.md` §15) |
 | Critério de aceite | *"O banco sobe do zero com um comando"* |
@@ -38,22 +38,67 @@ Os comandos vizinhos:
 | `npm run banco:zerar` | Para e **apaga** o volume — exige confirmação digitada |
 | `npm run verificar` | Confere se o banco está na versão do repositório, e checa os tipos |
 
-### 1.1 ⚠️ E o critério ainda **não** foi verificado
+### 1.1 O critério foi verificado — 27/08, 05:08
 
-**As migrações nunca rodaram.** Em 27/08 o Docker Desktop desta máquina foi iniciado e o daemon não respondeu em cerca de 15 minutos — o `docker ps` expirava sem devolver nada.
+As 7 migrações aplicaram contra um PostgreSQL 16 de verdade, do zero:
 
-O SQL está escrito e revisado, e **nenhuma linha dele passou por um PostgreSQL de verdade.** Isso não é formalidade: SQL que nunca rodou é SQL com erro de digitação até prova em contrário. Uma vírgula fora do lugar na migração 004 não aparece em nenhuma revisão de leitura, e aparece no primeiro segundo de execução.
+```
+001-inquilino-e-identidade.sql        ok (894 ms)
+002-clientes-e-processos.sql          ok (1351 ms)
+003-aprovacao-auditoria-consumo.sql   ok (874 ms)
+004-custo-e-orcamento.sql             ok (924 ms)
+005-assincronia-e-cache.sql           ok (869 ms)
+006-vigilancia.sql                    ok (869 ms)
+007-papel-da-aplicacao.sql            ok (935 ms)
+```
 
-**O que foi verificado:**
+**23 tabelas** no banco — as 22 do esquema mais a de controle das migrações.
 
-| Verificado | Como |
+### 1.2 Mas "as migrações rodaram" não é a prova que interessa
+
+Rodar sem erro só diz que o SQL está bem escrito. O que este marco afirma é bem mais forte: que o banco **recusa** o que as regras do projeto proíbem. Isso é uma afirmação testável, e agora é testada:
+
+```bash
+npm run banco:conferir
+```
+
+`ferramentas/banco/conferir-regras.mjs` **tenta fazer cada coisa proibida** e falha se alguma passar. Cada caso monta o cenário, tenta o proibido e termina em `ROLLBACK` — nenhum resíduo fica no banco.
+
+**25 de 25 corretos**, em 27/08:
+
+| Tenta | Resultado |
 |---|---|
-| Os 9 pacotes compilam | `npx tsc --build` — código 0 |
-| `dados/precos-escavador.json` é JSON válido | analisado |
-| Os dois scripts do banco não têm erro de sintaxe | `node --check` |
-| O migrador falha rápido e com dica útil quando o Docker está fora | executado: recusou em 25 s |
+| Dois usuários no mesmo número de WhatsApp | 🚫 recusado (Regra 7 / R-11) |
+| Reaproveitar um número **já revogado** | ✅ aceito — troca de telefone acontece |
+| Faixa A4 exigindo apenas estagiário | 🚫 recusado (Regra 2) |
+| Estagiário cadastrado **com** OAB | 🚫 recusado |
+| Advogado cadastrado **sem** OAB | 🚫 recusado |
+| `UPDATE` num evento de auditoria | 🚫 recusado |
+| `DELETE` num evento de auditoria | 🚫 recusado |
+| `TRUNCATE` na auditoria | 🚫 recusado (D-128) |
+| Gastar além do limite do orçamento | 🚫 recusado (Regra 6) |
+| Reservar **exatamente** até o limite | ✅ aceito — teto é teto, não parede antes do teto |
+| Gravar o mesmo evento de callback duas vezes | 🚫 recusado (D-116 / R-43) |
+| A mesma publicação chegando por dois caminhos | 🚫 recusado |
+| CNJ malformado entrando como processo | 🚫 recusado |
+| Verificar vínculo de canal sem dizer quem verificou | 🚫 recusado |
+| Desativar vigilância sem dizer quem desativou | 🚫 recusado (R-14) |
+| Alerta sem publicação nem movimentação de origem | 🚫 recusado |
 
-**O que falta:** abrir o Docker Desktop, esperar *"Engine running"*, e rodar `npm run banco:subir`. Se as 7 migrações passarem, o marco fecha. Se alguma falhar, a transação é desfeita sozinha — o banco fica como estava, e o erro sai com o nome do arquivo.
+E as permissões do papel da aplicação, conferidas uma a uma com `has_table_privilege`: pode `SELECT` e `INSERT` em `evento_auditoria`, **não** pode `UPDATE` nem `DELETE`; não pode `UPDATE` em `consumo`; não pode `DELETE` em `publicacao` nem em `movimentacao`; **pode** `DELETE` em `cache_entrada`, que é a única exceção de todo o esquema.
+
+> **Os dois casos que devem PASSAR são tão importantes quanto os que devem falhar.** Uma barreira que também barra o caminho legítimo é uma barreira que alguém vai desligar. Reservar exatamente até o teto tem de funcionar; reaproveitar um número revogado tem de funcionar.
+
+### 1.3 A trava da história imutável, também provada
+
+Acrescentei uma linha de comentário a uma migração já aplicada e rodei o migrador:
+
+```
+ERRO  1 migracao(oes) ja aplicada(s) foram EDITADAS depois:
+      - 003-aprovacao-auditoria-consumo.sql
+```
+
+Recusou, com a saída escrita junto. O arquivo foi restaurado em seguida.
 
 ---
 

@@ -8,9 +8,9 @@
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
 | ⏳ Aparição | **Ainda nenhuma.** Primeira leitura em 27/08, ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
-| Fase | **3 — construção começou.** O **marco 1 da Spec §15 está entregue**: monorepo, esquema do banco e migrações. PRD e Spec Parte I seguem aguardando aval; a Parte II depende do escritório |
+| Fase | **3 — construção.** O **marco 1 da Spec §15 está fechado e verificado**: monorepo, esquema do banco e migrações, com as regras provadas contra o banco de pé. PRD e Spec Parte I seguem aguardando aval; a Parte II depende do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | 🟡 **A fundação existe, e falta um teste.** Monorepo com 9 pacotes (TypeScript compila os 9), **7 migrações** com 22 tabelas, e `npm run banco:subir`. ⚠️ **As migrações nunca foram executadas** — o Docker não subiu na máquina em 27/08. Ver §"O marco 1". Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **A fundação está de pé e verificada.** Monorepo com 9 pacotes (os 9 compilam), **7 migrações** aplicadas num PostgreSQL 16 de verdade (23 tabelas), e **25 de 25 provas de regra passando** — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -235,7 +235,7 @@ Fica a regra, que é o que sobrevive ao incidente: **ferramenta de segredo se te
 
 > ✅ O bloco duplicado que existia neste documento (seções repetidas de "As duas demos" até "Riscos ativos") foi removido em 26/08. Era colisão entre sessões paralelas.
 
-## O marco 1 saiu do papel — 27/08/2026
+## O marco 1 fechou — 27/08/2026
 
 A construção começou. O marco 1 da §15 da Spec — **esqueleto do monorepo, esquema do banco e migrações** — está escrito. Detalhes em `docs/12-fundacao-marco-1.md`.
 
@@ -250,19 +250,23 @@ A construção começou. O marco 1 da §15 da Spec — **esqueleto do monorepo, 
 | `ferramentas/banco/migrar.mjs` | Migrador próprio, sem biblioteca e sem `npm install` |
 | `dados/precos-escavador.json` | Catálogo de preços com o que foi **medido**, com `lido_em` e `fonte` |
 
-### ⚠️ O que ainda **não** foi provado
+### ✅ E foi verificado contra um banco de verdade
 
-**As migrações nunca rodaram.** Em 27/08 o Docker Desktop desta máquina foi iniciado e o daemon não respondeu em ~15 minutos. O SQL está escrito e revisado, mas **nenhuma linha dele passou por um PostgreSQL de verdade**.
+As 7 migrações aplicaram do zero em 27/08 às 05:08, num PostgreSQL 16 — **23 tabelas** no banco.
 
-Isso não é detalhe: SQL que nunca rodou é SQL com erro de digitação até prova em contrário. O critério de aceite do marco — *"o banco sobe do zero com um comando"* — **ainda não foi verificado**.
-
-**O que fazer:** abrir o Docker Desktop, esperar ele dizer *"Engine running"*, e rodar
+Mas "as migrações rodaram" não é a prova que interessa. O que este marco afirma é mais forte: que o banco **recusa** o que as regras proíbem. Isso virou comando:
 
 ```bash
-npm run banco:subir
+npm run banco:conferir
 ```
 
-Se as 7 migrações passarem, o marco 1 está fechado. Se alguma falhar, a transação é desfeita sozinha e o banco fica como estava — o erro aparece com o nome do arquivo e a linha.
+Ele **tenta fazer cada coisa proibida** e falha se alguma passar. Cada caso monta o cenário, tenta, e termina em `ROLLBACK` — nada fica no banco. **25 de 25 corretos.**
+
+Recusou: dois usuários no mesmo WhatsApp · faixa A4 com estagiário · estagiário com OAB · advogado sem OAB · `UPDATE`, `DELETE` e `TRUNCATE` na auditoria · gasto além do limite · evento de callback duplicado · publicação duplicada · CNJ malformado · vínculo verificado sem autor · vigilância desativada sem autor · alerta sem origem.
+
+Aceitou o que deve aceitar: reaproveitar um número **já revogado**, e reservar **exatamente** até o teto. Isso importa tanto quanto o resto — barreira que barra o caminho legítimo é barreira que alguém desliga.
+
+E a trava da história imutável (D-127) também foi provada: editei uma migração já aplicada e o migrador recusou de rodar, nomeando o arquivo.
 
 ### As seis regras que viraram restrição do banco
 
@@ -489,15 +493,15 @@ HTTP 403
 
 > Atualizado em 27/08, depois de o marco 1 ficar escrito e do Bloco E entrar no orçamento.
 
-### 1. Provar que o banco sobe — sem gastar nada
+### 1. ✅ Feito — o banco sobe, e as regras foram provadas
 
-O critério de aceite do marco 1 está escrito e **não verificado**. Com o Docker Desktop aberto:
+O marco 1 fechou em 27/08: 7 migrações aplicadas, 23 tabelas, **25 de 25 provas de regra passando**. O marco 2 está destravado.
+
+Para conferir a qualquer momento, de graça:
 
 ```bash
-npm run banco:subir
+npm run verificar
 ```
-
-É o único passo que trava o marco 2: construir o chassi em cima de um esquema que nunca rodou seria empilhar em cima do não conferido.
 
 ### 2. Capturar uma aparição de diário oficial — gratuito
 
@@ -529,7 +533,7 @@ Destravam a Parte II da Spec, com destaque para a conta compartilhada (D-67), qu
 
 ### Depois
 
-**Marcos 2 a 5** — `dominio` e `mcp-core` sem rede, auditoria, motor de custo, cache. Nenhum consome crédito nem depende do escritório.
+**Marco 2** — `dominio` e `mcp-core` sem rede: sessão, escopo, abrangência, erro e envelope. Termina quando a matriz de escopo passa inteira. Depois vêm 3 (auditoria), 4 (motor de custo) e 5 (cache). Nenhum consome crédito nem depende do escritório.
 
 E a assinatura `2813617` precisa ser removida até **22/09**, depois de capturada a aparição.
 

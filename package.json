@@ -17,9 +17,10 @@
     "banco:subir": "node ferramentas/banco/subir.mjs",
     "banco:migrar": "node ferramentas/banco/migrar.mjs",
     "banco:estado": "node ferramentas/banco/migrar.mjs --estado",
+    "banco:conferir": "node ferramentas/banco/conferir-regras.mjs",
     "banco:derrubar": "node ferramentas/banco/subir.mjs --derrubar",
     "banco:zerar": "node ferramentas/banco/subir.mjs --zerar",
-    "verificar": "node ferramentas/banco/migrar.mjs --conferir && npm run tipos",
+    "verificar": "node ferramentas/banco/migrar.mjs --conferir && node ferramentas/banco/conferir-regras.mjs && npm run tipos",
     "tipos": "tsc --build",
     "limpar": "tsc --build --clean"
   },
