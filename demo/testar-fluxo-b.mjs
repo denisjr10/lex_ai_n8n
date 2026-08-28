@@ -208,6 +208,20 @@ checar('o aviso de demonstração vai em toda resposta ao cliente',
 checar('a nota de uso de IA é acrescentada pelo fluxo, não pedida ao modelo',
   enviar.parameters.jsonBody.includes('inteligência artificial')
   && !codigoDoModelo().includes('Termine SEMPRE'));
+// A regressão que este teste existe para impedir: copiar a nota da Demo A para
+// cá. Lá a frase "revisada por um advogado" é fato — o texto para no Telegram e
+// só sai com o clique de quem tem o papel. Aqui não para em ninguém, e a mesma
+// frase vira declaração falsa ao cliente (D-155). Enquanto não houver nó de
+// aprovação nesta rota, nenhum texto pode afirmar revisão humana.
+// A negação faz parte da frase honesta, então a busca tem de enxergá-la: sem o
+// `(?<!não )`, "não revisada por advogado" cairia na própria trava. Foi o que
+// aconteceu na primeira versão deste teste.
+checar('a nota NÃO afirma revisão de advogado — aqui não há nenhuma',
+  !/(?<!não )revisad[ao] por (um )?advogad/i.test(enviar.parameters.jsonBody),
+  'a Demo B envia sem aprovação: afirmar revisão é declaração falsa ao cliente');
+checar('a nota diz que o texto é automático e oferece a saída humana',
+  /não revisada por advogado/i.test(enviar.parameters.jsonBody)
+  && /falar com uma pessoa/i.test(enviar.parameters.jsonBody));
 function codigoDoModelo() {
   return wf.nodes.find((n) => n.name === 'Responder ao cliente').parameters.messages.messageValues[0].message;
 }

@@ -2,16 +2,17 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-27 |
+| Atualizado em | 2026-08-28 |
 | Crédito Escavador | ✅ **R$ 44,00 de R$ 50,00** — R$ 47,00 conferidos no painel em 26/08, menos R$ 3,00 do Bloco E em 27/08. 21 requisições feitas; o painel batia linha a linha com o nosso registro na última conferência. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
 | ⏳ Aparição | **Ainda nenhuma**, em duas leituras (27/08 de madrugada e ao meio-dia), as duas gratuitas. Primeira leitura ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | 🟢 **O escritório respondeu** | **27/08.** Cinco perguntas que travavam o PRD voltaram: identidade individual **pelo Telegram** (D-147), advogado vê **a base inteira** (D-146), Trello é **visualização** (D-152), colaborador **também confere prazo** (D-145), e a infra é **do prestador** (D-148). **D-07 e D-09 estão resolvidas.** PRD na v2.0; D-142 a D-154 e R-46 a R-49 somados. Ver §"As respostas do escritório chegaram" |
+| 🔎 **Revisão externa** | **28/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um foi corrigido nesta rodada (D-155):** a Demo B afirmava ao cliente que um advogado revisara o texto, e nenhum revisa. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. Ver §"Uma revisão externa passou no projeto inteiro" |
 | Fase | **3 — construção.** **Marcos 1 e 2 fechados e verificados**: monorepo, esquema do banco e migrações; e o chassi — sessão, escopo, abrangência, erro e envelope — com a matriz de escopo passando inteira. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | ✅ **Fundação e chassi de pé, os dois verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, e o **`mcp-core` com 44 testes passando** — a matriz de escopo inteira, `npm test` — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, 51 verificações), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **Fundação e chassi de pé, os dois verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, e o **`mcp-core` com 44 testes passando** — a matriz de escopo inteira, `npm test` — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, **53 verificações** desde a D-155), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -407,6 +408,48 @@ Agora o agente do cliente **nunca** dispara chamada paga. Dado ausente ou vencid
 ### Correção de numeração
 
 Duas decisões vindas do suporte do Escavador em 25/08 estavam numeradas **D-101 e D-102**, colidindo com as decisões da demo de 26/08. Foram renumeradas para **D-153** e **D-154**. Nenhum outro documento as referenciava — a correção não deixou ponta solta.
+
+## Uma revisão externa passou no projeto inteiro — 28/08/2026
+
+O Codex revisou tudo o que existe. **A maior parte dos achados procede**, e três não procedem — vale registrar os três, porque cada um deles é uma leitura que a próxima revisão pode repetir.
+
+### O que foi corrigido nesta rodada
+
+**A Demo B afirmava, ao cliente, que um advogado havia revisado o texto — e nenhum advogado revisa (D-155).** A nota de rodapé fora copiada da Demo A, onde a frase é verdadeira porque o texto para no Telegram e só sai com o clique de quem tem o papel. Na rota de consulta da Demo B o modelo escreve e a Uazapi envia, sem parar em ninguém. A frase passou a dizer o que é, e a oferecer a rota humana que já existe no Porteiro. Regressão gravada em `demo/testar-fluxo-b.mjs` — **53 verificações**, contra 51.
+
+Isso **não** conserta a rota: pela D-142 aquele texto é livre, portanto **A3b**, que exige aprovação mensagem a mensagem. A demo segue enviando sozinha por exceção consciente e declarada, e nessa forma **não atende cliente real**.
+
+### O que a revisão achou e ainda está aberto
+
+| # | Achado | Onde | Peso |
+|---|---|---|---|
+| 1 | **Webhook da Demo B sem autenticação**, e o número do remetente vem do próprio corpo recebido | `demo/montar-fluxo-b.mjs` | Alto — superfície aberta enquanto o fluxo estiver ativo |
+| 2 | **O chassi executa a ferramenta ANTES de registrar a auditoria.** Se o registro falha, o efeito externo já saiu. É a D-141 aplicada só à matriz de escopo: o teste de auditoria não confere o contador de chamadas | `packages/mcp-core/src/chassi.ts:237` · `testes/chassi.test.mjs:213` | Alto |
+| 3 | **`registrar()` é declarado síncrono**, e a gravação real em PostgreSQL será assíncrona. O `try/catch` de hoje não pega falha de promessa — a trava da D-77 deixa de funcionar em silêncio quando o Marco 3 entrar | `packages/mcp-core/src/chassi.ts:58` | Alto, e é o mais fácil de não notar |
+| 4 | **Aprovação A3 não confere o papel do aprovador** (estagiário aprova), não tem uso único, não é vinculada a inquilino nem sessão, e o `aprovacao_id` não entra no evento de auditoria | `packages/mcp-core/src/etapas.ts:200` | Alto — o último item é o que impede a trilha de provar quem assinou |
+| 5 | **O banco não isola inquilinos.** Referências apontam só o id do cliente/usuário/processo, sem o `inquilino_id` junto; não há política por linha; `lex_app` lê e insere em tudo | migrações 002 e 007 | Alto na produção, inerte hoje com um inquilino só |
+| 6 | **Segredo de justiça falha aberto** — os três scripts só recusam em `=== true`; ausência e erro de extração viram "público" | `capturar.mjs:159` · `anonimizar.mjs:305` · `importar-autos.mjs:95` | Alto, e contraria a Regra 5 |
+| 7 | **O disjuntor de crédito é contornável**: a expressão de rota gratuita é testada contra o comando inteiro, então `monitorar.mjs listar && capturar.mjs --executar` passa | `.claude/hooks/guarda-escavador.mjs:89` | Alto — Regra 8 |
+| 8 | **Normalização de CNJ quebrada na Demo A**: `/\D/g` dentro de template string virou `/D/g` no JSON gerado. CNJ com pontuação não é reconhecido; o teste não pega porque a memória curta guardou o processo | `demo/montar-fluxo-a.mjs:134` | Médio, mas é bug de verdade |
+| 9 | **As demos não rodam numa cópia limpa do Git** — os testes foram escritos contra os dados locais ignorados. Verificado com `git archive`: as duas quebram com `TypeError` | `demo/testar-fluxo-*.mjs` | Médio — hoje elas testam a máquina, não o repositório |
+| 10 | **Retentativa sem idempotência** nos envios (3 tentativas). Entrega bem-sucedida com resposta perdida reenvia. É a D-116 espelhada | Fluxos A e B | Médio |
+| 11 | Pseudonimização por SHA-256 sem segredo — previsível por teste de nome candidato. HMAC resolve | `captura/anonimizar.mjs:114` | Médio |
+| 12 | `--sem-validacao` combina com `--publicar`: dá para publicar receptor que aceita qualquer entrega | `captura/montar-receptor-callback.mjs:42` | Médio |
+| 13 | Menores confirmados: sessão emitida no futuro é aceita (`sessao.ts:65`); `Number("")`/`false`/`[]` viram 0 (`esquema.ts:121`); `parametros: null` estoura antes do erro tratado (`esquema.ts:201`); banco cria `sujeitos_autorizados` como `[]` e o TypeScript espera objeto (001:121); `CHECK` de rota gratuita passa com `preco_centavos` NULL (004:43); índice único de callback sem `inquilino_id` (005:57); erro cru do fornecedor volta ao agente (`chassi.ts:241`); `--conferir` cria tabela apesar de dizer que não altera; README ainda diz "Fase 0, nenhum código" | vários | Baixo |
+
+### Um comentário que promete garantia que não entrega
+
+`005-assincronia-e-cache.sql:124` afirma que a chave primária composta torna **impossível** ler a entrada de outro inquilino por esquecimento de `WHERE`. É falso: `SELECT * FROM cache_entrada WHERE chave = 'x'` atravessa inquilinos. Chave composta impede **colisão**, não **leitura**. O desenho está certo; o comentário é que mente — e comentário que mente é pior que comentário ausente, porque a próxima pessoa confia nele.
+
+### Os três achados que NÃO procedem
+
+1. **"Os arquivos `.exemplo.json` contêm identificadores reais."** Não contêm — são `111111111`, `"Nome do Advogado"`, `5500000000000`. A revisão citou a linha 2 dos dois arquivos, que é o `_leia-me`.
+2. **"Os workflows expõem os oito processos, inclusive os em segredo."** Expõem a estrutura, não as pessoas: o `anonimizar.mjs` troca os nomes por pseudônimos de um cofre que nunca é gravado e **recalcula o número CNJ com dígito verificador válido**. O que de fato está nos JSONs versionados é dado pessoal **do Denis** — id do Telegram, nome, celular. O repositório é **privado**, o que rebaixa isso de incidente a higiene, mas a D-147 acabou de tornar o id do Telegram uma âncora de identidade, então ele merece sair.
+3. **"Os SDKs e servidores MCP são arquivos vazios."** São esqueletos deliberados, cada um com o marco escrito no cabeçalho — Marco 3, 6 e 7. A revisão leu o roteiro como pendência.
+
+### O que a revisão confirmou que está de pé
+
+9 configurações TypeScript, 29 arquivos `.mjs`, 34 JSONs, os 44 testes do domínio e do chassi, e nenhum link quebrado na documentação. Nenhuma chamada à API externa foi feita.
 
 ## Onde estamos
 
