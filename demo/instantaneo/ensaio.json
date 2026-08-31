@@ -1,6 +1,7 @@
 {
-  "versao_do_contrato": 1,
+  "versao_do_contrato": 2,
   "origem": "ensaio-ficticio",
+  "nomes_reais": false,
   "aviso": "DADOS FICTICIOS. Derivados dos exemplos da documentacao publica do Escavador, nao de processo real. O formato e exato; o conteudo nao existe.",
   "processos": [
     {

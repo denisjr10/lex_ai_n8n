@@ -2,7 +2,11 @@
 
 Plataforma de automação e agentes de IA para escritório de advocacia, orquestrada em **n8n**, com camada de integração construída como **servidores MCP reutilizáveis**.
 
-> **Estado atual: Fase 0 — Diretrizes.** Nenhum código ainda. O trabalho em curso é fixar escopo, princípios e decisões antes de mapear as APIs e escrever PRD/Spec.
+> **Estado atual: Fase 3 — construção.** Fundação e chassi de pé, os dois verificados: monorepo com 9 pacotes,
+> 7 migrações num PostgreSQL 16 com 25 provas de regra, e o `mcp-core` com 44 testes passando. Duas demonstrações
+> rodando — colaborador no Telegram e cliente no WhatsApp, ligadas uma na outra. PRD (v2.0) e Spec Parte I aguardam aval.
+>
+> **A fonte da verdade é [`docs/00-estado-atual.md`](docs/00-estado-atual.md)** — este parágrafo é resumo, e resumo envelhece.
 
 ## Escopo em uma tela
 
@@ -30,10 +34,10 @@ Documentos previstos: `mapeamento-escavador.md`, `mapeamento-trello.md`, PRD e S
 ## Roteiro
 
 ```
-Fase 0  Diretrizes            ← estamos aqui
-Fase 1  Descoberta e mapeamento das APIs (Escavador → Trello)
-Fase 2  PRD + Spec
-Fase 3  Fundação (policy gate, auditoria, identidade)
+Fase 0  Diretrizes                                            ✅ concluída
+Fase 1  Descoberta e mapeamento das APIs (Escavador → Trello)  ✅ concluída
+Fase 2  PRD + Spec                                             🟡 escritos, aguardando aval
+Fase 3  Fundação (policy gate, auditoria, identidade)          ← estamos aqui
 Fase 4  MCP Escavador
 Fase 5  Operação interna (e-mail, documentos, Trello)
 Fase 6  MCP Trello

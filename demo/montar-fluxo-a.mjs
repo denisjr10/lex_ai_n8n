@@ -44,6 +44,24 @@ const caminhoEnsaio = path.join(AQUI, 'instantaneo', 'ensaio.json');
 const usarReal = fs.existsSync(caminhoReal) && !process.argv.includes('--ensaio');
 const bruto = JSON.parse(fs.readFileSync(usarReal ? caminhoReal : caminhoEnsaio, 'utf8'));
 
+// Falhar fechado na fronteira do contrato (`CONTRATO-DO-INSTANTANEO.md` §6).
+//
+// O contrato manda o consumidor RECUSAR versão que não conhece, em vez de exibir
+// campo errado com confiança (Regra 5). A conferência acontece AQUI, na geração,
+// e não dentro do n8n: o instantâneo é embutido no workflow no momento em que ele
+// é montado, então o fluxo publicado nunca vê um segundo instantâneo. Conferir na
+// geração pega o erro antes de ele virar workflow; conferir no fluxo pegaria
+// tarde, e num lugar onde a falha aparece como resposta estranha ao cliente.
+const VERSOES_ACEITAS = [2];
+if (!VERSOES_ACEITAS.includes(bruto.versao_do_contrato)) {
+  console.error(`
+  ${path.basename(usarReal ? caminhoReal : caminhoEnsaio)} está na versão ${JSON.stringify(bruto.versao_do_contrato)}, e este montador entende ${VERSOES_ACEITAS.join(', ')}.
+  Um instantâneo de versão desconhecida não é montado — campo errado exibido com confiança é pior que erro.
+  Regere com:  node captura/anonimizar.mjs --autos    (ou --exemplos)
+`);
+  process.exit(1);
+}
+
 const instantaneo = {
   ...bruto,
   processos: bruto.processos.map((p) => ({

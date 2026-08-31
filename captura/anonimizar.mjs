@@ -364,8 +364,20 @@ if (!entradas.length) {
   process.exit(1);
 }
 
+/** A versao do contrato que ESTE gerador produz — `demo/CONTRATO-DO-INSTANTANEO.md` §6.
+ *
+ *  Ficou em 1 por engano de 24/08 ate 31/08, e o engano estava nas duas linhas
+ *  logo abaixo: `origem: 'autos-fornecidos'` e `nomes_reais` SAO as novidades da
+ *  versao 2. O gerador produzia a forma nova carimbada com o numero velho.
+ *
+ *  Numero de versao que ninguem confere e campo preenchido, nao contrato — por
+ *  isso os montadores da demo agora recusam versao que nao conhecem (Regra 5).
+ *  Ao subir este numero, anote a mudanca na tabela do §6 do contrato E acrescente
+ *  o novo numero a VERSOES_ACEITAS dos dois montadores, senao a demo para. */
+const VERSAO_DO_CONTRATO = 2;
+
 const instantaneo = {
-  versao_do_contrato: 1,
+  versao_do_contrato: VERSAO_DO_CONTRATO,
   origem: usarExemplos ? 'ensaio-ficticio' : usarAutos ? 'autos-fornecidos' : 'escavador-v2',
   nomes_reais: nomesReais,
   aviso: usarExemplos
