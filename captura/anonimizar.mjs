@@ -302,7 +302,20 @@ function transformar({ capa, envolvidos, movimentacoes }, apelido, coerente = tr
     assunto: c.assunto_principal_normalizado?.nome || c.assunto || null,
     area: c.area || null,
     situacao: c.situacao || fonte.status_predito || null,
-    segredo_justica: fonte.segredo_justica ?? false,
+    // `?? true`, e a troca do `false` por `true` aqui é a Regra 5 inteira.
+    //
+    // Antes: campo ausente, `null` vindo do importador que não achou o rótulo,
+    // ou fonte que simplesmente não informa — tudo virava `false`, e o
+    // instantâneo AFIRMAVA que o processo é público. Os fluxos da demo leem
+    // exatamente este campo para decidir se mostram ou recusam, então uma
+    // ausência de informação viraria exibição de dado sob segredo.
+    //
+    // Agora não saber fecha. O preço é o inverso, e é o preço certo: um
+    // processo público pode aparecer marcado como sigiloso e ser recusado sem
+    // motivo. Isso se percebe na hora — alguém pergunta por que não apareceu —
+    // e se conserta corrigindo a origem. O erro contrário não se percebe: dado
+    // sigiloso exibido não avisa ninguém de que foi exibido.
+    segredo_justica: fonte.segredo_justica ?? true,
     valor_causa: c.valor_causa ?? null,
     data_inicio: capa.data_inicio || null,
     data_ultima_movimentacao: capa.data_ultima_movimentacao || null,

@@ -76,6 +76,25 @@ function valorCausa(s) {
 
 const rotulo = (texto, re) => { const m = texto.match(re); return m ? m[1].trim() : null; };
 
+/**
+ * Segredo de justiça a partir do texto da capa — com TRÊS respostas, não duas.
+ *
+ * A leitura antiga era `/Segredo de justiça\?\s*SIM/.test(bloco)`, que devolve
+ * booleano e portanto só sabe dizer "sim" e "não-sim". Rótulo ausente, PDF que
+ * extraiu mal, layout diferente e coluna vazia caíam todos em `false` — quatro
+ * maneiras de NÃO SABER virando a afirmação "este processo é público".
+ *
+ * Aqui `null` é a terceira resposta: não sei. Quem recebe decide o que fazer
+ * com ela, e pela Regra 5 a decisão é fechar. O importador não deixa passar em
+ * silêncio: processo sem resposta explícita entra na lista de problemas e é
+ * tratado como sigiloso.
+ */
+function lerSegredoDeJustica(bloco) {
+  if (/^\s*Segredo de justi[çc]a\??\s*:?\s*SIM\b/mi.test(bloco)) return true;
+  if (/^\s*Segredo de justi[çc]a\??\s*:?\s*(N[ÃA]O|NAO)\b/mi.test(bloco)) return false;
+  return null;
+}
+
 // ===========================================================================
 // Capa — duas variantes
 // ===========================================================================
@@ -92,7 +111,7 @@ function lerCapaPJe(bloco) {
     assunto: rotulo(bloco, /^\s*Assuntos?:\s*(.+?)\s*$/m),
     data_inicio: dataBr(rotulo(bloco, /^\s*[ÚU]ltima distribui[çc][ãa]o\s*:\s*(.+?)\s*$/m)),
     valor_causa: valorCausa(rotulo(bloco, /^\s*Valor da causa:\s*(.+?)\s*$/m)),
-    segredo_justica: /^\s*Segredo de justi[çc]a\?\s*SIM/mi.test(bloco),
+    segredo_justica: lerSegredoDeJustica(bloco),
     envolvidos: lerPartesPJe(bloco),
   };
 }
@@ -169,7 +188,7 @@ function lerCapaTrabalhista(bloco) {
     assunto: null,
     data_inicio: dataBr(rotulo(bloco, /^\s*Data da Autua[çc][ãa]o:\s*(.+?)\s*$/m)),
     valor_causa: valorCausa(rotulo(bloco, /^\s*Valor da causa:\s*(.+?)\s*$/m)),
-    segredo_justica: /^\s*Segredo de justi[çc]a\?\s*SIM/mi.test(bloco),
+    segredo_justica: lerSegredoDeJustica(bloco),
     envolvidos,
   };
 }
@@ -386,9 +405,18 @@ for (const nome of pdfs) {
 
     fs.writeFileSync(path.join(SAIDA, `${apelido}.local.json`), JSON.stringify(dados, null, 2) + '\n');
 
-    console.log(`  ${capa.segredo_justica ? '🔒' : '  '} ${apelido}  ${capa.numero_cnj}`);
+    const marcaSegredo = capa.segredo_justica === true ? '🔒'
+      : capa.segredo_justica === false ? '  '
+      : '❓';
+    console.log(`  ${marcaSegredo} ${apelido}  ${capa.numero_cnj}`);
     console.log(`       ${capa.classe || '(classe não lida)'}`);
     console.log(`       ${capa.envolvidos.length} parte(s) · ${docs.length} entrada(s) de linha do tempo · início ${capa.data_inicio || '?'}`);
+    // ❓ não é detalhe de exibição: é a diferença entre "li que é público" e
+    // "não achei a linha". A segunda vira problema, e o anonimizador trata
+    // ausência como sigiloso (Regra 5).
+    if (capa.segredo_justica === null) {
+      problemas.push(`${apelido}: NÃO foi possível ler "Segredo de justiça?" na capa — tratado como SIGILOSO até alguém conferir`);
+    }
     if (!capa.envolvidos.length) problemas.push(`${apelido}: nenhuma parte reconhecida`);
     if (i === 0 && !docs.length) problemas.push(`${apelido}: tabela Documentos não lida`);
 

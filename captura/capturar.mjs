@@ -160,9 +160,26 @@ if (!cnjValido(processo.numero_cnj)) {
 // Vira regra em codigo, e nao nota de rodape, porque o custo do engano e alto
 // nos dois sentidos: credito gasto para receber pouco, e dado que nao devia
 // circular circulando. Foi assim que o alvo mudou (D-96).
-if (processo.segredo_justica === true) {
-  morrer(`o ${processo.apelido} esta marcado como SEGREDO DE JUSTICA. ` +
-         `Trocar o alvo em processos.local.json, ou pedir aval explicito do usuario`);
+//
+// A TRAVA EXIGE `false` EXPLICITO, e nao "diferente de true".
+//
+// Ate 31/08 ela recusava so quando o campo era exatamente `true`. Campo
+// ausente, campo escrito errado, campo em texto ("nao", "N", "publico") e erro
+// de leitura passavam todos como se o processo fosse publico — ou seja, tres
+// formas de NAO SABER viravam uma resposta afirmativa. E o unico caso em que a
+// trava importa e justamente aquele em que a informacao falhou.
+//
+// Isso e o oposto da Regra 5. Nao saber e motivo para parar, nao para seguir.
+// O custo de parar por engano e um comando repetido depois de conferir uma
+// linha de JSON. O custo de seguir por engano e credito gasto para trazer dado
+// sob segredo para dentro do repositorio.
+if (processo.segredo_justica !== false) {
+  const comoVeio = processo.segredo_justica === undefined
+    ? 'o campo nao existe no cadastro'
+    : `o campo veio como ${JSON.stringify(processo.segredo_justica)}`;
+  morrer(`nao da para afirmar que o ${processo.apelido} esta FORA de segredo de justica: ${comoVeio}.\n` +
+         `       Segredo de justica falha FECHADO (Regra 5): so segue com "segredo_justica": false, escrito.\n` +
+         `       Confira a capa do processo e corrija processos.local.json, ou peca aval explicito ao usuario`);
 }
 ok(`processo ${processo.apelido} (${processo.tribunal}) · digito verificador confere · sem segredo de justica`);
 
