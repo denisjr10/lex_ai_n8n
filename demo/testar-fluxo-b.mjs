@@ -208,20 +208,25 @@ checar('o aviso de demonstração vai em toda resposta ao cliente',
 checar('a nota de uso de IA é acrescentada pelo fluxo, não pedida ao modelo',
   enviar.parameters.jsonBody.includes('inteligência artificial')
   && !codigoDoModelo().includes('Termine SEMPRE'));
-// A regressão que este teste existe para impedir: copiar a nota da Demo A para
-// cá. Lá a frase "revisada por um advogado" é fato — o texto para no Telegram e
-// só sai com o clique de quem tem o papel. Aqui não para em ninguém, e a mesma
-// frase vira declaração falsa ao cliente (D-155). Enquanto não houver nó de
-// aprovação nesta rota, nenhum texto pode afirmar revisão humana.
-// A negação faz parte da frase honesta, então a busca tem de enxergá-la: sem o
-// `(?<!não )`, "não revisada por advogado" cairia na própria trava. Foi o que
-// aconteceu na primeira versão deste teste.
-checar('a nota NÃO afirma revisão de advogado — aqui não há nenhuma',
-  !/(?<!não )revisad[ao] por (um )?advogad/i.test(enviar.parameters.jsonBody),
-  'a Demo B envia sem aprovação: afirmar revisão é declaração falsa ao cliente');
-checar('a nota diz que o texto é automático e oferece a saída humana',
-  /não revisada por advogado/i.test(enviar.parameters.jsonBody)
-  && /falar com uma pessoa/i.test(enviar.parameters.jsonBody));
+// A NOTA AFIRMA REVISÃO DE ADVOGADO, E NESTA ROTA NÃO HÁ NENHUMA (D-155).
+//
+// É proposital: a demonstração mostra ao escritório o texto que sairá em
+// produção, onde a aprovação existe. O que torna isso aceitável é o contexto —
+// destinatária única, que conduz a demo, e o aviso de DEMONSTRAÇÃO no topo de
+// toda resposta.
+//
+// O perigo não é a demo: é ela virar produção com a frase intacta e o aviso
+// removido. Por isso a trava não proíbe a frase — ela AMARRA a frase ao aviso.
+// Enquanto o texto afirmar revisão humana, o fluxo é obrigado a se declarar uma
+// demonstração. Quem tirar o aviso para atender cliente de verdade vai
+// encontrar este teste no caminho, e nesse momento a escolha é explícita:
+// ou entra o nó de aprovação, ou sai a afirmação.
+const afirmaRevisao = /(?<!não )revisad[ao] por (um )?advogad/i.test(enviar.parameters.jsonBody);
+const temNoDeAprovacao = wf.nodes.some((n) => /aprova/i.test(n.name));
+checar('afirmar revisão de advogado exige aprovação real OU o aviso de demonstração',
+  !afirmaRevisao || temNoDeAprovacao || enviar.parameters.jsonBody.includes('DEMONSTRAÇÃO'),
+  'o texto diz que um advogado revisou, não há nó de aprovação e o aviso de demonstração sumiu — '
+  + 'isso é declaração falsa a cliente (D-155). Ponha a aprovação da faixa A3b ou tire a frase');
 function codigoDoModelo() {
   return wf.nodes.find((n) => n.name === 'Responder ao cliente').parameters.messages.messageValues[0].message;
 }

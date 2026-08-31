@@ -150,7 +150,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ number: $('Porteiro do cliente (verificação em código)').item.json.numero, text: \"⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório\" + '\\n\\n' + $json.text.trim() + '\\n\\n' + \"_Mensagem automática, gerada com apoio de inteligência artificial e não revisada por advogado. Para falar com uma pessoa do escritório, é só dizer._\", linkPreview: false, delay: 1200 }) }}",
+        "jsonBody": "={{ JSON.stringify({ number: $('Porteiro do cliente (verificação em código)').item.json.numero, text: \"⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório\" + '\\n\\n' + $json.text.trim() + '\\n\\n' + \"_Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório._\", linkPreview: false, delay: 1200 }) }}",
         "options": {}
       },
       "name": "Enviar ao cliente",

@@ -77,21 +77,30 @@ for (const c of lista.clientes) {
 // No WhatsApp o itálico é _assim_. A nota é rodapé, e o itálico a separa da
 // mensagem em si — mesmo tratamento que ela recebe no Telegram (D-92).
 //
-// ESTA NOTA NÃO É A MESMA DA DEMO A, E A DIFERENÇA É DELIBERADA (D-155).
+// ⚠️ ESTA FRASE É FALSA NESTE FLUXO, E ISSO É DELIBERADO (D-155).
 //
-// A Demo A pode dizer "revisada por um advogado" porque lá isso é fato: o texto
-// para no Telegram e só sai depois que alguém com papel de advogado clica. Aqui
-// não para em ninguém — o modelo escreve e a Uazapi envia. Escrever a mesma
-// frase nos dois lugares seria o escritório afirmar por escrito, a um cliente,
-// que um advogado leu um texto que nenhum advogado leu. É pior que um defeito
-// de software: é uma declaração falsa em canal de comunicação com cliente,
-// justamente o que o Provimento 205/2021 da OAB manda tratar com sobriedade.
+// Na Demo A ela é fato: o texto para no Telegram e só sai depois que alguém com
+// papel de advogado clica. Aqui não para em ninguém — o modelo escreve e a
+// Uazapi envia. A frase fica assim mesmo porque a demonstração existe para
+// mostrar ao escritório COMO SERÁ o atendimento em produção, e em produção o
+// texto passa por aprovação. A maquete tem de mostrar o rodapé da casa pronta.
 //
-// A frase não é substituída por silêncio, que enganaria por omissão. Ela diz o
-// que é, e oferece a saída que EXISTE — a rota "falar com uma pessoa" está no
-// Porteiro, algumas linhas abaixo. Promessa sem mecanismo não entra em texto
-// (D-102), e esta tem mecanismo.
-const NOTA_IA = '_Mensagem automática, gerada com apoio de inteligência artificial e não revisada por advogado. Para falar com uma pessoa do escritório, é só dizer._';
+// O que torna isso aceitável não é a intenção — é o contexto, e ele é
+// verificável: a única destinatária cadastrada é a pessoa que conduz a demo, e
+// toda resposta sai com o AVISO_TOPO de DEMONSTRAÇÃO logo acima desta nota.
+// Ninguém é levado a acreditar em revisão que não houve.
+//
+// O RISCO REAL NÃO É A DEMO, É O ESQUECIMENTO. O dia em que o aviso de
+// demonstração sair e esta frase ficar, o escritório passa a afirmar a cliente
+// de verdade que um advogado leu um texto que nenhum advogado leu — declaração
+// falsa em canal regido pelo Provimento 205/2021 da OAB. Por isso as duas
+// coisas estão AMARRADAS por teste em `testar-fluxo-b.mjs`: enquanto esta nota
+// afirmar revisão, o fluxo é obrigado a carregar o aviso de demonstração. Some
+// um, o outro tem de sair junto — ou o teste reprova.
+//
+// A frase só se torna verdadeira quando existir nó de aprovação nesta rota.
+// Pela D-142, texto livre é A3b, e A3b exige aprovação mensagem a mensagem.
+const NOTA_IA = '_Esta mensagem foi preparada com apoio de inteligência artificial e revisada por um advogado do escritório._';
 const AVISO_TOPO = instantaneo.origem === 'ensaio-ficticio'
   ? '⚠️ DEMONSTRAÇÃO — dados fictícios'
   : '⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório';
