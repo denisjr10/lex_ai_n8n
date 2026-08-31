@@ -443,3 +443,76 @@ test('escopo: entre concessões vale a mais ampla; sem abrangência vale own', (
   );
   assert.equal(abrangenciaConcedida(ler(['escavador:movimentacao:read:any']), exigencia), null);
 });
+
+// ---------------------------------------------------------------------------
+// A assinatura entra na trilha — Regra 2, e achado 4 da revisão de 28/08
+// ---------------------------------------------------------------------------
+
+test('a auditoria guarda QUAL aprovação autorizou o ato', async () => {
+  const { cfg, sessao: s, auditoria } = montar({ escopos: ['escritorio:peticao:write:any'] });
+
+  const aprovacao = {
+    aprovacao_id: 'apr_0001',
+    faixa: 'A4',
+    aprovador_id: 'usr_advogada',
+    papel_do_aprovador: 'advogado',
+    status: 'aprovada',
+    expira_em: '2026-08-27T12:05:00.000Z',
+    resumo_do_conteudo: `peticionar:${JSON.stringify({ numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' })}`,
+  };
+
+  const r = await executarChamada(
+    cfg,
+    chamada('peticionar', { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' }, s, { aprovacao }),
+  );
+
+  assert.equal(ehErro(r), false, 'a chamada aprovada deveria passar');
+
+  // A pergunta que se faz depois de um ato A4 dar errado não é "houve
+  // aprovação?" — é "de quem foi a assinatura?". Sem este campo, a trilha
+  // responde a primeira e não a segunda, e a Regra 2 exige advogado
+  // IDENTIFICADO. Identificar na hora de decidir e esquecer na hora de
+  // registrar cumpre a metade da regra que não serve para nada.
+  const evento = auditoria.eventos.at(-1);
+  assert.equal(evento.resultado, 'permitido');
+  assert.equal(evento.aprovacao_id, 'apr_0001');
+});
+
+test('a recusa de um ato aprovado também guarda a aprovação apresentada', async () => {
+  // Aprovação de estagiário para faixa A4: recusada. O registro precisa dizer
+  // QUAL aprovação foi apresentada — é o que permite investigar depois quem
+  // tentou assinar o que não podia.
+  const { cfg, sessao: s, auditoria, fornecedor } = montar({ escopos: ['escritorio:peticao:write:any'] });
+
+  const r = await executarChamada(
+    cfg,
+    chamada('peticionar', { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' }, s, {
+      aprovacao: {
+        aprovacao_id: 'apr_0002',
+        faixa: 'A4',
+        aprovador_id: 'usr_estagiario',
+        papel_do_aprovador: 'estagiario',
+        status: 'aprovada',
+        expira_em: '2026-08-27T12:05:00.000Z',
+        resumo_do_conteudo: `peticionar:${JSON.stringify({ numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' })}`,
+      },
+    }),
+  );
+
+  assert.equal(ehErro(r), true);
+  assert.equal(fornecedor.estado.chamadas, 0, 'recusa não gasta');
+
+  const evento = auditoria.eventos.at(-1);
+  assert.equal(evento.resultado, 'negado');
+  assert.equal(evento.etapa, 'aprovacao');
+  assert.equal(evento.aprovacao_id, 'apr_0002');
+});
+
+test('sem aprovação apresentada, o campo simplesmente não existe no evento', async () => {
+  const { cfg, sessao: s, auditoria } = montar({ escopos: ['escavador:processo:read:any'] });
+  await executarChamada(cfg, chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, s));
+
+  // `undefined` e não `null`: `exactOptionalPropertyTypes` está ligado, e o
+  // banco distingue "não houve aprovação" de "houve e não sei qual".
+  assert.equal('aprovacao_id' in auditoria.eventos.at(-1), false);
+});

@@ -16,6 +16,8 @@
     "tipos": "tsc --build"
   },
   "dependencies": {
-    "@lex/dominio": "*"
+    "@lex/dominio": "*",
+    "@lex/mcp-core": "*",
+    "pg": "8.23.0"
   }
 }

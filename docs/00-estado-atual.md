@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-28 |
+| Atualizado em | 2026-08-31 |
 | Crédito Escavador | ✅ **R$ 44,00 de R$ 50,00** — R$ 47,00 conferidos no painel em 26/08, menos R$ 3,00 do Bloco E em 27/08. 21 requisições feitas; o painel batia linha a linha com o nosso registro na última conferência. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
@@ -10,9 +10,9 @@
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | 🟢 **O escritório respondeu** | **27/08.** Cinco perguntas que travavam o PRD voltaram: identidade individual **pelo Telegram** (D-147), advogado vê **a base inteira** (D-146), Trello é **visualização** (D-152), colaborador **também confere prazo** (D-145), e a infra é **do prestador** (D-148). **D-07 e D-09 estão resolvidas.** PRD na v2.0; D-142 a D-154 e R-46 a R-49 somados. Ver §"As respostas do escritório chegaram" |
 | 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Cinco dos doze achados abertos foram fechados em 31/08** — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, e a D-142 dentro do código (D-156). Ver §"Uma revisão externa passou no projeto inteiro" |
-| Fase | **3 — construção.** **Marcos 1 e 2 fechados e verificados**: monorepo, esquema do banco e migrações; e o chassi — sessão, escopo, abrangência, erro e envelope — com a matriz de escopo passando inteira. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
+| Fase | **3 — construção.** **Marcos 1, 2 e 3 fechados e verificados**: monorepo e migrações; o chassi, com a matriz de escopo passando inteira; e **a auditoria, que grava, recusa alteração e reconstrói a operação pelo `requisicao_id`**. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | ✅ **Fundação e chassi de pé, os dois verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, e **63 testes passando** — 51 do domínio e do chassi, 12 do disjuntor de crédito — a matriz de escopo inteira, `npm test` — o banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. `npm run banco:subir` · `npm run banco:conferir`. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, **52 verificações** desde a D-155), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **81 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, **52 verificações** desde a D-155), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -337,6 +337,47 @@ E na chamada: **parâmetro que ninguém declarou é recusado, não ignorado.**
 
 **Auditoria indisponível bloqueia** (D-77), já valendo: se o registro falhar, a chamada devolve erro mesmo quando seria permitida. Há teste exercitando justamente o caminho feliz com a auditoria fora do ar.
 
+## O marco 3 fechou — a auditoria grava e reconstrói · 31/08/2026
+
+`services/auditoria` saiu do esqueleto. Detalhes em `docs/14-auditoria-marco-3.md`.
+
+O critério de aceite **não** era "a tabela aceita INSERT" — ela já aceitava desde o marco 1. Era conseguir contar, meses depois, o que aconteceu numa operação e por quê. Por isso a verificação roda **o chassi de verdade**, com a auditoria de PostgreSQL no lugar da de memória, e depois pergunta ao banco o que aconteceu:
+
+```
+npm run banco:auditoria     →  23 de 23 corretos
+npm run verificar           →  25 de 25 · 23 de 23 · 81 testes
+```
+
+### O que a prova cobre
+
+Uma **recusa** e um **sucesso** atravessam o chassi e viram registro; a operação se remonta pelo `requisicao_id`, dizendo quem agiu, com que papel, por qual canal, qual etapa recusou e com que código; `UPDATE` e `DELETE` são recusados **para o papel da aplicação**; o consumo grava na mesma transação do ato; e a auditoria fora do ar **bloqueia a chamada sem tocar no fornecedor**.
+
+Esse último é o que dá sentido à correção de 31/08 que moveu o registro para antes da execução: o teste aponta uma conexão de verdade para uma porta onde não há banco — não é um dublê que lança, é a falha que de fato acontece às três da manhã — e confere que o contador de chamadas ao fornecedor **não se moveu**.
+
+### As decisões que carregam peso
+
+**A auditoria conecta como `lex_app`, nunca como o dono** (D-157). Conectar como dono não quebraria teste nenhum: o gatilho continuaria recusando e tudo pareceria certo, enquanto o desenho de duas camadas virava uma em silêncio. A segunda camada existe porque a primeira é um objeto do banco que quem tem DDL pode remover.
+
+**O resumo recusa dado pessoal, e recusa em vez de limpar** (D-158). A imutabilidade que protege a prova protegeria o vazamento com o mesmo empenho: **dado pessoal que entra ali não sai nunca mais**, e um pedido de eliminação sob a LGPD encontra uma tabela desenhada para recusá-lo. A barreira fica antes do INSERT porque depois não existe conserto, existe incidente. E a mensagem de recusa não repete o que encontrou, para não escrever o dado no log.
+
+**`aprovacao_id` entra no evento** (D-159) — achado 4 da revisão. A pergunta que se faz depois de um ato A4 dar errado não é "houve aprovação?", é "de quem foi a assinatura?".
+
+**A consulta de trilha exige `inquilino_id`** (D-160). `requisicao_id` sozinho atravessa inquilinos — o mesmo defeito do comentário da migração 005.
+
+### 🔴 O achado da integração: a sessão precisa estar no banco
+
+`evento_auditoria.sessao_id` tem chave estrangeira para `sessao`. A primeira execução da prova falhou aí, e a falha ensina algo que não estava escrito em lugar nenhum:
+
+> Uma sessão emitida pelo Policy Gate e mantida **só em memória** torna toda chamada dela irregistrável — e, pela D-77, **impossível**.
+
+O acoplamento está certo. O desagradável é o sintoma: não é "a auditoria falhou", é **"a plataforma inteira parou"**, e nada no erro aponta para a sessão. Virou **R-50**, e é exigência para o Policy Gate do marco 9.
+
+### Duas consequências que mudam hábitos do repositório
+
+**Entrou a primeira dependência de produção** (D-161): o `pg`. Ferramenta fala com o banco por `docker compose exec psql`; serviço não pode — um processo por gravação é inviável quando toda chamada gera pelo menos uma.
+
+**A prova deixa resíduo, e é para deixar** (D-162). Um teste de *append-only* que conseguisse limpar a si mesmo teria acabado de refutar o que veio testar. `npm run banco:zerar` recomeça.
+
 ## As respostas do escritório chegaram — 27/08/2026
 
 Cinco perguntas travavam o PRD desde 20/08. Todas voltaram, e três delas mudaram desenho. O PRD subiu para a **versão 2.0**; a Spec, para a **1.2**.
@@ -506,6 +547,9 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 | **Nota Técnica 02 — ClickUp no lugar de Workspace, Chat e Trello: viabilidade, recursos e custo** | `10-clickup-avaliacao.md` |
 | **Nota Técnica 03 — Demonstração ao vivo para o escritório, antes do contrato** | `11-nota-tecnica-demo.md` |
 | **Hooks do Claude Code — as regras inegociáveis viraram barreira em código** | `.claude/hooks/LEIA-ME.md` |
+| **Marco 1 — fundação: monorepo, esquema do banco e migrações** · 25 de 25 provas de regra | `12-fundacao-marco-1.md` |
+| **Marco 2 — o chassi: sessão, escopo, abrangência, erro e envelope** · a matriz de escopo inteira | `13-chassi-marco-2.md` |
+| **Marco 3 — a auditoria: grava, recusa alteração e reconstrói pelo `requisicao_id`** · 23 de 23 contra o banco | `14-auditoria-marco-3.md` |
 
 ## As regras saíram do prompt e viraram barreira — 25/08/2026
 
@@ -676,13 +720,17 @@ HTTP 403
 
 ## Próximo passo
 
-> Atualizado em 27/08, com os marcos 1 e 2 fechados e o Bloco E executado.
+> Atualizado em 31/08, com os marcos 1, 2 e 3 fechados e cinco achados da revisão externa corrigidos.
 
-### 1. Marco 3 — auditoria e consumo · sem gastar nada
+### 1. Marco 4 — motor de custo · sem gastar nada
 
-O próximo da fila, e o mais fácil de encaixar: **a tabela já existe** (migração 003, *append-only* provada contra o banco) e **a interface já está no chassi**. Falta a implementação que escreve no PostgreSQL em vez de na memória, mais a tabela `consumo`.
+O próximo da fila. A costura já está marcada no `chassi.ts` como **etapa 9**, a tabela `consumo` já grava na mesma transação do ato desde o marco 3, e `orcamento` já recusa estouro por restrição do banco desde a migração 004.
 
-Termina quando recusa e sucesso geram registro reconstruível pelo `requisicao_id`.
+Falta quem calcule o número: estimativa antes de chamar, reserva enquanto chama, reconciliação com o `Creditos-Utilizados` que vier na resposta — o cabeçalho que já sabemos que **varia por rota** (D-108) e que é a única fonte de verdade sobre preço.
+
+Termina quando uma chamada que estouraria o orçamento é recusada **antes** de custar.
+
+> ✅ **Marco 3 fechado em 31/08** — 23 de 23 contra o banco de pé. Ver §"O marco 3 fechou".
 
 ### 2. Capturar uma aparição de diário oficial — gratuito
 
@@ -716,13 +764,13 @@ Quatro perguntas novas (4a, 4b, 4c, 20a–20d) e **os números** — franquia de
 
 ### Depois
 
-**Marcos 4 e 5** — motor de custo e cache. Nenhum consome crédito nem depende do escritório. A costura dos dois já está marcada no `chassi.ts`, nas etapas 9 e 10.
+**Marco 5** — cache, etapa 10 do chassi. E os **achados abertos da revisão** que ainda não foram fechados: o isolamento de inquilinos no banco (5), a retentativa sem idempotência (10), a pseudonimização sem segredo (11) e os menores. Nenhum consome crédito nem depende do escritório.
 
 A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-154** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+**D-01 a D-162** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
 
 - ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
 - 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08

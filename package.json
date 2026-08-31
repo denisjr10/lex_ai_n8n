@@ -18,15 +18,17 @@
     "banco:migrar": "node ferramentas/banco/migrar.mjs",
     "banco:estado": "node ferramentas/banco/migrar.mjs --estado",
     "banco:conferir": "node ferramentas/banco/conferir-regras.mjs",
+    "banco:auditoria": "node ferramentas/banco/conferir-auditoria.mjs",
     "banco:derrubar": "node ferramentas/banco/subir.mjs --derrubar",
     "banco:zerar": "node ferramentas/banco/subir.mjs --zerar",
-    "verificar": "node ferramentas/banco/migrar.mjs --conferir && node ferramentas/banco/conferir-regras.mjs && npm run testes",
+    "verificar": "node ferramentas/banco/migrar.mjs --conferir && node ferramentas/banco/conferir-regras.mjs && node ferramentas/banco/conferir-auditoria.mjs && npm run testes",
     "tipos": "tsc --build",
     "testes": "npm run tipos && node --test \"testes/**/*.test.mjs\"",
     "limpar": "tsc --build --clean",
     "test": "npm run testes"
   },
   "devDependencies": {
+    "@types/pg": "^8.23.1",
     "typescript": "^5.6.0"
   }
 }

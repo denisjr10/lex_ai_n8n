@@ -78,6 +78,17 @@ export interface EventoDeAuditoria {
   readonly codigo_do_erro?: string;
   /** Etapa que recusou. É o que torna a trilha legível meses depois. */
   readonly etapa?: string;
+  /**
+   * Qual aprovação autorizou o ato — o campo que separa "alguém aprovou" de
+   * "esta pessoa aprovou".
+   *
+   * Sem ele a trilha registra que houve aprovação e não consegue dizer de quem
+   * foi a assinatura, que é exatamente a pergunta que se faz depois de um ato
+   * de faixa A4 dar errado. A Regra 2 exige advogado IDENTIFICADO; identificar
+   * na hora de decidir e esquecer na hora de registrar cumpre a metade da
+   * regra que não serve para nada.
+   */
+  readonly aprovacao_id?: string;
   readonly momento: string;
 }
 
@@ -148,6 +159,7 @@ export async function executarChamada(
         resultado: erro.codigo === 'erro_interno' ? 'erro' : 'negado',
         codigo_do_erro: erro.codigo,
         etapa,
+        ...(chamada.aprovacao ? { aprovacao_id: chamada.aprovacao.aprovacao_id } : {}),
         momento: agora.toISOString(),
       });
     } catch {
@@ -280,6 +292,7 @@ export async function executarChamada(
       acao: ferramenta.nome,
       resultado: 'permitido',
       etapa: 'execucao',
+      ...(chamada.aprovacao ? { aprovacao_id: chamada.aprovacao.aprovacao_id } : {}),
       momento: agora.toISOString(),
     });
   } catch {
