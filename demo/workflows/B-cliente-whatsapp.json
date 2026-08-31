@@ -4,7 +4,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "lex-demo-b-cliente",
+        "path": "lex-demo-b-cliente-SEGREDO-FORA-DO-GIT",
         "responseMode": "onReceived",
         "options": {}
       },
@@ -15,7 +15,7 @@
         -220,
         300
       ],
-      "webhookId": "lex-demo-b-cliente"
+      "webhookId": "lex-demo-b-cliente-SEGREDO-FORA-DO-GIT"
     },
     {
       "parameters": {

@@ -237,6 +237,34 @@ checar('o webhook responde na hora, sem esperar o modelo',
   wf.nodes.find((n) => n.name === 'Webhook da Uazapi').parameters.responseMode === 'onReceived');
 checar('nenhum nó nasce ativo', wf.active !== true);
 
+// ---------------------------------------------------------------------------
+// A porta de entrada — a única superfície desta demo voltada para a internet
+// ---------------------------------------------------------------------------
+const gatilho = wf.nodes.find((n) => n.name === 'Webhook da Uazapi');
+const caminho = String(gatilho.parameters.path || '');
+
+// O corpo que chega aqui traz o número de quem escreveu, e o Porteiro decide o
+// escopo a partir dele. Sem tranca na porta, quem descobrisse a URL mandaria um
+// corpo com o número de um cliente cadastrado e receberia a ficha do processo
+// dele — o Porteiro fazendo a coisa certa com um dado que já veio mentindo.
+checar('o webhook tem segredo no caminho, e não é um caminho adivinhável',
+  /^lex-demo-b-cliente-.{16,}$/.test(caminho),
+  `caminho = "${caminho}" — gere o segredo com: node guardar-segredo.mjs demo/webhook-b.local`);
+
+// Este JSON é versionado. O segredo em disco tem de ser o MARCADOR, nunca o
+// valor real — mesmo erro que o fluxo já evita com o token da Uazapi, que vai
+// por credencial e nunca no corpo.
+const segredoReal = fs.existsSync(path.join(AQUI, 'webhook-b.local'))
+  ? fs.readFileSync(path.join(AQUI, 'webhook-b.local'), 'utf8').trim()
+  : '';
+if (segredoReal) {
+  checar('o segredo do webhook NÃO está no JSON versionado',
+    !JSON.stringify(wf).includes(segredoReal),
+    'o segredo real vazou para demo/workflows/B-cliente-whatsapp.json');
+  checar('o caminho em disco leva o marcador, e o n8n recebe o valor real',
+    caminho.includes('SEGREDO-FORA-DO-GIT'));
+}
+
 // ===========================================================================
 if (NUMERO_CLIENTE === '5500000000000') {
   console.log('\n  \x1b[33mAVISO\x1b[0m usando clientes.exemplo.json — o número é de mentira.');

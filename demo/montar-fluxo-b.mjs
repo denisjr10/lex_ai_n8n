@@ -27,6 +27,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
@@ -37,7 +38,72 @@ const publicar = process.argv.includes('--publicar');
 const ativar = process.argv.includes('--ativar');
 
 const NOME = '[LEX-DEMO] B · Cliente (WhatsApp)';
-const CAMINHO_WEBHOOK = 'lex-demo-b-cliente';
+
+// ===========================================================================
+// AUTENTICAÇÃO DO WEBHOOK
+// ===========================================================================
+// O gatilho deste fluxo é a única porta aberta da demonstração para a internet,
+// e o corpo que chega por ela traz o número de quem escreveu. Sem porta
+// trancada, quem descobrisse a URL mandaria um corpo com o número de um cliente
+// cadastrado e receberia de volta a ficha do processo dele — o Porteiro faz a
+// coisa certa com um dado que já veio mentindo.
+//
+// O SEGREDO VIAJA NO CAMINHO, E NÃO NUM CABEÇALHO, porque a configuração de
+// webhook da Uazapi aceita `url`, `events` e `enabled`, e nada mais: não há
+// onde declarar cabeçalho. Segredo em URL é pior que segredo em cabeçalho — ele
+// aparece em log de servidor e em histórico de proxy — mas é o que o remetente
+// consegue enviar, e é incomparavelmente melhor que porta sem tranca. É o mesmo
+// desenho dos "incoming webhooks" do Slack, e pela mesma razão.
+//
+// Ele NÃO fica no repositório: sai de `demo/webhook-b.local`, que o .gitignore
+// cobre pelo padrão `*.local`, e é gravado por `guardar-segredo.mjs`.
+//
+// O SEGREDO É GERADO SOZINHO NA PRIMEIRA EXECUÇÃO, e isso é deliberado.
+//
+// A alternativa — exigir que alguém rode `guardar-segredo.mjs` antes — tem duas
+// falhas. A primeira é que o caminho sem tranca continuaria existindo como
+// padrão, e o padrão é o que acontece quando ninguém está prestando atenção. A
+// segunda é que numa cópia limpa do repositório o arquivo não existe, e a demo
+// teria de escolher entre quebrar ou publicar sem autenticação.
+//
+// Gerando aqui, o estado inseguro deixa de ser alcançável por esquecimento.
+// Não é segredo digitado por pessoa: é aleatório, nunca impresso, e vive só em
+// `demo/webhook-b.local`, que o .gitignore cobre pelo padrão `*.local`.
+const SEGREDO_PATH = path.join(AQUI, 'webhook-b.local');
+if (!fs.existsSync(SEGREDO_PATH)) {
+  fs.writeFileSync(SEGREDO_PATH, crypto.randomBytes(18).toString('base64url'), 'utf8');
+  console.log(`segredo     : ${path.basename(SEGREDO_PATH)} criado agora (fora do Git)`);
+}
+const segredoWebhook = fs.readFileSync(SEGREDO_PATH, 'utf8').trim();
+
+if (segredoWebhook && segredoWebhook.length < 16) {
+  console.error(`\n  o segredo em ${path.basename(SEGREDO_PATH)} tem ${segredoWebhook.length} caracteres.`);
+  console.error('  Um caminho de webhook adivinhável não é autenticação. Use 24 ou mais.\n');
+  process.exit(1);
+}
+
+const CAMINHO_WEBHOOK = segredoWebhook
+  ? `lex-demo-b-cliente-${segredoWebhook}`
+  : 'lex-demo-b-cliente';
+
+if (ativar && !segredoWebhook) {
+  console.error(`
+  RECUSADO: --ativar sem segredo de webhook.
+
+  Ativar é o que abre a porta para a internet. Sem segredo no caminho, qualquer
+  pessoa que descubra a URL manda um corpo com o número de um cliente cadastrado
+  e recebe a ficha do processo dele.
+
+  Para criar o segredo (rode você, no seu terminal — não peça ao assistente):
+
+    node -e "console.log(require('crypto').randomBytes(18).toString('base64url'))"
+    node guardar-segredo.mjs demo/webhook-b.local
+
+  Depois:  node demo/montar-fluxo-b.mjs --publicar --ativar
+           node demo/uazapi.mjs webhook      (reaponta a Uazapi para o caminho novo)
+`);
+  process.exit(1);
+}
 const MOVS_NA_FICHA = 12;   // o cliente quer o essencial, não o extrato
 
 // --- dados -----------------------------------------------------------------
@@ -473,12 +539,38 @@ const connections = {
 
 const workflow = { name: NOME, nodes, connections, settings: { executionOrder: 'v1' } };
 
+// O QUE VAI PARA O DISCO NÃO É O QUE VAI PARA O n8n, e a diferença é o segredo.
+//
+// Este JSON é versionado (D-15), então o segredo do webhook não pode estar
+// nele — seria o mesmo erro que o fluxo já evita com o token da Uazapi, que vai
+// por credencial e nunca no corpo. A cópia em disco leva um marcador no lugar;
+// o segredo de verdade só existe no que é enviado ao n8n e no arquivo `.local`.
+//
+// A substituição é sobre o JSON serializado, e não só sobre o campo do caminho,
+// porque o n8n repete o caminho no `webhookId`. Trocar um e esquecer o outro
+// vazaria do mesmo jeito, e a versão que sobra é sempre a que ninguém olhou.
+const MARCADOR = 'SEGREDO-FORA-DO-GIT';
+const serializado = JSON.stringify(workflow, null, 2);
+const paraDisco = segredoWebhook
+  ? serializado.split(segredoWebhook).join(MARCADOR)
+  : serializado;
+
+if (segredoWebhook && paraDisco.includes(segredoWebhook)) {
+  console.error('\n  o segredo do webhook sobreviveu à limpeza do JSON. Nada foi escrito.\n');
+  process.exit(1);
+}
+
 const dir = path.join(AQUI, 'workflows');
 fs.mkdirSync(dir, { recursive: true });
-fs.writeFileSync(path.join(dir, 'B-cliente-whatsapp.json'), JSON.stringify(workflow, null, 2) + '\n');
+fs.writeFileSync(path.join(dir, 'B-cliente-whatsapp.json'), paraDisco + '\n');
 console.log(`\nworkflow escrito : demo/workflows/B-cliente-whatsapp.json`);
 console.log(`  nós            : ${nodes.length}`);
-console.log(`  webhook        : /webhook/${CAMINHO_WEBHOOK}`);
+console.log(`  webhook        : /webhook/${segredoWebhook ? `lex-demo-b-cliente-${MARCADOR}` : CAMINHO_WEBHOOK}`);
+if (segredoWebhook) {
+  console.log(`  autenticação   : segredo de ${segredoWebhook.length} caracteres no caminho, fora do Git`);
+} else {
+  console.log(`  autenticação   : ⚠️ NENHUMA — veja demo/webhook-b.local em LEIA-ME.md`);
+}
 
 if (!publicar) {
   console.log(`\nPara enviar ao n8n:  node demo/montar-fluxo-b.mjs --publicar\n`);

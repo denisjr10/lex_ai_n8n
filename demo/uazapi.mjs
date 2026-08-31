@@ -126,7 +126,20 @@ try {
 
   else if (comando === 'webhook') {
     const cfg = JSON.parse(fs.readFileSync(path.join(AQUI, 'n8n.json'), 'utf8'));
-    const url = cfg.baseUrl.replace(/\/+$/, '') + '/webhook/lex-demo-b-cliente';
+
+    // O caminho tem de ser O MESMO que `montar-fluxo-b.mjs` gerou, segredo
+    // incluído. Duas cópias da mesma regra em arquivos diferentes é como uma
+    // delas envelhece sozinha — e o sintoma seria o pior possível: a Uazapi
+    // entregando num caminho que não existe mais, o cliente sem resposta, e
+    // nenhum erro em lugar nenhum. Por isso a leitura é do mesmo arquivo.
+    const segredoPath = path.join(AQUI, 'webhook-b.local');
+    const segredo = fs.existsSync(segredoPath) ? fs.readFileSync(segredoPath, 'utf8').trim() : '';
+    const caminho = segredo ? `lex-demo-b-cliente-${segredo}` : 'lex-demo-b-cliente';
+    if (!segredo) {
+      console.log('\n  AVISO: sem demo/webhook-b.local, o webhook fica SEM AUTENTICACAO.');
+      console.log('  Quem descobrir a URL recebe ficha de processo mandando o numero certo no corpo.\n');
+    }
+    const url = cfg.baseUrl.replace(/\/+$/, '') + '/webhook/' + caminho;
     const r = await api('/webhook', {
       metodo: 'POST',
       corpo: {
