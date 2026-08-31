@@ -149,7 +149,23 @@ const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
   // colaborador realmente pergunta. Ninguém decora número CNJ.
   partes: [...new Set((p.envolvidos || []).map(e => e.nome).filter(Boolean))],
 })))};
-const soDigitos = (t) => String(t).replace(/\D/g, '');
+// ⚠️ A BARRA INVERTIDA PRECISA SER DOBRADA AQUI, e por muito tempo não era.
+// Esta linha vive DENTRO de uma template string: a barra é consumida pelo
+// JavaScript de fora, não pelo de dentro. Escrita simples, ela sumia, e a classe
+// "não-dígito" virava a letra maiúscula sozinha — o workflow apagava a letra em
+// vez de apagar a pontuação.
+//
+// O SINTOMA ERA O CONTRÁRIO DO QUE PARECE. Com o defeito, CNJ digitado COM
+// pontuação continuava funcionando, por acaso: o número pontuado é substring
+// literal da frase, então a busca achava assim mesmo. Quem quebrava era o
+// número digitado SEM pontuação — o da pessoa que copia do PJe e cola no
+// celular — porque aí a comparação dependia mesmo da normalização.
+// Defeito que só aparece no caminho menos testado é o que sobrevive mais tempo.
+//
+// A linha de baixo já estava certa desde sempre, com a barra dobrada, o que
+// torna este um erro de distração e não de entendimento.
+// Regressão em testar-fluxo-a.mjs, com memoriaNova() isolando cada caso.
+const soDigitos = (t) => String(t).replace(/\\D/g, '');
 const semAcento = (t) => String(t).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toUpperCase();
 
 const e = $json;

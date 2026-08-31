@@ -47,6 +47,42 @@ const MENCIONA_ESCAVADOR = /escavador\.com/i
 // justamente para nao repetir aquele intervalo.
 const SCRIPT_QUE_COBRA = /\b(node|npx|bun|deno)\b(?![^|;&]*--check\b)[^|;&]*\b(capturar|monitorar|atualizar|comparar-tribunal)\.mjs/i
 
+// ==========================================================================
+// A ANALISE E POR SEGMENTO, NUNCA SOBRE O COMANDO INTEIRO
+//
+// O furo que isto fecha: as expressoes abaixo eram testadas contra o texto
+// todo, e bastava uma operacao gratuita no comando para liberar o comando
+// inteiro. `monitorar.mjs listar --executar && capturar.mjs --executar`
+// passava, porque OPERACAO_GRATUITA casava com a primeira metade e o `&&`
+// nao existia para o hook. Duas metades, um veredito, e o veredito era o da
+// metade inocente.
+//
+// Agora cada segmento e julgado sozinho, e basta UM culpado para negar.
+//
+// Duas sutilezas que o segmentador precisa acertar:
+//
+//   1. CONTINUACAO DE LINHA. Quebrar em `\n` sem juntar antes as linhas
+//      terminadas em barra invertida separaria `capturar.mjs` do seu
+//      `--executar`, e o segmento orfao pareceria um ensaio inofensivo.
+//      Seria trocar um furo por outro, pior — porque nasceria da correcao.
+//   2. SUBSTITUICAO DE COMANDO. `$(...)` e crase executam de verdade, entao
+//      o conteudo delas tambem e comando e tambem entra na lista.
+//
+// Dividir demais nao abre furo: no maximo barra um comando legitimo, e o
+// caminho para isso e perguntar ao usuario. Dividir de menos deixa gastar.
+function segmentar(comando) {
+  const texto = String(comando || '').replace(/\\\r?\n/g, ' ')
+
+  const embutidos = []
+  for (const m of texto.matchAll(/\$\(([^()]*)\)/g)) embutidos.push(m[1])
+  for (const m of texto.matchAll(/`([^`]*)`/g)) embutidos.push(m[1])
+
+  return [texto, ...embutidos]
+    .flatMap((t) => t.split(/&&|\|\||[;|&\n\r]/))
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
 function negar(motivo) {
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: {
@@ -77,7 +113,7 @@ if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
   // imprimem o plano e saem. Barrar o ensaio seria barrar exatamente a etapa
   // que existe para NAO gastar — e empurrar quem trabalha direto para a
   // chamada real, que e o oposto do que este hook quer.
-  const ehEnsaio = !/--executar\b/.test(comando)
+  const segmentos = segmentar(comando)
 
   // `--executar` NAO e sinonimo de "gasta". Os dois scripts com subcomando tem
   // operacoes gratuitas que tambem precisam de --executar para valer: conferir
@@ -90,7 +126,10 @@ if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
   // bloqueio. Falha fecha.
   const OPERACAO_GRATUITA = /\b(monitorar|atualizar)\.mjs\s+(origens|listar|aparicoes|remover|status)\b/i
 
-  if (SCRIPT_QUE_COBRA.test(comando) && !ehEnsaio && !OPERACAO_GRATUITA.test(comando)) {
+  const gastaCredito = (seg) =>
+    SCRIPT_QUE_COBRA.test(seg) && /--executar\b/.test(seg) && !OPERACAO_GRATUITA.test(seg)
+
+  if (segmentos.some(gastaCredito)) {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
       'Este comando executa um dos scripts que chamam a API do Escavador ' +
@@ -104,7 +143,7 @@ if (ferramenta === 'Bash' || ferramenta === 'PowerShell') {
     )
   }
 
-  if (MENCIONA_ESCAVADOR.test(comando) && INVOCADORES.test(comando)) {
+  if (segmentos.some((seg) => MENCIONA_ESCAVADOR.test(seg) && INVOCADORES.test(seg))) {
     negar(
       'BLOQUEADO pelo disjuntor de credito (Regra 8 do CLAUDE.md).\n' +
       'Este comando parece fazer uma chamada de rede ao Escavador. O debito ' +

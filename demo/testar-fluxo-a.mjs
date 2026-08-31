@@ -103,6 +103,15 @@ for (const [rotulo, pergunta] of [
   ['pelo apelido interno', `Como está o processo ${APELIDO}?`],
   ['pelo nome da parte', `Como está o processo do ${PARTE}?`],
 ]) {
+  // memoriaNova() A CADA CASO, e é o que faltava.
+  //
+  // Sem isto, a primeira iteração guardava o processo na memória curta e as
+  // seguintes o recuperavam DALI, em vez de reconhecê-lo pelo que a linha diz
+  // testar. O caso "sem pontuação" passava com a normalização de CNJ quebrada
+  // — a barra invertida engolida pela template string — porque nunca chegava a
+  // depender dela. Teste que compartilha estado com o caso anterior não testa
+  // o caso, testa o anterior.
+  memoriaNova();
   const r = rodar(P, msg(ADVOGADO.telegram_user_id, pergunta)).json;
   checar(`consulta reconhecida ${rotulo}`, r.rota === 'consulta' && r.processoId === APELIDO, `rota=${r.rota}`);
 }
