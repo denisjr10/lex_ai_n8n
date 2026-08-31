@@ -75,7 +75,7 @@ export function criarFerramentas(fornecedor) {
   const enviarAoCliente = definirFerramenta({
     nome: 'enviar_ao_cliente',
     descricao: 'Envia uma mensagem ao cliente pelo WhatsApp. Efeito externo.',
-    faixa: 'A3',
+    faixa: 'A3b',   // texto livre ao cliente: A3b, nao A3a (D-142)   // texto livre ao cliente: A3b, nao A3a (D-142)
     escopo: 'escritorio:mensagem:write',
     entrada: { numero_cnj: cnj(), corpo: texto({ maximo: 900 }) },
     sujeito: (p) => ({ processos: [p.numero_cnj] }),

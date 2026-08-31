@@ -311,6 +311,92 @@ test('erro do fornecedor não vaza detalhe interno para o agente', async () => {
 });
 
 // ---------------------------------------------------------------------------
+// Faixas A3a e A3b — D-142
+// ---------------------------------------------------------------------------
+
+const APROVACAO_BASE = {
+  aprovacao_id: 'apr_1',
+  faixa: 'A3b',
+  aprovador_id: 'usr_014',
+  papel_do_aprovador: 'advogado',
+  status: 'aprovada',
+  expira_em: '2026-08-27T16:00:00.000Z',
+};
+
+/** Aprovação para a chamada exata — aprova-se o conteúdo final, não a intenção. */
+function aprovacaoPara(ferramenta, parametros, ajustes = {}) {
+  return {
+    ...APROVACAO_BASE,
+    ...ajustes,
+    resumo_do_conteudo: `${ferramenta}:${JSON.stringify(parametros)}`,
+  };
+}
+
+test('estagiário NÃO aprova comunicação externa, mesmo com a aprovação em ordem', async () => {
+  // Este era o furo: até 31/08 o chassi conferia o papel do aprovador só em A4.
+  // Uma aprovação A3 assinada por estagiário passava com `permitido: true` — e
+  // A3 é justamente a faixa do que sai do escritório e chega ao cliente.
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia! Seu processo teve andamento.' };
+
+  const r = await executarChamada(base.cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, { papel_do_aprovador: 'estagiario' }),
+  });
+
+  assert.equal(ehErro(r), true, 'estagiário aprovou envio ao cliente e a mensagem saiu');
+  assert.equal(base.fornecedor.estado.chamadas, 0);
+});
+
+test('advogado aprova a mesma chamada, e ela sai', async () => {
+  // O contraponto obrigatório: uma trava que nega tudo não prova nada.
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia! Seu processo teve andamento.' };
+
+  const r = await executarChamada(base.cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros),
+  });
+
+  assert.equal(ehErro(r), false);
+  assert.equal(base.fornecedor.estado.chamadas, 1);
+});
+
+test('a faixa A3 pura deixou de existir, e a recusa ensina a escolher', () => {
+  // Ferramenta escrita antes da D-142 não pode simplesmente continuar valendo:
+  // ninguém teria decidido de que lado ela cai, e o lado herdado seria o mais
+  // permissivo em metade dos casos.
+  assert.throws(
+    () => definirFerramenta({
+      nome: 'avisar_cliente',
+      descricao: 'Manda um aviso ao cliente pelo WhatsApp',
+      faixa: 'A3',
+      escopo: 'escritorio:mensagem:write',
+      entrada: {},
+      executar: async () => ({}),
+    }),
+    /A3a.*A3b|A3b.*A3a/s,
+  );
+});
+
+test('A3a não pode ser declarada enquanto o catálogo de gabaritos não existir', () => {
+  // A3a DISPENSA aprovação porque um gabarito aprovado antes a substitui. Sem
+  // catálogo, seria uma faixa que libera apoiada numa garantia que ninguém
+  // verifica — melhor não subir do que subir com um buraco (D-140).
+  assert.throws(
+    () => definirFerramenta({
+      nome: 'avisar_movimentacao',
+      descricao: 'Avisa o cliente de uma movimentação, por gabarito',
+      faixa: 'A3a',
+      escopo: 'escritorio:mensagem:write',
+      entrada: {},
+      executar: async () => ({}),
+    }),
+    /gabarito/i,
+  );
+});
+
+// ---------------------------------------------------------------------------
 // Domínio
 // ---------------------------------------------------------------------------
 

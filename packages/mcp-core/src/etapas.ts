@@ -19,6 +19,7 @@
 import {
   abrangenciaConcedida,
   exigeAdvogadoNominal,
+  exigePapelDeAdvogado,
   exigeAprovacao,
   lerEscopos,
   naoAutorizado,
@@ -32,6 +33,7 @@ import {
   sessaoInvalida,
   type Abrangencia,
   type Decisao,
+  type Faixa,
   type Papel,
   type Sessao,
 } from '@lex/dominio';
@@ -219,7 +221,7 @@ export interface AprovacaoApresentada {
  * advogado teria assinado algo que não leu.
  */
 export function etapaAprovacao(
-  faixa: 'A0' | 'A1' | 'A2' | 'A3' | 'A4',
+  faixa: Faixa,
   resumoDoConteudo: string,
   aprovacao: AprovacaoApresentada | undefined,
   agora: Date,
@@ -239,15 +241,24 @@ export function etapaAprovacao(
     return negar(precisaAprovacao(faixa, quem));
   }
 
-  // A4 exige advogado ou sócio. Trava de projeto: sem identidade individual,
-  // A4 não se libera (R-11, e regra 4 de `04` §5.3).
-  if (exigeAdvogadoNominal(faixa)) {
-    if (!podeAprovarA4(aprovacao.papel_do_aprovador)) {
-      return negar(precisaAprovacao(faixa, quem));
-    }
-    if (!aprovacao.aprovador_id.trim()) {
-      return negar(precisaAprovacao(faixa, quem));
-    }
+  // QUEM APROVOU PRECISA PODER APROVAR.
+  //
+  // Isto vale para A3b e para A4, e até 31/08 valia só para A4 — ou seja, uma
+  // aprovação de comunicação externa assinada por estagiário passava. A tabela
+  // de §5.1 e o PRD §6.2 sempre disseram "advogado"; o código tratava a
+  // exigência como rito adiado para a Parte II. Mas enquanto uma exigência está
+  // adiada, o comportamento em vigor é o permissivo — e negar por padrão é a
+  // Regra 5. Afrouxar depois é decisão registrada; afrouxar por omissão não é
+  // decisão nenhuma.
+  if (exigePapelDeAdvogado(faixa) && !podeAprovarA4(aprovacao.papel_do_aprovador)) {
+    return negar(precisaAprovacao(faixa, quem));
+  }
+
+  // A4 vai além do papel: exige a identidade individual registrada no ato.
+  // Trava de projeto, não de rito — sem identidade individual, A4 não se
+  // libera (R-11, e regra 4 de `04` §5.3).
+  if (exigeAdvogadoNominal(faixa) && !aprovacao.aprovador_id.trim()) {
+    return negar(precisaAprovacao(faixa, quem));
   }
 
   if (aprovacao.resumo_do_conteudo !== resumoDoConteudo) {

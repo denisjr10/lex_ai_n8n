@@ -22,9 +22,9 @@ import { executarChamada, ehErro } from '@lex/mcp-core';
 import { MENSAGEM_INDISTINGUIVEL } from '@lex/dominio';
 import { montar, chamada, CNJ_DA_CARTEIRA, CNJ_DE_FORA, AGORA } from './ajuda.mjs';
 
-const APROVACAO_A3 = {
+const APROVACAO_A3B = {
   aprovacao_id: 'apr_1',
-  faixa: 'A3',
+  faixa: 'A3b',
   aprovador_id: 'usr_014',
   papel_do_aprovador: 'advogado',
   status: 'aprovada',
@@ -276,8 +276,8 @@ for (const linha of MATRIZ) {
       // conteudo — aprova-se o conteudo final, nunca a intencao.
       const resumo = `${linha.ferramenta}:${JSON.stringify(linha.parametros)}`;
       extra.aprovacao = {
-        ...APROVACAO_A3,
-        faixa: linha.ferramenta === 'peticionar' ? 'A4' : 'A3',
+        ...APROVACAO_A3B,
+        faixa: linha.ferramenta === 'peticionar' ? 'A4' : 'A3b',
         papel_do_aprovador: linha.aprovacaoDe ?? 'advogado',
         resumo_do_conteudo: resumo,
       };

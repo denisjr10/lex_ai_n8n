@@ -17,7 +17,7 @@
  */
 
 import type { Faixa } from '@lex/dominio';
-import { ehFaixa, lerEscopo, type Escopo } from '@lex/dominio';
+import { A3A_DISPONIVEL, ehFaixa, lerEscopo, type Escopo } from '@lex/dominio';
 import { conferirEsquema, type Esquema, type Lido } from './esquema.js';
 
 /**
@@ -97,7 +97,28 @@ export function definirFerramenta<E extends Esquema, R>(
     problemas.push('descrição ausente ou curta demais — é o que o agente lê para escolher a ferramenta');
   }
   if (!ehFaixa(d.faixa)) {
-    problemas.push(`faixa "${String(d.faixa)}" desconhecida`);
+    // `A3` puro cai aqui desde a D-142, e a mensagem precisa ensinar a escolher
+    // em vez de só reprovar: quem escreveu a ferramenta antes da divisão não
+    // tem como adivinhar que ela existe.
+    const dica = String(d.faixa) === 'A3'
+      ? '. A faixa A3 se dividiu (D-142): use A3a para comunicação por gabarito pré-aprovado, ou A3b para texto livre. Na dúvida, A3b — é a que espera um humano'
+      : '';
+    problemas.push(`faixa "${String(d.faixa)}" desconhecida${dica}`);
+  }
+
+  // A3a promete que a mensagem saiu de um gabarito aprovado, versionado e
+  // vigente, com lacunas preenchidas só por campo verificado (PRD §6.2.2,
+  // RF-42 a RF-45). Nada disso existe ainda — não há catálogo, nem tabela
+  // `gabarito`, nem como reconstruir o texto exato que saiu.
+  //
+  // Aceitar a declaração agora seria a pior combinação possível: uma faixa que
+  // DISPENSA aprovação, apoiada numa garantia que ninguém verifica. Melhor não
+  // subir do que subir com um buraco (D-140).
+  if (d.faixa === 'A3a' && !A3A_DISPONIVEL) {
+    problemas.push(
+      'faixa A3a ainda não pode ser declarada: ela dispensa aprovação porque um gabarito aprovado a substitui, '
+      + 'e o catálogo de gabaritos não existe (RF-42 a RF-45). Enquanto não existir, comunicação externa é A3b',
+    );
   }
 
   const escopoLido = lerEscopo(d.escopo);
