@@ -226,6 +226,88 @@ test('auditoria indisponível bloqueia a operação, mesmo quando ela seria perm
   assert.equal(ehErro(r), true);
   assert.equal(r.erro.codigo, 'erro_interno');
   assert.match(r.erro.mensagem_agente, /auditoria/i);
+
+  // A METADE QUE FALTAVA, E ERA A QUE IMPORTAVA (D-141).
+  //
+  // Conferir só o envelope deixava passar o defeito que existia de verdade: o
+  // chassi chamava o fornecedor, gastava o crédito, e SÓ ENTÃO descobria que
+  // não conseguiria registrar. O teste ficava verde porque a resposta era, de
+  // fato, um erro de auditoria — mas o dinheiro já tinha saído.
+  //
+  // A D-141 diz: toda recusa exige o contador em zero. Esta linha é essa regra.
+  assert.equal(base.fornecedor.estado.chamadas, 0,
+    'a auditoria caiu e o fornecedor foi chamado assim mesmo — "falha fecha" que fecha depois do fato não fecha nada');
+});
+
+test('auditoria que rejeita PROMESSA bloqueia igual — a gravação real é assíncrona', async () => {
+  // A armadilha que este teste existe para pegar: se `registrar` for declarado
+  // `void` e o chassi não aguardar, uma auditoria assíncrona que falha rejeita
+  // SOZINHA, longe do try/catch. O teste acima continuaria verde, a operação
+  // seguiria em frente, e a trava da D-77 teria deixado de existir sem que
+  // nenhuma linha vermelha aparecesse. O marco 3 grava em PostgreSQL — ou seja,
+  // é exatamente este o caso que vai para produção.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const cfg = {
+    ...base.cfg,
+    auditoria: {
+      registrar: async () => { throw new Error('timeout gravando no PostgreSQL'); },
+    },
+  };
+
+  const r = await executarChamada(cfg, chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao));
+
+  assert.equal(ehErro(r), true);
+  assert.equal(r.erro.codigo, 'erro_interno');
+  assert.match(r.erro.mensagem_agente, /auditoria/i);
+  assert.equal(base.fornecedor.estado.chamadas, 0,
+    'auditoria assíncrona falhou e o fornecedor foi chamado — o chassi não está aguardando a gravação');
+});
+
+test('o registro da autorização acontece ANTES da execução, não depois', async () => {
+  // Prova de ordem, e não só de resultado: a auditoria observa o contador de
+  // chamadas ao fornecedor no instante em que é chamada. Se ela vir o contador
+  // já em 1, é porque a execução veio primeiro.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const vistos = [];
+  const cfg = {
+    ...base.cfg,
+    auditoria: {
+      registrar(e) {
+        vistos.push({ etapa: e.etapa, chamadasNoFornecedorAteAgora: base.fornecedor.estado.chamadas });
+      },
+    },
+  };
+
+  const r = await executarChamada(cfg, chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao));
+
+  assert.equal(ehErro(r), false);
+  const autorizacao = vistos.find((v) => v.etapa === 'execucao');
+  assert.ok(autorizacao, 'a autorização não gerou registro nenhum');
+  assert.equal(autorizacao.chamadasNoFornecedorAteAgora, 0,
+    'quando a auditoria foi chamada o fornecedor já tinha sido acionado — a ordem está invertida');
+  assert.equal(base.fornecedor.estado.chamadas, 1, 'a chamada permitida deveria ter executado');
+});
+
+test('erro do fornecedor não vaza detalhe interno para o agente', async () => {
+  // Conteúdo externo é hostil nos dois sentidos (Regra 4): o que volta do
+  // fornecedor também não é para ser repassado cru a quem lê conteúdo externo.
+  // O detalhe vai para a trilha, que é de quem investiga.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const cfg = {
+    ...base.cfg,
+    ferramentas: new Map([...base.cfg.ferramentas].map(([nome, f]) => [nome, {
+      ...f,
+      executar: async () => { throw new Error('ECONNREFUSED 10.0.3.7:5432 senha=hunter2'); },
+    }])),
+  };
+
+  const trilha = { etapas: [], executou: false };
+  const r = await executarChamada(cfg, chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao), trilha);
+
+  assert.equal(ehErro(r), true);
+  assert.doesNotMatch(r.erro.mensagem_agente, /ECONNREFUSED|10\.0\.3\.7|hunter2/,
+    'o erro cru do fornecedor chegou ao agente');
+  assert.match(trilha.detalheDaFalha, /ECONNREFUSED/, 'o detalhe deveria ter ficado na trilha');
 });
 
 // ---------------------------------------------------------------------------

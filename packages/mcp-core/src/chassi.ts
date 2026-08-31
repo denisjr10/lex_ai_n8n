@@ -53,9 +53,17 @@ import type { Contexto, Ferramenta } from './ferramenta.js';
  * aqui: um sistema que age sem conseguir registrar o ato é um sistema sem
  * prova. Por isso `registrar` pode lançar, e o chassi trata o lançamento como
  * recusa — em vez de seguir e "tentar gravar depois".
+ *
+ * `registrar` devolve `Promise<void> | void` DE PROPÓSITO. A auditoria de
+ * memória do teste é síncrona; a do marco 3 grava em PostgreSQL e será
+ * assíncrona. Se a assinatura fosse `void`, o chassi chamaria a gravação real
+ * sem esperar por ela, e o `try/catch` daqui **não pegaria** a falha — a
+ * promessa rejeitaria depois, sozinha, longe de qualquer bloqueio. A trava da
+ * D-77 continuaria passando no teste e deixaria de existir na produção, em
+ * silêncio. É o tipo de defeito que só aparece no dia do incidente.
  */
 export interface Auditoria {
-  registrar(evento: EventoDeAuditoria): void;
+  registrar(evento: EventoDeAuditoria): Promise<void> | void;
 }
 
 export interface EventoDeAuditoria {
@@ -106,6 +114,16 @@ export interface ConfiguracaoDoChassi {
 export interface Trilha {
   etapas: string[];
   executou: boolean;
+  /**
+   * A mensagem crua do fornecedor quando a execução falha.
+   *
+   * Fica AQUI e não no envelope: o agente lê conteúdo externo, e conteúdo
+   * externo é hostil (Regra 4). Devolver a ele `ECONNREFUSED 10.0.3.7:5432` ou
+   * o corpo de erro do Escavador conta sobre a nossa infraestrutura coisas que
+   * ele não tem por que saber. Quem precisa do detalhe é quem investiga — a
+   * trilha e, no marco 3, a auditoria.
+   */
+  detalheDaFalha?: string;
 }
 
 export async function executarChamada(
@@ -117,9 +135,9 @@ export async function executarChamada(
   const revogacao = cfg.revogacao ?? NADA_REVOGADO;
 
   /** Fecha a chamada: registra na auditoria e devolve o envelope. */
-  const encerrar = (etapa: string, erro: ErroInterno): Envelope<unknown> => {
+  const encerrar = async (etapa: string, erro: ErroInterno): Promise<Envelope<unknown>> => {
     try {
-      cfg.auditoria.registrar({
+      await cfg.auditoria.registrar({
         requisicao_id,
         inquilino_id: sessao.inquilino_id,
         usuario_id: sessao.usuario_id,
@@ -144,14 +162,14 @@ export async function executarChamada(
     return responderErro(erro, requisicao_id);
   };
 
-  const passo = (nome: string, d: Decisao): Envelope<unknown> | null => {
+  const passo = async (nome: string, d: Decisao): Promise<Envelope<unknown> | null> => {
     trilha.etapas.push(nome);
-    return d.permitido ? null : encerrar(nome, d.erro);
+    return d.permitido ? null : await encerrar(nome, d.erro);
   };
 
   // -- Etapa 2: sessão ------------------------------------------------------
   {
-    const parar = passo('sessao', etapaSessao(sessao, agora, revogacao));
+    const parar = await passo('sessao', etapaSessao(sessao, agora, revogacao));
     if (parar) return parar;
   }
 
@@ -161,13 +179,13 @@ export async function executarChamada(
   {
     trilha.etapas.push('inquilino');
     if (!sessao.inquilino_id.trim()) {
-      return encerrar('inquilino', erroInterno('sessão sem inquilino'));
+      return await encerrar('inquilino', erroInterno('sessão sem inquilino'));
     }
   }
 
   // -- Etapa 4: perfil ------------------------------------------------------
   {
-    const parar = passo(
+    const parar = await passo(
       'perfil',
       etapaPerfil(chamada.ferramenta, sessao.perfil, cfg.perfis),
     );
@@ -178,18 +196,18 @@ export async function executarChamada(
   if (!ferramenta) {
     // O perfil expõe uma ferramenta que não está registrada: erro de
     // configuração do servidor, não do agente.
-    return encerrar('registro', erroInterno('ferramenta exposta no perfil, mas não registrada'));
+    return await encerrar('registro', erroInterno('ferramenta exposta no perfil, mas não registrada'));
   }
 
   // -- Etapa 5: escopo ------------------------------------------------------
   const escopo = etapaEscopo(ferramenta.escopoLido, sessao.escopos);
   {
-    const parar = passo('escopo', escopo.decisao);
+    const parar = await passo('escopo', escopo.decisao);
     if (parar) return parar;
   }
   const abrangencia = escopo.abrangencia;
   if (!abrangencia) {
-    return encerrar('escopo', erroInterno('escopo permitido sem abrangência resolvida'));
+    return await encerrar('escopo', erroInterno('escopo permitido sem abrangência resolvida'));
   }
 
   // -- Etapa 7 ANTES da 6, e a inversão é deliberada ------------------------
@@ -204,20 +222,20 @@ export async function executarChamada(
   // revela existência de processo. As duas continuam antes de qualquer gasto.
   const validacao = validar(ferramenta.entrada, chamada.parametros);
   trilha.etapas.push('entrada');
-  if (!validacao.ok) return encerrar('entrada', validacao.erro);
+  if (!validacao.ok) return await encerrar('entrada', validacao.erro);
   const parametros = validacao.valor;
 
   // -- Etapa 6: abrangência -------------------------------------------------
   {
     const sujeitos = ferramenta.sujeito ? ferramenta.sujeito(parametros) : undefined;
-    const parar = passo('abrangencia', etapaAbrangencia(abrangencia, sujeitos, sessao));
+    const parar = await passo('abrangencia', etapaAbrangencia(abrangencia, sujeitos, sessao));
     if (parar) return parar;
   }
 
   // -- Etapa 8: faixa e aprovação -------------------------------------------
   {
     const resumo = `${ferramenta.nome}:${JSON.stringify(parametros)}`;
-    const parar = passo(
+    const parar = await passo(
       'aprovacao',
       etapaAprovacao(ferramenta.faixa, resumo, chamada.aprovacao, agora),
     );
@@ -234,18 +252,25 @@ export async function executarChamada(
     agora,
   };
 
-  let dados: unknown;
+  // -- Auditoria da autorização, ANTES da execução --------------------------
+  //
+  // ⚠️ A ORDEM AQUI É A PROPRIEDADE, NÃO UM DETALHE DE ESTILO.
+  //
+  // Até 31/08 este registro vinha DEPOIS de `ferramenta.executar`, e o efeito
+  // era o oposto do que a D-77 promete: com a auditoria fora do ar, o chassi
+  // chamava o fornecedor, gastava crédito ou enviava a mensagem, e só então
+  // descobria que não conseguiria registrar — devolvendo erro sobre um ato que
+  // já tinha acontecido. "Falha fecha" que fecha depois do fato não fecha nada.
+  //
+  // Registrar antes inverte o custo do engano: se a gravação falha, nada foi
+  // executado, e o pior desfecho é uma chamada legítima recusada. Recusar por
+  // excesso de zelo é reparável; agir sem prova não é.
+  //
+  // O evento diz `permitido` porque é isso que ele registra — a AUTORIZAÇÃO,
+  // não o desfecho. O que acontece depois na rede é outro fato, e o fracasso
+  // dele gera o seu próprio registro logo abaixo.
   try {
-    trilha.executou = true;
-    dados = await ferramenta.executar(parametros, ctx);
-  } catch (e) {
-    const detalhe = e instanceof Error ? e.message : 'falha desconhecida';
-    return encerrar('execucao', erroInterno(detalhe));
-  }
-
-  // -- Auditoria do sucesso, incondicional ----------------------------------
-  try {
-    cfg.auditoria.registrar({
+    await cfg.auditoria.registrar({
       requisicao_id,
       inquilino_id: sessao.inquilino_id,
       usuario_id: sessao.usuario_id,
@@ -259,9 +284,21 @@ export async function executarChamada(
     });
   } catch {
     return responderErro(
-      erroInterno('a auditoria está indisponível e a operação não pode ser confirmada'),
+      erroInterno('a auditoria está indisponível e nenhuma operação pode prosseguir sem registro'),
       requisicao_id,
     );
+  }
+
+  let dados: unknown;
+  try {
+    trilha.executou = true;
+    dados = await ferramenta.executar(parametros, ctx);
+  } catch (e) {
+    // O detalhe do fornecedor vai para a trilha, e a mensagem ao agente é
+    // genérica: erro cru de fornecedor conta ao agente coisas sobre a nossa
+    // infraestrutura que ele não tem por que saber (Regra 4).
+    trilha.detalheDaFalha = e instanceof Error ? e.message : 'falha desconhecida';
+    return await encerrar('execucao', erroInterno('a operação não pôde ser concluída no fornecedor'));
   }
 
   return responder(dados, { origem: 'api', requisicao_id });
