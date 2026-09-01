@@ -95,8 +95,21 @@ export async function reconstruir(
   const req = exigirUuid('requisicao_id', requisicao_id);
   const inq = exigirUuid('inquilino_id', inquilino_id);
 
-  const eventosCrus = await c.consultar<Record<string, unknown>>(LER_EVENTOS, [req, inq]);
-  const consumoCru = await c.consultar<Record<string, unknown>>(LER_CONSUMO, [req, inq]);
+  // As duas leituras na MESMA transacao, com o escritorio declarado. Juntas
+  // por dois motivos: a politica por linha da migracao 010 so enxerga dentro de
+  // uma transacao que declarou o inquilino, e reconstruir uma operacao a partir
+  // de dois retratos tirados em momentos diferentes pode devolver um evento sem
+  // o consumo que o acompanha.
+  //
+  // O `WHERE inquilino_id = $2` continua nas consultas, e nao virou redundancia:
+  // a politica e a rede de seguranca, o filtro e a intencao escrita. Quem ler o
+  // SQL daqui a um ano precisa ver de quem e o dado sem ter de saber que existe
+  // uma politica em outro arquivo.
+  const [eventosCrus, consumoCru] = await c.noInquilino(inq, async (cliente) => {
+    const ev = await cliente.query(LER_EVENTOS, [req, inq]);
+    const co = await cliente.query(LER_CONSUMO, [req, inq]);
+    return [ev.rows as Record<string, unknown>[], co.rows as Record<string, unknown>[]];
+  });
 
   // `bigint` e `numeric` chegam do `pg` como texto, de propósito: o driver não
   // arrisca perder precisão convertendo para `number`. Os ids ficam texto —
@@ -154,7 +167,8 @@ export async function negados(
   ate: Date,
 ): Promise<readonly EventoDaTrilha[]> {
   const inq = exigirUuid('inquilino_id', inquilino_id);
-  const linhas = await c.consultar<Record<string, unknown>>(
+  const linhas = await c.noInquilino(inq, async (cliente) => {
+    const r = await cliente.query(
     `SELECT id, momento, usuario_id, papel, canal, sessao_id, acao, resultado,
             parametros_resumidos ->> 'etapa'          AS etapa,
             parametros_resumidos ->> 'codigo_do_erro' AS codigo_do_erro,
@@ -165,8 +179,10 @@ export async function negados(
         AND momento     >= $2
         AND momento      < $3
       ORDER BY momento DESC`,
-    [inq, desde.toISOString(), ate.toISOString()],
-  );
+      [inq, desde.toISOString(), ate.toISOString()],
+    );
+    return r.rows as Record<string, unknown>[];
+  });
 
   return linhas.map((l) => ({
     id: String(l['id']),

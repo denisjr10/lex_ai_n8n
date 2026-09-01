@@ -2,17 +2,17 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-08-31 |
+| Atualizado em | 2026-09-01 |
 | Crédito Escavador | ✅ **R$ 44,00 de R$ 50,00** — R$ 47,00 conferidos no painel em 26/08, menos R$ 3,00 do Bloco E em 27/08. 21 requisições feitas; o painel batia linha a linha com o nosso registro na última conferência. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
 | ⏳ Aparição | **Ainda nenhuma**, em duas leituras (27/08 de madrugada e ao meio-dia), as duas gratuitas. Primeira leitura ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | 🟢 **O escritório respondeu** | **27/08.** Cinco perguntas que travavam o PRD voltaram: identidade individual **pelo Telegram** (D-147), advogado vê **a base inteira** (D-146), Trello é **visualização** (D-152), colaborador **também confere prazo** (D-145), e a infra é **do prestador** (D-148). **D-07 e D-09 estão resolvidas.** PRD na v2.0; D-142 a D-154 e R-46 a R-49 somados. Ver §"As respostas do escritório chegaram" |
-| 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Cinco dos doze achados abertos foram fechados em 31/08** — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, e a D-142 dentro do código (D-156). Ver §"Uma revisão externa passou no projeto inteiro" |
+| 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Onze dos doze achados foram fechados** — cinco em 31/08 e seis em 01/09 — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, a D-142 dentro do código (D-156), e o **isolamento entre escritórios em duas camadas** (D-157), **uso único de aprovação** (D-158) e os menores. Falta só o **HMAC no anonimizador, adiado por decisão do usuário até depois da apresentação** (D-159). Ver §"Uma revisão externa passou no projeto inteiro" |
 | Fase | **3 — construção.** **Marcos 1, 2 e 3 fechados e verificados**: monorepo e migrações; o chassi, com a matriz de escopo passando inteira; e **a auditoria, que grava, recusa alteração e reconstrói a operação pelo `requisicao_id`**. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **7 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **25 de 25 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **81 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, **52 verificações** desde a D-155), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **10 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **45 de 45 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **92 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, **52 verificações** desde a D-155), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -480,6 +480,34 @@ Isso **não** conserta a rota: pela D-142 aquele texto é livre, portanto **A3b*
 | **Segredo de justiça falhando aberto** | `false` explícito em `capturar.mjs`; terceiro estado `null` em `importar-autos.mjs`; `?? true` em `anonimizar.mjs`. **Achou um caso real:** o AUTOS-08, trabalhista do TRT8, não tem o rótulo na capa e vinha sendo importado como público havia uma semana | Importador marca ❓ e lista o problema |
 
 E mais uma que não estava na lista do revisor, porque nasceu da leitura dos documentos: **a D-142 entrou no código (D-156)**. `A3` puro deixou de existir, **A3b passou a exigir papel de advogado** — um estagiário aprovava comunicação externa até 31/08 — e A3a é recusada na carga enquanto o catálogo de gabaritos não existir.
+
+### O isolamento entre escritórios fechou — 01/09
+
+Era o achado que eu tinha classificado como **órfão no roteiro**: os dez marcos da Spec §15 não têm dono para ele, e o marco 1 já passou sem incluí-lo. Foi feito agora porque **agora é o momento mais barato que vai existir** — quatro fatos sustentam isso:
+
+| Fato | Por que importa |
+|---|---|
+| `lex_app` é papel comum, não dono das tabelas | Política por linha **não se aplica** ao dono nem a superusuário. A migração 007 já separava os dois por outro motivo — deixar a auditoria imutável — e a pré-condição difícil já estava satisfeita por acidente de bom desenho |
+| Havia **um** consumidor do banco | Um `SET LOCAL` num helper. Os marcos 4 a 9 trazem cinco consumidores novos, e cada um escrito antes seria mais um lugar para retrofit |
+| Não há dado em produção | As chaves compostas entraram `NOT NULL` sem preencher nada retroativamente |
+| 17 das 22 tabelas já tinham `inquilino_id` | As cinco de fora se explicam sozinhas: `inquilino` é a própria lista de escritórios; `identidade_externa` e `reserva_orcamento` penduram num pai único; `catalogo_preco` e `custo_observado` são dado do fornecedor, iguais para todo mundo |
+
+**Duas camadas, e nenhuma substitui a outra.** A 009 impede **escrita** inconsistente; a 010 impede **leitura** cruzada. Precisam das duas porque a conferência de chave estrangeira roda como dona da tabela e passa por cima da política — só a 009 fica entre um bug e um vínculo apontando para o cliente de outro escritório.
+
+**O preço, escrito para não virar surpresa:** conexão sem escritório declarado não vê nada, e o sintoma é **vazio, não erro** — que é confuso de diagnosticar. A defesa não está no SQL: está em `noInquilino(inquilino_id, …)`, a porta de todo acesso a dado de escritório, que exige o inquilino como argumento. Sem ele, não compila.
+
+**Provado nos dois sentidos, e é isso que separa a trava do comentário:**
+
+```
+COM a política, o escritório A vê: 0 cliente(s) do B
+SEM a política, o escritório A vê: 1 cliente(s) do B
+```
+
+O mesmo para a chave composta: com ela, `ERROR`; sem ela, `INSERT 0 1`. E o cenário das provas ganhou um **segundo escritório** — sem ele não há como afirmar isolamento, só funcionamento.
+
+> ⚠️ **Um susto no caminho, que vale mais que a correção.** O `INSERT` do escritório vizinho esqueceu a coluna `tipo` de `cliente`. O cenário inteiro passou a falhar, e com isso **todos** os casos `deveRecusar` passaram pelo motivo errado: o banco recusava, mas recusava o cenário, não a regra. Prova que falha antes de chegar na regra é prova que não prova nada — e ela ficou verde.
+
+**O que NÃO foi feito, e é decisão sua:** papéis separados por serviço (`lex_auditoria`, `lex_callback`, `lex_policy`). `conexao.ts` fixa `lex_app` e documenta que o papel é decisão de segurança, não de configuração; separar mexeria nessa trava, e isso merece ser deliberado em vez de sair como efeito colateral.
 
 ### O que a revisão achou e ainda está aberto
 

@@ -27,6 +27,8 @@
 
 import { Pool, type PoolClient } from 'pg';
 
+import { exigirUuid } from './identificador.js';
+
 /** O papel que este serviço tem de usar. Não é configurável de propósito. */
 export const PAPEL_ESPERADO = 'lex_app';
 
@@ -84,13 +86,37 @@ export function lerAmbiente(env: NodeJS.ProcessEnv = process.env): OpcoesDeConex
 }
 
 export interface Conexao {
-  /** Executa uma consulta. Lança em qualquer falha — falha fecha. */
+  /**
+   * Executa uma consulta **sem escritório declarado**.
+   *
+   * ⚠️ A partir da migração 010, dado de inquilino NÃO aparece por aqui. A
+   * política por linha filtra tudo o que tem `inquilino_id`, e uma conexão que
+   * não declarou o escritório não enxerga uma linha sequer. Isto continua
+   * servindo para o que é genuinamente global — `SELECT current_user`, o
+   * catálogo de preços do fornecedor, a tabela de migrações.
+   *
+   * Para dado de escritório existe `noInquilino`, e a diferença entre as duas
+   * não é estilo: é que uma delas obriga a dizer de quem é o dado.
+   */
   consultar<L extends Record<string, unknown>>(
     sql: string,
     valores?: readonly unknown[],
   ): Promise<L[]>;
-  /** Executa dentro de uma transação, com COMMIT ou ROLLBACK. */
-  emTransacao<T>(corpo: (c: PoolClient) => Promise<T>): Promise<T>;
+
+  /**
+   * Executa dentro de uma transação, **declarando de qual escritório se trata**.
+   *
+   * Esta é a porta de todo acesso a dado de inquilino. O `SET LOCAL` vale até o
+   * fim da transação e some com ela — o que importa num pool, onde a mesma
+   * conexão física atende escritórios diferentes em sequência. Uma variável que
+   * vazasse entre transações seria pior que não ter política nenhuma, porque
+   * pareceria estar funcionando.
+   *
+   * O inquilino é PARÂMETRO, e não algo lido de um contexto ambiente, porque
+   * ambiente se esquece de definir. Aqui não dá: sem o argumento, não compila.
+   */
+  noInquilino<T>(inquilino_id: string, corpo: (c: PoolClient) => Promise<T>): Promise<T>;
+
   encerrar(): Promise<void>;
 }
 
@@ -123,10 +149,20 @@ export function abrirConexao(opcoes: OpcoesDeConexao): Conexao {
       return r.rows as L[];
     },
 
-    async emTransacao<T>(corpo: (c: PoolClient) => Promise<T>): Promise<T> {
+    async noInquilino<T>(inquilino_id: string, corpo: (c: PoolClient) => Promise<T>): Promise<T> {
+      // Conferido ANTES de abrir transação: um uuid malformado viraria erro de
+      // sintaxe dentro do SET, e a mensagem do PostgreSQL não diria que o
+      // problema era o inquilino.
+      const inq = exigirUuid('inquilino_id', inquilino_id);
+
       const cliente = await pool.connect();
       try {
         await cliente.query('BEGIN');
+        // `set_config(..., true)` é o `SET LOCAL` em forma de função, e é a
+        // forma que aceita PARÂMETRO. `SET LOCAL lex.inquilino_id = $1` não
+        // existe: SET não parametriza, e montar o comando por concatenação
+        // seria abrir injeção de SQL na única linha que decide o isolamento.
+        await cliente.query('SELECT set_config($1, $2, true)', ['lex.inquilino_id', inq]);
         const resultado = await corpo(cliente);
         await cliente.query('COMMIT');
         return resultado;

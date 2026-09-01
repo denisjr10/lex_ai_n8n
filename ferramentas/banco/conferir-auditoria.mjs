@@ -113,6 +113,9 @@ try {
   }
 
   // O inquilino de teste precisa existir para as chaves estrangeiras fecharem.
+  // `inquilino` NAO tem politica por linha — ela E a lista de escritorios, e
+  // filtra-la pelo escritorio corrente impediria o proprio login de achar a
+  // linha. Por isso este INSERT ainda passa por `consultar`.
   await conexao.consultar(
     `INSERT INTO inquilino (id, nome) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`,
     [INQUILINO, 'Escritorio de Teste — conferir-auditoria'],
@@ -121,11 +124,16 @@ try {
   // exige inscricao para os papeis `socio` e `advogado`, e proibe para os
   // demais. E a Regra 2 no esquema — advogado sem OAB nao e advogado, e nao
   // teria como assinar um ato de faixa A4.
-  await conexao.consultar(
+  //
+  // Daqui para baixo tudo passa por `noInquilino`: com a politica por linha da
+  // migracao 010, um INSERT em tabela de inquilino sem escritorio declarado e
+  // recusado — e ler sem declarar devolve VAZIO, que e o sintoma confuso que a
+  // porta com argumento obrigatorio existe para evitar.
+  await conexao.noInquilino(INQUILINO, (cliente) => cliente.query(
     `INSERT INTO usuario (id, inquilino_id, nome, email, papel, numero_oab)
      VALUES ($1, $2, $3, $4, 'advogado', $5) ON CONFLICT (id) DO NOTHING`,
     [USUARIO, INQUILINO, 'Advogada de Teste', `teste-${USUARIO}@exemplo.invalido`, 'AP-000000'],
-  );
+  ));
   // A SESSAO PRECISA EXISTIR NO BANCO ANTES DE QUALQUER REGISTRO.
   //
   // `evento_auditoria.sessao_id` tem chave estrangeira para `sessao`. Isso
@@ -135,7 +143,7 @@ try {
   // trilha que aponta para uma sessao que ninguem consegue descrever nao
   // reconstroi nada. Mas e uma exigencia que o Policy Gate do marco 9 precisa
   // cumprir, e que nao estava escrita em lugar nenhum ate agora.
-  await conexao.consultar(
+  await conexao.noInquilino(INQUILINO, (cliente) => cliente.query(
     `INSERT INTO sessao (id, usuario_id, inquilino_id, canal, perfil, escopos,
                          sujeitos_autorizados, emitida_em, expira_em)
      VALUES ($1, $2, $3, 'telegram', 'advogado', $4, $5::jsonb, now() - interval '1 minute',
@@ -143,7 +151,7 @@ try {
      ON CONFLICT (id) DO NOTHING`,
     [SESSAO, USUARIO, INQUILINO, ['escavador:processo:read:any'],
      JSON.stringify({ processos: [CNJ], documentos: [] })],
-  );
+  ));
   ok('cenário criado — lex_app pode INSERT, que é o que ele precisa poder');
 
   const auditoria = criarAuditoriaPostgres(conexao);

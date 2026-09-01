@@ -117,7 +117,14 @@ export function criarAuditoriaPostgres(c: Conexao): AuditoriaPostgres {
   }
 
   async function registrarEDevolverId(evento: EventoDeAuditoria): Promise<string> {
-    const linhas = await c.consultar<{ id: string }>(INSERIR_EVENTO, valores(evento));
+    // Pela porta que exige o escritorio: com a politica por linha da migracao
+    // 010, um INSERT sem inquilino declarado e recusado pelo banco — e ser
+    // recusado e o comportamento certo, porque gravar prova sem saber de quem
+    // ela e nao e gravar prova.
+    const linhas = await c.noInquilino(evento.inquilino_id, async (cliente) => {
+      const r = await cliente.query(INSERIR_EVENTO, valores(evento));
+      return r.rows as { id: string }[];
+    });
     const id = linhas[0]?.id;
     if (id === undefined) {
       // `INSERT ... RETURNING` sem linha não deveria acontecer. Se acontecer,
@@ -147,7 +154,7 @@ export function criarAuditoriaPostgres(c: Conexao): AuditoriaPostgres {
         );
       }
 
-      return c.emTransacao(async (cliente) => {
+      return c.noInquilino(evento.inquilino_id, async (cliente) => {
         const ev = await cliente.query(INSERIR_EVENTO, valores(evento));
         const eventoId: unknown = ev.rows[0]?.id;
         if (eventoId === undefined) {

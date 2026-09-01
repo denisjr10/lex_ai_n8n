@@ -354,6 +354,63 @@ const CASOS = [
     'MATCH SIMPLE — "ninguem criou ainda" nao exige um usuario que nao existe'
   ),
 
+
+  // ---- 010: politica por linha -------------------------------------------
+  //
+  // Estas provas trocam de papel com SET LOCAL ROLE. Sem isso elas nao
+  // provariam nada: o conferidor conecta como `lex_dono`, que E o dono das
+  // tabelas, e politica por linha NAO se aplica ao dono. Rodar a prova com o
+  // papel errado daria verde num banco sem politica nenhuma.
+  //
+  // Sao `devePassar` com RAISE dentro: o sucesso e o bloco NAO levantar. Um
+  // SELECT que devolve zero linhas nao e erro, entao "nao enxergou" precisa
+  // virar afirmacao explicita para poder falhar.
+  devePassar(
+    'escritorio A nao enxerga cliente do escritorio B',
+    `SET LOCAL ROLE lex_app;
+     SELECT set_config('lex.inquilino_id', '11111111-1111-1111-1111-111111111111', true);
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM cliente;
+       IF n <> 0 THEN RAISE EXCEPTION 'enxergou % cliente(s) que nao sao deste escritorio', n; END IF;
+     END $$;`,
+    'a consulta que esquece o filtro deixa de vazar'
+  ),
+  devePassar(
+    'escritorio B enxerga o proprio cliente — isolar nao pode virar cegar',
+    `SET LOCAL ROLE lex_app;
+     SELECT set_config('lex.inquilino_id', '99999999-9999-9999-9999-999999999999', true);
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM cliente;
+       IF n <> 1 THEN RAISE EXCEPTION 'deveria ver 1 cliente proprio, viu %', n; END IF;
+     END $$;`,
+    'a metade que impede a trava de virar defeito'
+  ),
+  devePassar(
+    'conexao SEM escritorio declarado nao enxerga nada',
+    `SET LOCAL ROLE lex_app;
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM usuario;
+       IF n <> 0 THEN RAISE EXCEPTION 'sem inquilino declarado, enxergou % usuario(s)', n; END IF;
+     END $$;`,
+    'falha fechada: quem nao diz de quem trata nao ve ninguem'
+  ),
+  deveRecusar(
+    'gravar linha carimbada com o escritorio de outro',
+    `SET LOCAL ROLE lex_app;
+     SELECT set_config('lex.inquilino_id', '11111111-1111-1111-1111-111111111111', true);
+     INSERT INTO cliente (inquilino_id, nome, tipo)
+     VALUES ('99999999-9999-9999-9999-999999999999', 'Infiltrado', 'fisica');`,
+    'WITH CHECK — nao se le fora do escritorio, e nao se escreve nele'
+  ),
+  devePassar(
+    'gravar no proprio escritorio segue funcionando',
+    `SET LOCAL ROLE lex_app;
+     SELECT set_config('lex.inquilino_id', '11111111-1111-1111-1111-111111111111', true);
+     INSERT INTO cliente (inquilino_id, nome, tipo)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'Cliente Legitimo', 'fisica');`,
+    'o caminho de todo dia nao pode ficar barrado'
+  ),
+
 ];
 
 // ---------------------------------------------------------------------------
