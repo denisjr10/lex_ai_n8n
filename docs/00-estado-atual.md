@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-09-01 |
-| Crédito Escavador | ✅ **R$ 44,00 de R$ 50,00** — R$ 47,00 conferidos no painel em 26/08, menos R$ 3,00 do Bloco E em 27/08. 21 requisições feitas; o painel batia linha a linha com o nosso registro na última conferência. **O "teto de 16 requisições" não existe** (D-119): a cota é de dinheiro, e rota gratuita não consome nada. Expira **01/09** |
+| Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
-| 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08. **Remover até 22/09** — mas **não remova ainda**: falta capturar uma aparição, que é gratuita e é o último contrato não validado. Ver §"Assinaturas do Escavador" |
-| ⏳ Aparição | **Ainda nenhuma**, em duas leituras (27/08 de madrugada e ao meio-dia), as duas gratuitas. Primeira leitura ~13h depois de criada a vigilância: `items: []`, `Creditos-Utilizados: 0`. Vazio não é falha — diário publica em dia útil, e vigiamos o nome de uma advogada só. **Repetir a cada dia útil** |
+| 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08, renovação em **26/09**. ⚠️ **Com o saldo expirado, a remoção pela API pode ser recusada** (o 403 de saldo bloqueado veio antes do preço da rota, em 23/08). **Conferir no painel e remover por lá, ou pelo suporte, até 22/09.** Uma recarga com esta assinatura ainda ativa passa a financiar cobrança mensal que ninguém está olhando |
+| ⏳ Aparição | 🔴 **NUNCA CAPTURADA — é a perda real da expiração.** Três leituras, todas vazias e gratuitas (27/08 madrugada e meio-dia). O contrato da aparição de diário oficial — a peça que dispara prazo (D-62, E2) — segue **não medido**, conhecido só pelo OpenAPI, que a R-44 manda não tratar como fonte. Só se fecha com saldo novo |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | 🟢 **O escritório respondeu** | **27/08.** Cinco perguntas que travavam o PRD voltaram: identidade individual **pelo Telegram** (D-147), advogado vê **a base inteira** (D-146), Trello é **visualização** (D-152), colaborador **também confere prazo** (D-145), e a infra é **do prestador** (D-148). **D-07 e D-09 estão resolvidas.** PRD na v2.0; D-142 a D-154 e R-46 a R-49 somados. Ver §"As respostas do escritório chegaram" |
 | 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Onze dos doze achados foram fechados** — cinco em 31/08 e seis em 01/09 — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, a D-142 dentro do código (D-156), e o **isolamento entre escritórios em duas camadas** (D-157), **uso único de aprovação** (D-158) e os menores. Falta só o **HMAC no anonimizador, adiado por decisão do usuário até depois da apresentação** (D-159). Ver §"Uma revisão externa passou no projeto inteiro" |
@@ -631,7 +631,7 @@ Isso vira restrição de projeto, não detalhe operacional:
 - ~~**Nenhuma rota é gratuita agora.**~~ ✅ **Corrigido em 20/08 pelo Playground:** as rotas de *status* do ciclo assíncrono são **gratuitas**, e os preços vão de R$ 0,00 a R$ 3,00 — ver a seção do painel, abaixo
 - **A cota não revela a tabela de preços** — o custo é fixo. A pendência de preço por rota continua dependendo do painel autenticado
 - **16 chamadas validam contrato, não cobertura.** Autenticação, cobertura do plano (V1 e V2), formato dos dados e ciclo de webhook. Nada além disso
-- **Recarga paga é decisão do usuário**, tomada com o registro de execução à vista
+- **Recarga paga é decisão do usuário**, tomada com o registro de execução à vista — **e passou a ser necessária** desde 01/09 para qualquer chamada nova
 
 Registrado como **R-21** e decisões **D-47 a D-50**. O orçamento chamada a chamada está em `06-orcamento-de-chamadas-escavador.md` e **precisa de aval antes da primeira execução**.
 
@@ -778,17 +778,37 @@ Ver §"As respostas do escritório chegaram". **D-07 e D-09 resolvidas**, identi
 
 Quatro perguntas novas (4a, 4b, 4c, 20a–20d) e **os números** — franquia de aparições, tetos de bloco e de orçamento. O texto para a conversa com a advogada proprietária está pronto no **PRD §9.3.1**, e é o mais urgente dos dois: o número da franquia **não pode ser alterado depois de criado o monitoramento** (R-46).
 
-### O que sobrou de crédito, e o que ele ainda pode comprar
+### O saldo de teste expirou — 01/09/2026
 
-**R$ 44,00**, expirando em **01/09**. Sem teto de requisições, e rota gratuita não consome nada.
+**Gastamos R$ 6,00 de R$ 50,00.** Os R$ 44,00 restantes evaporaram: saldo de bônus não vira crédito e não se transfere. Não há recarga contratada, e recarga **não é autosserviço** — depende do comercial (R-22).
 
-| O que | Custo | Vale? |
-|---|---|---|
-| Aparição de diário | gratuito | **Sim** — é o contrato que falta |
-| Bloco D — formato dos erros | ~R$ 0,00 | Boa parte já foi respondida de graça pelo 403 de 23/08 e pelos 422 de 26/08 |
-| Um terceiro ramo (Justiça Federal, STJ) | ~R$ 3,00 | **Talvez.** O Bloco E mostrou que o contrato é o mesmo entre ramos; um terceiro ponto confirmaria a regra, mas o retorno já é menor |
+**O que o dinheiro não gasto não custou.** O objetivo declarado da cota nunca foi cobertura, foi **contrato** (§2 do orçamento), e o contrato foi validado quase inteiro por R$ 6,00:
 
-> ⚠️ **Crédito não usado evapora em 01/09.** Não há recarga contratada, e recarga é decisão do usuário, tomada com o registro à vista — nunca consequência de chamada exploratória.
+| Pergunta que travava arquitetura | Estado |
+|---|---|
+| O token autentica na V2? E na V1? | ✅ Sim, o mesmo token nas duas |
+| Envelope, paginação e modelo de envolvido, processo e movimentação | ✅ Medidos e gravados em `captura/respostas-brutas/` |
+| O ciclo assíncrono e o callback funcionam ponta a ponta? | ✅ Provado — solicitação `55413945`, n8n recebeu em 2 s |
+| O preço é por rota ou plano? | ✅ Medido: por rota (D-108). Há rotas gratuitas |
+| O contrato muda entre ramos da Justiça? | ✅ Não — TRT8 e TJAP têm o mesmo formato (§5.8) |
+| Como são os erros? | ✅ 403 e dois 422 reais, de graça |
+| Criar vigilância em diário: contrato, franquia, recorrência | ✅ id `2813617`, franquia 1000/mês |
+| **Como é uma aparição de diário oficial?** | 🔴 **NUNCA MEDIDA — a perda** |
+
+**A perda concreta é uma só, e é relevante:** a **aparição** é o gatilho de prazo da entrega E2, o coração da D-62. Sabemos criar a vigilância e sabemos que o callback chega; **não sabemos o formato do que chega quando o nome aparece no diário**. O que temos é o OpenAPI, e a R-44 registra três vezes em que a fonte oficial do Escavador disse uma coisa e o sistema fez outra.
+
+Perdas menores, de baixo impacto: o Bloco D formal (respondido de graça pelos erros reais), um terceiro ramo da Justiça (o Bloco E já mostrou o contrato estável) e a medição gratuita da R-46 (a franquia não editável).
+
+### Precisa de saldo novo para terminar? Depende de qual "terminar"
+
+| Frente | Precisa de crédito? |
+|---|---|
+| Marcos 4 (motor de custo) e 5 (cache), achados abertos da revisão, Spec Parte II, PRD, demos A e B | ❌ **Não.** As demos rodam sobre 8 processos reais anonimizados dos autos em PDF, sem tocar a API |
+| Fechar o contrato da aparição e validar E2 de ponta a ponta | ✅ **Sim** — e não tem substituto |
+| Reconciliar o motor de custo contra `Creditos-Utilizados` real | ✅ **Sim**, no fim do marco 4 |
+| Homologação e produção | ✅ **Sim, e a conta deve ser do escritório**, não do prestador — é consumo do cliente e responsabilidade dele (conversa com R-48) |
+
+**Recomendação de sequência:** construir até o marco 4 ficar pronto **sem crédito nenhum**, e só então pedir recarga, para que o crédito pago seja gasto pela máquina que mede e reconcilia — e não por script avulso. Antes de recarregar, **resolver a assinatura `2813617`**: recarga com ela ativa financia cobrança mensal esquecida (R-13).
 
 ### Depois
 
@@ -839,8 +859,8 @@ As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` 
 - ~~**URL pública de callback**~~ ✅ **De pé e provada em 26/08** — `callback.criativeia.com.br/webhook/escavador-callback`, validada nos dois caminhos
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
 - ~~Acesso à instância n8n~~ ✅ **Em uso** — chave de API guardada em `demo/n8n.local`, rotacionada em 26/08 depois de dois vazamentos (R-42)
-- **Aparição de diário oficial** — gratuita, e é o último contrato não validado. Rodar `aparicoes 2813617` até capturar uma
-- **Remover a assinatura `2813617`** até **22/09**, depois de capturada a aparição (D-121)
+- 🔴 **Aparição de diário oficial** — **não foi capturada, e o saldo expirou em 01/09.** Continua sendo o último contrato não validado, e agora **depende de recarga**. Ver §"O saldo de teste expirou"
+- ⚠️ **Resolver a assinatura `2813617`** até **22/09** — a D-121 (segurar até capturar a aparição) **caiu com a expiração**: não há mais como capturar sem recarga. Conferir o estado no painel; se a remoção pela API for recusada por saldo bloqueado, remover pelo painel ou pelo suporte. **E fazer isso antes de qualquer recarga**
 - ~~Acesso à instância n8n do cliente~~ ✅ **Resolvido em 27/08 (D-148)** — a instância é a do prestador, fornecida com o serviço. Cria obrigação contratual nova: sob a LGPD, o escritório é controlador e o prestador é operador (R-48). **Precisa de cláusula antes de o primeiro dado real entrar**
 - **Levar ao escritório os números e as quatro perguntas novas** — o texto para a advogada proprietária está pronto no PRD §9.3.1
 - **Aval sobre as decisões propostas — D-03 a D-152.** O PRD (v2.0) e a Spec Parte I (v1.2) aguardam junto. **D-142 a D-152 são as novas**, e três delas mudam desenho: a divisão da faixa A3 (D-142), o canal do cliente a custo zero (D-144) e a franquia de aparições não editável (D-150)
