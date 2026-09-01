@@ -15,7 +15,9 @@ import {
   definirFerramenta,
   montarPerfis,
   auditoriaEmMemoria,
+  aprovacoesEmMemoria,
   cnj,
+  inteiro,
   texto,
   umDe,
 } from '@lex/mcp-core';
@@ -46,7 +48,14 @@ export function criarFerramentas(fornecedor) {
     descricao: 'Consulta a capa de um processo pelo numero CNJ.',
     faixa: 'A1',
     escopo: 'escavador:processo:read',
-    entrada: { numero_cnj: cnj(), formato: umDe(['resumo', 'completo'], { obrigatorio: false }) },
+    // `limite` existe para exercitar o validador de INTEIRO, que aceitava
+    // '' , false e [] como zero. Opcional, para nao mexer nos testes que ja
+    // chamam esta ferramenta sem ele.
+    entrada: {
+      numero_cnj: cnj(),
+      formato: umDe(['resumo', 'completo'], { obrigatorio: false }),
+      limite: inteiro({ minimo: 1, maximo: 100, obrigatorio: false }),
+    },
     sujeito: (p) => ({ processos: [p.numero_cnj] }),
     custo: { rota: 'v2.processo.capa' },
     cache: 'estado_processo',
@@ -141,11 +150,36 @@ export function sessao(ajustes = {}) {
 export function montar(ajustesDaSessao = {}) {
   const fornecedor = criarFornecedor();
   const auditoria = auditoriaEmMemoria();
+  const aprovacoes = aprovacoesEmMemoria();
   return {
     fornecedor,
     auditoria,
-    cfg: { ferramentas: criarFerramentas(fornecedor), perfis: PERFIS, auditoria },
+    aprovacoes,
+    cfg: { ferramentas: criarFerramentas(fornecedor), perfis: PERFIS, auditoria, aprovacoes },
     sessao: sessao(ajustesDaSessao),
+  };
+}
+
+/**
+ * Uma aprovacao valida para ESTA chamada, nesta sessao.
+ *
+ * Existe para que os testes nao repitam os cinco campos de vinculo — e para que
+ * esquecer um deles seja erro de quem escreve o teste, nao um passa-livre. O
+ * `resumo_do_conteudo` e montado do mesmo jeito que o chassi monta: aprova-se o
+ * conteudo final, nunca a intencao.
+ */
+export function aprovacaoValida(ferramenta, parametros, s, ajustes = {}) {
+  return {
+    aprovacao_id: 'apr_1',
+    faixa: 'A3b',
+    aprovador_id: 'usr_014',
+    papel_do_aprovador: 'advogado',
+    status: 'aprovada',
+    expira_em: '2026-08-27T16:00:00.000Z',
+    inquilino_id: s.inquilino_id,
+    sessao_id: s.sessao_id,
+    resumo_do_conteudo: `${ferramenta}:${JSON.stringify(parametros)}`,
+    ...ajustes,
   };
 }
 

@@ -73,6 +73,18 @@ INSERT INTO usuario (id, inquilino_id, nome, email, papel, numero_oab) VALUES
 INSERT INTO usuario (id, inquilino_id, nome, email, papel) VALUES
   ('33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111',
    'Estagiario de Teste', 'est@teste.invalido', 'estagiario');
+
+-- O SEGUNDO ESCRITORIO. Sem ele nao ha como provar isolamento: um cenario com
+-- um inquilino so consegue afirmar que o sistema funciona, nunca que ele
+-- separa. As chaves compostas da migracao 009 existem para o caso de dois.
+INSERT INTO inquilino (id, nome) VALUES
+  ('99999999-9999-9999-9999-999999999999', 'Escritorio Vizinho');
+INSERT INTO usuario (id, inquilino_id, nome, email, papel, numero_oab) VALUES
+  ('88888888-8888-8888-8888-888888888888', '99999999-9999-9999-9999-999999999999',
+   'Advogado Vizinho', 'adv@vizinho.invalido', 'advogado', 'AP-0002');
+INSERT INTO cliente (id, inquilino_id, nome, tipo) VALUES
+  ('77777777-7777-7777-7777-777777777777', '99999999-9999-9999-9999-999999999999',
+   'Cliente do Vizinho', 'fisica');
 `;
 const FIM = '\nROLLBACK;\n';
 
@@ -211,6 +223,137 @@ const CASOS = [
      VALUES ('11111111-1111-1111-1111-111111111111', 'prazo');`,
     'alerta sem origem ninguem confere'
   ),
+
+  // ---- 008: a faixa que se dividiu (D-142, D-156) -------------------------
+  deveRecusar(
+    'aprovacao na faixa A3, que deixou de existir',
+    `INSERT INTO aprovacao (inquilino_id, faixa, acao_proposta, conteudo_proposto,
+                            solicitante, papel_exigido, expira_em)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'A3', 'enviar_ao_cliente', '{}',
+             'agente', 'advogado', now() + interval '1 day');`,
+    'D-142 — A3 virou A3a e A3b'
+  ),
+  devePassar(
+    'aprovacao A3b assinada por advogado',
+    `INSERT INTO aprovacao (inquilino_id, faixa, acao_proposta, conteudo_proposto,
+                            solicitante, papel_exigido, expira_em)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'A3b', 'enviar_ao_cliente', '{}',
+             'agente', 'advogado', now() + interval '1 day');`,
+    'o caminho legitimo nao pode ficar barrado'
+  ),
+  deveRecusar(
+    'comunicacao externa em texto livre exigindo apenas estagiario',
+    `INSERT INTO aprovacao (inquilino_id, faixa, acao_proposta, conteudo_proposto,
+                            solicitante, papel_exigido, expira_em)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'A3b', 'enviar_ao_cliente', '{}',
+             'agente', 'estagiario', now() + interval '1 day');`,
+    'D-156 — A3b exige advogado'
+  ),
+  devePassar(
+    'envio por gabarito pre-aprovado nao exige advogado na hora',
+    `INSERT INTO aprovacao (inquilino_id, faixa, acao_proposta, conteudo_proposto,
+                            solicitante, papel_exigido, expira_em)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'A3a', 'avisar_movimentacao', '{}',
+             'agente', 'estagiario', now() + interval '1 day');`,
+    'D-142 — em A3a o advogado aprovou o gabarito antes'
+  ),
+
+  // ---- 008: aprovacao se gasta uma vez ------------------------------------
+  deveRecusar(
+    'marcar como usada uma aprovacao que nao foi aprovada',
+    `INSERT INTO aprovacao (id, inquilino_id, faixa, acao_proposta, conteudo_proposto,
+                            solicitante, papel_exigido, expira_em, status, usado_em)
+     VALUES ('44444444-4444-4444-4444-444444444444',
+             '11111111-1111-1111-1111-111111111111', 'A3b', 'enviar_ao_cliente', '{}',
+             'agente', 'advogado', now() + interval '1 day', 'pendente', now());`,
+    'estado impossivel que o banco aceita e estado que um dia aparece'
+  ),
+
+  // ---- 008: CHECK que passava com NULL ------------------------------------
+  deveRecusar(
+    'rota classificada como gratuita SEM preco medido',
+    `INSERT INTO catalogo_preco (fornecedor, rota, classificacao, lido_em, fonte)
+     VALUES ('escavador', 'v1.origens', 'gratuita', current_date, 'medicao');`,
+    'D-108 — gratuito se confirma pela medicao, nunca por suposicao'
+  ),
+  devePassar(
+    'rota gratuita COM zero medido e escrito',
+    `INSERT INTO catalogo_preco (fornecedor, rota, classificacao, preco_centavos, lido_em, fonte)
+     VALUES ('escavador', 'v1.origens', 'gratuita', 0, current_date, 'medicao');`,
+    'o zero medido e um fato, e entra'
+  ),
+
+  // ---- 008: a forma de sujeitos_autorizados -------------------------------
+  deveRecusar(
+    'sessao com sujeitos_autorizados na forma antiga de lista',
+    `INSERT INTO sessao (usuario_id, inquilino_id, canal, perfil, sujeitos_autorizados, expira_em)
+     VALUES ('22222222-2222-2222-2222-222222222222',
+             '11111111-1111-1111-1111-111111111111', 'painel', 'advogado',
+             '[]'::jsonb, now() + interval '15 minutes');`,
+    'lista viraria objeto sem `processos`, e undefined em abrangencia libera'
+  ),
+  devePassar(
+    'sessao usando o DEFAULT da coluna',
+    `INSERT INTO sessao (usuario_id, inquilino_id, canal, perfil, expira_em)
+     VALUES ('22222222-2222-2222-2222-222222222222',
+             '11111111-1111-1111-1111-111111111111', 'painel', 'advogado',
+             now() + interval '15 minutes');`,
+    'o default nasce na forma certa'
+  ),
+
+
+  // ---- 009: o banco recusa referencia entre escritorios -------------------
+  deveRecusar(
+    'sessao do escritorio A para um usuario do escritorio B',
+    `INSERT INTO sessao (usuario_id, inquilino_id, canal, perfil, expira_em)
+     VALUES ('88888888-8888-8888-8888-888888888888',
+             '11111111-1111-1111-1111-111111111111', 'painel', 'advogado',
+             now() + interval '15 minutes');`,
+    'chave composta — a sessao de um escritorio nao autentica gente de outro'
+  ),
+  deveRecusar(
+    'vinculo de WhatsApp do escritorio A para um cliente do escritorio B',
+    `INSERT INTO vinculo_canal_cliente (inquilino_id, cliente_id, canal, identificador)
+     VALUES ('11111111-1111-1111-1111-111111111111',
+             '77777777-7777-7777-7777-777777777777', 'whatsapp', '+5596999990000');`,
+    'era a porta para responder dado de cliente alheio a um numero cadastrado'
+  ),
+  deveRecusar(
+    'processo do escritorio A sob responsabilidade de advogado do escritorio B',
+    `INSERT INTO processo (inquilino_id, numero_cnj, advogado_responsavel_id)
+     VALUES ('11111111-1111-1111-1111-111111111111', '0000132-06.2025.5.08.0205',
+             '88888888-8888-8888-8888-888888888888');`,
+    'responsabilidade processual nao atravessa escritorio'
+  ),
+  deveRecusar(
+    'aprovacao do escritorio A assinada por advogado do escritorio B',
+    `INSERT INTO aprovacao (inquilino_id, faixa, acao_proposta, conteudo_proposto,
+                            solicitante, papel_exigido, expira_em, status,
+                            aprovador_id, decidida_em)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'A3b', 'enviar_ao_cliente', '{}',
+             'agente', 'advogado', now() + interval '1 day', 'aprovada',
+             '88888888-8888-8888-8888-888888888888', now());`,
+    'Regra 2 — a assinatura tem de ser de quem responde por aquele escritorio'
+  ),
+  devePassar(
+    'cada escritorio referenciando o proprio pessoal',
+    `INSERT INTO sessao (usuario_id, inquilino_id, canal, perfil, expira_em)
+     VALUES ('22222222-2222-2222-2222-222222222222',
+             '11111111-1111-1111-1111-111111111111', 'painel', 'advogado',
+             now() + interval '15 minutes');
+     INSERT INTO sessao (usuario_id, inquilino_id, canal, perfil, expira_em)
+     VALUES ('88888888-8888-8888-8888-888888888888',
+             '99999999-9999-9999-9999-999999999999', 'painel', 'advogado',
+             now() + interval '15 minutes');`,
+    'dois escritorios convivem — isolar nao pode virar travar'
+  ),
+  devePassar(
+    'coluna opcional continua aceitando nulo',
+    `INSERT INTO item_vigiado (inquilino_id, tipo, valor)
+     VALUES ('11111111-1111-1111-1111-111111111111', 'oab', 'AP-0001');`,
+    'MATCH SIMPLE — "ninguem criou ainda" nao exige um usuario que nao existe'
+  ),
+
 ];
 
 // ---------------------------------------------------------------------------

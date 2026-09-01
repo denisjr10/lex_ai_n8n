@@ -209,6 +209,23 @@ export interface AprovacaoApresentada {
   readonly expira_em: string;
   /** Resumo do conteúdo aprovado — aprova-se o conteúdo final, não a intenção. */
   readonly resumo_do_conteudo: string;
+
+  /**
+   * De QUEM é esta aprovação — o escritório e a sessão em que ela nasceu.
+   *
+   * Sem estes dois campos a aprovação é um crachá sem foto: ela prova que
+   * alguém aprovou alguma coisa, não que foi ESTE escritório, nesta conversa.
+   * Uma aprovação do escritório A, apresentada numa sessão do escritório B para
+   * a mesma ferramenta com os mesmos parâmetros, passava — e "mesma ferramenta
+   * com os mesmos parâmetros" é o caso comum, não o exótico: consultar o mesmo
+   * número de processo é exatamente o que dois escritórios fariam.
+   *
+   * `sessao_id` é o que impede a aprovação de atravessar conversas. O advogado
+   * aprova dentro de um contexto — aquela pergunta, daquele cliente, naquele
+   * atendimento — e a autorização não deveria sobreviver a ele.
+   */
+  readonly inquilino_id: string;
+  readonly sessao_id: string;
 }
 
 /**
@@ -225,6 +242,7 @@ export function etapaAprovacao(
   resumoDoConteudo: string,
   aprovacao: AprovacaoApresentada | undefined,
   agora: Date,
+  sessao: Sessao,
 ): Decisao {
   if (!exigeAprovacao(faixa)) return PERMITIDO;
 
@@ -233,6 +251,19 @@ export function etapaAprovacao(
     : 'advogado';
 
   if (!aprovacao) return negar(precisaAprovacao(faixa, quem));
+
+  // A APROVAÇÃO PRECISA SER DESTE ESCRITÓRIO E DESTA CONVERSA.
+  //
+  // Comparação exata, e a recusa é a mesma de "não há aprovação" — quem
+  // apresenta uma aprovação de outro contexto não fica sabendo se ela existe,
+  // se venceu ou se é de outro escritório. Distinguir os casos na mensagem
+  // seria contar, a quem tenta, qual metade da tentativa funcionou.
+  if (aprovacao.inquilino_id !== sessao.inquilino_id) {
+    return negar(precisaAprovacao(faixa, quem));
+  }
+  if (aprovacao.sessao_id !== sessao.sessao_id) {
+    return negar(precisaAprovacao(faixa, quem));
+  }
   if (aprovacao.status !== 'aprovada') return negar(precisaAprovacao(faixa, quem));
   if (aprovacao.faixa !== faixa) return negar(precisaAprovacao(faixa, quem));
 

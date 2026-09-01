@@ -126,6 +126,20 @@ export function inteiro(
   return {
     obrigatorio: opcoes.obrigatorio ?? true,
     ler(bruto, nome) {
+      // `Number()` DIZ SIM PARA COISAS QUE NÃO SÃO NÚMERO, e três delas viram
+      // zero: `Number('')`, `Number(false)` e `Number([])`. Todas passavam por
+      // `Number.isInteger` e chegavam à ferramenta como um `0` que ninguém
+      // escreveu — um limite, uma página, uma quantidade, silenciosamente zero.
+      //
+      // O conserto não é testar as três: é aceitar só o que de fato representa
+      // um número. Texto numérico continua valendo, porque parâmetro que chega
+      // por JSON de agente frequentemente vem como texto, e recusar "12" seria
+      // rigor sem propósito. Texto VAZIO, não: vazio é ausência de valor, e
+      // ausência é assunto de `obrigatorio`, nunca de conversão.
+      const ehTextoNumerico = typeof bruto === 'string' && bruto.trim() !== '';
+      if (typeof bruto !== 'number' && !ehTextoNumerico) {
+        return { ok: false, erro: parametroInvalido(nome, 'precisa ser um número inteiro') };
+      }
       const n = typeof bruto === 'number' ? bruto : Number(bruto);
       if (!Number.isInteger(n)) {
         return { ok: false, erro: parametroInvalido(nome, 'precisa ser um número inteiro') };
@@ -202,6 +216,21 @@ export function validar<E extends Esquema>(
   esquema: E,
   bruto: Readonly<Record<string, unknown>>,
 ): Validacao<Lido<E>> {
+  // O TIPO DIZ `Record`, MAS O VALOR VEM DA REDE.
+  //
+  // `parametros` chega de um JSON que o agente montou, e `null` é JSON válido.
+  // `Object.keys(null)` lança TypeError — e lançar aqui é diferente de recusar
+  // aqui: o chassi devolveria uma exceção crua em vez do envelope de erro que
+  // toda recusa produz, saindo pela porta que não passa pela tradução de erro.
+  // Assinatura de tipo não protege de entrada externa; ela descreve o contrato
+  // que o chamador deveria cumprir, e conteúdo externo é hostil (Regra 4).
+  if (bruto === null || typeof bruto !== 'object' || Array.isArray(bruto)) {
+    return {
+      ok: false,
+      erro: parametroInvalido('parametros', 'precisa ser um objeto com os parâmetros da ferramenta'),
+    };
+  }
+
   const conhecidos = new Set(Object.keys(esquema));
   for (const nome of Object.keys(bruto)) {
     if (!conhecidos.has(nome)) {

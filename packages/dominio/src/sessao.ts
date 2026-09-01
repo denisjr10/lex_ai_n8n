@@ -68,6 +68,20 @@ export function sessaoVigente(sessao: Sessao, agora: Date): boolean {
   if (Number.isNaN(expira) || Number.isNaN(emitida)) return false;
   // Data ilegível é sessão inválida, não sessão eterna. Falha fecha.
   if (expira <= emitida) return false;
+
+  // A janela tem DOIS lados, e por muito tempo só o de cima era conferido.
+  //
+  // Uma sessão emitida no futuro passava: bastava `emitida_em` adiantado e
+  // `expira_em` mais adiantado ainda para ter uma sessão válida hoje, amanhã e
+  // no mês que vem. Em produção quem emite é o banco, com `now()`, então o caso
+  // não nasce sozinho — ele nasce de relógio errado no servidor, de fuso
+  // aplicado duas vezes, ou de sessão forjada por quem consiga montar o objeto.
+  //
+  // Conferir os dois lados custa uma comparação. Confiar em que o lado de baixo
+  // nunca vai importar é a mesma aposta que já perdemos no segredo de justiça:
+  // o caso improvável é exatamente aquele em que a trava precisava existir.
+  if (agora.getTime() < emitida) return false;
+
   return agora.getTime() < expira;
 }
 

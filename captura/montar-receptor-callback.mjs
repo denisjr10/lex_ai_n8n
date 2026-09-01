@@ -73,6 +73,24 @@ if (fs.existsSync(arqToken)) {
   tokenEsperado = decodificar(fs.readFileSync(arqToken)).replace(/\s+/g, '') || null;
 }
 
+// A frase de aviso virou trava.
+//
+// A mensagem logo abaixo sempre disse "só para ver o JSON, nunca para publicar
+// em endereço público" — e isso era uma FRASE, não um impedimento. Nada barrava
+// `--sem-validacao --publicar`, e o resultado seria um receptor no ar aceitando
+// entrega de qualquer origem, sem conferir o token do Escavador. O caminho
+// perigoso não pode depender de alguém ter lido o parágrafo certo.
+if (semValidacao && publicar) {
+  console.log(`\n${cor.neg}Receptor de callback do Escavador${cor.off}\n`);
+  morrer(
+    '--sem-validacao nao combina com --publicar.\n\n' +
+    '      Sem validacao o receptor aceita QUALQUER entrega, de qualquer origem.\n' +
+    '      Isso serve para inspecionar o JSON gerado; nunca para deixar no ar.\n\n' +
+    '      Para ver o fluxo sem publicar:  --sem-validacao\n' +
+    '      Para publicar de verdade:       grave o token e rode sem a bandeira'
+  );
+}
+
 if (!tokenEsperado && !semValidacao) {
   console.log(`\n${cor.neg}Receptor de callback do Escavador${cor.off}\n`);
   morrer(

@@ -65,6 +65,19 @@ test('data ilegível é sessão inválida, não sessão eterna', () => {
   );
 });
 
+test('sessão emitida no futuro não vale ainda — a janela tem dois lados', () => {
+  // Só o lado de cima era conferido. Bastava `emitida_em` adiantado e
+  // `expira_em` mais adiantado ainda para ter uma sessão válida hoje, amanhã e
+  // no mês que vem. Em produção quem emite é o banco com now(), então o caso
+  // não nasce sozinho: nasce de relógio errado, de fuso aplicado duas vezes,
+  // ou de sessão forjada por quem consiga montar o objeto.
+  const futura = {
+    emitida_em: '2026-08-27T13:00:00.000Z',  // uma hora depois de AGORA
+    expira_em: '2026-09-27T13:00:00.000Z',
+  };
+  assert.equal(sessaoVigente(futura, AGORA), false);
+});
+
 // ---------------------------------------------------------------------------
 // Tradução de erro — Spec §10
 // ---------------------------------------------------------------------------
@@ -324,9 +337,11 @@ const APROVACAO_BASE = {
 };
 
 /** Aprovação para a chamada exata — aprova-se o conteúdo final, não a intenção. */
-function aprovacaoPara(ferramenta, parametros, ajustes = {}) {
+function aprovacaoPara(ferramenta, parametros, sessao, ajustes = {}) {
   return {
     ...APROVACAO_BASE,
+    inquilino_id: sessao.inquilino_id,
+    sessao_id: sessao.sessao_id,
     ...ajustes,
     resumo_do_conteudo: `${ferramenta}:${JSON.stringify(parametros)}`,
   };
@@ -341,7 +356,7 @@ test('estagiário NÃO aprova comunicação externa, mesmo com a aprovação em 
 
   const r = await executarChamada(base.cfg, {
     ...chamada('enviar_ao_cliente', parametros, base.sessao),
-    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, { papel_do_aprovador: 'estagiario' }),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, base.sessao, { papel_do_aprovador: 'estagiario' }),
   });
 
   assert.equal(ehErro(r), true, 'estagiário aprovou envio ao cliente e a mensagem saiu');
@@ -355,11 +370,113 @@ test('advogado aprova a mesma chamada, e ela sai', async () => {
 
   const r = await executarChamada(base.cfg, {
     ...chamada('enviar_ao_cliente', parametros, base.sessao),
-    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, base.sessao),
   });
 
   assert.equal(ehErro(r), false);
   assert.equal(base.fornecedor.estado.chamadas, 1);
+});
+
+// ---------------------------------------------------------------------------
+// A aprovação vale UMA vez, neste escritório, nesta conversa
+// ---------------------------------------------------------------------------
+
+test('a mesma aprovação não serve duas vezes', async () => {
+  // O caso real não é o atacante: é a retentativa. A camada de cima repete a
+  // chamada por timeout de rede, apresenta a mesma aprovação, e sai uma segunda
+  // mensagem ao cliente com a assinatura de um advogado que autorizou uma.
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia! Seu processo teve andamento.' };
+  const aprovacao = aprovacaoPara('enviar_ao_cliente', parametros, base.sessao);
+
+  const primeira = await executarChamada(base.cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao), aprovacao,
+  });
+  assert.equal(ehErro(primeira), false, 'a primeira deveria passar');
+  assert.equal(base.fornecedor.estado.chamadas, 1);
+
+  const segunda = await executarChamada(base.cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao), aprovacao,
+  });
+  assert.equal(ehErro(segunda), true, 'a aprovação foi aceita duas vezes');
+  assert.equal(base.fornecedor.estado.chamadas, 1,
+    'a segunda chamada executou — a mensagem saiu duas vezes com uma assinatura só');
+});
+
+test('aprovação de outro escritório não vale nesta sessão', async () => {
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia!' };
+
+  const r = await executarChamada(base.cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, base.sessao, {
+      inquilino_id: 'inq_de_outro_escritorio',
+    }),
+  });
+
+  assert.equal(ehErro(r), true);
+  assert.equal(base.fornecedor.estado.chamadas, 0);
+});
+
+test('aprovação de outra sessão não atravessa a conversa', async () => {
+  // O advogado aprova dentro de um contexto — aquela pergunta, daquele cliente,
+  // naquele atendimento. A autorização não deveria sobreviver a ele.
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia!' };
+
+  const r = await executarChamada(base.cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, base.sessao, {
+      sessao_id: 'ses_de_ontem',
+    }),
+  });
+
+  assert.equal(ehErro(r), true);
+  assert.equal(base.fornecedor.estado.chamadas, 0);
+});
+
+test('sem registro de aprovações, faixa que exige aprovação não sai', async () => {
+  // Enquanto o marco 9 não existir, `aprovacoes` é opcional na configuração —
+  // e opcional NÃO pode significar liberado. Quem montar o chassi sem ele fica
+  // com as faixas A3b e A4 travadas, que é o estado seguro.
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const cfg = { ...base.cfg, aprovacoes: undefined };
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia!' };
+
+  const r = await executarChamada(cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, base.sessao),
+  });
+
+  assert.equal(ehErro(r), true);
+  assert.equal(base.fornecedor.estado.chamadas, 0);
+});
+
+test('registro de aprovações indisponível bloqueia — não saber fecha', async () => {
+  const base = montar({ escopos: ['escritorio:mensagem:write:carteira'] });
+  const cfg = {
+    ...base.cfg,
+    aprovacoes: { consumir: async () => { throw new Error('banco fora do ar'); } },
+  };
+  const parametros = { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Bom dia!' };
+
+  const r = await executarChamada(cfg, {
+    ...chamada('enviar_ao_cliente', parametros, base.sessao),
+    aprovacao: aprovacaoPara('enviar_ao_cliente', parametros, base.sessao),
+  });
+
+  assert.equal(ehErro(r), true);
+  assert.equal(base.fornecedor.estado.chamadas, 0,
+    'sem saber se a aprovação estava inteira, a mensagem saiu assim mesmo');
+});
+
+test('faixa que NÃO exige aprovação não gasta aprovação nenhuma', async () => {
+  // A1 não passa pelo registro. Se passasse, uma consulta teria o poder de
+  // queimar uma autorização que ninguém pediu para usar.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const r = await executarChamada(base.cfg, chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao));
+  assert.equal(ehErro(r), false);
+  assert.equal(base.aprovacoes.gastas.size, 0);
 });
 
 test('a faixa A3 pura deixou de existir, e a recusa ensina a escolher', () => {
@@ -394,6 +511,56 @@ test('A3a não pode ser declarada enquanto o catálogo de gabaritos não existir
     }),
     /gabarito/i,
   );
+});
+
+// ---------------------------------------------------------------------------
+// Validação de entrada — o que Number() aceita e não devia
+// ---------------------------------------------------------------------------
+
+test('texto vazio, false e lista vazia NÃO viram o inteiro zero', async () => {
+  // `Number('')`, `Number(false)` e `Number([])` valem 0, e os três passavam
+  // por Number.isInteger. Chegavam à ferramenta como um zero que ninguém
+  // escreveu — um limite, uma página, uma quantidade, silenciosamente zero.
+  // `null` fica FORA desta lista de propósito: o validador trata null e
+  // undefined como "campo ausente", e para um campo opcional ausente é uma
+  // resposta legítima. Em campo obrigatório, null é recusado — o caso logo
+  // abaixo prova isso.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  for (const valor of ['', false, [], {}]) {
+    const r = await executarChamada(
+      base.cfg,
+      chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA, limite: valor }, base.sessao),
+    );
+    assert.equal(ehErro(r), true, `${JSON.stringify(valor)} foi aceito como inteiro`);
+    assert.equal(r.erro.codigo, 'parametro_invalido');
+  }
+});
+
+test('null em campo OBRIGATÓRIO é recusado', async () => {
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const r = await executarChamada(base.cfg, chamada('consultar_processo', { numero_cnj: null }, base.sessao));
+  assert.equal(ehErro(r), true);
+  assert.equal(base.fornecedor.estado.chamadas, 0);
+});
+
+test('texto numérico continua valendo — rigor sem propósito recusa "12"', async () => {
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const r = await executarChamada(
+    base.cfg,
+    chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA, limite: '12' }, base.sessao),
+  );
+  assert.equal(ehErro(r), false);
+});
+
+test('parametros null vira recusa com envelope, não exceção crua', async () => {
+  // O tipo diz Record, mas o valor vem da rede, e `null` é JSON válido.
+  // Object.keys(null) lança — e lançar sai por uma porta que não passa pela
+  // tradução de erro, devolvendo exceção onde deveria haver envelope.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const r = await executarChamada(base.cfg, chamada('consultar_processo', null, base.sessao));
+  assert.equal(ehErro(r), true);
+  assert.equal(r.erro.codigo, 'parametro_invalido');
+  assert.equal(base.fornecedor.estado.chamadas, 0);
 });
 
 // ---------------------------------------------------------------------------
@@ -458,6 +625,8 @@ test('a auditoria guarda QUAL aprovação autorizou o ato', async () => {
     papel_do_aprovador: 'advogado',
     status: 'aprovada',
     expira_em: '2026-08-27T12:05:00.000Z',
+    inquilino_id: s.inquilino_id,
+    sessao_id: s.sessao_id,
     resumo_do_conteudo: `peticionar:${JSON.stringify({ numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' })}`,
   };
 

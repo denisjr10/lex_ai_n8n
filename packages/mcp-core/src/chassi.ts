@@ -24,6 +24,8 @@
 import {
   ehErro,
   erroInterno,
+  exigeAprovacao,
+  precisaAprovacao,
   responder,
   responderErro,
   type Decisao,
@@ -98,6 +100,67 @@ export function auditoriaEmMemoria(): Auditoria & { eventos: EventoDeAuditoria[]
   return { eventos, registrar: (e) => void eventos.push(e) };
 }
 
+/**
+ * O registro de aprovações, do ponto de vista do chassi: **uma porta com uma
+ * função só — gastar a aprovação, e dizer se ela ainda estava inteira.**
+ *
+ * POR QUE ISTO NÃO É `buscarAprovacao`. O chassi não busca aprovação; ele
+ * confere a que recebeu, e essa regra não mudou. Buscar seria dar ao servidor
+ * MCP o poder de decidir que uma aprovação serve. Consumir é o oposto: a
+ * decisão humana já veio pronta, e o que se faz aqui é registrar que ela foi
+ * USADA — uma vez, e nunca mais.
+ *
+ * POR QUE O CHASSI SOZINHO NÃO RESOLVE ISSO. Conferir "já foi usada?" e depois
+ * marcar "agora foi" são dois passos, e entre eles cabe uma segunda chamada.
+ * Duas execuções simultâneas passariam pelo `if` as duas — é a mesma *race
+ * condition* (duas tarefas correndo ao mesmo tempo e atrapalhando uma à outra)
+ * que a unicidade do `evento_callback` resolve no banco. Por isso a operação é
+ * atômica e vive de fora: quem implementa faz o `UPDATE ... WHERE usado_em IS
+ * NULL` e olha quantas linhas mudou. Uma linha, era a primeira vez. Zero
+ * linhas, já tinham gastado.
+ *
+ * A INTERFACE NASCE ANTES DA IMPLEMENTAÇÃO, DE PROPÓSITO. É o mesmo caminho da
+ * `Auditoria`, que existiu como porta durante dois marcos antes de o marco 3
+ * preenchê-la — e o resultado foi que a auditoria nasceu obrigatória em vez de
+ * ganhar obrigatoriedade depois. Uso único tem a mesma natureza: é fácil de
+ * exigir enquanto ninguém depende de poder repetir, e difícil de introduzir
+ * depois que algum fluxo passou a reapresentar a mesma aprovação.
+ *
+ * Quem preenche é o **marco 9** (Policy Gate).
+ */
+export interface RegistroDeAprovacoes {
+  /**
+   * Marca a aprovação como usada, **atomicamente**.
+   *
+   * Devolve `true` se esta chamada foi quem a gastou; `false` se ela já estava
+   * gasta. Lançar significa "não sei" — e não saber, aqui, fecha: sem certeza
+   * de que a aprovação estava inteira, a ação não sai.
+   */
+  consumir(aprovacao_id: string, inquilino_id: string): Promise<boolean>;
+}
+
+/**
+ * Registro de aprovações em memória, para teste. Em produção entra o marco 9.
+ *
+ * `gastas` fica exposto de propósito: um teste de uso único precisa poder
+ * afirmar que a segunda tentativa não gastou nada de novo, e não só que ela foi
+ * recusada.
+ */
+export function aprovacoesEmMemoria(): RegistroDeAprovacoes & { gastas: Set<string> } {
+  const gastas = new Set<string>();
+  return {
+    gastas,
+    consumir: async (id, inquilino_id) => {
+      // A chave leva o inquilino junto: duas aprovações de escritórios
+      // diferentes podem ter o mesmo id sem uma gastar a da outra.
+      const chave = `${inquilino_id}:${id}`;
+      if (gastas.has(chave)) return false;
+      gastas.add(chave);
+      return true;
+    },
+  };
+}
+
 export interface Chamada {
   readonly ferramenta: string;
   readonly parametros: Readonly<Record<string, unknown>>;
@@ -111,6 +174,11 @@ export interface ConfiguracaoDoChassi {
   readonly ferramentas: ReadonlyMap<string, Ferramenta<Esquema, unknown>>;
   readonly perfis: ReadonlyMap<string, ReadonlySet<string>>;
   readonly auditoria: Auditoria;
+  /**
+   * Onde as aprovacoes sao gastas. Opcional ate o marco 9 existir — mas a
+   * ausencia NAO libera: faixa que exige aprovacao recusa sem ele.
+   */
+  readonly aprovacoes?: RegistroDeAprovacoes;
   readonly revogacao?: ListaDeRevogacao;
 }
 
@@ -249,9 +317,42 @@ export async function executarChamada(
     const resumo = `${ferramenta.nome}:${JSON.stringify(parametros)}`;
     const parar = await passo(
       'aprovacao',
-      etapaAprovacao(ferramenta.faixa, resumo, chamada.aprovacao, agora),
+      etapaAprovacao(ferramenta.faixa, resumo, chamada.aprovacao, agora, sessao),
     );
     if (parar) return parar;
+
+    // A aprovação passou na conferência. Agora ela é GASTA — e só depois disso
+    // a chamada segue. A ordem é a mesma da auditoria e pelo mesmo motivo: se o
+    // consumo acontecesse depois da execução, a segunda tentativa já teria
+    // enviado a mensagem antes de descobrir que a autorização era a mesma.
+    if (chamada.aprovacao && exigeAprovacao(ferramenta.faixa)) {
+      if (!cfg.aprovacoes) {
+        // Faixa que exige aprovação sem registro onde gastá-la é configuração
+        // incompleta, não caso limite. Enquanto o marco 9 não existir, quem
+        // montar o chassi tem de dizer explicitamente o que fazer — e a
+        // resposta padrão, sem ninguém dizer nada, é não sair.
+        return await encerrar(
+          'aprovacao',
+          erroInterno('não há registro de aprovações configurado, e uma aprovação não pode ser usada sem ser gasta'),
+        );
+      }
+      let primeiraVez: boolean;
+      try {
+        primeiraVez = await cfg.aprovacoes.consumir(
+          chamada.aprovacao.aprovacao_id,
+          sessao.inquilino_id,
+        );
+      } catch {
+        // "Não sei se estava inteira" fecha, como toda governança indisponível.
+        return await encerrar(
+          'aprovacao',
+          erroInterno('não foi possível confirmar que a aprovação ainda não havia sido usada'),
+        );
+      }
+      if (!primeiraVez) {
+        return await encerrar('aprovacao', precisaAprovacao(ferramenta.faixa, 'advogado'));
+      }
+    }
   }
 
   // -- Etapa 9: custo  «marco 4» --------------------------------------------
