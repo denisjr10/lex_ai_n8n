@@ -713,6 +713,32 @@ O risco central **não** é bagunçar o repositório: é **a demo virar produç�
 
 **Trava a demo o mesmo que já travava os Blocos A e B:** um número CNJ real do escritório.
 
+## A demo voltou ao ar para nova rodada de testes — 01/09/2026
+
+A instância gratuita da Uazapi expira em **1 hora** — a anterior tinha morrido, e com ela o último salto da Demo A (o envio real ao cliente). Subiu instância nova, e as correções da revisão do Codex **ainda não foram exercidas ao vivo**.
+
+**O ritual de religar, em ordem** — é isto que se repete a cada nova instância:
+
+1. `node demo/uazapi.mjs criar <nome>` — grava o token em `demo/uazapi.local`, fora do Git, sem imprimir
+2. **parear** — QR code, escaneado por uma pessoa
+3. `credencial` — recria a credencial no n8n e registra o id em `demo/credenciais.json`
+4. `webhook` — reaponta a Demo B, com o segredo no caminho
+5. republicar os **dois** fluxos com `--publicar --ativar`
+
+**O pareamento pelo script falhou, e isso custou uma volta.** O usuário pareou direto no painel da Uazapi, que criou **outra** instância ("Lex AI", `559681009574`) — ficaram duas, e os fluxos apontavam para a vazia, que nunca receberia nada. A correção foi trocar o token em `demo/uazapi.local` pelo da instância pareada e refazer os passos 3 a 5. **Lição operacional: depois de parear, confirme com `status` que o número conectado é o que você espera** — instância criada e instância pareada podem não ser a mesma, e o sintoma disso é silêncio, não erro.
+
+**O que ficou pendente de teste ao vivo** — os três caminhos que a correção do Codex criou e que nenhum humano ainda viu funcionar:
+
+| Caminho | O que precisa aparecer |
+|---|---|
+| Aprovar com a Uazapi viva | `✅ APROVADO · Enviando ao cliente…` e depois `📤 APROVADO E ENTREGUE`, com número mascarado |
+| Aprovar com a Uazapi morta | `❌ APROVADO, MAS NÃO ENTREGUE`, dizendo em letras que ninguém foi avisado no lugar do cliente |
+| Demo B, pergunta de prazo | Oferece falar com uma pessoa do escritório — **não** promete avisar a equipe |
+
+Só o processo **AUTOS-05** tem cliente vinculado na lista; aprovar qualquer outro cai no `⚠️ APROVADO, MAS SEM DESTINATÁRIO`, que é comportamento correto.
+
+**E um vazamento pequeno, que ensina um grande** (R-51): o token da instância apareceu numa captura de tela do painel da Uazapi. Aqui o dano é nulo — instância gratuita, uma hora de vida. Mas é o mesmo campo que, em produção, dá acesso ao WhatsApp do escritório: **quem tem o token manda mensagem como o escritório.** Foi exatamente por isso que a D-114 tirou o segredo da saída dos scripts — e o painel do fornecedor não obedece à nossa disciplina.
+
 ## As duas demos ficaram prontas, e ligadas — 24/08/2026
 
 A **Demo A** (colaborador no Telegram) e a **Demo B** (cliente no WhatsApp) estão publicadas e ativas, sobre os 8 processos reais anonimizados. **Custo em crédito do Escavador: R$ 0,00.**
@@ -871,6 +897,7 @@ As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` 
 |---|---|
 | **R-16** — Trello não tem escopo por quadro; token vê a conta inteira | **Grave e estrutural.** Tratado por desenho (D-36), mas o isolamento passa a depender do nosso código. Precisa ser dito ao escritório |
 | **R-11** — conta única do Workspace compartilhada por toda a equipe | ⚠️ **Resolvido pela metade em 27/08.** A identidade **da plataforma** virou individual pelo Telegram (D-147), destravando privilégio por papel, aprovação nominal, auditoria e a faixa A4. **E-mail e Drive seguem na conta única** — E3 vai ler de uma caixa que ninguém responde individualmente. O escritório foi informado e aceitou |
+| **R-51** — o painel do fornecedor exibe o token da instância em tela, e ele vaza por captura | **Novo, moderado — e fora do nosso alcance.** A D-114 tirou o segredo da saída dos nossos scripts, mas o painel da Uazapi mostra o token em texto aberto, e a captura de tela o carrega para onde o usuário mandar. Em produção esse campo **dá acesso a mandar mensagem como o escritório**. Aconteceu em 01/09, sem dano — instância gratuita de 1 hora | Segredo se lê pelo script, nunca pelo painel; se o painel for inevitável, tape o campo antes de qualquer captura. Na plataforma real, token de canal externo mora no cofre e nenhuma tela o exibe |
 | **R-46** — a franquia de aparições **não é editável** depois de criada | **Novo e grave.** O `PUT` da V1 aceita só `origens_ids` e `variacoes`. O alarme de 70% pede procedimento, não ajuste de número (D-150). *Lido do OpenAPI; conferir por medição — é gratuito* |
 | **R-47** — identidade individual ancorada em conta de Telegram | **Novo, moderado a grave.** Número de telefone é o âncora (SIM swap, troca de chip), e **o escritório não administra as contas** — não há desligamento central. Tratado por revogação do vínculo na plataforma, 2FA obrigatório e conteúdo fora do corpo da mensagem |
 | **R-48** — a plataforma roda em infraestrutura do prestador | **Novo, jurídico.** Dado sob sigilo profissional em ambiente de terceiro. Escritório é controlador, prestador é operador — precisa de cláusula de finalidade, devolução, expurgo e continuidade |
