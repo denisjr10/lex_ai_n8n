@@ -12,7 +12,7 @@
 | 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Onze dos doze achados foram fechados** — cinco em 31/08 e seis em 01/09 — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, a D-142 dentro do código (D-156), e o **isolamento entre escritórios em duas camadas** (D-157), **uso único de aprovação** (D-158) e os menores. Falta só o **HMAC no anonimizador, adiado por decisão do usuário até depois da apresentação** (D-159). Ver §"Uma revisão externa passou no projeto inteiro" |
 | Fase | **3 — construção.** **Marcos 1, 2 e 3 fechados e verificados**: monorepo e migrações; o chassi, com a matriz de escopo passando inteira; e **a auditoria, que grava, recusa alteração e reconstrói a operação pelo `requisicao_id`**. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **10 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **45 de 45 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **92 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, **12 nós, 86 verificações** — a recusa agora chama um advogado no Telegram, D-163), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **10 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **45 de 45 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **92 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, **12 nós, 101 verificações** — a recusa agora chama um advogado no Telegram, D-163), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -712,6 +712,24 @@ Três decisões que valem destaque:
 O risco central **não** é bagunçar o repositório: é **a demo virar produção** — sem Policy Gate, sem motor de custo, com WhatsApp não oficial (R-33). Riscos novos: **R-33 a R-36**. Decisões: **D-86 a D-94**.
 
 **Trava a demo o mesmo que já travava os Blocos A e B:** um número CNJ real do escritório.
+
+## O primeiro uso real derrubou dois defeitos que 86 testes não viram — 01/09/2026
+
+Dois minutos de conversa de verdade no WhatsApp acharam o que a bateria automática não achou. Nenhum dos dois é falha de segurança: em ambos o sistema faz exatamente o que foi mandado, e é **a conversa** que fica impossível (R-53).
+
+**1. O laço da escolha de processo (D-167).** O assistente listava os processos pela classe — "procedimento comum cível", "agravo de instrumento" — e depois **só aceitava resposta por número CNJ**. O cliente respondeu *"O procedimento comum"*, que é literalmente o rótulo oferecido, e recebeu a mesma pergunta de volta. Tentou *"Procedimento comum cível"*, exato. Mesma pergunta. Três vezes.
+
+É o pior tipo de defeito de conversa: quem está do outro lado fez tudo certo e o sistema insiste. A regra que fica: **se o sistema oferece uma opção com um rótulo, ele aceita aquele rótulo de volta.**
+
+Agora valem três formas, da mais específica para a menos — o número, o rótulo e a ordem ("o segundo", "2"). **No empate não escolhe**, porque escolher no empate é responder com confiança sobre o processo errado. E a pergunta passou a ensinar como responder, cuja ausência era metade do problema.
+
+**2. A saudação composta (D-168).** *"Oi, boa tarde"* — a forma mais comum de abrir conversa em português — não era reconhecida como saudação, porque a regra exigia um cumprimento **e mais nada**. Resultado: a primeira mensagem do cliente caía direto na pergunta sobre qual processo, **sem ele nunca ter sido cumprimentado pelo nome**.
+
+Cumprimento composto agora é saudação; cumprimento **seguido de pergunta** continua sendo pergunta. E quem tem mais de um processo recebe a lista já nas boas-vindas — sem isso, a conversa começa com uma pergunta nossa em vez de uma resposta.
+
+**O que isso ensina sobre como testamos (R-53).** As 86 verificações checam o que o código decide, não o que uma pessoa consegue fazer com ele. Toda cena da demonstração passa a ter uma **transcrição de conversa** entre as verificações — a do print está reproduzida inteira na suíte, incluindo "O procedimento comum" com artigo na frente, "procedimento" cortado, "o primeiro" e "1".
+
+**Fluxo B: 86 → 101 verificações.**
 
 ## A recusa passou a chamar uma pessoa — 01/09/2026
 

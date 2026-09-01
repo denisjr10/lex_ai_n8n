@@ -201,6 +201,31 @@ checar('saudação recebe boas-vindas, não o resumo do processo', saudacao.rota
 checar('as boas-vindas chamam o cliente pelo nome', String(saudacao.texto).includes(CLIENTE.nome.split(' ')[0]));
 checar('as boas-vindas não vazam o número do processo', !String(saudacao.texto).includes(MEU.numero_cnj));
 
+// PESSOAS CUMPRIMENTAM EM DOBRO. "Oi, boa tarde" é uma saudação, não duas — e
+// a versão anterior exigia um cumprimento e mais nada, então essa mensagem
+// escapava e o cliente caía na pergunta sobre qual processo sem nem ter sido
+// cumprimentado pelo nome. Foi a PRIMEIRA mensagem do primeiro uso real.
+for (const forma of ['Oi, boa tarde', 'olá bom dia', 'Oi!', 'boa noite, tudo bem?', 'opa, tudo bom']) {
+  const r = rodar(P, zap(NUMERO_CLIENTE, forma)).json;
+  checar(`"${forma}" é cumprimentado pelo nome`,
+    r.rota === 'direto' && String(r.texto).includes(CLIENTE.nome.split(' ')[0]),
+    `rota=${r.rota} texto=${String(r.texto).slice(0, 60)}`);
+}
+// Cumprimento seguido de pergunta NÃO é saudação — é pergunta, e responder com
+// boas-vindas seria ignorar o que a pessoa quis.
+const comPergunta = rodar(P, zap(NUMERO_CLIENTE, comAlvo('oi, como está meu processo?'))).json;
+checar('cumprimento + pergunta vai para a consulta, não para as boas-vindas',
+  comPergunta.rota === 'consulta', `rota=${comPergunta.rota}`);
+
+if (VARIOS) {
+  // Quem tem mais de um processo recebe a lista já na saudação: sem isso, a
+  // conversa começa com uma pergunta nossa em vez de uma resposta.
+  checar('a saudação de quem tem vários processos já lista os processos',
+    String(saudacao.texto).split('\n').filter((l) => l.startsWith('· ')).length
+      === (CLIENTE.processos || []).length,
+    String(saudacao.texto));
+}
+
 const humano = rodar(P, zap(NUMERO_CLIENTE, 'quero falar com uma pessoa')).json;
 checar('pedido de atendimento humano tem caminho', humano.rota === 'direto' && /escritório/i.test(String(humano.texto)));
 
@@ -216,6 +241,32 @@ if (!VARIOS) {
 } else {
   const OUTRO = instantaneo.processos.find(
     (p) => (CLIENTE.processos || []).includes(p.id) && p.id !== MEU.id);
+
+  // A CONVERSA QUE FALHOU NO PRIMEIRO USO REAL, reproduzida inteira. O
+  // assistente listava os processos pela classe e depois só aceitava número
+  // CNJ: o cliente respondeu "o procedimento comum" — o rótulo que nós mesmos
+  // oferecemos — e recebeu a mesma pergunta de volta, três vezes.
+  //
+  // Se o sistema oferece uma opção com um rótulo, ele aceita aquele rótulo.
+  const OFERTA = rodar(P, zap(NUMERO_CLIENTE, 'como está meu processo?')).json;
+  const rotulos = String(OFERTA.texto).split('\n').filter((l) => l.startsWith('· '))
+    .map((l) => l.slice(2).trim());
+  checar('a pergunta oferece um rótulo por processo', rotulos.length === (CLIENTE.processos || []).length,
+    `rótulos=${rotulos.length}`);
+  for (const r of rotulos) {
+    const resposta = rodar(P, zap(NUMERO_CLIENTE, r)).json;
+    checar(`responder "${r}" resolve o processo`, resposta.rota === 'consulta' && Boolean(resposta.processoId),
+      `rota=${resposta.rota}`);
+  }
+  // E como as pessoas realmente respondem: com artigo na frente, e cortando.
+  for (const forma of ['O ' + rotulos[0], rotulos[0].split(' ')[0], 'o primeiro', '1']) {
+    const r = rodar(P, zap(NUMERO_CLIENTE, forma)).json;
+    checar(`"${forma}" também resolve`, r.rota === 'consulta' && Boolean(r.processoId), `rota=${r.rota}`);
+  }
+  // A pergunta de desambiguação tem de ensinar COMO responder. A falta dessa
+  // linha foi metade do defeito: o cliente não tinha como adivinhar a forma.
+  checar('a pergunta ensina como responder', /pode responder com o nome/i.test(String(OFERTA.texto)),
+    String(OFERTA.texto).slice(-140));
 
   const vago = rodar(P, zap(NUMERO_CLIENTE, 'como está meu processo?')).json;
   checar('pergunta vaga NÃO escolhe um processo por ele', vago.rota === 'direto' && !vago.processoId,

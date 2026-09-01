@@ -235,6 +235,10 @@ const CLIENTES = ${JSON.stringify(lista.clientes, null, 2)};
 const AVISO_TOPO = ${JSON.stringify(AVISO_TOPO)};
 const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
   id: p.id, numero: p.numero_cnj, titulo: p.titulo, classe: p.classe,
+  // O órgão entra para desempatar: dois processos do mesmo cliente podem ter a
+  // MESMA classe, e aí listar "procedimento comum cível" duas vezes é oferecer
+  // uma escolha impossível. Com o órgão, viram opções distinguíveis.
+  orgao: p.orgao_julgador || null,
   segredo: p.segredo_justica === true,
 })))};
 
@@ -308,18 +312,94 @@ if (!meus.length) {
 
 const base = { rota: 'consulta', numero, nome: cliente.nome };
 
+// --- reconhecer o processo PELO NOME QUE NÓS MESMOS OFERECEMOS --------------
+// Este bloco existe por causa de um defeito encontrado no primeiro uso real:
+// o assistente listava os processos pela classe ("procedimento comum cível",
+// "agravo de instrumento") e depois só aceitava resposta por número CNJ. O
+// cliente respondeu "o procedimento comum" — exatamente o que fora oferecido —
+// e recebeu a mesma pergunta de volta. Três vezes.
+//
+// É o pior tipo de defeito de conversa: quem está do outro lado fez tudo certo
+// e o sistema insiste. Não dava erro, não vazava nada, e a demonstração parava.
+//
+// A lição, que vale para todo o projeto: SE O SISTEMA OFERECE UMA OPÇÃO COM UM
+// RÓTULO, ELE É OBRIGADO A ACEITAR AQUELE RÓTULO DE VOLTA.
+const semAcento = (t) => String(t == null ? '' : t)
+  .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();
+
+// Palavras que toda frase tem e que não distinguem processo nenhum. Sem
+// removê-las, "o processo de agravo" e "o processo comum" empatariam no "processo".
+const VAZIAS = ['processo','processos','caso','casos','quero','saber','sobre','esse','essa',
+  'este','esta','aquele','meu','minha','como','esta','sendo','favor','falar','duvida','para',
+  'pra','uma','com','dos','das','que','por','tem','the'];
+const palavras = (t) => semAcento(t).replace(/[^a-z0-9 ]/g, ' ').split(/ +/)
+  .filter(w => w.length >= 3 && VAZIAS.indexOf(w) === -1);
+
+const rotuloDe = (p) => String(p.classe || p.titulo).toLowerCase();
+// Se dois processos têm a mesma classe, o rótulo sozinho não escolhe nada.
+const rotuloNaLista = (p) => {
+  const r = rotuloDe(p);
+  const repetido = meus.filter(x => rotuloDe(x) === r).length > 1;
+  return repetido && p.orgao ? r + ' — ' + p.orgao : r;
+};
+
+/** Casa a resposta do cliente com um dos processos DELE, por rótulo. Devolve
+ *  null quando não há vencedor claro — inclusive no empate, porque escolher no
+ *  empate é responder com confiança sobre o processo errado. */
+const porRotulo = () => {
+  const ditas = palavras(texto);
+  if (!ditas.length) return null;
+  const pontos = meus.map(p => {
+    const alvo = palavras(rotuloDe(p) + ' ' + (p.orgao || ''));
+    return ditas.filter(w => alvo.indexOf(w) !== -1).length;
+  });
+  const maior = Math.max.apply(null, pontos);
+  if (!maior) return null;
+  if (pontos.filter(v => v === maior).length > 1) return null;
+  return meus[pontos.indexOf(maior)];
+};
+
+/** "o primeiro", "o segundo", "1", "2" — como as pessoas respondem a listas.
+ *  Só vale em mensagem curta: num texto longo, um "2" solto é coincidência. */
+const porOrdem = () => {
+  if (String(texto).trim().length > 25) return null;
+  const t = semAcento(texto);
+  const ordens = [/\\b(primeir[oa]|1|1o|1a)\\b/, /\\b(segund[oa]|2|2o|2a)\\b/, /\\b(terceir[oa]|3|3o|3a)\\b/];
+  for (let i = 0; i < ordens.length && i < meus.length; i++) {
+    if (ordens[i].test(t)) return meus[i];
+  }
+  return null;
+};
+
 // --- saudação ---------------------------------------------------------------
-const ehSaudacao = /^(oi+|ol[áa]|opa|e a[íi]|bom dia|boa tarde|boa noite|tudo bem|tudo bom|ajuda|menu|come[çc]ar)[\\s!.,?]*$/i.test(texto);
+// PESSOAS CUMPRIMENTAM EM DOBRO. "Oi, boa tarde" é uma saudação, não duas, e a
+// versão anterior desta linha exigia que a mensagem fosse UM cumprimento e mais
+// nada — então "Oi, boa tarde" escapava da saudação e caía na pergunta sobre
+// qual processo, antes mesmo de o cliente ser cumprimentado pelo nome.
+// Encontrado no primeiro uso real, na primeira mensagem.
+const CUMPRIMENTO = '(oi+|ol[áa]|opa|e a[íi]|salve|bom dia|boa tarde|boa noite|tudo bem|tudo bom|beleza|ajuda|menu|come[çc]ar|in[íi]cio)';
+const ehSaudacao = new RegExp(
+  '^' + CUMPRIMENTO + '([\\\\s!.,?-]+' + CUMPRIMENTO + ')*[\\\\s!.,?]*$', 'i').test(String(texto).trim());
 if (ehSaudacao) {
-  return { json: { ...base, rota: 'direto', texto: [
-    'Olá, ' + cliente.nome.split(' ')[0] + '! Aqui é o atendimento automatizado do escritório.',
-    '',
-    'Posso informar como está o andamento do seu processo.',
-    meus.length > 1 ? '' : '',
-    'É só perguntar, por exemplo: "como está meu processo?"',
-    '',
-    'Para falar com uma pessoa do escritório, é só dizer.'
-  ].filter(Boolean).join('\\n') }};
+  const primeiro = cliente.nome.split(' ')[0];
+  const linhas = ['Olá, ' + primeiro + '! Aqui é o atendimento automatizado do escritório.', ''];
+  if (meus.length > 1) {
+    // Quem tem mais de um processo recebe a lista já na saudação. Sem isso, a
+    // primeira pergunta dele seria respondida com "sobre qual deles?" — e a
+    // conversa começaria por uma pergunta nossa em vez de uma resposta.
+    linhas.push('Você tem ' + meus.length + ' processos conosco:');
+    linhas.push('');
+    linhas.push(meus.map(p => '· ' + rotuloNaLista(p)).join('\\n'));
+    linhas.push('');
+    linhas.push('Posso informar o andamento de qualquer um deles — é só dizer qual. Por exemplo: "como está o ' + rotuloDe(meus[0]) + '?"');
+  } else {
+    linhas.push('Posso informar como está o andamento do seu processo.');
+    linhas.push('');
+    linhas.push('É só perguntar, por exemplo: "como está meu processo?"');
+  }
+  linhas.push('');
+  linhas.push('Para falar com uma pessoa do escritório, é só dizer.');
+  return { json: { ...base, rota: 'direto', texto: linhas.join('\\n') }};
 }
 
 // --- o chamado ao escritório ------------------------------------------------
@@ -439,12 +519,20 @@ let alvo = meus[0];
 if (meus.length > 1) {
   const digitos = soDigitos(texto);
   const porNumero = meus.find(p => digitos.length >= 15 && digitos.indexOf(soDigitos(p.numero)) !== -1);
-  if (porNumero) alvo = porNumero;
+  // TRÊS FORMAS DE RESPONDER, e a ordem é da mais específica para a menos:
+  // o número (não deixa dúvida), o rótulo que oferecemos, e a ordem da lista.
+  const escolhido = porNumero || porRotulo() || porOrdem();
+  if (escolhido) alvo = escolhido;
   else {
     return { json: { ...base, rota: 'direto', texto: [
       'Você tem ' + meus.length + ' processos conosco. Sobre qual deles é a sua pergunta?',
       '',
-      meus.map(p => '· ' + (p.classe || p.titulo).toLowerCase()).join('\\n')
+      meus.map((p, i) => '· ' + rotuloNaLista(p)).join('\\n'),
+      '',
+      // A instrução de como responder estava faltando, e a falta dela foi
+      // metade do problema: o cliente não tinha como saber que a resposta
+      // precisava de uma forma específica.
+      'Pode responder com o nome — por exemplo, "' + rotuloDe(meus[0]).split(' ')[0] + '" — ou com o número do processo.'
     ].join('\\n') }};
   }
 }
