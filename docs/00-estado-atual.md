@@ -713,6 +713,25 @@ O risco central **não** é bagunçar o repositório: é **a demo virar produç�
 
 **Trava a demo o mesmo que já travava os Blocos A e B:** um número CNJ real do escritório.
 
+## A demo tem um comando de volta ao ar — 01/09/2026
+
+A instância gratuita da Uazapi vive **uma hora**, e no dia 01/09 ela expirou três vezes — uma delas **no meio de um teste**. Toda vez, a mesma sequência de quatro passos à mão.
+
+`demo/reapontar.mjs` faz a sequência inteira (D-169): confere a instância, grava a credencial no n8n, reaponta o webhook e **republica e reativa os dois fluxos**.
+
+O quarto passo é o que mais escapava, e é o mais traiçoeiro: sem ele os fluxos continuam citando a **credencial antiga**, tudo parece publicado, e o envio só falha na hora em que tem gente olhando. O script **para no primeiro erro** — credencial nova com fluxos velhos é pior que nada feito, porque parece pronto.
+
+O momento em que isso mais vai valer é a apresentação ao escritório: se a instância cair no meio, o caminho de volta é um comando, e não quatro que alguém tenta lembrar com a sala esperando.
+
+**O token não passa pelo script nem pelo chat.** Sai de `demo/uazapi.local`, gravado por `guardar-segredo.mjs`, e não é impresso nem em mensagem de erro (D-114, R-51).
+
+```
+node guardar-segredo.mjs demo/uazapi.local
+node demo/reapontar.mjs
+```
+
+**Pendente:** a instância atual expirou e o usuário criou outra; falta gravar o token novo e rodar o comando. Depois disso, dois testes nunca exercitados ao vivo — o **chamado ao advogado no Telegram** ("vou ganhar essa causa?") e a **conversa da escolha de processo** corrigida hoje.
+
 ## O primeiro uso real derrubou dois defeitos que 86 testes não viram — 01/09/2026
 
 Dois minutos de conversa de verdade no WhatsApp acharam o que a bateria automática não achou. Nenhum dos dois é falha de segurança: em ambos o sistema faz exatamente o que foi mandado, e é **a conversa** que fica impossível (R-53).
