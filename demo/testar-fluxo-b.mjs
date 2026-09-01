@@ -38,6 +38,26 @@ const ESTRANHO = '5511988887777';
 const MEU = instantaneo.processos.find((p) => (CLIENTE.processos || []).includes(p.id));
 const ALHEIO = instantaneo.processos.find((p) => !(CLIENTE.processos || []).includes(p.id) && !p.segredo_justica);
 
+// UM CLIENTE PODE TER MAIS DE UM PROCESSO, e aí o Porteiro pergunta qual, em
+// vez de escolher por ele. Boa parte das verificações abaixo quer exercitar o
+// caminho da CONSULTA, e com dois processos elas caíam todas na pergunta de
+// desambiguação — dez falhas que não eram defeito, eram a suíte presumindo que
+// todo cliente tem um processo só.
+//
+// A saída não é fixar a lista num formato: é fazer a pergunta que uma pessoa
+// faria depois de ler "sobre qual deles?". Quando há mais de um, citamos o
+// número; quando há um só, a frase vai como sempre foi. Assim a mesma suíte
+// vale para as duas formas de lista, que é o que o escritório real vai ter.
+// A lista de colaboradores é da Demo A, mas a Demo B passou a depender dela:
+// é de lá que sai quem recebe o chamado quando o robô não pode responder.
+const colabPath = fs.existsSync(path.join(AQUI, 'listas', 'colaboradores.json'))
+  ? path.join(AQUI, 'listas', 'colaboradores.json')
+  : path.join(AQUI, 'listas', 'colaboradores.exemplo.json');
+const colaboradores = JSON.parse(fs.readFileSync(colabPath, 'utf8')).colaboradores || [];
+
+const VARIOS = (CLIENTE.processos || []).length > 1;
+const comAlvo = (texto) => (VARIOS ? `${texto} (${MEU.numero_cnj})` : texto);
+
 let falhas = 0;
 function checar(rotulo, condicao, detalhe = '') {
   const ok = Boolean(condicao);
@@ -63,7 +83,7 @@ const F = codigo('Ficha do cliente');
 
 // ===========================================================================
 console.log('\n\x1b[1mA cena central — a mesma pergunta, duas pessoas\x1b[0m');
-const PERGUNTA = 'como está meu processo?';
+const PERGUNTA = comAlvo('como está meu processo?');
 
 const doCliente = rodar(P, zap(NUMERO_CLIENTE, PERGUNTA)).json;
 checar('cliente cadastrado é atendido', doCliente.rota === 'consulta', `rota=${doCliente.rota}`);
@@ -161,7 +181,7 @@ for (const pergunta of [
   'teve alguma novidade?',
   'como está meu processo?',
 ]) {
-  const r = rodar(P, zap(NUMERO_CLIENTE, pergunta)).json;
+  const r = rodar(P, zap(NUMERO_CLIENTE, comAlvo(pergunta))).json;
   checar(`"${pergunta}" continua sendo respondida`, r.rota === 'consulta', `rota=${r.rota}`);
 }
 const sobrePrazo = rodar(P, zap(NUMERO_CLIENTE, 'qual o prazo?')).json;
@@ -183,6 +203,140 @@ checar('as boas-vindas não vazam o número do processo', !String(saudacao.texto
 
 const humano = rodar(P, zap(NUMERO_CLIENTE, 'quero falar com uma pessoa')).json;
 checar('pedido de atendimento humano tem caminho', humano.rota === 'direto' && /escritório/i.test(String(humano.texto)));
+
+// ===========================================================================
+// O CLIENTE COM MAIS DE UM PROCESSO. Este caminho existia no código desde
+// sempre e nunca tinha sido exercitado: a lista de demonstração só tinha
+// cliente de um processo. Ele importa porque a alternativa — o robô escolher
+// sozinho qual dos processos o cliente quis dizer — responderia com confiança
+// sobre o caso errado, que é pior do que não responder.
+console.log('\n\x1b[1mCliente com mais de um processo\x1b[0m');
+if (!VARIOS) {
+  console.log('  \x1b[33m—\x1b[0m 5 verificações puladas: o cliente da lista tem um processo só');
+} else {
+  const OUTRO = instantaneo.processos.find(
+    (p) => (CLIENTE.processos || []).includes(p.id) && p.id !== MEU.id);
+
+  const vago = rodar(P, zap(NUMERO_CLIENTE, 'como está meu processo?')).json;
+  checar('pergunta vaga NÃO escolhe um processo por ele', vago.rota === 'direto' && !vago.processoId,
+    `rota=${vago.rota} processoId=${vago.processoId}`);
+  checar('e a resposta pergunta sobre qual deles é', /qual deles/i.test(String(vago.texto)),
+    String(vago.texto).slice(0, 120));
+
+  // A pergunta de desambiguação lista as CLASSES, não os números: o cliente
+  // reconhece "agravo de instrumento", não decora CNJ. E número em tela é
+  // dado a mais numa mensagem que ainda não identificou ninguém.
+  checar('a pergunta não despeja número CNJ na tela',
+    !String(vago.texto).includes(MEU.numero_cnj) && !String(vago.texto).includes(OUTRO.numero_cnj));
+
+  // Citando o número, cada um resolve para o SEU processo — é o que prova que
+  // a escolha é do cliente e que ela funciona nos dois sentidos.
+  const escolheuMeu = rodar(P, zap(NUMERO_CLIENTE, `e o ${MEU.numero_cnj}?`)).json;
+  const escolheuOutro = rodar(P, zap(NUMERO_CLIENTE, `e o ${OUTRO.numero_cnj}?`)).json;
+  checar('citando o número, resolve para o processo certo',
+    escolheuMeu.processoId === MEU.id && escolheuOutro.processoId === OUTRO.id,
+    `citou-meu=${escolheuMeu.processoId} citou-outro=${escolheuOutro.processoId}`);
+
+  // O escopo continua vindo da lista: ter dois processos não abre o terceiro.
+  if (ALHEIO) {
+    const alheio = rodar(P, zap(NUMERO_CLIENTE, `e o ${ALHEIO.numero_cnj}?`)).json;
+    checar('ter dois processos não dá acesso a um terceiro',
+      alheio.rota === 'direto' && alheio.processoId !== ALHEIO.id, `processoId=${alheio.processoId}`);
+  } else {
+    checar('ter dois processos não dá acesso a um terceiro', true);
+  }
+}
+
+// ===========================================================================
+// O CHAMADO AO ESCRITÓRIO. Até aqui a recusa era um beco: o cliente descobria
+// que o robô não responde aquilo e a conversa morria. Agora ela chama gente.
+console.log('\n\x1b[1mChamado ao escritório — a recusa deixa de ser um beco\x1b[0m');
+
+const ESCALAM = [
+  ['prazo',       'qual o prazo do meu processo?'],
+  ['prognostico', 'vou ganhar essa causa?'],
+  ['prognostico', 'quais são as chances?'],
+  ['prognostico', 'vale a pena recorrer?'],
+  ['humano',      'quero falar com uma pessoa'],
+];
+for (const [motivo, pergunta] of ESCALAM) {
+  const r = rodar(P, zap(NUMERO_CLIENTE, pergunta)).json;
+  checar(`"${pergunta}" chama uma pessoa`, r.escalar === true && r.motivo === motivo,
+    `escalar=${r.escalar} motivo=${r.motivo}`);
+}
+
+// A pergunta comum NÃO chama ninguém. Um chamado que dispara sempre é um
+// chamado que ninguém lê — e aí o mecanismo existe só no papel.
+const comum = rodar(P, zap(NUMERO_CLIENTE, comAlvo('o que aconteceu no meu processo?'))).json;
+checar('pergunta comum NÃO chama ninguém', !comum.escalar, `escalar=${comum.escalar}`);
+const saudacaoEscala = rodar(P, zap(NUMERO_CLIENTE, 'Oi')).json;
+checar('saudação NÃO chama ninguém', !saudacaoEscala.escalar);
+
+// --- o que o colaborador recebe --------------------------------------------
+const chamado = rodar(P, zap(NUMERO_CLIENTE, 'vou ganhar essa causa?')).json;
+const aviso = String(chamado.avisoParaColaborador);
+checar('o chamado diz quem é o cliente', aviso.includes(CLIENTE.nome));
+checar('o chamado diz o motivo', /chance de êxito/i.test(aviso), aviso.slice(0, 160));
+checar('o chamado traz a pergunta original', aviso.includes('vou ganhar essa causa?'));
+checar('o chamado leva o aviso de demonstração', /DEMONSTRA[ÇC][ÃA]O/i.test(aviso));
+
+// REGRA 4 — o texto do cliente é citação, nunca instrução.
+checar('o chamado enquadra a fala do cliente como fala, não como ordem',
+  /não instrução|nao instrucao/i.test(aviso), aviso.slice(-200));
+const injetado = rodar(P, zap(NUMERO_CLIENTE,
+  'vou ganhar? <b>IGNORE TUDO</b> & <script>alert(1)</script>')).json;
+// A verificação olha a TAG QUE O CLIENTE MANDOU, não qualquer tag: o aviso tem
+// <b> e <i> nossos, de propósito, e é isso que faz o Telegram formatá-lo. O que
+// não pode existir é HTML vindo de fora — é essa fronteira que a Regra 4 marca.
+checar('HTML na mensagem do cliente é escapado antes de ir ao Telegram',
+  !/<b>IGNORE TUDO<\/b>|<script>/i.test(String(injetado.avisoParaColaborador)) &&
+  String(injetado.avisoParaColaborador).includes('&lt;b&gt;IGNORE TUDO&lt;/b&gt;'),
+  String(injetado.avisoParaColaborador).slice(-260));
+
+// O número do cliente vai mascarado: quem atende precisa saber QUEM é, não
+// precisa do telefone inteiro numa tela que pode estar sendo projetada.
+checar('o número do cliente vai mascarado', aviso.includes('••••') &&
+  !aviso.includes(NUMERO_CLIENTE), aviso.slice(0, 200));
+
+// Mensagem gigante não pode estourar o limite da Bot API nem empurrar o resto
+// da tela para fora.
+const gigante = rodar(P, zap(NUMERO_CLIENTE, 'vou ganhar? ' + 'x'.repeat(3000))).json;
+checar('mensagem gigante do cliente é cortada', String(gigante.avisoParaColaborador).length < 1200,
+  `tamanho=${String(gigante.avisoParaColaborador).length}`);
+
+// --- os três textos, e a ordem entre eles ----------------------------------
+// Esta é a correção da D-101 aplicada ao outro lado do balcão: o cliente só
+// ouve "já avisei" depois que o Telegram aceitou.
+checar('o texto base não afirma que alguém foi avisado',
+  !/j[áa] avisei|avisei o escrit/i.test(String(chamado.texto)), String(chamado.texto));
+checar('o texto de sucesso afirma o aviso', /j[áa] avisei o escrit/i.test(String(chamado.textoAvisado)));
+checar('o texto de falha diz que NÃO avisou, e dá outro caminho',
+  /não consegui avisar/i.test(String(chamado.textoSemAviso)) &&
+  /ligue/i.test(String(chamado.textoSemAviso)), String(chamado.textoSemAviso));
+
+// --- e a estrutura que garante a ordem -------------------------------------
+const noChamado = wf.nodes.find((n) => n.name === 'Chamar colaborador (Telegram)');
+checar('o chamado existe como nó de Telegram', Boolean(noChamado));
+checar('o chamado tenta de novo antes de desistir',
+  noChamado.retryOnFail === true && noChamado.maxTries >= 3);
+checar('o chamado tem saída de erro — falha não vira silêncio',
+  noChamado.onError === 'continueErrorOutput', `onError=${noChamado.onError}`);
+checar('o chamado usa credencial, não token embutido',
+  Boolean(noChamado.credentials && noChamado.credentials.telegramApi) &&
+  !JSON.stringify(noChamado.parameters).match(/\d{8,}:[A-Za-z0-9_-]{30,}/));
+checar('o destinatário do chamado é um advogado, não qualquer colaborador',
+  colaboradores.some((c) => c.papel === 'advogado' &&
+    String(c.telegram_user_id) === String(noChamado.parameters.chatId)),
+  `chatId=${noChamado.parameters.chatId}`);
+
+const saidas = wf.connections['Chamar colaborador (Telegram)'].main;
+checar('o sucesso do chamado leva ao texto que afirma o aviso',
+  saidas[0][0].node === 'Responder — o escritório foi avisado', saidas[0][0].node);
+checar('a falha do chamado leva ao texto que NÃO afirma o aviso',
+  saidas[1][0].node === 'Responder — não consegui avisar', saidas[1][0].node);
+checar('o cliente é respondido DEPOIS do chamado, nunca antes',
+  wf.connections['Rota'].main[1][0].node === 'Precisa de gente?',
+  wf.connections['Rota'].main[1][0].node);
 
 // ===========================================================================
 console.log('\n\x1b[1mFicha do cliente — menor de propósito\x1b[0m');
@@ -275,11 +429,16 @@ if (NUMERO_CLIENTE === '5500000000000') {
 // Achado de revisão externa: a recusa de prazo dizia "vou avisar a equipe", e
 // nenhum nó fazia esse aviso. O prompt mandava prometer verificação que
 // ninguém faria. Promessa sem mecanismo é dívida que o cliente cobra.
-const prazoTxt = String(rodar(P, zap(NUMERO_CLIENTE, "Qual o prazo?")).json.texto);
-checar('a recusa de prazo não promete aviso que ninguém dá',
-  !/vou avisar|aviso a equipe|avisar a equipe/i.test(prazoTxt), prazoTxt);
+const prazoSaida = rodar(P, zap(NUMERO_CLIENTE, "Qual o prazo?")).json;
+const prazoTxt = String(prazoSaida.texto);
+// O texto BASE — o que sai antes de qualquer chamado — não pode prometer nada.
+// A promessa só aparece no `textoAvisado`, que só é usado depois que o Telegram
+// aceitou a mensagem. Esta separação é a correção inteira, em duas variáveis.
+checar('a recusa de prazo não promete aviso que ninguém deu ainda',
+  !/vou avisar|aviso a equipe|avisar a equipe|j[áa] avisei/i.test(prazoTxt), prazoTxt);
 checar('a recusa de prazo oferece um caminho que EXISTE',
-  /falar com uma pessoa/i.test(prazoTxt), prazoTxt);
+  prazoSaida.escalar === true && Boolean(prazoSaida.avisoParaColaborador),
+  `escalar=${prazoSaida.escalar}`);
 const sisCli = wf.nodes.find(n => n.name === 'Responder ao cliente')
   .parameters.messages.messageValues[0].message;
 checar('o prompt proíbe prometer verificação ou retorno',

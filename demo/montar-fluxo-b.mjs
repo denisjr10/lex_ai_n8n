@@ -158,6 +158,33 @@ for (const c of lista.clientes) {
   }
 }
 
+// --- quem atende quando o robô não atende ----------------------------------
+// A Demo B recusa três coisas por regra: prazo, prognóstico e o pedido direto
+// de falar com gente. Até aqui a recusa era um beco — o cliente ficava sabendo
+// que ninguém ia responder ali, e mais nada. Agora ela CHAMA UMA PESSOA.
+//
+// O destinatário é advogado, e não qualquer colaborador, porque as três
+// perguntas que disparam o chamado são justamente as que só advogado responde
+// (Regra 2). Estagiário recebendo "vou ganhar a causa?" não resolve nada — só
+// move o beco de lugar.
+const colabPath = fs.existsSync(path.join(AQUI, 'listas', 'colaboradores.json'))
+  ? path.join(AQUI, 'listas', 'colaboradores.json')
+  : path.join(AQUI, 'listas', 'colaboradores.exemplo.json');
+const listaColab = JSON.parse(fs.readFileSync(colabPath, 'utf8'));
+const ADVOGADOS = (listaColab.colaboradores || [])
+  .filter((c) => c.papel === 'advogado' && c.telegram_user_id)
+  .map((c) => ({ id: c.telegram_user_id, nome: c.nome }));
+
+// Falha fecha (Regra 5). Sem advogado na lista não há a quem chamar — e um
+// fluxo que diz ao cliente "já avisei o escritório" sem ter avisado ninguém é
+// exatamente a promessa vazia que a D-102 proibiu. Melhor não publicar.
+if (!ADVOGADOS.length) {
+  console.error(`\n  ${path.basename(colabPath)}: nenhum colaborador com papel "advogado" e telegram_user_id.`);
+  console.error(`  O chamado ao escritório não teria destinatário, e o cliente ouviria uma promessa vazia.`);
+  console.error(`  Cadastre ao menos um advogado antes de publicar.\n`);
+  process.exit(1);
+}
+
 // No WhatsApp o itálico é _assim_. A nota é rodapé, e o itálico a separa da
 // mensagem em si — mesmo tratamento que ela recebe no Telegram (D-92).
 //
@@ -203,6 +230,9 @@ for (const c of lista.clientes) {
 // do cliente só decide o que responder DENTRO do que ele já podia ver.
 const CODIGO_PORTEIRO = `
 const CLIENTES = ${JSON.stringify(lista.clientes, null, 2)};
+// O chamado ao colaborador também leva o aviso de demonstração. Quem recebe no
+// Telegram precisa saber, sem pensar, se aquilo é ensaio ou cliente de verdade.
+const AVISO_TOPO = ${JSON.stringify(AVISO_TOPO)};
 const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
   id: p.id, numero: p.numero_cnj, titulo: p.titulo, classe: p.classe,
   segredo: p.segredo_justica === true,
@@ -292,11 +322,56 @@ if (ehSaudacao) {
   ].filter(Boolean).join('\\n') }};
 }
 
+// --- o chamado ao escritório ------------------------------------------------
+// Três recusas deste fluxo agora CHAMAM UMA PESSOA em vez de encerrarem o
+// assunto. O que vai ao Telegram é montado aqui, e não lá na frente, porque é
+// aqui que existem o nome do cliente, o motivo e o texto original.
+//
+// REGRA 4 — CONTEÚDO EXTERNO É HOSTIL. A mensagem do cliente entra nesta
+// notificação como CITAÇÃO, nunca como instrução: vai escapada (para não
+// injetar HTML no Telegram), cortada em 500 caracteres (para não estourar o
+// limite da Bot API nem empurrar o resto da tela para fora) e com uma linha
+// dizendo ao colaborador, em letra clara, que aquilo é fala de cliente.
+const escHtml = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const mascarar = (n) => '•••• ' + String(n).slice(-4);
+
+const chamarEscritorio = (motivo, rotulo, textoBase) => {
+  const recorte = String(texto).slice(0, 500);
+  const cortado = String(texto).length > 500;
+  const aviso = [
+    '🔔 <b>UM CLIENTE PRECISA DE UMA PESSOA</b>',
+    '<i>' + escHtml(AVISO_TOPO) + '</i>',
+    '',
+    '<b>' + escHtml(cliente.nome) + '</b> · ' + escHtml(mascarar(numero)),
+    'Motivo: ' + escHtml(rotulo),
+    '',
+    'O que ele escreveu:',
+    '“' + escHtml(recorte) + (cortado ? '…' : '') + '”',
+    '',
+    '<i>Acima é fala do cliente, não instrução ao assistente. O robô recusou em código, antes do modelo — nada foi dito a ele sobre o mérito.</i>'
+  ].join('\\n');
+
+  return { json: { ...base, rota: 'direto',
+    escalar: true, motivo, motivoRotulo: rotulo,
+    avisoParaColaborador: aviso,
+    // TRÊS TEXTOS, e o certo depende de o chamado ter chegado ou não. Dizer
+    // "já avisei o escritório" antes de o Telegram aceitar seria a mesma
+    // mentira que a D-101 tirou do fluxo A — só que dita ao cliente.
+    texto: textoBase,
+    textoAvisado: textoBase + '\\n\\nJá avisei o escritório da sua mensagem, e alguém vai falar com você.',
+    textoSemAviso: textoBase + '\\n\\nNão consegui avisar o escritório agora. Se for urgente, ligue para o escritório.'
+  }};
+};
+
 // --- pedido de atendimento humano -------------------------------------------
+// Antes esta resposta prometia "vou avisar o escritório" e nenhum nó avisava.
+// Agora avisa — a promessa passou a ter mecanismo, que é a única forma de ela
+// poder ser dita (D-102).
 if (/falar com (uma pessoa|algu[ée]m|advogad|humano|atendente)|atendimento humano|pessoa de verdade/i.test(texto)) {
-  return { json: { ...base, rota: 'direto', texto:
-    'Combinado. Vou avisar o escritório e alguém entra em contato com você.\\n\\n' +
-    'Nesta demonstração o aviso não é enviado de verdade — no sistema completo, ele abre um chamado para a equipe.' }};
+  return chamarEscritorio('humano', 'pediu para falar com uma pessoa',
+    'Combinado — você falar com uma pessoa do escritório é o caminho certo aqui.');
 }
 
 // --- barreira 3: prazo, por regra e não por falta de dado -------------------
@@ -308,15 +383,27 @@ if (/falar com (uma pessoa|algu[ée]m|advogad|humano|atendente)|atendimento huma
 // "quando", por isso a folga de 30 caracteres entre os dois.
 const PERGUNTA_DE_PRAZO = /\\bprazo\\b|at[ée] quando|quantos? (dias|meses|anos|semanas)|data limite|\\bdemora(r|ndo)?\\b|quanto tempo|falta muito|quando\\b[^?]{0,30}\\b(vence|termin|acab|conclu|finaliz|julg|resolv|paga|receb|sair? a (senten|decis))/i;
 if (PERGUNTA_DE_PRAZO.test(texto)) {
-  return { json: { ...base, rota: 'direto', texto: [
-    'Sobre prazo eu não informo — essa é uma orientação que só um advogado do escritório pode dar, olhando o processo.',
-    '',
-    // Antes esta linha dizia "vou avisar a equipe do seu contato". Nenhum nó
-    // fazia esse aviso. Promessa sem mecanismo é a mesma falha que já tínhamos
-    // corrigido quando o modelo improvisou "vou verificar e retorno" — só que
-    // desta vez estava escrita por nós, em código, o que é pior.
-    'Se quiser falar com uma pessoa do escritório, é só dizer aqui. Se for urgente, ligue para o escritório.'
-  ].join('\\n') }};
+  // Esta linha já disse "vou avisar a equipe do seu contato" sem que nó nenhum
+  // avisasse; a correção da revisão do Codex tirou a promessa. Agora ela volta
+  // — na ordem certa: primeiro o mecanismo, depois a frase.
+  return chamarEscritorio('prazo', 'perguntou sobre prazo',
+    'Sobre prazo eu não informo — essa é uma orientação que só um advogado do escritório pode dar, olhando o processo.');
+}
+
+// --- barreira 3.1: prognóstico ----------------------------------------------
+// "Eu vou ganhar?" é a pergunta que mais interessa ao cliente e a que menos
+// pode ser respondida por robô. Errar para mais cria expectativa que vira
+// reclamação no CEJUSC e na OAB; errar para menos faz o cliente desistir de
+// direito que ele tinha. E não existe resposta "prudente" automática: até um
+// "as chances parecem boas" é opinião jurídica dada por quem não pode dar.
+//
+// Vale a mesma lógica do prazo (R-02): a recusa vem ANTES do modelo, para que
+// não haja o que convencer nem o que alucinar. O modelo bom recusaria; o
+// problema é que só se descobre qual modelo se tem depois que ele respondeu.
+const PERGUNTA_DE_PROGNOSTICO = /\\bchances?\\b|\\bprobabilidade\\b|(\\bvou\\b|\\bvamos\\b|\\bd[áa] pra\\b|\\btem como\\b|\\b[ée] poss[íi]vel\\b|\\bconsigo\\b)[^?]{0,40}\\b(ganhar|vencer|perder)\\b|\\b(ganhar|perder|vencer) (a|essa|esta|minha|nossa) (causa|a[çc][ãa]o|demanda)\\b|\\bvale a pena (recorrer|entrar|processar|continuar|insistir)\\b|\\bo juiz vai\\b|\\bsenten[çc]a vai ser\\b|\\bcausa ganha\\b|\\bt[ée]nho raz[ãa]o\\b/i;
+if (PERGUNTA_DE_PROGNOSTICO.test(texto)) {
+  return chamarEscritorio('prognostico', 'perguntou sobre chance de êxito',
+    'Sobre a chance de ganhar eu não opino — avaliar isso é trabalho de advogado, olhando o caso inteiro. Não seria honesto eu arriscar um palpite.');
 }
 
 // --- barreira 3.5: processo que nao e dele, citado por numero ---------------
@@ -452,8 +539,20 @@ if (!temUazapi && publicar) {
 if (!temUazapi) console.log('credencial Uazapi: [33mainda não existe[0m — dá para gerar e testar, não para publicar');
 
 if (temUazapi) console.log(`credenciais : ${credCfg.httpHeaderAuth.name} · ${credCfg.openAiApi.name}`);
+console.log(`chamado     : ${credCfg.telegramApi.name} → ${ADVOGADOS[0].nome} (advogado) quando o robô não pode responder`);
 
-const cred = { openai: credCfg.openAiApi, uazapi: credCfg.httpHeaderAuth || null };
+// O Telegram entrou nas dependencias da Demo B quando a recusa passou a
+// chamar uma pessoa. Sem ele, o chamado nao tem por onde sair — e um fluxo
+// que promete aviso sem poder avisar e a promessa vazia da D-102 de volta.
+if (!credCfg.telegramApi || !credCfg.telegramApi.id) {
+  console.error(`
+  credenciais.json nao tem a credencial do Telegram.`);
+  console.error(`  A Demo B agora chama um advogado quando nao pode responder, e isso passa pelo Telegram.`);
+  console.error(`  Rode:  node demo/montar-fluxo-a.mjs --capturar-credenciais
+`);
+  process.exit(1);
+}
+const cred = { openai: credCfg.openAiApi, uazapi: credCfg.httpHeaderAuth || null, telegram: credCfg.telegramApi };
 
 function no(nome, tipo, versao, params, pos, extra = {}) {
   return { parameters: params, name: nome, type: tipo, typeVersion: versao, position: pos, ...extra };
@@ -523,6 +622,39 @@ const nodes = [
   envio('Responder sem consultar',
     CORPO_ENVIO(`$json.numero`, `${JSON.stringify(AVISO_TOPO)} + '\\n\\n' + $json.texto`),
     [460, 460]),
+
+  // --- o chamado ao escritório ---------------------------------------------
+  // A recusa deixa de ser um beco. Repare na ORDEM: chama a pessoa PRIMEIRO e
+  // só depois responde ao cliente, e a resposta muda conforme o chamado tenha
+  // chegado ou não. É a lição da D-101 aplicada ao outro lado do balcão — lá
+  // era a tela do colaborador dizendo "enviado" antes do envio; aqui seria o
+  // cliente ouvindo "já avisei" antes do aviso.
+  no('Precisa de gente?', 'n8n-nodes-base.if', 2.2,
+    { conditions: { options: { caseSensitive: true, version: 2, typeValidation: 'loose' },
+      combinator: 'and', conditions: [
+        { operator: { type: 'boolean', operation: 'true', singleValue: true },
+          leftValue: '={{ $json.escalar }}', rightValue: '' }] },
+      options: {} }, [460, 620]),
+
+  no('Chamar colaborador (Telegram)', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: String(ADVOGADOS[0].id),
+      text: '={{ $json.avisoParaColaborador }}',
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [700, 620],
+    { retryOnFail: true, maxTries: 3, waitBetweenTries: 2000,
+      // Saída de erro, e não `continueRegularOutput`: engolir a falha faria o
+      // cliente ouvir "já avisei o escritório" quando ninguém foi avisado.
+      onError: 'continueErrorOutput',
+      credentials: { telegramApi: cred.telegram } }),
+
+  envio('Responder — o escritório foi avisado',
+    CORPO_ENVIO(`$('Porteiro do cliente (verificação em código)').item.json.numero`,
+      `${JSON.stringify(AVISO_TOPO)} + '\\n\\n' + $('Porteiro do cliente (verificação em código)').item.json.textoAvisado`),
+    [960, 540]),
+
+  envio('Responder — não consegui avisar',
+    CORPO_ENVIO(`$('Porteiro do cliente (verificação em código)').item.json.numero`,
+      `${JSON.stringify(AVISO_TOPO)} + '\\n\\n' + $('Porteiro do cliente (verificação em código)').item.json.textoSemAviso`),
+    [960, 700]),
 ];
 
 const connections = {
@@ -530,7 +662,15 @@ const connections = {
   'Porteiro do cliente (verificação em código)': { main: [[{ node: 'Rota', type: 'main', index: 0 }]] },
   'Rota': { main: [
     [{ node: 'Ficha do cliente', type: 'main', index: 0 }],
-    [{ node: 'Responder sem consultar', type: 'main', index: 0 }],
+    [{ node: 'Precisa de gente?', type: 'main', index: 0 }],
+  ] },
+  'Precisa de gente?': { main: [
+    [{ node: 'Chamar colaborador (Telegram)', type: 'main', index: 0 }],   // escalar
+    [{ node: 'Responder sem consultar', type: 'main', index: 0 }],         // recusa comum
+  ] },
+  'Chamar colaborador (Telegram)': { main: [
+    [{ node: 'Responder — o escritório foi avisado', type: 'main', index: 0 }],
+    [{ node: 'Responder — não consegui avisar', type: 'main', index: 0 }],  // saída de erro
   ] },
   'Ficha do cliente': { main: [[{ node: 'Responder ao cliente', type: 'main', index: 0 }]] },
   'Modelo — cliente': { ai_languageModel: [[{ node: 'Responder ao cliente', type: 'ai_languageModel', index: 0 }]] },

@@ -20,7 +20,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const CLIENTES = [\n  {\n    \"whatsapp\": \"559681186483\",\n    \"nome\": \"Tiago Correia Bandeira\",\n    \"processos\": [\n      \"AUTOS-05\"\n    ],\n    \"_nota\": \"Numero real do Denis como o WhatsApp o registra: 12 digitos, sem o nono. Atua como o cliente na demonstracao.\"\n  }\n];\nconst PROCESSOS = [{\"id\":\"AUTOS-01\",\"numero\":\"6984107-85.2020.8.03.0001\",\"titulo\":\"Beatriz Correia Bandeira × Rafael Teixeira Mourao\",\"classe\":\"CUMPRIMENTO DE SENTENÇA\",\"segredo\":true},{\"id\":\"AUTOS-02\",\"numero\":\"4670534-48.2024.8.03.0001\",\"titulo\":\"Leandro Prado Cavalcanti × Beatriz Correia Bandeira\",\"classe\":\"ALIMENTOS - LEI ESPECIAL Nº 5.478/68\",\"segredo\":true},{\"id\":\"AUTOS-03\",\"numero\":\"5205929-54.2026.8.15.2001\",\"titulo\":\"Rodrigo Queiroz Amorim × Beatriz Correia Bandeira\",\"classe\":\"CUMPRIMENTO DE SENTENÇA DE OBRIGAÇÃO DE PRESTAR ALIMENTOS\",\"segredo\":true},{\"id\":\"AUTOS-04\",\"numero\":\"6782320-89.2026.8.03.0002\",\"titulo\":\"Vinicius Andrade Peixoto × Instituto de Previdencia de Vila Formosa\",\"classe\":\"PROCEDIMENTO COMUM CÍVEL\",\"segredo\":false},{\"id\":\"AUTOS-05\",\"numero\":\"1903155-68.2024.8.03.0001\",\"titulo\":\"Tiago Correia Bandeira × Municipio de Porto Belo\",\"classe\":\"CUMPRIMENTO DE SENTENÇA CONTRA A FAZENDA PÚBLICA\",\"segredo\":false},{\"id\":\"AUTOS-06\",\"numero\":\"1742002-89.2025.8.03.0001\",\"titulo\":\"Ana Beatriz Siqueira Lacerda × Estado de Rio Verde\",\"classe\":\"PROCEDIMENTO COMUM CÍVEL\",\"segredo\":false},{\"id\":\"AUTOS-07\",\"numero\":\"5304347-49.2026.8.03.0000\",\"titulo\":\"Ana Beatriz Siqueira Lacerda × Estado de Rio Verde\",\"classe\":\"AGRAVO DE INSTRUMENTO\",\"segredo\":false},{\"id\":\"AUTOS-08\",\"numero\":\"2980233-68.2025.5.08.0205\",\"titulo\":\"Mariana Monteiro Alencar × Agropecuaria Aurora S.A.\",\"classe\":\"Ação Trabalhista - Rito Sumaríssimo\",\"segredo\":true}];\n\nconst soDigitos = (t) => String(t || '').replace(/\\D/g, '');\n\n/** Celular brasileiro tem DUAS formas, e o WhatsApp guarda a do cadastro\n *  original: 55 + DDD + 9 digitos (com o nono) ou 55 + DDD + 8 (sem).\n *  Quem cadastra o cliente digita a que conhece; o telefone reporta a que tem.\n *  Comparar sem normalizar recusa cliente legitimo — e a recusa parece um\n *  problema de seguranca funcionando, o que e o pior tipo de defeito.\n *  Aconteceu na primeira conexao: numero cadastrado com o nono, WhatsApp\n *  registrado sem ele. */\nfunction formasDoNumero(bruto) {\n  const n = soDigitos(bruto);\n  const formas = [n];\n  const m = n.match(/^55(\\d{2})(\\d{8,9})$/);\n  if (m) {\n    const [, ddd, resto] = m;\n    if (resto.length === 9 && resto[0] === '9') formas.push('55' + ddd + resto.slice(1));\n    if (resto.length === 8) formas.push('55' + ddd + '9' + resto);\n  }\n  return formas;\n}\nconst mesmoNumero = (a, b) => {\n  const fa = formasDoNumero(a), fb = formasDoNumero(b);\n  return fa.some(x => fb.indexOf(x) !== -1);\n};\n\n// O corpo do webhook da Uazapi e { event, instance, data }, e o formato de\n// \"data\" varia por evento. Aceitar as formas plausíveis custa três linhas e\n// evita que uma mudança de versão derrube a demonstração na frente do cliente.\nconst corpo = $json.body || $json;\nconst d = corpo.data || corpo.message || corpo;\nconst m = d.message || d;\n\nconst texto = String(m.text || m.body || m.conversation || '').trim();\nconst fromMe = m.fromMe === true || m.key && m.key.fromMe === true;\nconst isGroup = m.isGroup === true || String(m.chatid || '').indexOf('@g.us') !== -1;\n\n// Eco da própria instância, grupo e mensagem sem texto não são atendimento.\nif (fromMe || isGroup || !texto) {\n  return { json: { rota: 'ignorar', motivo: fromMe ? 'mensagem propria' : isGroup ? 'grupo' : 'sem texto' } };\n}\n\nconst numero = soDigitos(m.sender_pn || m.sender || m.chatid || m.from);\nif (!numero) {\n  return { json: { rota: 'ignorar', motivo: 'evento sem remetente' } };\n}\n\n// --- barreira 1: quem -------------------------------------------------------\n// A recusa é deliberadamente sem informação. Dizer \"este processo não é seu\"\n// já confirma que o processo existe, e para quem pesca isso basta.\nconst cliente = CLIENTES.find(c => mesmoNumero(c.whatsapp, numero));\nif (!cliente) {\n  return { json: { rota: 'direto', numero, texto: [\n    'Olá! Este é o atendimento automatizado do escritório.',\n    '',\n    'Não localizei um cadastro para este número. Se você é cliente, fale com o escritório pelo canal de sempre para atualizarmos seu contato.',\n    '',\n    'Não presto informações sobre processos a números não cadastrados.'\n  ].join('\\n') }};\n}\n\n// --- barreira 2: escopo -----------------------------------------------------\n// O QUE ELE PODE VER SAI DAQUI. A mensagem dele não entra nesta decisão.\nconst meus = PROCESSOS.filter(p => (cliente.processos || []).indexOf(p.id) !== -1);\nif (!meus.length) {\n  return { json: { rota: 'direto', numero, texto:\n    'Olá, ' + cliente.nome.split(' ')[0] + '! No momento não há processo vinculado ao seu cadastro. Fale com o escritório para conferirmos.' }};\n}\n\nconst base = { rota: 'consulta', numero, nome: cliente.nome };\n\n// --- saudação ---------------------------------------------------------------\nconst ehSaudacao = /^(oi+|ol[áa]|opa|e a[íi]|bom dia|boa tarde|boa noite|tudo bem|tudo bom|ajuda|menu|come[çc]ar)[\\s!.,?]*$/i.test(texto);\nif (ehSaudacao) {\n  return { json: { ...base, rota: 'direto', texto: [\n    'Olá, ' + cliente.nome.split(' ')[0] + '! Aqui é o atendimento automatizado do escritório.',\n    '',\n    'Posso informar como está o andamento do seu processo.',\n    meus.length > 1 ? '' : '',\n    'É só perguntar, por exemplo: \"como está meu processo?\"',\n    '',\n    'Para falar com uma pessoa do escritório, é só dizer.'\n  ].filter(Boolean).join('\\n') }};\n}\n\n// --- pedido de atendimento humano -------------------------------------------\nif (/falar com (uma pessoa|algu[ée]m|advogad|humano|atendente)|atendimento humano|pessoa de verdade/i.test(texto)) {\n  return { json: { ...base, rota: 'direto', texto:\n    'Combinado. Vou avisar o escritório e alguém entra em contato com você.\\n\\n' +\n    'Nesta demonstração o aviso não é enviado de verdade — no sistema completo, ele abre um chamado para a equipe.' }};\n}\n\n// --- barreira 3: prazo, por regra e não por falta de dado -------------------\n// Um cliente confiar em prazo dito por robô é o pior desfecho possível do\n// projeto (R-02). A recusa vem antes do modelo, para que não haja o que\n// convencer nem o que alucinar.\n// \"quando isso vai terminar?\" é pergunta de prazo com outra roupa, e foi\n// exatamente a que escapou da primeira versão. O verbo pode estar longe do\n// \"quando\", por isso a folga de 30 caracteres entre os dois.\nconst PERGUNTA_DE_PRAZO = /\\bprazo\\b|at[ée] quando|quantos? (dias|meses|anos|semanas)|data limite|\\bdemora(r|ndo)?\\b|quanto tempo|falta muito|quando\\b[^?]{0,30}\\b(vence|termin|acab|conclu|finaliz|julg|resolv|paga|receb|sair? a (senten|decis))/i;\nif (PERGUNTA_DE_PRAZO.test(texto)) {\n  return { json: { ...base, rota: 'direto', texto: [\n    'Sobre prazo eu não informo — essa é uma orientação que só um advogado do escritório pode dar, olhando o processo.',\n    '',\n    // Antes esta linha dizia \"vou avisar a equipe do seu contato\". Nenhum nó\n    // fazia esse aviso. Promessa sem mecanismo é a mesma falha que já tínhamos\n    // corrigido quando o modelo improvisou \"vou verificar e retorno\" — só que\n    // desta vez estava escrita por nós, em código, o que é pior.\n    'Se quiser falar com uma pessoa do escritório, é só dizer aqui. Se for urgente, ligue para o escritório.'\n  ].join('\\n') }};\n}\n\n// --- barreira 3.5: processo que nao e dele, citado por numero ---------------\n// O Porteiro ja garantia que o ESCOPO nao muda. Faltava a resposta: o modelo,\n// recebendo a ficha do processo do cliente e uma pergunta sobre outro numero,\n// improvisou \"nao tenho informacoes sobre o processo X, vou verificar com o\n// escritorio e retorno\". Nao vazou nada — mas prometeu ao cliente um retorno\n// sobre processo alheio, que o escritorio nunca poderia dar.\n// A recusa passa a ser em codigo, e nao confirma nem desmente que o processo\n// exista: diz apenas que este canal so trata do processo dele.\nconst cnjCitado = (texto.match(/\\d{7}-?\\d{2}\\.?\\d{4}\\.?\\d\\.?\\d{2}\\.?\\d{4}/g) || [])[0];\n// Vale tambem para numero digitado sem pontuacao: 20 digitos seguidos sao um\n// CNJ, com ou sem os pontos que ninguem digita no celular.\nconst digitosDoTexto = soDigitos(texto);\nconst cnjSemPontos = digitosDoTexto.length >= 20 ? digitosDoTexto : null;\n\nif (cnjCitado || cnjSemPontos) {\n  const ehDele = meus.some(p => {\n    const n = soDigitos(p.numero);\n    return (cnjCitado && soDigitos(cnjCitado) === n) || (cnjSemPontos && cnjSemPontos.indexOf(n) !== -1);\n  });\n  if (!ehDele) {\n    return { json: { ...base, rota: 'direto', texto: [\n      'Por aqui eu trato apenas do processo vinculado ao seu cadastro.',\n      '',\n      'Sobre qualquer outro processo, fale diretamente com o escritório.'\n    ].join('\\n') }};\n  }\n}\n\n// --- escolha do processo, DENTRO do que já é dele ---------------------------\nlet alvo = meus[0];\nif (meus.length > 1) {\n  const digitos = soDigitos(texto);\n  const porNumero = meus.find(p => digitos.length >= 15 && digitos.indexOf(soDigitos(p.numero)) !== -1);\n  if (porNumero) alvo = porNumero;\n  else {\n    return { json: { ...base, rota: 'direto', texto: [\n      'Você tem ' + meus.length + ' processos conosco. Sobre qual deles é a sua pergunta?',\n      '',\n      meus.map(p => '· ' + (p.classe || p.titulo).toLowerCase()).join('\\n')\n    ].join('\\n') }};\n  }\n}\n\n// --- barreira 4: segredo de justiça -----------------------------------------\n// Vale mesmo para a própria parte: o canal do WhatsApp não identifica ninguém\n// com o rigor que o segredo exige. Número de telefone não é identidade.\nif (alvo.segredo) {\n  return { json: { ...base, rota: 'direto', texto: [\n    'Seu processo corre em segredo de justiça, e por isso não trago informações dele por aqui.',\n    '',\n    'Fale diretamente com o escritório — é a forma segura de tratar deste caso.'\n  ].join('\\n') }};\n}\n\nreturn { json: { ...base, processoId: alvo.id, processoNumero: alvo.numero, pergunta: texto } };"
+        "jsCode": "const CLIENTES = [\n  {\n    \"whatsapp\": \"5596981071928\",\n    \"nome\": \"Ana Beatriz Siqueira Lacerda\",\n    \"processos\": [\n      \"AUTOS-06\",\n      \"AUTOS-07\"\n    ],\n    \"_nota\": \"Numero do Denis para a demonstracao, 13 digitos COM o nono. Substituiu 559681186483, indisponivel. Dois processos do MESMO caso: AUTOS-06 e a acao na 1a Vara de Fazenda Publica; AUTOS-07 e o agravo que subiu ao tribunal. AUTOS-07 tem zero movimentacoes -- recurso recem-distribuido, nao defeito.\"\n  }\n];\n// O chamado ao colaborador também leva o aviso de demonstração. Quem recebe no\n// Telegram precisa saber, sem pensar, se aquilo é ensaio ou cliente de verdade.\nconst AVISO_TOPO = \"⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório\";\nconst PROCESSOS = [{\"id\":\"AUTOS-01\",\"numero\":\"6984107-85.2020.8.03.0001\",\"titulo\":\"Beatriz Correia Bandeira × Rafael Teixeira Mourao\",\"classe\":\"CUMPRIMENTO DE SENTENÇA\",\"segredo\":true},{\"id\":\"AUTOS-02\",\"numero\":\"4670534-48.2024.8.03.0001\",\"titulo\":\"Leandro Prado Cavalcanti × Beatriz Correia Bandeira\",\"classe\":\"ALIMENTOS - LEI ESPECIAL Nº 5.478/68\",\"segredo\":true},{\"id\":\"AUTOS-03\",\"numero\":\"5205929-54.2026.8.15.2001\",\"titulo\":\"Rodrigo Queiroz Amorim × Beatriz Correia Bandeira\",\"classe\":\"CUMPRIMENTO DE SENTENÇA DE OBRIGAÇÃO DE PRESTAR ALIMENTOS\",\"segredo\":true},{\"id\":\"AUTOS-04\",\"numero\":\"6782320-89.2026.8.03.0002\",\"titulo\":\"Vinicius Andrade Peixoto × Instituto de Previdencia de Vila Formosa\",\"classe\":\"PROCEDIMENTO COMUM CÍVEL\",\"segredo\":false},{\"id\":\"AUTOS-05\",\"numero\":\"1903155-68.2024.8.03.0001\",\"titulo\":\"Tiago Correia Bandeira × Municipio de Porto Belo\",\"classe\":\"CUMPRIMENTO DE SENTENÇA CONTRA A FAZENDA PÚBLICA\",\"segredo\":false},{\"id\":\"AUTOS-06\",\"numero\":\"1742002-89.2025.8.03.0001\",\"titulo\":\"Ana Beatriz Siqueira Lacerda × Estado de Rio Verde\",\"classe\":\"PROCEDIMENTO COMUM CÍVEL\",\"segredo\":false},{\"id\":\"AUTOS-07\",\"numero\":\"5304347-49.2026.8.03.0000\",\"titulo\":\"Ana Beatriz Siqueira Lacerda × Estado de Rio Verde\",\"classe\":\"AGRAVO DE INSTRUMENTO\",\"segredo\":false},{\"id\":\"AUTOS-08\",\"numero\":\"2980233-68.2025.5.08.0205\",\"titulo\":\"Mariana Monteiro Alencar × Agropecuaria Aurora S.A.\",\"classe\":\"Ação Trabalhista - Rito Sumaríssimo\",\"segredo\":true}];\n\nconst soDigitos = (t) => String(t || '').replace(/\\D/g, '');\n\n/** Celular brasileiro tem DUAS formas, e o WhatsApp guarda a do cadastro\n *  original: 55 + DDD + 9 digitos (com o nono) ou 55 + DDD + 8 (sem).\n *  Quem cadastra o cliente digita a que conhece; o telefone reporta a que tem.\n *  Comparar sem normalizar recusa cliente legitimo — e a recusa parece um\n *  problema de seguranca funcionando, o que e o pior tipo de defeito.\n *  Aconteceu na primeira conexao: numero cadastrado com o nono, WhatsApp\n *  registrado sem ele. */\nfunction formasDoNumero(bruto) {\n  const n = soDigitos(bruto);\n  const formas = [n];\n  const m = n.match(/^55(\\d{2})(\\d{8,9})$/);\n  if (m) {\n    const [, ddd, resto] = m;\n    if (resto.length === 9 && resto[0] === '9') formas.push('55' + ddd + resto.slice(1));\n    if (resto.length === 8) formas.push('55' + ddd + '9' + resto);\n  }\n  return formas;\n}\nconst mesmoNumero = (a, b) => {\n  const fa = formasDoNumero(a), fb = formasDoNumero(b);\n  return fa.some(x => fb.indexOf(x) !== -1);\n};\n\n// O corpo do webhook da Uazapi e { event, instance, data }, e o formato de\n// \"data\" varia por evento. Aceitar as formas plausíveis custa três linhas e\n// evita que uma mudança de versão derrube a demonstração na frente do cliente.\nconst corpo = $json.body || $json;\nconst d = corpo.data || corpo.message || corpo;\nconst m = d.message || d;\n\nconst texto = String(m.text || m.body || m.conversation || '').trim();\nconst fromMe = m.fromMe === true || m.key && m.key.fromMe === true;\nconst isGroup = m.isGroup === true || String(m.chatid || '').indexOf('@g.us') !== -1;\n\n// Eco da própria instância, grupo e mensagem sem texto não são atendimento.\nif (fromMe || isGroup || !texto) {\n  return { json: { rota: 'ignorar', motivo: fromMe ? 'mensagem propria' : isGroup ? 'grupo' : 'sem texto' } };\n}\n\nconst numero = soDigitos(m.sender_pn || m.sender || m.chatid || m.from);\nif (!numero) {\n  return { json: { rota: 'ignorar', motivo: 'evento sem remetente' } };\n}\n\n// --- barreira 1: quem -------------------------------------------------------\n// A recusa é deliberadamente sem informação. Dizer \"este processo não é seu\"\n// já confirma que o processo existe, e para quem pesca isso basta.\nconst cliente = CLIENTES.find(c => mesmoNumero(c.whatsapp, numero));\nif (!cliente) {\n  return { json: { rota: 'direto', numero, texto: [\n    'Olá! Este é o atendimento automatizado do escritório.',\n    '',\n    'Não localizei um cadastro para este número. Se você é cliente, fale com o escritório pelo canal de sempre para atualizarmos seu contato.',\n    '',\n    'Não presto informações sobre processos a números não cadastrados.'\n  ].join('\\n') }};\n}\n\n// --- barreira 2: escopo -----------------------------------------------------\n// O QUE ELE PODE VER SAI DAQUI. A mensagem dele não entra nesta decisão.\nconst meus = PROCESSOS.filter(p => (cliente.processos || []).indexOf(p.id) !== -1);\nif (!meus.length) {\n  return { json: { rota: 'direto', numero, texto:\n    'Olá, ' + cliente.nome.split(' ')[0] + '! No momento não há processo vinculado ao seu cadastro. Fale com o escritório para conferirmos.' }};\n}\n\nconst base = { rota: 'consulta', numero, nome: cliente.nome };\n\n// --- saudação ---------------------------------------------------------------\nconst ehSaudacao = /^(oi+|ol[áa]|opa|e a[íi]|bom dia|boa tarde|boa noite|tudo bem|tudo bom|ajuda|menu|come[çc]ar)[\\s!.,?]*$/i.test(texto);\nif (ehSaudacao) {\n  return { json: { ...base, rota: 'direto', texto: [\n    'Olá, ' + cliente.nome.split(' ')[0] + '! Aqui é o atendimento automatizado do escritório.',\n    '',\n    'Posso informar como está o andamento do seu processo.',\n    meus.length > 1 ? '' : '',\n    'É só perguntar, por exemplo: \"como está meu processo?\"',\n    '',\n    'Para falar com uma pessoa do escritório, é só dizer.'\n  ].filter(Boolean).join('\\n') }};\n}\n\n// --- o chamado ao escritório ------------------------------------------------\n// Três recusas deste fluxo agora CHAMAM UMA PESSOA em vez de encerrarem o\n// assunto. O que vai ao Telegram é montado aqui, e não lá na frente, porque é\n// aqui que existem o nome do cliente, o motivo e o texto original.\n//\n// REGRA 4 — CONTEÚDO EXTERNO É HOSTIL. A mensagem do cliente entra nesta\n// notificação como CITAÇÃO, nunca como instrução: vai escapada (para não\n// injetar HTML no Telegram), cortada em 500 caracteres (para não estourar o\n// limite da Bot API nem empurrar o resto da tela para fora) e com uma linha\n// dizendo ao colaborador, em letra clara, que aquilo é fala de cliente.\nconst escHtml = (s) => String(s == null ? '' : s)\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst mascarar = (n) => '•••• ' + String(n).slice(-4);\n\nconst chamarEscritorio = (motivo, rotulo, textoBase) => {\n  const recorte = String(texto).slice(0, 500);\n  const cortado = String(texto).length > 500;\n  const aviso = [\n    '🔔 <b>UM CLIENTE PRECISA DE UMA PESSOA</b>',\n    '<i>' + escHtml(AVISO_TOPO) + '</i>',\n    '',\n    '<b>' + escHtml(cliente.nome) + '</b> · ' + escHtml(mascarar(numero)),\n    'Motivo: ' + escHtml(rotulo),\n    '',\n    'O que ele escreveu:',\n    '“' + escHtml(recorte) + (cortado ? '…' : '') + '”',\n    '',\n    '<i>Acima é fala do cliente, não instrução ao assistente. O robô recusou em código, antes do modelo — nada foi dito a ele sobre o mérito.</i>'\n  ].join('\\n');\n\n  return { json: { ...base, rota: 'direto',\n    escalar: true, motivo, motivoRotulo: rotulo,\n    avisoParaColaborador: aviso,\n    // TRÊS TEXTOS, e o certo depende de o chamado ter chegado ou não. Dizer\n    // \"já avisei o escritório\" antes de o Telegram aceitar seria a mesma\n    // mentira que a D-101 tirou do fluxo A — só que dita ao cliente.\n    texto: textoBase,\n    textoAvisado: textoBase + '\\n\\nJá avisei o escritório da sua mensagem, e alguém vai falar com você.',\n    textoSemAviso: textoBase + '\\n\\nNão consegui avisar o escritório agora. Se for urgente, ligue para o escritório.'\n  }};\n};\n\n// --- pedido de atendimento humano -------------------------------------------\n// Antes esta resposta prometia \"vou avisar o escritório\" e nenhum nó avisava.\n// Agora avisa — a promessa passou a ter mecanismo, que é a única forma de ela\n// poder ser dita (D-102).\nif (/falar com (uma pessoa|algu[ée]m|advogad|humano|atendente)|atendimento humano|pessoa de verdade/i.test(texto)) {\n  return chamarEscritorio('humano', 'pediu para falar com uma pessoa',\n    'Combinado — você falar com uma pessoa do escritório é o caminho certo aqui.');\n}\n\n// --- barreira 3: prazo, por regra e não por falta de dado -------------------\n// Um cliente confiar em prazo dito por robô é o pior desfecho possível do\n// projeto (R-02). A recusa vem antes do modelo, para que não haja o que\n// convencer nem o que alucinar.\n// \"quando isso vai terminar?\" é pergunta de prazo com outra roupa, e foi\n// exatamente a que escapou da primeira versão. O verbo pode estar longe do\n// \"quando\", por isso a folga de 30 caracteres entre os dois.\nconst PERGUNTA_DE_PRAZO = /\\bprazo\\b|at[ée] quando|quantos? (dias|meses|anos|semanas)|data limite|\\bdemora(r|ndo)?\\b|quanto tempo|falta muito|quando\\b[^?]{0,30}\\b(vence|termin|acab|conclu|finaliz|julg|resolv|paga|receb|sair? a (senten|decis))/i;\nif (PERGUNTA_DE_PRAZO.test(texto)) {\n  // Esta linha já disse \"vou avisar a equipe do seu contato\" sem que nó nenhum\n  // avisasse; a correção da revisão do Codex tirou a promessa. Agora ela volta\n  // — na ordem certa: primeiro o mecanismo, depois a frase.\n  return chamarEscritorio('prazo', 'perguntou sobre prazo',\n    'Sobre prazo eu não informo — essa é uma orientação que só um advogado do escritório pode dar, olhando o processo.');\n}\n\n// --- barreira 3.1: prognóstico ----------------------------------------------\n// \"Eu vou ganhar?\" é a pergunta que mais interessa ao cliente e a que menos\n// pode ser respondida por robô. Errar para mais cria expectativa que vira\n// reclamação no CEJUSC e na OAB; errar para menos faz o cliente desistir de\n// direito que ele tinha. E não existe resposta \"prudente\" automática: até um\n// \"as chances parecem boas\" é opinião jurídica dada por quem não pode dar.\n//\n// Vale a mesma lógica do prazo (R-02): a recusa vem ANTES do modelo, para que\n// não haja o que convencer nem o que alucinar. O modelo bom recusaria; o\n// problema é que só se descobre qual modelo se tem depois que ele respondeu.\nconst PERGUNTA_DE_PROGNOSTICO = /\\bchances?\\b|\\bprobabilidade\\b|(\\bvou\\b|\\bvamos\\b|\\bd[áa] pra\\b|\\btem como\\b|\\b[ée] poss[íi]vel\\b|\\bconsigo\\b)[^?]{0,40}\\b(ganhar|vencer|perder)\\b|\\b(ganhar|perder|vencer) (a|essa|esta|minha|nossa) (causa|a[çc][ãa]o|demanda)\\b|\\bvale a pena (recorrer|entrar|processar|continuar|insistir)\\b|\\bo juiz vai\\b|\\bsenten[çc]a vai ser\\b|\\bcausa ganha\\b|\\bt[ée]nho raz[ãa]o\\b/i;\nif (PERGUNTA_DE_PROGNOSTICO.test(texto)) {\n  return chamarEscritorio('prognostico', 'perguntou sobre chance de êxito',\n    'Sobre a chance de ganhar eu não opino — avaliar isso é trabalho de advogado, olhando o caso inteiro. Não seria honesto eu arriscar um palpite.');\n}\n\n// --- barreira 3.5: processo que nao e dele, citado por numero ---------------\n// O Porteiro ja garantia que o ESCOPO nao muda. Faltava a resposta: o modelo,\n// recebendo a ficha do processo do cliente e uma pergunta sobre outro numero,\n// improvisou \"nao tenho informacoes sobre o processo X, vou verificar com o\n// escritorio e retorno\". Nao vazou nada — mas prometeu ao cliente um retorno\n// sobre processo alheio, que o escritorio nunca poderia dar.\n// A recusa passa a ser em codigo, e nao confirma nem desmente que o processo\n// exista: diz apenas que este canal so trata do processo dele.\nconst cnjCitado = (texto.match(/\\d{7}-?\\d{2}\\.?\\d{4}\\.?\\d\\.?\\d{2}\\.?\\d{4}/g) || [])[0];\n// Vale tambem para numero digitado sem pontuacao: 20 digitos seguidos sao um\n// CNJ, com ou sem os pontos que ninguem digita no celular.\nconst digitosDoTexto = soDigitos(texto);\nconst cnjSemPontos = digitosDoTexto.length >= 20 ? digitosDoTexto : null;\n\nif (cnjCitado || cnjSemPontos) {\n  const ehDele = meus.some(p => {\n    const n = soDigitos(p.numero);\n    return (cnjCitado && soDigitos(cnjCitado) === n) || (cnjSemPontos && cnjSemPontos.indexOf(n) !== -1);\n  });\n  if (!ehDele) {\n    return { json: { ...base, rota: 'direto', texto: [\n      'Por aqui eu trato apenas do processo vinculado ao seu cadastro.',\n      '',\n      'Sobre qualquer outro processo, fale diretamente com o escritório.'\n    ].join('\\n') }};\n  }\n}\n\n// --- escolha do processo, DENTRO do que já é dele ---------------------------\nlet alvo = meus[0];\nif (meus.length > 1) {\n  const digitos = soDigitos(texto);\n  const porNumero = meus.find(p => digitos.length >= 15 && digitos.indexOf(soDigitos(p.numero)) !== -1);\n  if (porNumero) alvo = porNumero;\n  else {\n    return { json: { ...base, rota: 'direto', texto: [\n      'Você tem ' + meus.length + ' processos conosco. Sobre qual deles é a sua pergunta?',\n      '',\n      meus.map(p => '· ' + (p.classe || p.titulo).toLowerCase()).join('\\n')\n    ].join('\\n') }};\n  }\n}\n\n// --- barreira 4: segredo de justiça -----------------------------------------\n// Vale mesmo para a própria parte: o canal do WhatsApp não identifica ninguém\n// com o rigor que o segredo exige. Número de telefone não é identidade.\nif (alvo.segredo) {\n  return { json: { ...base, rota: 'direto', texto: [\n    'Seu processo corre em segredo de justiça, e por isso não trago informações dele por aqui.',\n    '',\n    'Fale diretamente com o escritório — é a forma segura de tratar deste caso.'\n  ].join('\\n') }};\n}\n\nreturn { json: { ...base, processoId: alvo.id, processoNumero: alvo.numero, pergunta: texto } };"
       },
       "name": "Porteiro do cliente (verificação em código)",
       "type": "n8n-nodes-base.code",
@@ -197,6 +197,120 @@
           "name": "[LEX-DEMO] Uazapi (instância)"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.escalar }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Precisa de gente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "898717066",
+        "text": "={{ $json.avisoParaColaborador }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "name": "Chamar colaborador (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        620
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "telegramApi": {
+          "id": "bUpBJwqst2NKCYMj",
+          "name": "[LEX-DEMO] Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Porteiro do cliente (verificação em código)').item.json.numero, text: \"⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório\" + '\\n\\n' + $('Porteiro do cliente (verificação em código)').item.json.textoAvisado, linkPreview: false, delay: 1200 }) }}",
+        "options": {}
+      },
+      "name": "Responder — o escritório foi avisado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        540
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "isp5n4dxq4BVPGCM",
+          "name": "[LEX-DEMO] Uazapi (instância)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Porteiro do cliente (verificação em código)').item.json.numero, text: \"⚠️ DEMONSTRAÇÃO — atendimento automatizado do escritório\" + '\\n\\n' + $('Porteiro do cliente (verificação em código)').item.json.textoSemAviso, linkPreview: false, delay: 1200 }) }}",
+        "options": {}
+      },
+      "name": "Responder — não consegui avisar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        700
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "isp5n4dxq4BVPGCM",
+          "name": "[LEX-DEMO] Uazapi (instância)"
+        }
+      }
     }
   ],
   "connections": {
@@ -233,7 +347,43 @@
         ],
         [
           {
+            "node": "Precisa de gente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Precisa de gente?": {
+      "main": [
+        [
+          {
+            "node": "Chamar colaborador (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Responder sem consultar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chamar colaborador (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Responder — o escritório foi avisado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder — não consegui avisar",
             "type": "main",
             "index": 0
           }

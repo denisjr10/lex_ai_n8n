@@ -12,7 +12,7 @@
 | 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Onze dos doze achados foram fechados** — cinco em 31/08 e seis em 01/09 — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, a D-142 dentro do código (D-156), e o **isolamento entre escritórios em duas camadas** (D-157), **uso único de aprovação** (D-158) e os menores. Falta só o **HMAC no anonimizador, adiado por decisão do usuário até depois da apresentação** (D-159). Ver §"Uma revisão externa passou no projeto inteiro" |
 | Fase | **3 — construção.** **Marcos 1, 2 e 3 fechados e verificados**: monorepo e migrações; o chassi, com a matriz de escopo passando inteira; e **a auditoria, que grava, recusa alteração e reconstrói a operação pelo `requisicao_id`**. PRD (v2.0) e Spec Parte I (v1.2) aguardam aval; **a Parte II está quase destravada** — falta só o levantamento do Trello e os números do escritório |
 | Branch | `claude/law-firm-ai-automation-6pwaug` |
-| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **10 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **45 de 45 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **92 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, 8 nós, **52 verificações** desde a D-155), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
+| Código | ✅ **Fundação, chassi e auditoria de pé, os três verificados.** Monorepo com 9 pacotes, **10 migrações** aplicadas num PostgreSQL 16 (23 tabelas) com **45 de 45 provas de regra**, **23 de 23 provas de auditoria contra o banco de pé**, e **92 testes passando** — 69 do domínio, do chassi e da auditoria, 12 do disjuntor de crédito. `npm run verificar` roda os três. O banco recusa conta compartilhada, alteração de auditoria, estouro de orçamento e evento duplicado. Mais: captura, importador de autos em PDF, anonimizador, cliente do n8n e **as duas demos rodando** — A no Telegram (`ZPh3DxptHFIyWETO`, 23 nós, 138 verificações) e B no WhatsApp (`Hxc7uAmAUhyPE7E1`, **12 nós, 86 verificações** — a recusa agora chama um advogado no Telegram, D-163), **ligadas uma na outra**: aprovar no Telegram envia ao cliente |
 | Regras de cobrança | ⚠️ **Duas das quatro caíram.** Valem: callback é grátis (3 entregas, R$ 0,00); "200 itens" são aparições. **Não valem:** a tarifa plana de R$ 3,00 (débito por rota, D-108) nem o teto de 16 requisições (18 feitas, saldo intacto, D-119). Ver `06-orcamento...` §5.3 |
 | Dados da demo | ✅ **8 processos reais, anonimizados**, extraídos dos autos em PDF do escritório. **Sem gastar crédito** — a demo deixou de depender do desbloqueio |
 | Alvo do Escavador | 🔄 **Trocado em 24/08** (D-96): o anterior estava em segredo de justiça. Agora é um processo de saúde pública do TJAP |
@@ -712,6 +712,48 @@ Três decisões que valem destaque:
 O risco central **não** é bagunçar o repositório: é **a demo virar produção** — sem Policy Gate, sem motor de custo, com WhatsApp não oficial (R-33). Riscos novos: **R-33 a R-36**. Decisões: **D-86 a D-94**.
 
 **Trava a demo o mesmo que já travava os Blocos A e B:** um número CNJ real do escritório.
+
+## A recusa passou a chamar uma pessoa — 01/09/2026
+
+A Demo B recusa três coisas por regra. Até hoje a recusa era **um beco**: o cliente descobria que o robô não responde aquilo, e a conversa morria ali. Agora ela **chama um advogado no Telegram** (D-163).
+
+É a mesma frase que a revisão do Codex mandou tirar — *"vou avisar a equipe"* — voltando na ordem certa: **primeiro o mecanismo, depois a promessa.**
+
+**O que dispara o chamado:**
+
+| Gatilho | O que o cliente ouve |
+|---|---|
+| **Prazo** | "Sobre prazo eu não informo — só um advogado, olhando o processo" |
+| **Prognóstico** — *"vou ganhar?"*, *"quais as chances?"*, *"vale a pena recorrer?"* | "Sobre a chance de ganhar eu não opino. Não seria honesto eu arriscar um palpite" |
+| **Pedido de gente** | "Combinado — falar com uma pessoa é o caminho certo aqui" |
+
+**A barreira de prognóstico é nova (D-165)**, e é irmã da de prazo. "Eu vou ganhar?" é a pergunta que mais interessa ao cliente e a que menos pode ser respondida por robô: errar para mais cria expectativa que vira reclamação na OAB; errar para menos faz o cliente desistir de direito que tinha. E **não existe resposta prudente automática** — até "as chances parecem boas" é opinião jurídica dada por quem não pode dar. Como no prazo, a recusa vem antes do modelo.
+
+**A ordem importa, e é a D-101 do outro lado do balcão (D-164).** Lá era a tela do colaborador dizendo "enviado" antes do envio; aqui seria o cliente ouvindo "já avisei" antes do aviso. São três textos:
+
+- **base** — não afirma aviso nenhum
+- **sucesso** — *"Já avisei o escritório da sua mensagem"*, e só sai depois que o Telegram aceitou
+- **falha** — *"Não consegui avisar o escritório agora. Se for urgente, ligue"*
+
+O nó do Telegram tem `retryOnFail` e **saída de erro**. `continueRegularOutput` produziria exatamente a frase falsa.
+
+**O que o advogado recebe** — nome do cliente, número mascarado, motivo, e a pergunta original **entre aspas, escapada e cortada em 500 caracteres**, sob uma linha dizendo que aquilo é fala de cliente e não ordem ao assistente (D-166, Regra 4). O aviso de demonstração vai junto: quem recebe precisa saber sem pensar se é ensaio ou cliente de verdade.
+
+**Sem advogado na lista, o gerador recusa publicar.** Prometer aviso sem ter a quem avisar é a D-102 de volta.
+
+**E o risco que isso cria está registrado (R-52):** três gatilhos com um cliente é confortável; num escritório com centenas, o chamado vira ruído e morre de sucesso — sem ninguém desligar nada, só deixando de olhar. Aí a frase "já avisei" volta a ser falsa, não por defeito, mas por saturação.
+
+## Um cliente com dois processos — o caminho que existia e ninguém tinha testado — 01/09/2026
+
+A lista da demo sempre teve cliente de **um** processo só. Ao montar a rodada com vários clientes, descobriu-se que **Ana Beatriz Siqueira Lacerda tem dois processos nos autos do escritório, e são o mesmo caso em duas instâncias**: AUTOS-06 é a ação na 1ª Vara de Fazenda Pública, AUTOS-07 é o agravo de instrumento que subiu ao tribunal. O AUTOS-07 tem zero movimentações — recurso recém-distribuído, não defeito.
+
+Com dois processos, o Porteiro **não escolhe por ele**: pergunta *"sobre qual deles é a sua pergunta?"* e lista **pelas classes**, não pelos números — o cliente reconhece "agravo", ninguém decora CNJ. A alternativa seria o robô chutar e responder com confiança sobre o caso errado, que é pior do que não responder.
+
+**Esse caminho existia no código desde sempre e nunca tinha sido exercitado** — nem por teste, nem por pessoa. Ao trocar a lista, **10 verificações falharam de uma vez**, e nenhuma era defeito: era a suíte inteira presumindo cliente de um processo só. Corrigiu-se a suíte, não o fluxo, e o caminho ganhou 5 verificações próprias — incluindo a de que ter dois processos **não** abre um terceiro.
+
+**Guarda nova no gerador da Demo A:** número de destino de faz-de-conta agora **para a geração**. A Uazapi *aceita* envio para número inexistente, então a tela diria `📤 APROVADO E ENTREGUE` sobre entrega nenhuma — a mesma mentira que a D-101 acabou de tirar dali. Provado com `5500000000000` e com `55968`: os dois recusam.
+
+**Número do cliente na demo:** `5596981071928` (13 dígitos, com o nono). O anterior ficou indisponível. Os demais clientes entram na hora da apresentação, com os números dos colaboradores do escritório.
 
 ## A demo voltou ao ar para nova rodada de testes — 01/09/2026
 

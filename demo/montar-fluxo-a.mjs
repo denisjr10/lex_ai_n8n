@@ -94,7 +94,20 @@ for (const c of listaClientes.clientes || []) {
       console.error(`  (${DESTINOS[id].nome} e ${c.nome}). Não escolho por você — corrija a lista.\n`);
       process.exit(1);
     }
-    DESTINOS[id] = { numero: String(c.whatsapp || '').replace(/\D/g, ''), nome: c.nome };
+    const numero = String(c.whatsapp || '').replace(/\D/g, '');
+    // Número de faz-de-conta é pior que número ausente. Ausente cai no caminho
+    // honesto "APROVADO, MAS SEM DESTINATÁRIO"; um 5500000000000 é ACEITO pela
+    // Uazapi e nunca chega — a tela diria "ENTREGUE" sobre entrega nenhuma, que
+    // é exatamente a mentira que a D-101 mandou tirar daqui. Falha fecha: o
+    // gerador para, e ninguém publica um fluxo que promete o que não cumpre.
+    const digitosRepetidos = /^(\d)\1+$/.test(numero.slice(2));
+    if (numero.length < 12 || numero.length > 13 || digitosRepetidos) {
+      console.error(`\n  ${path.basename(clientesPath)}: o número de ${c.nome} não serve como destino.`);
+      console.error(`  Recebido: ${numero || '(vazio)'} — esperado 12 ou 13 dígitos com código do país,`);
+      console.error(`  e um número real. Preencha ou remova o cliente; não publico envio para o vazio.\n`);
+      process.exit(1);
+    }
+    DESTINOS[id] = { numero, nome: c.nome };
   }
 }
 
