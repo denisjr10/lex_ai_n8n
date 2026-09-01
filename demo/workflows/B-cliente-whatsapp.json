@@ -165,7 +165,7 @@
       "waitBetweenTries": 2000,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "sNm7ZdSpzEubaBOu",
+          "id": "BYF3aU2FOma4nTmi",
           "name": "[LEX-DEMO] Uazapi (instância)"
         }
       }
@@ -193,7 +193,7 @@
       "waitBetweenTries": 2000,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "sNm7ZdSpzEubaBOu",
+          "id": "BYF3aU2FOma4nTmi",
           "name": "[LEX-DEMO] Uazapi (instância)"
         }
       }
