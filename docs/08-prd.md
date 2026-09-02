@@ -1,13 +1,15 @@
 # PRD — Plataforma de Automação e Agentes de IA para Escritório de Advocacia
 
-| Campo | Valor |
-|---|---|
-| Versão | 2.0 — **o escritório respondeu.** P-01 a P-03 e P-07 fechadas, D-07 e D-09 resolvidas, e a aprovação humana ganhou a faixa que devolve eficiência (§6.2) |
-| Data | 2026-08-27 |
-| Estado | 🟡 **Proposta — aguarda aval do usuário sobre as decisões novas (D-142 a D-152)** |
-| Fase | 2 — PRD e Spec |
-| Antecede | `09-spec-tecnica.md` — **Parte I escrita em 20/08**; a Parte II está quase destravada (§13) |
+
+| Campo    | Valor                                                                                                                                                      |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Versão   | 2.0 — **o escritório respondeu.** P-01 a P-03 e P-07 fechadas, D-07 e D-09 resolvidas, e a aprovação humana ganhou a faixa que devolve eficiência (§6.2)   |
+| Data     | 2026-08-27                                                                                                                                                 |
+| Estado   | 🟡 **Proposta — aguarda aval do usuário sobre as decisões novas (D-142 a D-152)**                                                                          |
+| Fase     | 2 — PRD e Spec                                                                                                                                             |
+| Antecede | `09-spec-tecnica.md` — **Parte I escrita em 20/08**; a Parte II está quase destravada (§13)                                                                |
 | Herda de | `01-diretrizes-gerais.md`, `04-modelo-de-identidade-e-autorizacao.md`, `mapeamento-escavador.md`, `mapeamento-trello.md`, `07-painel-escavador-achados.md` |
+
 
 > **O que este documento é.** A definição do **produto**: quem usa, o que faz, com que regras, a que custo e como se sabe que deu certo. Ele não descreve implementação — isso é da Spec. Onde uma decisão de produto depende de resposta do escritório, o requisito está marcado 🚧 e opera sob premissa declarada.
 
@@ -42,13 +44,15 @@ A plataforma automatiza essas três frentes com agentes de IA orquestrados em **
 
 ### 2.1 Situação atual
 
-| Dor | Consequência hoje |
-|---|---|
-| Acompanhamento de publicação e movimentação é manual | **Risco de perda de prazo** — o pior cenário possível deste projeto |
-| Cliente liga ou manda mensagem para saber do processo | Tempo de advogado consumido em informação que é factual e pública |
-| Demanda chega por e-mail e depende de alguém registrar | Demanda perdida, ou registrada tarde, ou registrada duas vezes |
-| Consulta a tribunal é repetitiva e manual | Trabalho qualificado gasto em tarefa mecânica |
-| Não há registro de quem consultou o quê | Impossível auditar acesso a dado sob sigilo profissional |
+
+| Dor                                                    | Consequência hoje                                                   |
+| ------------------------------------------------------ | ------------------------------------------------------------------- |
+| Acompanhamento de publicação e movimentação é manual   | **Risco de perda de prazo** — o pior cenário possível deste projeto |
+| Cliente liga ou manda mensagem para saber do processo  | Tempo de advogado consumido em informação que é factual e pública   |
+| Demanda chega por e-mail e depende de alguém registrar | Demanda perdida, ou registrada tarde, ou registrada duas vezes      |
+| Consulta a tribunal é repetitiva e manual              | Trabalho qualificado gasto em tarefa mecânica                       |
+| Não há registro de quem consultou o quê                | Impossível auditar acesso a dado sob sigilo profissional            |
+
 
 ### 2.2 Por que agora
 
@@ -70,12 +74,14 @@ Herdados de `01-diretrizes-gerais.md` §1.1, agora com métrica associada — ve
 
 Quatro papéis, herdados de `01` §5.1. O PRD acrescenta o que cada um **espera do produto**.
 
-| Papel | Quem é | Canal | O que espera |
-|---|---|---|---|
-| **Cliente** | Pessoa ou empresa com vínculo contratual ativo | WhatsApp | Saber como está o processo dele, a qualquer hora, sem esperar |
-| **Colaborador** | Equipe administrativa, estagiários, paralegais | **Telegram**, e-mail, painel | Não precisar consultar tribunal manualmente; ter a demanda já registrada e triada |
-| **Advogado** | Advogado(a) inscrito(a) atuante | **Telegram**, e-mail, painel | Não perder prazo; revisar rápido o que a IA propôs; ter fonte para tudo que a IA afirma |
-| **Administrador** | Sócio responsável ou TI | Painel administrativo | Saber o custo, controlar quem acessa o quê, auditar |
+
+| Papel             | Quem é                                         | Canal                        | O que espera                                                                            |
+| ----------------- | ---------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------- |
+| **Cliente**       | Pessoa ou empresa com vínculo contratual ativo | WhatsApp                     | Saber como está o processo dele, a qualquer hora, sem esperar                           |
+| **Colaborador**   | Equipe administrativa, estagiários, paralegais | **Telegram**, e-mail, painel | Não precisar consultar tribunal manualmente; ter a demanda já registrada e triada       |
+| **Advogado**      | Advogado(a) inscrito(a) atuante                | **Telegram**, e-mail, painel | Não perder prazo; revisar rápido o que a IA propôs; ter fonte para tudo que a IA afirma |
+| **Administrador** | Sócio responsável ou TI                        | Painel administrativo        | Saber o custo, controlar quem acessa o quê, auditar                                     |
+
 
 ### 3.1 O que o advogado enxerga — D-07 resolvida
 
@@ -85,10 +91,12 @@ A premissa P-02 caiu. O advogado recebe abrangência `any`, não `carteira`. A m
 
 Isso é uma escolha legítima de um escritório pequeno, onde a colaboração cruzada é a operação real — mas ela **remove um controle**, e o controle removido precisa ser substituído, não simplesmente esquecido:
 
-| # | Requisito |
-|---|---|
+
+| #         | Requisito                                                                                                                                                                                                       |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RF-37** | Acesso a processo fora da carteira do próprio advogado é registrado como **acesso amplo** e entra em relatório mensal para o administrador. Não é bloqueado, nem exige justificativa na hora — é visível depois |
-| **RF-38** | Processo marcado como **sigiloso** ou sob segredo de justiça continua exigindo escopo próprio, nunca concedido por abrangência ampla (RNF-16). "Base inteira" não inclui segredo de justiça |
+| **RF-38** | Processo marcado como **sigiloso** ou sob segredo de justiça continua exigindo escopo próprio, nunca concedido por abrangência ampla (RNF-16). "Base inteira" não inclui segredo de justiça                     |
+
 
 > **Por que registrar em vez de bloquear.** Bloquear atrapalharia exatamente a colaboração que o escritório descreveu. Registrar não atrapalha nada e responde à única pergunta que importa depois de um incidente: *quem viu o quê, e quando?* O escritório perde a barreira e ganha o espelho.
 
@@ -108,12 +116,14 @@ O cliente é o único papel que acessa a plataforma **de fora**, por um canal qu
 
 O produto vai ao ar em quatro entregas. A ordem é deliberada e **o atendimento ao cliente é a última**, mesmo sendo a mais visível — é a de maior risco reputacional e a que depende de todas as outras estarem maduras.
 
-| Entrega | Conteúdo | Quem passa a usar | Encerra quando |
-|---|---|---|---|
-| **E1 · Fundação e consulta processual** | Identidade, Policy Gate, auditoria, custo, MCP Escavador | Advogados e colaboradores, pelo Telegram e pelo painel | Uma consulta processual roda ponta a ponta, autorizada, auditada e com custo registrado |
-| **E2 · Vigilância de prazo** | Monitoramento de diário oficial e de movimentação, com alerta no Telegram | Advogados e colaboradores | Uma publicação em diário oficial vira alerta no mesmo dia, sem ninguém pedir |
-| **E3 · Demandas e organização** | Ingestão de e-mail, classificação, registro, Trello, resposta por gabarito ou com aprovação | Colaboradores e advogados | Nenhum e-mail entra sem gerar registro rastreável; resposta só sai aprovada ou por gabarito |
-| **E4 · Atendimento ao cliente** | WhatsApp, em piloto restrito antes de ampliar | Clientes | Piloto com grupo controlado atendido sem escalada indevida |
+
+| Entrega                                 | Conteúdo                                                                                    | Quem passa a usar                                      | Encerra quando                                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| **E1 · Fundação e consulta processual** | Identidade, Policy Gate, auditoria, custo, MCP Escavador                                    | Advogados e colaboradores, pelo Telegram e pelo painel | Uma consulta processual roda ponta a ponta, autorizada, auditada e com custo registrado     |
+| **E2 · Vigilância de prazo**            | Monitoramento de diário oficial e de movimentação, com alerta no Telegram                   | Advogados e colaboradores                              | Uma publicação em diário oficial vira alerta no mesmo dia, sem ninguém pedir                |
+| **E3 · Demandas e organização**         | Ingestão de e-mail, classificação, registro, Trello, resposta por gabarito ou com aprovação | Colaboradores e advogados                              | Nenhum e-mail entra sem gerar registro rastreável; resposta só sai aprovada ou por gabarito |
+| **E4 · Atendimento ao cliente**         | WhatsApp, em piloto restrito antes de ampliar                                               | Clientes                                               | Piloto com grupo controlado atendido sem escalada indevida                                  |
+
 
 > **Por que E2 vem antes de E3.** Perda de prazo é o pior desfecho possível do projeto e a dor mais cara do escritório. E2 é também a entrega mais barata em crédito (§9.3). E3 depende de um levantamento que ainda não foi feito (perguntas 26 e 27, agora sob nossa responsabilidade — §13).
 
@@ -139,11 +149,13 @@ O escritório perguntou o que é essa "base interna" que o documento cita o temp
 
 Ela existe por três motivos, e cada um resolve um problema concreto:
 
-| Motivo | O que resolve |
-|---|---|
-| **É de graça consultar** | A vigilância traz a publicação por *callback* (o Escavador nos avisa sozinho quando algo aparece) — que é gratuito, medido — e guarda. Quem perguntar depois lê daqui, sem pagar de novo. É o que torna o atendimento ao cliente barato (§9.4) |
-| **Ela é nossa** | O Trello pode cair, mudar de plano, ser migrado para ClickUp ou ser cancelado. A demanda registrada não some junto. O Trello vira uma **vitrine** do que a base já sabe |
-| **Prova o que aconteceu** | Card do Trello se move, se arquiva, se apaga. Registro de auditoria não. A responsabilização mora na base, não no quadro |
+
+| Motivo                    | O que resolve                                                                                                                                                                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **É de graça consultar**  | A vigilância traz a publicação por *callback* (o Escavador nos avisa sozinho quando algo aparece) — que é gratuito, medido — e guarda. Quem perguntar depois lê daqui, sem pagar de novo. É o que torna o atendimento ao cliente barato (§9.4) |
+| **Ela é nossa**           | O Trello pode cair, mudar de plano, ser migrado para ClickUp ou ser cancelado. A demanda registrada não some junto. O Trello vira uma **vitrine** do que a base já sabe                                                                        |
+| **Prova o que aconteceu** | Card do Trello se move, se arquiva, se apaga. Registro de auditoria não. A responsabilização mora na base, não no quadro                                                                                                                       |
+
 
 **Na prática, a divisão de trabalho fica assim:**
 
@@ -151,9 +163,11 @@ Ela existe por três motivos, e cada um resolve um problema concreto:
 - A pessoa move o card no Trello → o *webhook* (aviso automático que o Trello dispara a cada mudança) notifica a plataforma → a base interna atualiza o status
 - Se o card for apagado por engano, a demanda continua existindo, e a divergência aparece na conferência
 
-| # | Requisito |
-|---|---|
+
+| #         | Requisito                                                                                                                                                         |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RF-39** | Toda demanda existe primeiro na base interna e depois no Trello. Card sem demanda correspondente é sinalizado na conferência periódica, e demanda sem card também |
+
 
 ---
 
@@ -163,33 +177,37 @@ Numerados `RF-nn`. Cada um traz **critério de aceite** — a condição objetiv
 
 ### 5.1 E1 — Fundação e consulta processual
 
-| # | Requisito | Critério de aceite |
-|---|---|---|
-| **RF-01** | Cada pessoa da equipe tem identidade individual na plataforma, com autenticação nominal e segundo fator | Duas pessoas distintas produzem registros de auditoria distintos ao fazer a mesma consulta. Conta compartilhada é rejeitada. ✅ **Viabilizado por D-147** — identidade pelo Telegram + painel |
-| **RF-02** | Um agente interno responde perguntas sobre processo em linguagem natural, pelo Telegram | Pergunta "como está o processo X?" devolve situação, última movimentação e data, com a fonte identificada |
-| **RF-03** | Toda afirmação factual do agente aponta a fonte e a idade do dado | Nenhuma resposta contém fato processual sem origem (cache ou API) e data. Resposta sem fonte é bug, não estilo |
-| **RF-04** | O agente enxerga apenas as ferramentas que o papel do solicitante permite | Colaborador não vê `remover_monitoramento` na lista de ferramentas. Advogado vê |
-| **RF-05** | Toda chamada paga é registrada com solicitante, papel, processo, ferramenta, custo e resultado | O painel de custo reconstrói qualquer gasto até a pessoa que o originou |
-| **RF-06** | Consulta repetida ao mesmo dado dentro da validade é servida por cache, sem custo | Duas consultas ao mesmo processo em 1 hora geram uma cobrança, não duas |
-| **RF-07** | O sistema recusa consulta fora do escopo do papel, em código, antes da chamada paga | Cliente consultando CPF de terceiro recebe recusa **sem que a API seja chamada** — não gasta crédito e não vaza a existência do dado |
-| **RF-08** | O administrador vê consumo de crédito por pessoa, por papel e por período | Painel responde "quem gastou o quê no mês" sem consulta manual ao banco |
-| **RF-37** | Acesso a processo fora da carteira do próprio advogado é registrado como acesso amplo e entra em relatório mensal | O relatório existe e é gerado sem consulta manual ao banco (§3.1) |
-| **RF-38** | Processo sigiloso exige escopo próprio, jamais concedido por abrangência ampla | Advogado com abrangência `any` **não** alcança processo marcado sigiloso sem escopo dedicado |
+
+| #         | Requisito                                                                                                         | Critério de aceite                                                                                                                                                                           |
+| --------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RF-01** | Cada pessoa da equipe tem identidade individual na plataforma, com autenticação nominal e segundo fator           | Duas pessoas distintas produzem registros de auditoria distintos ao fazer a mesma consulta. Conta compartilhada é rejeitada. ✅ **Viabilizado por D-147** — identidade pelo Telegram + painel |
+| **RF-02** | Um agente interno responde perguntas sobre processo em linguagem natural, pelo Telegram                           | Pergunta "como está o processo X?" devolve situação, última movimentação e data, com a fonte identificada                                                                                    |
+| **RF-03** | Toda afirmação factual do agente aponta a fonte e a idade do dado                                                 | Nenhuma resposta contém fato processual sem origem (cache ou API) e data. Resposta sem fonte é bug, não estilo                                                                               |
+| **RF-04** | O agente enxerga apenas as ferramentas que o papel do solicitante permite                                         | Colaborador não vê `remover_monitoramento` na lista de ferramentas. Advogado vê                                                                                                              |
+| **RF-05** | Toda chamada paga é registrada com solicitante, papel, processo, ferramenta, custo e resultado                    | O painel de custo reconstrói qualquer gasto até a pessoa que o originou                                                                                                                      |
+| **RF-06** | Consulta repetida ao mesmo dado dentro da validade é servida por cache, sem custo                                 | Duas consultas ao mesmo processo em 1 hora geram uma cobrança, não duas                                                                                                                      |
+| **RF-07** | O sistema recusa consulta fora do escopo do papel, em código, antes da chamada paga                               | Cliente consultando CPF de terceiro recebe recusa **sem que a API seja chamada** — não gasta crédito e não vaza a existência do dado                                                         |
+| **RF-08** | O administrador vê consumo de crédito por pessoa, por papel e por período                                         | Painel responde "quem gastou o quê no mês" sem consulta manual ao banco                                                                                                                      |
+| **RF-37** | Acesso a processo fora da carteira do próprio advogado é registrado como acesso amplo e entra em relatório mensal | O relatório existe e é gerado sem consulta manual ao banco (§3.1)                                                                                                                            |
+| **RF-38** | Processo sigiloso exige escopo próprio, jamais concedido por abrangência ampla                                    | Advogado com abrangência `any` **não** alcança processo marcado sigiloso sem escopo dedicado                                                                                                 |
+
 
 ### 5.2 E2 — Vigilância de prazo
 
-| # | Requisito | Critério de aceite |
-|---|---|---|
-| **RF-09** | O escritório cadastra o que quer vigiar — nome dos advogados, nome ou CPF/CNPJ de clientes, processos específicos | Cadastro feito por advogado ou administrador, nunca pelo agente por conta própria |
-| **RF-10** | Publicação em diário oficial que mencione item vigiado vira alerta no mesmo dia | Publicação captada pelo Escavador aparece como alerta em até 1 hora do recebimento do evento |
-| **RF-11** | O alerta identifica processo, tipo de publicação, teor e **o que ele pode significar em termos de prazo** — sem calcular o prazo | O alerta diz "há indício de prazo" e encaminha a advogado; **nunca** afirma "o prazo vence em X" |
-| **RF-12** | Movimentação nova em processo vigiado gera alerta equivalente | Movimentação captada vira alerta com CNJ, data e teor |
-| **RF-13** | Alerta com indício de prazo tem prioridade máxima, vai para **advogado e colaborador**, e escala enquanto não for confirmado por um advogado | O rito completo está em §5.2.1. 🚧 Os prazos N1 e N2 dependem das perguntas 20a–20c |
-| **RF-14** | Remover um item de vigilância exige confirmação explícita e fica registrado | Remoção nunca acontece como efeito colateral de outra operação (R-14) |
-| **RF-15** | Falha na recepção de eventos é visível | Se nenhum evento chega em janela esperada, o sistema alerta o administrador. Silêncio nunca é interpretado como "nada aconteceu" |
-| **RF-35** | O esgotamento da franquia de aparições é alarmado **antes** de cegar | Ao atingir **70%** da franquia no ciclo, o sistema alerta o administrador e dispara o procedimento de §9.3.1. Em 100% a captura do mês já parou (R-40) |
-| **RF-36** | O inventário de vigilâncias é conferido contra o quadro de advogados | Rotina periódica compara os monitoramentos ativos com a lista de advogados. **Faltou** → alarme de prazo. **Sobrou** → alarme de custo. Ambas as listagens são gratuitas (R-41) |
-| **RF-40** | A franquia de aparições é definida **na criação** do monitoramento, com valor decidido pelo escritório, e registrada na base com a data da decisão | Nenhum monitoramento é criado com o valor padrão da API por omissão. A criação registra quem escolheu o número (R-46) |
+
+| #         | Requisito                                                                                                                                          | Critério de aceite                                                                                                                                                              |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RF-09** | O escritório cadastra o que quer vigiar — nome dos advogados, nome ou CPF/CNPJ de clientes, processos específicos                                  | Cadastro feito por advogado ou administrador, nunca pelo agente por conta própria                                                                                               |
+| **RF-10** | Publicação em diário oficial que mencione item vigiado vira alerta no mesmo dia                                                                    | Publicação captada pelo Escavador aparece como alerta em até 1 hora do recebimento do evento                                                                                    |
+| **RF-11** | O alerta identifica processo, tipo de publicação, teor e **o que ele pode significar em termos de prazo** — sem calcular o prazo                   | O alerta diz "há indício de prazo" e encaminha a advogado; **nunca** afirma "o prazo vence em X"                                                                                |
+| **RF-12** | Movimentação nova em processo vigiado gera alerta equivalente                                                                                      | Movimentação captada vira alerta com CNJ, data e teor                                                                                                                           |
+| **RF-13** | Alerta com indício de prazo tem prioridade máxima, vai para **advogado e colaborador**, e escala enquanto não for confirmado por um advogado       | O rito completo está em §5.2.1. 🚧 Os prazos N1 e N2 dependem das perguntas 20a–20c                                                                                             |
+| **RF-14** | Remover um item de vigilância exige confirmação explícita e fica registrado                                                                        | Remoção nunca acontece como efeito colateral de outra operação (R-14)                                                                                                           |
+| **RF-15** | Falha na recepção de eventos é visível                                                                                                             | Se nenhum evento chega em janela esperada, o sistema alerta o administrador. Silêncio nunca é interpretado como "nada aconteceu"                                                |
+| **RF-35** | O esgotamento da franquia de aparições é alarmado **antes** de cegar                                                                               | Ao atingir **70%** da franquia no ciclo, o sistema alerta o administrador e dispara o procedimento de §9.3.1. Em 100% a captura do mês já parou (R-40)                          |
+| **RF-36** | O inventário de vigilâncias é conferido contra o quadro de advogados                                                                               | Rotina periódica compara os monitoramentos ativos com a lista de advogados. **Faltou** → alarme de prazo. **Sobrou** → alarme de custo. Ambas as listagens são gratuitas (R-41) |
+| **RF-40** | A franquia de aparições é definida **na criação** do monitoramento, com valor decidido pelo escritório, e registrada na base com a data da decisão | Nenhum monitoramento é criado com o valor padrão da API por omissão. A criação registra quem escolheu o número (R-46)                                                           |
+
 
 > **RF-11 é uma restrição de produto, não uma limitação técnica.** Calcular prazo processual envolve contagem em dias úteis, suspensão, feriado forense local, prerrogativa e intimação ficta. Errar por um dia é dano irreversível. A plataforma **sinaliza indício**; quem conta prazo é advogado.
 >
@@ -199,14 +217,16 @@ Numerados `RF-nn`. Cada um traz **critério de aceite** — a condição objetiv
 
 O escritório pediu para entender como isso funciona no dia a dia. É assim:
 
-| Momento | O que acontece |
-|---|---|
-| **T0** | O Escavador entrega a publicação no nosso receptor. A plataforma registra na base interna, marca "indício de prazo" e monta o alerta com o número do processo, a data, o teor e o link para o inteiro teor |
-| **T0 + segundos** | O alerta chega no Telegram do **advogado responsável pelo processo** e do **colaborador de plantão**, com um botão "Ciente" |
-| **T0 + N1** *(proposta: 2 horas úteis)* | Se ninguém clicou, o alerta é reenviado e passa a tocar **todos os advogados**, não só o responsável |
-| **T0 + N2** *(proposta: 4 horas úteis)* | Se ainda ninguém confirmou, escala para a sócia responsável e o alerta aparece como **"não confirmado"** no painel |
-| **Fim do dia útil** | O resumo diário lista todo alerta de prazo que ficou sem confirmação. Ninguém termina o dia sem ver a lista |
-| **Nunca** | O alerta **não** se encerra sozinho, **não** expira e **não** some da lista. Alerta de prazo é a única coisa no sistema que não tem prazo de validade |
+
+| Momento                                 | O que acontece                                                                                                                                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **T0**                                  | O Escavador entrega a publicação no nosso receptor. A plataforma registra na base interna, marca "indício de prazo" e monta o alerta com o número do processo, a data, o teor e o link para o inteiro teor |
+| **T0 + segundos**                       | O alerta chega no Telegram do **advogado responsável pelo processo** e do **colaborador de plantão**, com um botão "Ciente"                                                                                |
+| **T0 + N1** *(proposta: 2 horas úteis)* | Se ninguém clicou, o alerta é reenviado e passa a tocar **todos os advogados**, não só o responsável                                                                                                       |
+| **T0 + N2** *(proposta: 4 horas úteis)* | Se ainda ninguém confirmou, escala para a sócia responsável e o alerta aparece como **"não confirmado"** no painel                                                                                         |
+| **Fim do dia útil**                     | O resumo diário lista todo alerta de prazo que ficou sem confirmação. Ninguém termina o dia sem ver a lista                                                                                                |
+| **Nunca**                               | O alerta **não** se encerra sozinho, **não** expira e **não** some da lista. Alerta de prazo é a única coisa no sistema que não tem prazo de validade                                                      |
+
 
 **Três regras que fazem o rito funcionar:**
 
@@ -218,29 +238,33 @@ O escritório pediu para entender como isso funciona no dia a dia. É assim:
 
 ### 5.3 E3 — Demandas e organização
 
-| # | Requisito | Critério de aceite |
-|---|---|---|
-| **RF-16** | A caixa de e-mail do escritório é lida e cada mensagem classificada | Classes: demanda de cliente · comunicação de tribunal · indício de prazo · administrativo · irrelevante |
-| **RF-17** | Toda mensagem processada gera registro rastreável, **inclusive as classificadas como irrelevantes** | Auditoria consegue responder "o que aconteceu com o e-mail recebido às 14h32" para qualquer mensagem |
-| **RF-18** | Mensagem que a automação não conseguiu classificar vai para fila humana explícita | Nenhuma mensagem é descartada em silêncio. Falha é visível |
-| **RF-19** | Anexo é processado em ambiente isolado, com varredura e limite de tipo e tamanho | Anexo malicioso não alcança o agente nem o sistema de arquivos da plataforma |
-| **RF-20** | Demanda identificada vira card no Trello com os campos de correspondência preenchidos | Card criado traz `id_demanda`, `numero_cnj`, `cliente_id` e `origem: automacao` |
-| **RF-21** | Resposta a e-mail sai por **gabarito pré-aprovado** (A3a) ou como **rascunho para aprovação** (A3b) | Nenhum texto novo, escrito pelo modelo, sai sem passar por um humano |
-| **RF-22** | O que a automação criou é distinguível do que a pessoa criou | Campo `origem` permite corrigir erro em massa sem tocar em trabalho manual |
-| **RF-39** | A demanda existe primeiro na base interna e depois no Trello (§4.3) | Conferência periódica sinaliza card órfão e demanda sem card |
+
+| #         | Requisito                                                                                           | Critério de aceite                                                                                      |
+| --------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **RF-16** | A caixa de e-mail do escritório é lida e cada mensagem classificada                                 | Classes: demanda de cliente · comunicação de tribunal · indício de prazo · administrativo · irrelevante |
+| **RF-17** | Toda mensagem processada gera registro rastreável, **inclusive as classificadas como irrelevantes** | Auditoria consegue responder "o que aconteceu com o e-mail recebido às 14h32" para qualquer mensagem    |
+| **RF-18** | Mensagem que a automação não conseguiu classificar vai para fila humana explícita                   | Nenhuma mensagem é descartada em silêncio. Falha é visível                                              |
+| **RF-19** | Anexo é processado em ambiente isolado, com varredura e limite de tipo e tamanho                    | Anexo malicioso não alcança o agente nem o sistema de arquivos da plataforma                            |
+| **RF-20** | Demanda identificada vira card no Trello com os campos de correspondência preenchidos               | Card criado traz `id_demanda`, `numero_cnj`, `cliente_id` e `origem: automacao`                         |
+| **RF-21** | Resposta a e-mail sai por **gabarito pré-aprovado** (A3a) ou como **rascunho para aprovação** (A3b) | Nenhum texto novo, escrito pelo modelo, sai sem passar por um humano                                    |
+| **RF-22** | O que a automação criou é distinguível do que a pessoa criou                                        | Campo `origem` permite corrigir erro em massa sem tocar em trabalho manual                              |
+| **RF-39** | A demanda existe primeiro na base interna e depois no Trello (§4.3)                                 | Conferência periódica sinaliza card órfão e demanda sem card                                            |
+
 
 ### 5.4 E4 — Atendimento ao cliente
 
-| # | Requisito | Critério de aceite |
-|---|---|---|
-| **RF-23** | O cliente é identificado antes de qualquer dado processual | Vínculo número ↔ cliente é cadastrado **pelo escritório**, nunca autodeclarado no chat. Verificação adicional obrigatória (RN-01) |
-| **RF-24** | O cliente consulta apenas processo em que é parte e que esteja vinculado ao escritório | Tentativa de consultar terceiro é recusada em código, antes da chamada paga (RF-07) |
-| **RF-25** | O agente informa **status e fatos**; não interpreta, não estima prazo de desfecho, não avalia chance de êxito, não recomenda conduta | Pergunta do tipo "eu vou ganhar?" é encaminhada a advogado, com resposta padrão registrada |
-| **RF-26** | O cliente sabe que fala com um assistente automatizado e como chamar um humano | Aviso na abertura da conversa e caminho de escalada disponível em qualquer ponto |
-| **RF-27** | Escalada a humano acontece por pedido explícito, por sinal de insatisfação, por assunto fora de escopo **ou por dado interno ausente/vencido** | Escalada registrada com motivo |
-| **RF-28** | Conversa de cliente tem teto de consumo de **modelo** e de mensagens | Atingido o teto, a conversa escala a humano. **Nunca** para em silêncio. O teto de crédito do Escavador é zero por construção (RF-29) |
-| **RF-29** | O agente do cliente lê **exclusivamente** da base interna e **nunca dispara chamada paga ao Escavador** | Dado ausente ou vencido produz escalada ao time, não consulta. Ver §9.4 — é a decisão que fecha a exposição financeira do canal externo |
-| **RF-41** | Toda mensagem enviada ao cliente sai por gabarito pré-aprovado ou por texto aprovado por advogado | Nenhuma prosa livre do modelo alcança o cliente sem passar por um humano (§6.2) |
+
+| #         | Requisito                                                                                                                                      | Critério de aceite                                                                                                                      |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **RF-23** | O cliente é identificado antes de qualquer dado processual                                                                                     | Vínculo número ↔ cliente é cadastrado **pelo escritório**, nunca autodeclarado no chat. Verificação adicional obrigatória (RN-01)       |
+| **RF-24** | O cliente consulta apenas processo em que é parte e que esteja vinculado ao escritório                                                         | Tentativa de consultar terceiro é recusada em código, antes da chamada paga (RF-07)                                                     |
+| **RF-25** | O agente informa **status e fatos**; não interpreta, não estima prazo de desfecho, não avalia chance de êxito, não recomenda conduta           | Pergunta do tipo "eu vou ganhar?" é encaminhada a advogado, com resposta padrão registrada                                              |
+| **RF-26** | O cliente sabe que fala com um assistente automatizado e como chamar um humano                                                                 | Aviso na abertura da conversa e caminho de escalada disponível em qualquer ponto                                                        |
+| **RF-27** | Escalada a humano acontece por pedido explícito, por sinal de insatisfação, por assunto fora de escopo **ou por dado interno ausente/vencido** | Escalada registrada com motivo                                                                                                          |
+| **RF-28** | Conversa de cliente tem teto de consumo de **modelo** e de mensagens                                                                           | Atingido o teto, a conversa escala a humano. **Nunca** para em silêncio. O teto de crédito do Escavador é zero por construção (RF-29)   |
+| **RF-29** | O agente do cliente lê **exclusivamente** da base interna e **nunca dispara chamada paga ao Escavador**                                        | Dado ausente ou vencido produz escalada ao time, não consulta. Ver §9.4 — é a decisão que fecha a exposição financeira do canal externo |
+| **RF-41** | Toda mensagem enviada ao cliente sai por gabarito pré-aprovado ou por texto aprovado por advogado                                              | Nenhuma prosa livre do modelo alcança o cliente sem passar por um humano (§6.2)                                                         |
+
 
 ---
 
@@ -250,13 +274,15 @@ Numeradas `RN-nn`. São inegociáveis dentro do produto; alterá-las exige decis
 
 ### 6.1 Identidade e acesso
 
-| # | Regra |
-|---|---|
-| **RN-01** | Número de telefone é chave de busca, nunca prova de identidade |
-| **RN-02** | Conta compartilhada é proibida para colaborador e advogado — inviabiliza auditoria e responsabilização |
+
+| #         | Regra                                                                                                                                        |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RN-01** | Número de telefone é chave de busca, nunca prova de identidade                                                                               |
+| **RN-02** | Conta compartilhada é proibida para colaborador e advogado — inviabiliza auditoria e responsabilização                                       |
 | **RN-03** | O privilégio é verificado **em código no servidor MCP**, jamais por instrução no prompt do agente. O agente nunca é a fronteira de segurança |
-| **RN-04** | Negar por padrão. Sem lista de permissão explícita, nega |
-| **RN-05** | Falha fecha. Governança indisponível bloqueia a operação em vez de liberá-la |
+| **RN-04** | Negar por padrão. Sem lista de permissão explícita, nega                                                                                     |
+| **RN-05** | Falha fecha. Governança indisponível bloqueia a operação em vez de liberá-la                                                                 |
+
 
 ### 6.2 Aprovação humana — o que realmente exige um humano
 
@@ -266,28 +292,32 @@ Esta seção foi reescrita na v2.0. O escritório levantou, com razão, que exig
 
 Efeito externo é **o que atravessa a porta do escritório com o nome do escritório**. Nem toda ação da plataforma faz isso — a maioria, na verdade, não faz:
 
-| Ação | Sai do escritório? | Faixa | Precisa de humano? |
-|---|---|---|---|
-| Consultar a base interna | Não | A0 | Não |
-| Consultar processo no Escavador | Não fala com ninguém — só gasta dinheiro | A1 | Só acima da quota |
-| Registrar demanda, criar card no Trello, anexar documento | Não (interno e reversível) | A2 | Não |
-| Marcar alerta como lido, mover card | Não | A2 | Não |
-| **Responder e-mail de cliente** | **Sim** | A3 | Depende — ver 6.2.2 |
-| **Mandar mensagem no WhatsApp do cliente** | **Sim** | A3 | Depende — ver 6.2.2 |
-| **Peticionar, protocolar, assinar, requerer prazo** | **Sim, com efeito jurídico** | A4 | **Sempre**, e está fora de escopo nesta fase |
+
+| Ação                                                      | Sai do escritório?                       | Faixa | Precisa de humano?                           |
+| --------------------------------------------------------- | ---------------------------------------- | ----- | -------------------------------------------- |
+| Consultar a base interna                                  | Não                                      | A0    | Não                                          |
+| Consultar processo no Escavador                           | Não fala com ninguém — só gasta dinheiro | A1    | Só acima da quota                            |
+| Registrar demanda, criar card no Trello, anexar documento | Não (interno e reversível)               | A2    | Não                                          |
+| Marcar alerta como lido, mover card                       | Não                                      | A2    | Não                                          |
+| **Responder e-mail de cliente**                           | **Sim**                                  | A3    | Depende — ver 6.2.2                          |
+| **Mandar mensagem no WhatsApp do cliente**                | **Sim**                                  | A3    | Depende — ver 6.2.2                          |
+| **Peticionar, protocolar, assinar, requerer prazo**       | **Sim, com efeito jurídico**             | A4    | **Sempre**, e está fora de escopo nesta fase |
+
 
 Ou seja: das dezenas de coisas que a plataforma faz por dia, **só duas categorias são de efeito externo** — responder e-mail e falar com cliente. Todo o resto — vigiar diário, capturar publicação, alertar advogado, registrar demanda, criar card, consultar processo, montar relatório de custo — roda sozinho, registrado, sem pedir nada a ninguém.
 
 #### 6.2.2 A faixa A3 se divide em duas
 
-| Faixa | Natureza | Rito | Quem aprova |
-|---|---|---|---|
-| **A0** | Leitura interna, sem custo | Automática, registrada | — |
-| **A1** | Leitura externa com custo | Automática dentro da quota; acima, aprovação | Advogado |
-| **A2** | Escrita interna, reversível | Automática, registrada | — |
+
+| Faixa   | Natureza                                          | Rito                                                             | Quem aprova                                     |
+| ------- | ------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------- |
+| **A0**  | Leitura interna, sem custo                        | Automática, registrada                                           | —                                               |
+| **A1**  | Leitura externa com custo                         | Automática dentro da quota; acima, aprovação                     | Advogado                                        |
+| **A2**  | Escrita interna, reversível                       | Automática, registrada                                           | —                                               |
 | **A3a** | **Comunicação externa por gabarito pré-aprovado** | **Automática e registrada.** O advogado aprovou o gabarito antes | Advogado, **uma vez**, na aprovação do gabarito |
-| **A3b** | **Comunicação externa em texto livre** | **Aprovação obrigatória, mensagem a mensagem** | Advogado |
-| **A4** | Efeito jurídico ou prazo | **Aprovação de advogado identificado, sempre** | Advogado, nominalmente |
+| **A3b** | **Comunicação externa em texto livre**            | **Aprovação obrigatória, mensagem a mensagem**                   | Advogado                                        |
+| **A4**  | Efeito jurídico ou prazo                          | **Aprovação de advogado identificado, sempre**                   | Advogado, nominalmente                          |
+
 
 **O que é um gabarito.** Um texto aprovado uma vez por um advogado, com lacunas que só podem ser preenchidas por **campo da base interna** — número do processo, data da movimentação, nome do cliente, teor da publicação. O modelo escolhe **qual** gabarito usar; ele não escreve o texto.
 
@@ -302,12 +332,14 @@ Exemplo, com as lacunas em colchetes:
 3. O assunto está na **lista de assuntos autorizados** para envio automático
 4. **Nenhum sinalizador de exceção disparou:** menção a prazo, valor, reclamação, pedido de orientação jurídica, processo sigiloso, cliente sem vínculo verificado, ou processo em que o escritório não é o constituído
 
-| # | Requisito |
-|---|---|
+
+| #         | Requisito                                                                                                                                                                  |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RF-42** | Existe um catálogo de gabaritos versionado, com data de aprovação, advogado aprovador e histórico de revisões. Alterar um gabarito exige nova aprovação e cria versão nova |
-| **RF-43** | Toda mensagem A3a registra **qual gabarito, qual versão e quais valores** preencheram as lacunas. Reconstruir o texto exato enviado é sempre possível |
-| **RF-44** | Um gabarito pode ser **desligado na hora** por qualquer advogado, sem passar por ninguém. Desligar é sempre mais fácil que ligar |
-| **RF-45** | Amostragem periódica: uma fração das mensagens A3a enviadas é revista por advogado depois do envio, e o resultado alimenta a revisão do gabarito |
+| **RF-43** | Toda mensagem A3a registra **qual gabarito, qual versão e quais valores** preencheram as lacunas. Reconstruir o texto exato enviado é sempre possível                      |
+| **RF-44** | Um gabarito pode ser **desligado na hora** por qualquer advogado, sem passar por ninguém. Desligar é sempre mais fácil que ligar                                           |
+| **RF-45** | Amostragem periódica: uma fração das mensagens A3a enviadas é revista por advogado depois do envio, e o resultado alimenta a revisão do gabarito                           |
+
 
 > **Por que isto não afrouxa a Regra 2.** O advogado continua aprovando o texto exato que sai — ele só aprova antes, uma vez, para todos os casos iguais, em vez de aprovar mil vezes o mesmo parágrafo. É a diferença entre revisar uma minuta-padrão e revisar cada cópia dela. O que **nunca** sai sem leitura humana é texto novo, escrito pelo modelo, sobre situação que ninguém previu — e é exatamente aí que mora o risco.
 
@@ -315,22 +347,26 @@ Exemplo, com as lacunas em colchetes:
 
 O escritório perguntou se a regra vale igual para os dois casos. Vale igual — mas o efeito prático é bem diferente, e a diferença é boa notícia:
 
-| Tipo | O que é | Cabe em gabarito? |
-|---|---|---|
-| **De ofício** — o escritório avisa sem o cliente pedir | "Seu processo teve movimentação", "recebemos seu documento", "audiência designada" | **Quase sempre.** São fatos previsíveis, recorrentes e de forma estável. É o caso que mais se beneficia de A3a |
-| **Resposta** — o cliente perguntou algo | "Em que pé está?", "quando sai a sentença?", "o que significa isso?" | **Depende.** As perguntas repetidas (status, documento, prazo de retorno) viram gabarito. As demais são texto livre, e vão para aprovação |
+
+| Tipo                                                   | O que é                                                                            | Cabe em gabarito?                                                                                                                         |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **De ofício** — o escritório avisa sem o cliente pedir | "Seu processo teve movimentação", "recebemos seu documento", "audiência designada" | **Quase sempre.** São fatos previsíveis, recorrentes e de forma estável. É o caso que mais se beneficia de A3a                            |
+| **Resposta** — o cliente perguntou algo                | "Em que pé está?", "quando sai a sentença?", "o que significa isso?"               | **Depende.** As perguntas repetidas (status, documento, prazo de retorno) viram gabarito. As demais são texto livre, e vão para aprovação |
+
 
 **Contraintuitivamente, é a mensagem de ofício — a que o cliente não pediu — que mais se automatiza.** Porque ela nasce de um fato registrado na base, não de uma pergunta imprevisível. E é justamente a que o escritório não manda hoje, por falta de tempo.
 
 #### 6.2.4 As regras
 
-| # | Regra |
-|---|---|
+
+| #         | Regra                                                                                                                                                                                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RN-06** | A aprovação recai sobre o **conteúdo final**, não sobre a intenção. Em A3b, o advogado aprova o texto exato da mensagem; em A3a, aprova o gabarito e as regras de preenchimento — que produzem um texto determinístico, reconstruível a qualquer momento (RF-43) |
-| **RN-07** | Aprovação em lote é permitida **apenas** na faixa A1 |
-| **RN-08** | Ato com efeito jurídico ou de prazo exige aprovação de **advogado identificado**. Sem exceção e sem automatização |
-| **RN-09** | **O pedido de aprovação pendente expira** — não a autorização já concedida. Ver 6.2.5 |
-| **RN-19** | Na dúvida, cai para A3b. Sinalizador ambíguo, campo faltando, cliente sem vínculo verificado: o caminho é a fila de aprovação, nunca o envio |
+| **RN-07** | Aprovação em lote é permitida **apenas** na faixa A1                                                                                                                                                                                                             |
+| **RN-08** | Ato com efeito jurídico ou de prazo exige aprovação de **advogado identificado**. Sem exceção e sem automatização                                                                                                                                                |
+| **RN-09** | **O pedido de aprovação pendente expira** — não a autorização já concedida. Ver 6.2.5                                                                                                                                                                            |
+| **RN-19** | Na dúvida, cai para A3b. Sinalizador ambíguo, campo faltando, cliente sem vínculo verificado: o caminho é a fila de aprovação, nunca o envio                                                                                                                     |
+
 
 #### 6.2.5 O que "aprovação expira" quer dizer — RN-09 explicada
 
@@ -357,24 +393,28 @@ Por isso: passada a janela (proposta: **4 horas úteis** para A3b, **2 horas út
 
 ### 6.3 Conteúdo e veracidade
 
-| # | Regra |
-|---|---|
-| **RN-10** | Sem fonte, não se afirma. Toda afirmação factual aponta processo, documento ou consulta verificável |
-| **RN-11** | É proibido citar jurisprudência, número de processo, dispositivo legal ou prazo que não venha de consulta registrada |
-| **RN-12** | A plataforma **sinaliza indício de prazo**; não calcula prazo (RF-11) |
-| **RN-13** | Conteúdo externo — e-mail, anexo, mensagem de cliente — é hostil até prova em contrário e nunca alimenta diretamente um agente com poder de ação |
+
+| #         | Regra                                                                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RN-10** | Sem fonte, não se afirma. Toda afirmação factual aponta processo, documento ou consulta verificável                                                     |
+| **RN-11** | É proibido citar jurisprudência, número de processo, dispositivo legal ou prazo que não venha de consulta registrada                                    |
+| **RN-12** | A plataforma **sinaliza indício de prazo**; não calcula prazo (RF-11)                                                                                   |
+| **RN-13** | Conteúdo externo — e-mail, anexo, mensagem de cliente — é hostil até prova em contrário e nunca alimenta diretamente um agente com poder de ação        |
 | **RN-20** | **Promessa sem mecanismo não entra em texto nem em gabarito** (D-102). "Vamos verificar e retornamos" só pode ser dito onde existe rotina que faça isso |
+
 
 ### 6.4 Custo
 
-| # | Regra |
-|---|---|
-| **RN-14** | Toda chamada paga é atribuída a solicitante, papel, cliente/processo e fluxo |
-| **RN-15** | Orçamento em três níveis: por conversa/sessão · por pessoa/mês · global do escritório/mês |
-| **RN-16** | Ao atingir o teto, o sistema **degrada para cache e exige aprovação da chamada específica**. Não para em silêncio, não continua gastando, e aprovar não levanta o teto (§9.5) |
-| **RN-17** | Nenhuma ferramenta pagina em laço automático. Cada bloco de 200 resultados custa dinheiro (R-25) |
-| **RN-18** | Alerta antes do teto, não depois |
+
+| #         | Regra                                                                                                                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RN-14** | Toda chamada paga é atribuída a solicitante, papel, cliente/processo e fluxo                                                                                                        |
+| **RN-15** | Orçamento em três níveis: por conversa/sessão · por pessoa/mês · global do escritório/mês                                                                                           |
+| **RN-16** | Ao atingir o teto, o sistema **degrada para cache e exige aprovação da chamada específica**. Não para em silêncio, não continua gastando, e aprovar não levanta o teto (§9.5)       |
+| **RN-17** | Nenhuma ferramenta pagina em laço automático. Cada bloco de 200 resultados custa dinheiro (R-25)                                                                                    |
+| **RN-18** | Alerta antes do teto, não depois                                                                                                                                                    |
 | **RN-21** | **O canal do cliente não gasta crédito do Escavador.** Nunca, em nenhuma circunstância, nem com aprovação. Aumentar o teto do canal externo não é uma opção de configuração (RF-29) |
+
 
 ---
 
@@ -382,42 +422,50 @@ Por isso: passada a janela (proposta: **4 horas úteis** para A3b, **2 horas út
 
 ### 7.1 Segurança
 
-| # | Requisito |
-|---|---|
-| **RNF-01** | Segredo (token, chave, senha) vive em cofre ou variável de ambiente. Nunca em repositório, documento ou prompt |
-| **RNF-02** | Um token por aplicação, com expiração de no máximo 1 ano e revogação isolada |
-| **RNF-03** | Entrada externa é sanitizada e delimitada antes de chegar ao agente; instrução encontrada em conteúdo externo nunca é executada |
-| **RNF-04** | O endpoint que recebe callback do Escavador valida o segredo compartilhado no cabeçalho `Authorization` antes de processar |
-| **RNF-05** | O receptor de callback é idempotente — o Escavador reentrega, e reentrega não pode duplicar efeito |
-| **RNF-06** | Nenhuma das APIs de destino oferece segunda barreira (R-16 no Trello, R-24 no Escavador, R-38 no n8n). O código do MCP é a única fronteira, e é auditado como tal |
+
+| #          | Requisito                                                                                                                                                                  |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RNF-01** | Segredo (token, chave, senha) vive em cofre ou variável de ambiente. Nunca em repositório, documento ou prompt                                                             |
+| **RNF-02** | Um token por aplicação, com expiração de no máximo 1 ano e revogação isolada                                                                                               |
+| **RNF-03** | Entrada externa é sanitizada e delimitada antes de chegar ao agente; instrução encontrada em conteúdo externo nunca é executada                                            |
+| **RNF-04** | O endpoint que recebe callback do Escavador valida o segredo compartilhado no cabeçalho `Authorization` antes de processar                                                 |
+| **RNF-05** | O receptor de callback é idempotente — o Escavador reentrega, e reentrega não pode duplicar efeito                                                                         |
+| **RNF-06** | Nenhuma das APIs de destino oferece segunda barreira (R-16 no Trello, R-24 no Escavador, R-38 no n8n). O código do MCP é a única fronteira, e é auditado como tal          |
 | **RNF-18** | O vínculo identidade ↔ Telegram é cadastrado pelo escritório e exige **senha de nuvem (2FA) ativa** na conta do Telegram da pessoa. Sem ela, o vínculo não é aceito (R-47) |
+
 
 ### 7.2 Auditoria
 
-| # | Requisito |
-|---|---|
-| **RNF-07** | Registro imutável de quem pediu, o que foi consultado, o que foi decidido, o que custou e quem aprovou |
+
+| #          | Requisito                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **RNF-07** | Registro imutável de quem pediu, o que foi consultado, o que foi decidido, o que custou e quem aprovou                   |
 | **RNF-08** | O registro sobrevive à indisponibilidade do n8n — auditoria vive em banco próprio, não em histórico de execução de fluxo |
-| **RNF-09** | Acesso a dado de cliente é registrado inclusive quando negado. Tentativa recusada é informação de segurança |
+| **RNF-09** | Acesso a dado de cliente é registrado inclusive quando negado. Tentativa recusada é informação de segurança              |
+
 
 ### 7.3 Desempenho e disponibilidade
 
-| # | Requisito |
-|---|---|
-| **RNF-10** | Operação assíncrona nunca bloqueia. O sistema aceita, devolve identificador e notifica quando concluir |
-| **RNF-11** | Consulta servida por cache responde em menos de 2 segundos |
-| **RNF-12** | Vazão da API de destino é controlada no servidor MCP, não no consumidor |
+
+| #          | Requisito                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| **RNF-10** | Operação assíncrona nunca bloqueia. O sistema aceita, devolve identificador e notifica quando concluir      |
+| **RNF-11** | Consulta servida por cache responde em menos de 2 segundos                                                  |
+| **RNF-12** | Vazão da API de destino é controlada no servidor MCP, não no consumidor                                     |
 | **RNF-13** | Indisponibilidade do Escavador degrada para cache com aviso explícito de idade do dado, em vez de erro seco |
+
 
 ### 7.4 Conformidade e sigilo
 
-| # | Requisito |
-|---|---|
-| **RNF-14** | Dado pessoal de cliente não entra em repositório de código. Amostra de resposta de API é anonimizada antes de versionada |
-| **RNF-15** | Certificado digital da OAB, senha de tribunal e semente de 2FA ficam **fora de todo perfil** nesta fase (R-12) |
-| **RNF-16** | Autos sob segredo de justiça exigem escopo próprio, jamais concedido com abrangência ampla — inclusive para advogado com abrangência `any` (RF-38) |
-| **RNF-17** | O cliente é informado do uso de IA — exigência ética, não cortesia |
+
+| #          | Requisito                                                                                                                                                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **RNF-14** | Dado pessoal de cliente não entra em repositório de código. Amostra de resposta de API é anonimizada antes de versionada                                                                                                                   |
+| **RNF-15** | Certificado digital da OAB, senha de tribunal e semente de 2FA ficam **fora de todo perfil** nesta fase (R-12)                                                                                                                             |
+| **RNF-16** | Autos sob segredo de justiça exigem escopo próprio, jamais concedido com abrangência ampla — inclusive para advogado com abrangência `any` (RF-38)                                                                                         |
+| **RNF-17** | O cliente é informado do uso de IA — exigência ética, não cortesia                                                                                                                                                                         |
 | **RNF-19** | A plataforma roda em infraestrutura do prestador, não do escritório (D-148). O escritório é **controlador** dos dados e o prestador é **operador** — o contrato precisa dizer isso, e precisa prever devolução e expurgo ao término (R-48) |
+
 
 ---
 
@@ -425,10 +473,12 @@ Por isso: passada a janela (proposta: **4 horas úteis** para A3b, **2 horas út
 
 O produto expõe ao agente uma superfície **curada**, não a API inteira. Cobertura total fica no SDK interno; exposição é decidida por perfil.
 
-| Sistema | Operações mapeadas | Ferramentas expostas | Detalhe |
-|---|---|---|---|
-| Escavador | 83 | **15** | `mapeamento-escavador.md` §8.1 |
-| Trello | 261 | **12** | `mapeamento-trello.md` §9 |
+
+| Sistema   | Operações mapeadas | Ferramentas expostas | Detalhe                        |
+| --------- | ------------------ | -------------------- | ------------------------------ |
+| Escavador | 83                 | **15**               | `mapeamento-escavador.md` §8.1 |
+| Trello    | 261                | **12**               | `mapeamento-trello.md` §9      |
+
 
 **RF-30** — O perfil decide o que **aparece** na janela do agente; o escopo decide o que a chamada tem **direito** de fazer. Ferramenta na mão sem escopo recebe recusa do servidor.
 
@@ -446,19 +496,21 @@ Esta seção é requisito funcional, não anexo financeiro (P7). Os preços são
 
 ### 9.1 O que custa, e quanto
 
-| Operação | Preço |
-|---|---|
-| Consultar envolvidos de um processo | R$ 0,05 |
-| Obter resumo por IA já existente | R$ 0,05 |
-| Solicitar geração de resumo por IA | R$ 0,08 |
-| Consultar status de tarefa assíncrona | **Gratuito** — medido |
-| Receber entrega de callback | **Gratuito** — medido, 3 entregas a R$ 0,00 |
-| Listar, consultar, editar e **remover** monitoramento | **Gratuito** — medido |
-| Consultar aparições de um monitoramento | **Gratuito** — medido |
-| Capa do processo · movimentações · atualização no tribunal | R$ 3,00 |
-| Listar processos de um envolvido ou de uma OAB | R$ 3,00 **por bloco de 200 resultados** |
-| Monitorar um processo no tribunal | R$ 0,18 a R$ 3,00 **por mês** |
-| Monitorar termo em diários oficiais (V1) | R$ 3,00/mês por termo · + R$ 0,05 a cada 200 aparições acima da franquia |
+
+| Operação                                                   | Preço                                                                    |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Consultar envolvidos de um processo                        | R$ 0,05                                                                  |
+| Obter resumo por IA já existente                           | R$ 0,05                                                                  |
+| Solicitar geração de resumo por IA                         | R$ 0,08                                                                  |
+| Consultar status de tarefa assíncrona                      | **Gratuito** — medido                                                    |
+| Receber entrega de callback                                | **Gratuito** — medido, 3 entregas a R$ 0,00                              |
+| Listar, consultar, editar e **remover** monitoramento      | **Gratuito** — medido                                                    |
+| Consultar aparições de um monitoramento                    | **Gratuito** — medido                                                    |
+| Capa do processo · movimentações · atualização no tribunal | R$ 3,00                                                                  |
+| Listar processos de um envolvido ou de uma OAB             | R$ 3,00 **por bloco de 200 resultados**                                  |
+| Monitorar um processo no tribunal                          | R$ 0,18 a R$ 3,00 **por mês**                                            |
+| Monitorar termo em diários oficiais (V1)                   | R$ 3,00/mês por termo · + R$ 0,05 a cada 200 aparições acima da franquia |
+
 
 ### 9.2 O risco de custo aberto — R-25 explicado
 
@@ -474,30 +526,36 @@ Para uma pessoa física com dois processos, custa R$ 3,00. Para uma empresa que 
 
 Tratamento, já como requisito:
 
-| # | Requisito |
-|---|---|
-| **RF-31** | Nenhuma ferramenta pagina em laço. Traz um bloco, devolve, e **informa que há mais** — quem decide continuar é gente |
+
+| #         | Requisito                                                                                                                                       |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RF-31** | Nenhuma ferramenta pagina em laço. Traz um bloco, devolve, e **informa que há mais** — quem decide continuar é gente                            |
 | **RF-32** | Antes de listar envolvido de volume desconhecido, **contar** com a rota de resumo, que é barata. Perguntar "quantos são?" antes de "quais são?" |
-| **RF-33** | Teto de blocos por chamada e por papel. Acima do teto, a IA propõe, escreve o custo estimado no pedido, e um advogado aprova |
+| **RF-33** | Teto de blocos por chamada e por papel. Acima do teto, a IA propõe, escreve o custo estimado no pedido, e um advogado aprova                    |
+
 
 **Os tetos propostos** (configuráveis, e este é o número que o escritório precisa avalizar):
 
-| Papel | Blocos sem aprovação | Custo máximo por chamada |
-|---|---|---|
-| Cliente | **0** — o agente do cliente nunca lista nada pago (RF-29) | R$ 0,00 |
-| Colaborador | 1 bloco (até 200 resultados) | R$ 3,00 |
-| Advogado | 2 blocos (até 400 resultados) | R$ 6,00 |
-| Acima disso | A IA propõe, com o custo estimado escrito. Advogado aprova | — |
+
+| Papel       | Blocos sem aprovação                                       | Custo máximo por chamada |
+| ----------- | ---------------------------------------------------------- | ------------------------ |
+| Cliente     | **0** — o agente do cliente nunca lista nada pago (RF-29)  | R$ 0,00                  |
+| Colaborador | 1 bloco (até 200 resultados)                               | R$ 3,00                  |
+| Advogado    | 2 blocos (até 400 resultados)                              | R$ 6,00                  |
+| Acima disso | A IA propõe, com o custo estimado escrito. Advogado aprova | —                        |
+
 
 ### 9.3 Vigilância de prazo — a escolha que muda a conta
 
 Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem em **duas ordens de grandeza**:
 
-| Caminho | Como funciona | Custo para 200 processos |
-|---|---|---|
-| Monitorar cada processo no tribunal (V2) | Um monitoramento por processo | 200 × R$ 3,00/mês = **R$ 600,00/mês** |
-| Monitorar cada processo, variante mensal com documentos públicos | Idem, frequência menor | 200 × R$ 0,18/mês = **R$ 36,00/mês** |
-| **Monitorar o nome dos advogados no diário oficial (V1)** | Um monitoramento por advogado, captura toda publicação que o mencione | **R$ 3,00/mês por advogado** · escritório com 5 advogados: **R$ 15,00/mês** |
+
+| Caminho                                                          | Como funciona                                                         | Custo para 200 processos                                                    |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Monitorar cada processo no tribunal (V2)                         | Um monitoramento por processo                                         | 200 × R$ 3,00/mês = **R$ 600,00/mês**                                       |
+| Monitorar cada processo, variante mensal com documentos públicos | Idem, frequência menor                                                | 200 × R$ 0,18/mês = **R$ 36,00/mês**                                        |
+| **Monitorar o nome dos advogados no diário oficial (V1)**        | Um monitoramento por advogado, captura toda publicação que o mencione | **R$ 3,00/mês por advogado** · escritório com 5 advogados: **R$ 15,00/mês** |
+
 
 **Recomendação de produto:** a vigilância de prazo se apoia primariamente no **monitoramento de diário oficial por nome de advogado (V1)**, complementada por monitoramento de processo apenas onde houver razão específica. Três motivos:
 
@@ -530,9 +588,9 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 1. **O alarme já traz o número** — quantas aparições foram consumidas, quantas faltam e quantos dias faltam para o ciclo virar. A primeira coisa é olhar se o ritmo realmente vai estourar
 2. **Conferir se o volume é real ou ruído.** Nome comum captura publicação de homônimo. Se for isso, a rota de edição **aceita `variacoes`** — refinar as variações reduz o consumo, e é o único ajuste que a API permite no meio do ciclo
 3. **Se o volume for real, a franquia não sobe neste ciclo.** As saídas, em ordem de preferência:
-   - **(a)** Cobrir os processos com prazo próximo com **monitoramento por processo** (V2) até o ciclo virar. Custa R$ 0,18 a R$ 3,00 por processo/mês, e só nos que importam
-   - **(b)** Reforçar a conferência humana do diário nos dias restantes — a rotina manual que R-02 nunca dispensou
-   - **(c)** Recriar o monitoramento com franquia maior. **Cobra assinatura nova**, e é decisão do escritório, não do agente
+  - **(a)** Cobrir os processos com prazo próximo com **monitoramento por processo** (V2) até o ciclo virar. Custa R$ 0,18 a R$ 3,00 por processo/mês, e só nos que importam
+  - **(b)** Reforçar a conferência humana do diário nos dias restantes — a rotina manual que R-02 nunca dispensou
+  - **(c)** Recriar o monitoramento com franquia maior. **Cobra assinatura nova**, e é decisão do escritório, não do agente
 4. **Registrar o que aconteceu.** O consumo real deste ciclo é o que dimensiona o próximo. É assim que o número deixa de ser chute em três meses
 
 **E como a vigilância é operada no dia a dia:** a assinatura **fica ligada indefinidamente**. Removê-la é a operação de maior dano silencioso do projeto (R-14), restrita a `remover_monitoramento` — ferramenta separada, escopo separado, confirmação explícita (D-29) — e reservada a eventos de cadastro: o advogado sai do escritório, transfere a OAB, o escritório deixa de atuar numa jurisdição. **Remoção rotineira só existe em ambiente de teste.**
@@ -557,9 +615,11 @@ Isso é mais restritivo do que a v1.0 do PRD dizia ("dentro do teto por conversa
 
 **O que mantém a base fresca, então?** A vigilância (E2), que é assinatura mensal fixa e cujas entregas por callback são **gratuitas, medidas**. O dado chega sozinho, de graça, todo dia útil. A base interna não fica velha por falta de consulta paga — ela fica fresca porque o Escavador empurra o que muda.
 
-| Sem esta decisão | Com esta decisão |
-|---|---|
+
+| Sem esta decisão                                                                                 | Com esta decisão                                                                             |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
 | 100 clientes × 3 perguntas/mês × R$ 3,00 = **R$ 900,00/mês**, e crescendo com a base de clientes | Custo do canal do cliente em crédito do Escavador: **R$ 0,00**, fixo, independente do volume |
+
 
 **E o RF-28, o "teto por conversa"?** Ele continua existindo, mas passa a limitar outra coisa: **consumo de modelo de IA e número de mensagens**. Uma conversa que passa de ~30 mensagens ou de um teto de custo de modelo escala a humano — não porque ficou cara, mas porque conversa longa demais é sinal de que o agente não está resolvendo. 🚧 Os números dependem do provedor de modelo escolhido (pergunta 70) e ainda não foram medidos.
 
@@ -567,11 +627,13 @@ Isso é mais restritivo do que a v1.0 do PRD dizia ("dentro do teto por conversa
 
 O escritório pediu para entender o mecanismo. São três tetos encadeados, e **o mais restritivo vence**:
 
-| Nível | O que limita | Teto proposto |
-|---|---|---|
-| **Por sessão/conversa** | Impede que um agente em laço torre o saldo numa tarde | **R$ 9,00** (três chamadas caras) |
-| **Por pessoa/mês** | Distribui responsabilidade e revela uso atípico | **R$ 60,00** advogado · **R$ 30,00** colaborador |
-| **Global do escritório/mês** | Último anteparo | **R$ 300,00** |
+
+| Nível                        | O que limita                                          | Teto proposto                                    |
+| ---------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
+| **Por sessão/conversa**      | Impede que um agente em laço torre o saldo numa tarde | **R$ 9,00** (três chamadas caras)                |
+| **Por pessoa/mês**           | Distribui responsabilidade e revela uso atípico       | **R$ 60,00** advogado · **R$ 30,00** colaborador |
+| **Global do escritório/mês** | Último anteparo                                       | **R$ 300,00**                                    |
+
 
 > Os números acima são **proposta**, dimensionada para um escritório de porte pequeno com vigilância de 5 advogados (R$ 15/mês fixos) e consulta pontual. Eles precisam do aval do escritório, e serão recalibrados no primeiro trimestre com o consumo real. O teto do canal do cliente não aparece na tabela porque é zero por construção (RN-21).
 
@@ -593,16 +655,18 @@ Duas camadas de alarme: a nossa e o **Alerta de saldo** nativo do painel do Esca
 
 Cada resultado esperado da §2.3 com métrica e instrumentação.
 
-| Resultado | Métrica | Como se mede |
-|---|---|---|
-| Cliente se atende sozinho | Taxa de resolução sem humano; tempo até primeira resposta | Conversas encerradas sem escalada ÷ total |
-| Nada se perde | Cobertura de registro | Mensagens processadas com registro ÷ mensagens recebidas. **Meta: 100%** |
-| Prazo não se perde | Tempo entre publicação e alerta confirmado por advogado | Carimbo de evento até o "Ciente" (§5.2.1) |
-| Trabalho manual cai | Volume de consulta automatizada; consultas manuais residuais | Contagem por fluxo |
-| Controle e auditoria | Rastreabilidade completa | Amostra aleatória de ações reconstruída ponta a ponta |
-| Qualidade do agente | **Taxa de rejeição em aprovação humana** | Rascunhos rejeitados ÷ rascunhos submetidos |
-| **Autonomia** | **% de mensagens externas enviadas por gabarito (A3a)** | Mensagens A3a ÷ total de mensagens externas |
-| Custo sob controle | Custo por consulta; custo por cliente atendido; % de resposta servida por cache | Painel de custo |
+
+| Resultado                 | Métrica                                                                         | Como se mede                                                             |
+| ------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Cliente se atende sozinho | Taxa de resolução sem humano; tempo até primeira resposta                       | Conversas encerradas sem escalada ÷ total                                |
+| Nada se perde             | Cobertura de registro                                                           | Mensagens processadas com registro ÷ mensagens recebidas. **Meta: 100%** |
+| Prazo não se perde        | Tempo entre publicação e alerta confirmado por advogado                         | Carimbo de evento até o "Ciente" (§5.2.1)                                |
+| Trabalho manual cai       | Volume de consulta automatizada; consultas manuais residuais                    | Contagem por fluxo                                                       |
+| Controle e auditoria      | Rastreabilidade completa                                                        | Amostra aleatória de ações reconstruída ponta a ponta                    |
+| Qualidade do agente       | **Taxa de rejeição em aprovação humana**                                        | Rascunhos rejeitados ÷ rascunhos submetidos                              |
+| **Autonomia**             | **% de mensagens externas enviadas por gabarito (A3a)**                         | Mensagens A3a ÷ total de mensagens externas                              |
+| Custo sob controle        | Custo por consulta; custo por cliente atendido; % de resposta servida por cache | Painel de custo                                                          |
+
 
 ### 10.1 Por quanto tempo se mede a taxa de rejeição, e o agente responde sozinho algum dia?
 
@@ -610,11 +674,13 @@ O escritório fez as duas perguntas. As respostas:
 
 **A medição não tem prazo para acabar** — mas o que se faz com ela muda ao longo do tempo:
 
-| Momento | Para que serve a taxa de rejeição |
-|---|---|
-| **Piloto de E3 e E4** | É o critério que decide se o agente sai do piloto. Rejeição alta = não abre |
-| **Operação normal** | É termômetro. Ela sobe quando um gabarito envelhece, quando a base ganha um tipo de caso novo, ou quando alguém mexeu no prompt. Subiu, tem coisa quebrada |
-| **Sempre** | É o que autoriza um caso a virar gabarito — ver abaixo |
+
+| Momento               | Para que serve a taxa de rejeição                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Piloto de E3 e E4** | É o critério que decide se o agente sai do piloto. Rejeição alta = não abre                                                                                |
+| **Operação normal**   | É termômetro. Ela sobe quando um gabarito envelhece, quando a base ganha um tipo de caso novo, ou quando alguém mexeu no prompt. Subiu, tem coisa quebrada |
+| **Sempre**            | É o que autoriza um caso a virar gabarito — ver abaixo                                                                                                     |
+
 
 Ela é barata de medir (sai da diferença entre `conteudo_proposto` e `conteudo_final`, que a base já guarda) e não custa trabalho a ninguém. Desligar um termômetro que não incomoda é como parar de olhar o painel do carro porque o motor está bom.
 
@@ -634,16 +700,18 @@ Segunda contramétrica, nova nesta versão: **taxa de correção pós-envio em A
 
 Atualizadas em 27/08 com as respostas do escritório.
 
-| # | Premissa | Estado | Consequência |
-|---|---|---|---|
-| **P-01** | O escritório aceita migrar de conta compartilhada para identidade individual | ✅ **Confirmada, por outro caminho** | Identidade individual **pelo Telegram**, uma conta por pessoa, todas identificadas — não por licenças do Workspace, para evitar gasto no início. O escritório foi informado das implicações e aceitou os riscos. RF-01 é viável e a faixa A4 fica liberada (D-25). **Mas R-11 continua aberto para e-mail e Drive** — ver §14 e D-147 |
-| **P-02** | ~~Advogado tem acesso à carteira em que está constituído~~ | ❌ **Caiu** | Advogado acessa **a base inteira** (D-07 resolvida). Matriz de privilégios alterada; compensação por auditoria em RF-37 (§3.1) |
-| **P-03** | O Trello é quadro de trabalho, e a base interna é a fonte da verdade da demanda | ✅ **Confirmada** | D-09 resolvida. Desenho de E3 mantido; a base interna está explicada em §4.3 |
-| **P-04** | Há saldo contratado no Escavador quando E1 entrar em operação | 🟡 **Em providência** | A cota de teste expira em **01/09/2026** (renovada; a v1.0 dizia 23/08). Sem saldo, E1 não opera em produção |
-| **P-05** | O escritório usará WhatsApp Business Platform oficial | 🟡 **A confirmar** | Biblioteca não oficial arrisca banimento do número; E4 não vai ao ar. D-10 permanece |
-| ~~**P-06**~~ | ✅ **Encerrada em 25/08.** Os preços do painel **são** o catálogo do pré-pago | — | O §9 se apoia em preço confirmado e medido |
-| **P-07** | O volume da carteira cabe em um bloco de 200 na maioria das consultas | 🚧 **Depende de duas contagens** | Ver §11.1 |
-| **P-08** | A infraestrutura (n8n, banco, MCP) é do prestador, não do escritório | ✅ **Confirmada** | Destrava a implementação inteira, e cria obrigação contratual de operador de dados (RNF-19, D-148, R-48) |
+
+| #            | Premissa                                                                        | Estado                              | Consequência                                                                                                                                                                                                                                                                                                                          |
+| ------------ | ------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P-01**     | O escritório aceita migrar de conta compartilhada para identidade individual    | ✅ **Confirmada, por outro caminho** | Identidade individual **pelo Telegram**, uma conta por pessoa, todas identificadas — não por licenças do Workspace, para evitar gasto no início. O escritório foi informado das implicações e aceitou os riscos. RF-01 é viável e a faixa A4 fica liberada (D-25). **Mas R-11 continua aberto para e-mail e Drive** — ver §14 e D-147 |
+| **P-02**     | ~~Advogado tem acesso à carteira em que está constituído~~                      | ❌ **Caiu**                          | Advogado acessa **a base inteira** (D-07 resolvida). Matriz de privilégios alterada; compensação por auditoria em RF-37 (§3.1)                                                                                                                                                                                                        |
+| **P-03**     | O Trello é quadro de trabalho, e a base interna é a fonte da verdade da demanda | ✅ **Confirmada**                    | D-09 resolvida. Desenho de E3 mantido; a base interna está explicada em §4.3                                                                                                                                                                                                                                                          |
+| **P-04**     | Há saldo contratado no Escavador quando E1 entrar em operação                   | 🟡 **Em providência**               | A cota de teste expira em **01/09/2026** (renovada; a v1.0 dizia 23/08). Sem saldo, E1 não opera em produção                                                                                                                                                                                                                          |
+| **P-05**     | O escritório usará WhatsApp Business Platform oficial                           | 🟡 **A confirmar**                  | Biblioteca não oficial arrisca banimento do número; E4 não vai ao ar. D-10 permanece                                                                                                                                                                                                                                                  |
+| ~~**P-06**~~ | ✅ **Encerrada em 25/08.** Os preços do painel **são** o catálogo do pré-pago    | —                                   | O §9 se apoia em preço confirmado e medido                                                                                                                                                                                                                                                                                            |
+| **P-07**     | O volume da carteira cabe em um bloco de 200 na maioria das consultas           | 🚧 **Depende de duas contagens**    | Ver §11.1                                                                                                                                                                                                                                                                                                                             |
+| **P-08**     | A infraestrutura (n8n, banco, MCP) é do prestador, não do escritório            | ✅ **Confirmada**                    | Destrava a implementação inteira, e cria obrigação contratual de operador de dados (RNF-19, D-148, R-48)                                                                                                                                                                                                                              |
+
 
 ### 11.1 O que P-07 quer dizer, e o que precisa ser perguntado ao escritório
 
@@ -664,17 +732,19 @@ Não precisa de número exato. Ordem de grandeza resolve.
 
 Atualizadas em 27/08.
 
-| Dependência | Estado | Bloqueia |
-|---|---|---|
-| Saldo contratado no Escavador | 🟡 **Cota de teste renovada até 01/09/2026**, R$ 44,00 restantes. Saldo contratado em providência | E1 em produção |
-| Acesso à instância n8n | ✅ **Resolvido — é a instância do prestador**, fornecida junto com o serviço, já em uso | — |
-| URL pública para receber callback | ✅ **Resolvido e provado** — `callback.criativeia.com.br`, no n8n do prestador, validada nos dois caminhos em 26/08 | — |
-| Número CNJ de processo real para teste | ✅ **Resolvido** — 8 processos dos autos em PDF; TJAP e TRT8 já capturados | — |
-| Identidade individual para a equipe | ✅ **Resolvido — contas individuais no Telegram**, uma por pessoa, cadastradas pelo escritório | — |
-| Credenciais do Trello (chave, token, segredo) | 🟡 **Em providência** | E3, e o levantamento das perguntas 26 e 27 |
-| Conta WhatsApp Business Platform | 🟡 **Em providência** | E4 |
-| Respostas do questionário de descoberta | 🟡 **Em providência.** As cinco que travavam o PRD foram respondidas em 27/08 | Refino de E3 e E4 |
-| Aval do escritório sobre os números propostos | 🔴 **Aberto** — franquia de aparições, tetos de bloco, tetos de orçamento, N1 e N2 da escalada | Configuração de E2 e do disjuntor |
+
+| Dependência                                   | Estado                                                                                                             | Bloqueia                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| Saldo contratado no Escavador                 | 🟡 **Cota de teste renovada até 01/09/2026**, R$ 44,00 restantes. Saldo contratado em providência                  | E1 em produção                             |
+| Acesso à instância n8n                        | ✅ **Resolvido — é a instância do prestador**, fornecida junto com o serviço, já em uso                             | —                                          |
+| URL pública para receber callback             | ✅ **Resolvido e provado** — `callback.criativeia.com.br`, no n8n do prestador, validada nos dois caminhos em 26/08 | —                                          |
+| Número CNJ de processo real para teste        | ✅ **Resolvido** — 8 processos dos autos em PDF; TJAP e TRT8 já capturados                                          | —                                          |
+| Identidade individual para a equipe           | ✅ **Resolvido — contas individuais no Telegram**, uma por pessoa, cadastradas pelo escritório                      | —                                          |
+| Credenciais do Trello (chave, token, segredo) | 🟡 **Em providência**                                                                                              | E3, e o levantamento das perguntas 26 e 27 |
+| Conta WhatsApp Business Platform              | 🟡 **Em providência**                                                                                              | E4                                         |
+| Respostas do questionário de descoberta       | 🟡 **Em providência.** As cinco que travavam o PRD foram respondidas em 27/08                                      | Refino de E3 e E4                          |
+| Aval do escritório sobre os números propostos | 🔴 **Aberto** — franquia de aparições, tetos de bloco, tetos de orçamento, N1 e N2 da escalada                     | Configuração de E2 e do disjuntor          |
+
 
 ---
 
@@ -682,19 +752,21 @@ Atualizadas em 27/08.
 
 Numeração de `02-descoberta-perguntas-abertas.md`. 🚧 marca o que trava decisão de produto.
 
-| Pergunta | Trava | Destinatário | Estado |
-|---|---|---|---|
-| ~~16a–16c~~ | Conta compartilhada — P-01, RF-01 | Escritório | ✅ **Respondida em 27/08** — identidade individual pelo Telegram (D-147). É o Caminho B da Nota Técnica 01 §1.6.3 |
-| ~~D-07~~ | Advogado vê base inteira ou só a carteira? | Escritório | ✅ **Respondida em 27/08** — base inteira (§3.1, D-146) |
-| ~~D-09~~ | Trello é fonte da verdade ou visualização? | Escritório | ✅ **Respondida em 27/08** — visualização (§4.3, D-152) |
-| ~~12~~ | Prazo de escalada de alerta não lido | Escritório | ⚠️ **Referência corrigida.** A pergunta 12 do questionário é sobre horário de atendimento, não sobre escalada. O rito foi escrito em §5.2.1 e as perguntas viraram **20a–20d** |
-| 🚧 **20a–20d** | N1, N2, horário útil, último degrau da escalada e janela de expiração de aprovação — RF-13, RN-09 | Escritório | 🔴 **Nova, aberta** |
-| 🚧 **4a** | O colaborador também vê a base inteira, ou segue na carteira? | Escritório | 🔴 **Nova, aberta** — a resposta de 27/08 falou só de advogados |
-| 🚧 **4b–4c** | Quantos processos ativos? Há cliente com mais de 200 processos? — P-07 | Escritório | 🔴 **Nova, aberta** (§11.1) |
-| **26 e 27** | Campos personalizados e automações Butler existentes — RF-20 | ~~Escritório~~ → **Nós** | 🟡 **Reatribuída em 27/08.** O escritório não sabe responder. Vira levantamento técnico nosso, assim que a chave de API do Trello chegar |
-| 🚧 **Franquia, tetos e orçamento** | Os números da §9.2, §9.3.1 e §9.5 | Escritório | 🔴 **Aberto** — propostas escritas, aguardando o de acordo |
-| ~~Ao suporte do Escavador~~ | "Até 200 itens" são aparições, não termos | Escavador | ✅ Respondida em 25/08 — §9.3 |
-| ~~Ao suporte do Escavador~~ | A tabela é o catálogo real do pré-pago | Escavador | ✅ Respondida em 25/08 — P-06 encerrada |
+
+| Pergunta                           | Trava                                                                                             | Destinatário             | Estado                                                                                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ~~16a–16c~~                        | Conta compartilhada — P-01, RF-01                                                                 | Escritório               | ✅ **Respondida em 27/08** — identidade individual pelo Telegram (D-147). É o Caminho B da Nota Técnica 01 §1.6.3                                                               |
+| ~~D-07~~                           | Advogado vê base inteira ou só a carteira?                                                        | Escritório               | ✅ **Respondida em 27/08** — base inteira (§3.1, D-146)                                                                                                                         |
+| ~~D-09~~                           | Trello é fonte da verdade ou visualização?                                                        | Escritório               | ✅ **Respondida em 27/08** — visualização (§4.3, D-152)                                                                                                                         |
+| ~~12~~                             | Prazo de escalada de alerta não lido                                                              | Escritório               | ⚠️ **Referência corrigida.** A pergunta 12 do questionário é sobre horário de atendimento, não sobre escalada. O rito foi escrito em §5.2.1 e as perguntas viraram **20a–20d** |
+| 🚧 **20a–20d**                     | N1, N2, horário útil, último degrau da escalada e janela de expiração de aprovação — RF-13, RN-09 | Escritório               | 🔴 **Nova, aberta**                                                                                                                                                            |
+| 🚧 **4a**                          | O colaborador também vê a base inteira, ou segue na carteira?                                     | Escritório               | 🔴 **Nova, aberta** — a resposta de 27/08 falou só de advogados                                                                                                                |
+| 🚧 **4b–4c**                       | Quantos processos ativos? Há cliente com mais de 200 processos? — P-07                            | Escritório               | 🔴 **Nova, aberta** (§11.1)                                                                                                                                                    |
+| **26 e 27**                        | Campos personalizados e automações Butler existentes — RF-20                                      | ~~Escritório~~ → **Nós** | 🟡 **Reatribuída em 27/08.** O escritório não sabe responder. Vira levantamento técnico nosso, assim que a chave de API do Trello chegar                                       |
+| 🚧 **Franquia, tetos e orçamento** | Os números da §9.2, §9.3.1 e §9.5                                                                 | Escritório               | 🔴 **Aberto** — propostas escritas, aguardando o de acordo                                                                                                                     |
+| ~~Ao suporte do Escavador~~        | "Até 200 itens" são aparições, não termos                                                         | Escavador                | ✅ Respondida em 25/08 — §9.3                                                                                                                                                   |
+| ~~Ao suporte do Escavador~~        | A tabela é o catálogo real do pré-pago                                                            | Escavador                | ✅ Respondida em 25/08 — P-06 encerrada                                                                                                                                         |
+
 
 ---
 
@@ -702,19 +774,21 @@ Numeração de `02-descoberta-perguntas-abertas.md`. 🚧 marca o que trava deci
 
 Recorte dos riscos de `01` §15 que mudam **o que o produto faz**, não apenas como é construído.
 
-| Risco | Efeito no produto | Tratamento |
-|---|---|---|
-| **R-11** — conta compartilhada | ⚠️ **Parcialmente resolvido.** A identidade da plataforma passa a ser individual pelo Telegram, o que destrava RF-01, aprovação nominal e a faixa A4. **Mas e-mail e Drive do escritório continuam numa conta única** — ou seja, E3 lê de uma caixa que nenhuma pessoa responde individualmente | D-147; dito com clareza ao escritório, que aceitou (item 16c). Reavaliar quando E3 entrar |
-| **R-47** — identidade pelo Telegram depende de número de telefone | **Novo.** Troca de chip, clonagem e SIM swap alcançam a conta; e o escritório **não administra** as contas do Telegram da equipe — não há desligamento central | Vínculo cadastrado pelo escritório e revogável na plataforma (RNF-18); 2FA obrigatório no Telegram; conteúdo confidencial não trafega na mensagem (D-17), só notificação e link para o painel |
-| **R-24** e **R-16** — nenhuma API de destino tem escopo | O código do MCP é a única fronteira de segurança | RN-03, RNF-06, revisão de segurança dedicada |
-| **R-25** — custo por bloco de 200 | A consulta mais natural do cliente é a de custo mais imprevisível | RF-31 a RF-33, com os tetos da §9.2 |
-| **R-46** — a franquia de aparições não é editável depois de criada | **Novo.** O alarme de 70% não pode ser resolvido aumentando o número. Dimensionar na criação é o único controle | RF-40, procedimento de §9.3.1 |
-| **R-48** — a plataforma roda em infraestrutura do prestador | **Novo.** Concentração, dependência e obrigação de operador de dados sob a LGPD | RNF-19; contrato prevendo devolução, expurgo e continuidade |
-| **R-49** — gabarito pré-aprovado envelhece | **Novo.** Um texto aprovado uma vez continua saindo depois de a realidade mudar — e ninguém percebe, porque não passa mais por ninguém | Revisão datada, amostragem pós-envio (RF-45), desligamento imediato por qualquer advogado (RF-44), taxa de correção pós-envio como contramétrica (§10) |
-| **R-22** — recarga não é autosserviço | O produto pode parar por dias esperando o comercial | RF-34 |
-| **R-02 / R-14** — perda de prazo por falha silenciosa | O pior desfecho possível | RF-13 com o rito de §5.2.1, RF-14, RF-15, RF-35, RF-36; e RN-12 mantém o humano na contagem |
-| **R-12** — a API guarda certificado e senha de advogado | Capacidade que não entra no produto | RNF-15 |
-| **R-40** — cegueira por cota | Vigilância para de ver sem emitir erro | RF-35, RF-40, §9.3.1 |
+
+| Risco                                                              | Efeito no produto                                                                                                                                                                                                                                                                               | Tratamento                                                                                                                                                                                    |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-11** — conta compartilhada                                     | ⚠️ **Parcialmente resolvido.** A identidade da plataforma passa a ser individual pelo Telegram, o que destrava RF-01, aprovação nominal e a faixa A4. **Mas e-mail e Drive do escritório continuam numa conta única** — ou seja, E3 lê de uma caixa que nenhuma pessoa responde individualmente | D-147; dito com clareza ao escritório, que aceitou (item 16c). Reavaliar quando E3 entrar                                                                                                     |
+| **R-47** — identidade pelo Telegram depende de número de telefone  | **Novo.** Troca de chip, clonagem e SIM swap alcançam a conta; e o escritório **não administra** as contas do Telegram da equipe — não há desligamento central                                                                                                                                  | Vínculo cadastrado pelo escritório e revogável na plataforma (RNF-18); 2FA obrigatório no Telegram; conteúdo confidencial não trafega na mensagem (D-17), só notificação e link para o painel |
+| **R-24** e **R-16** — nenhuma API de destino tem escopo            | O código do MCP é a única fronteira de segurança                                                                                                                                                                                                                                                | RN-03, RNF-06, revisão de segurança dedicada                                                                                                                                                  |
+| **R-25** — custo por bloco de 200                                  | A consulta mais natural do cliente é a de custo mais imprevisível                                                                                                                                                                                                                               | RF-31 a RF-33, com os tetos da §9.2                                                                                                                                                           |
+| **R-46** — a franquia de aparições não é editável depois de criada | **Novo.** O alarme de 70% não pode ser resolvido aumentando o número. Dimensionar na criação é o único controle                                                                                                                                                                                 | RF-40, procedimento de §9.3.1                                                                                                                                                                 |
+| **R-48** — a plataforma roda em infraestrutura do prestador        | **Novo.** Concentração, dependência e obrigação de operador de dados sob a LGPD                                                                                                                                                                                                                 | RNF-19; contrato prevendo devolução, expurgo e continuidade                                                                                                                                   |
+| **R-49** — gabarito pré-aprovado envelhece                         | **Novo.** Um texto aprovado uma vez continua saindo depois de a realidade mudar — e ninguém percebe, porque não passa mais por ninguém                                                                                                                                                          | Revisão datada, amostragem pós-envio (RF-45), desligamento imediato por qualquer advogado (RF-44), taxa de correção pós-envio como contramétrica (§10)                                        |
+| **R-22** — recarga não é autosserviço                              | O produto pode parar por dias esperando o comercial                                                                                                                                                                                                                                             | RF-34                                                                                                                                                                                         |
+| **R-02 / R-14** — perda de prazo por falha silenciosa              | O pior desfecho possível                                                                                                                                                                                                                                                                        | RF-13 com o rito de §5.2.1, RF-14, RF-15, RF-35, RF-36; e RN-12 mantém o humano na contagem                                                                                                   |
+| **R-12** — a API guarda certificado e senha de advogado            | Capacidade que não entra no produto                                                                                                                                                                                                                                                             | RNF-15                                                                                                                                                                                        |
+| **R-40** — cegueira por cota                                       | Vigilância para de ver sem emitir erro                                                                                                                                                                                                                                                          | RF-35, RF-40, §9.3.1                                                                                                                                                                          |
+
 
 ---
 
@@ -722,31 +796,35 @@ Recorte dos riscos de `01` §15 que mudam **o que o produto faz**, não apenas c
 
 ### 15.1 Decisões da v1.0, com a resposta do escritório
 
-| # | Decisão | Resposta do escritório | Estado |
-|---|---|---|---|
-| **D-61** | Quatro entregas, com **vigilância de prazo (E2) antes de demandas (E3)** e **atendimento ao cliente (E4) por último** | ✅ Sim | ✅ **Confirmada** (escritório, 27/08) |
-| **D-62** | A vigilância de prazo se apoia primariamente em **monitoramento de diário oficial por nome de advogado (V1)**, não em monitoramento por processo | 🟡 "Vou confirmar com o escritório" | 🟡 **Proposta** — pendente |
-| **D-63** | O agente do cliente lê da **base interna alimentada pela vigilância** | ✅ Sim, com esclarecimento | ✅ **Confirmada e endurecida por D-144** — nunca recorre à API paga |
-| **D-64** | A plataforma **sinaliza indício de prazo e nunca calcula prazo**. Contagem é ato de advogado | ✅ Sim — "mas os colaboradores também verificam isso" | ✅ **Confirmada**, com o complemento em **D-145** |
-| **D-65** | Aprovação **expira** | ✅ Após esclarecimento (§6.2.5) | ✅ **Confirmada**, redigida em **D-143** |
-| **D-66** | A **taxa de rejeição em aprovação humana** é a métrica primária de qualidade | ✅ Sim, com esclarecimento (§10.1) | ✅ **Confirmada** |
-| **D-67** | Identidade individual é **bloqueio de projeto**, não preferência | ✅ "Terá identidade individual, pelo Telegram por enquanto" | ✅ **Confirmada** — desdobrada em **D-147** |
+
+| #        | Decisão                                                                                                                                          | Resposta do escritório                                     | Estado                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| **D-61** | Quatro entregas, com **vigilância de prazo (E2) antes de demandas (E3)** e **atendimento ao cliente (E4) por último**                            | ✅ Sim                                                      | ✅ **Confirmada** (escritório, 27/08)                               |
+| **D-62** | A vigilância de prazo se apoia primariamente em **monitoramento de diário oficial por nome de advogado (V1)**, não em monitoramento por processo | 🟡 "Vou confirmar com o escritório"                        | 🟡 **Proposta** — pendente                                         |
+| **D-63** | O agente do cliente lê da **base interna alimentada pela vigilância**                                                                            | ✅ Sim, com esclarecimento                                  | ✅ **Confirmada e endurecida por D-144** — nunca recorre à API paga |
+| **D-64** | A plataforma **sinaliza indício de prazo e nunca calcula prazo**. Contagem é ato de advogado                                                     | ✅ Sim — "mas os colaboradores também verificam isso"       | ✅ **Confirmada**, com o complemento em **D-145**                   |
+| **D-65** | Aprovação **expira**                                                                                                                             | ✅ Após esclarecimento (§6.2.5)                             | ✅ **Confirmada**, redigida em **D-143**                            |
+| **D-66** | A **taxa de rejeição em aprovação humana** é a métrica primária de qualidade                                                                     | ✅ Sim, com esclarecimento (§10.1)                          | ✅ **Confirmada**                                                   |
+| **D-67** | Identidade individual é **bloqueio de projeto**, não preferência                                                                                 | ✅ "Terá identidade individual, pelo Telegram por enquanto" | ✅ **Confirmada** — desdobrada em **D-147**                         |
+
 
 ### 15.2 Decisões novas, geradas pelas respostas
 
-| # | Decisão | Recomendação |
-|---|---|---|
-| **D-142** | **A faixa A3 se divide em A3a e A3b.** Comunicação externa por **gabarito pré-aprovado** sai automática e registrada; texto livre exige aprovação mensagem a mensagem. É o que devolve eficiência sem tirar o humano do circuito (§6.2) | Adotar |
-| **D-143** | **A expiração recai sobre o pedido de aprovação pendente**, nunca sobre gabarito nem sobre autorização concedida. Pedido vencido não envia, vira registro e devolve o caso à fila — o agente redige de novo com o dado atual (§6.2.5) | Adotar |
-| **D-144** | **O agente do cliente não gasta crédito do Escavador em nenhuma circunstância.** Dado ausente ou vencido produz escalada, não chamada paga. Fecha a exposição financeira do canal externo em zero e torna desnecessário o teto de crédito por conversa (§9.4). **Endurece D-63** | Adotar |
-| **D-145** | **O alerta de indício de prazo vai para colaborador e advogado; só o "Ciente" de um advogado encerra a escalada.** O clique do colaborador registra triagem e para o reenvio para ele, sem parar o relógio. Traduz a informação do escritório sem afrouxar D-64 (§5.2.1) | Adotar |
-| **D-146** | **Advogado enxerga a base inteira** (D-07 resolvida). O controle removido é substituído por registro: acesso fora da carteira é marcado como acesso amplo e vai a relatório mensal (RF-37). Segredo de justiça continua exigindo escopo próprio (RF-38) | Adotar |
-| **D-147** | **A identidade individual vem do Telegram + painel — Caminho B da Nota Técnica 01 §1.6.3.** Uma conta por pessoa, vínculo cadastrado pelo escritório, 2FA obrigatório na conta do Telegram, revogação na plataforma. **R-11 permanece aberto para e-mail e Drive**, e isso foi dito e aceito pelo escritório (item 16c) | Adotar |
-| **D-148** | **A plataforma roda na infraestrutura do prestador**, não do escritório — n8n, banco e servidores MCP. Consequência contratual: o escritório é **controlador** e o prestador é **operador** de dados pessoais, com obrigação de devolução e expurgo ao término (RNF-19, R-48) | Adotar |
-| **D-149** | **Tetos numéricos propostos** como padrão configurável: blocos por papel (§9.2), franquia de aparições de 1.000/mês por advogado (§9.3.1), orçamento de R$ 9,00 por sessão · R$ 60,00 e R$ 30,00 por pessoa/mês · R$ 300,00 no escritório (§9.5). Números são proposta nossa e exigem o de acordo do escritório | Adotar, e submeter |
-| **D-150** | **A franquia de aparições da V1 não é editável depois de criada** — a rota de edição aceita só `origens_ids` e `variacoes`. Dimensionar na criação é o único controle, e o alarme de 70% dispara um **procedimento** (§9.3.1), não um ajuste de número (R-46). *Levantado do OpenAPI; conferir por medição antes de implementar* | Adotar |
-| **D-151** | **O catálogo de gabaritos cresce por evidência.** Caso com 20 aprovações consecutivas sem edição e nenhuma rejeição vira candidato a gabarito, aprovado uma vez por advogado. É assim que a autonomia sobe — pelo catálogo, não pela retirada do humano (§10.1) | Adotar |
-| **D-152** | **O Trello é visualização; a base interna é a fonte da verdade** (D-09 resolvida). Demanda existe primeiro na base e depois no quadro; card órfão e demanda sem card são sinalizados na conferência (RF-39, §4.3) | Adotar |
+
+| #         | Decisão                                                                                                                                                                                                                                                                                                                          | Recomendação       |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| **D-142** | **A faixa A3 se divide em A3a e A3b.** Comunicação externa por **gabarito pré-aprovado** sai automática e registrada; texto livre exige aprovação mensagem a mensagem. É o que devolve eficiência sem tirar o humano do circuito (§6.2)                                                                                          | Adotar             |
+| **D-143** | **A expiração recai sobre o pedido de aprovação pendente**, nunca sobre gabarito nem sobre autorização concedida. Pedido vencido não envia, vira registro e devolve o caso à fila — o agente redige de novo com o dado atual (§6.2.5)                                                                                            | Adotar             |
+| **D-144** | **O agente do cliente não gasta crédito do Escavador em nenhuma circunstância.** Dado ausente ou vencido produz escalada, não chamada paga. Fecha a exposição financeira do canal externo em zero e torna desnecessário o teto de crédito por conversa (§9.4). **Endurece D-63**                                                 | Adotar             |
+| **D-145** | **O alerta de indício de prazo vai para colaborador e advogado; só o "Ciente" de um advogado encerra a escalada.** O clique do colaborador registra triagem e para o reenvio para ele, sem parar o relógio. Traduz a informação do escritório sem afrouxar D-64 (§5.2.1)                                                         | Adotar             |
+| **D-146** | **Advogado enxerga a base inteira** (D-07 resolvida). O controle removido é substituído por registro: acesso fora da carteira é marcado como acesso amplo e vai a relatório mensal (RF-37). Segredo de justiça continua exigindo escopo próprio (RF-38)                                                                          | Adotar             |
+| **D-147** | **A identidade individual vem do Telegram + painel — Caminho B da Nota Técnica 01 §1.6.3.** Uma conta por pessoa, vínculo cadastrado pelo escritório, 2FA obrigatório na conta do Telegram, revogação na plataforma. **R-11 permanece aberto para e-mail e Drive**, e isso foi dito e aceito pelo escritório (item 16c)          | Adotar             |
+| **D-148** | **A plataforma roda na infraestrutura do prestador**, não do escritório — n8n, banco e servidores MCP. Consequência contratual: o escritório é **controlador** e o prestador é **operador** de dados pessoais, com obrigação de devolução e expurgo ao término (RNF-19, R-48)                                                    | Adotar             |
+| **D-149** | **Tetos numéricos propostos** como padrão configurável: blocos por papel (§9.2), franquia de aparições de 1.000/mês por advogado (§9.3.1), orçamento de R$ 9,00 por sessão · R$ 60,00 e R$ 30,00 por pessoa/mês · R$ 300,00 no escritório (§9.5). Números são proposta nossa e exigem o de acordo do escritório                  | Adotar, e submeter |
+| **D-150** | **A franquia de aparições da V1 não é editável depois de criada** — a rota de edição aceita só `origens_ids` e `variacoes`. Dimensionar na criação é o único controle, e o alarme de 70% dispara um **procedimento** (§9.3.1), não um ajuste de número (R-46). *Levantado do OpenAPI; conferir por medição antes de implementar* | Adotar             |
+| **D-151** | **O catálogo de gabaritos cresce por evidência.** Caso com 20 aprovações consecutivas sem edição e nenhuma rejeição vira candidato a gabarito, aprovado uma vez por advogado. É assim que a autonomia sobe — pelo catálogo, não pela retirada do humano (§10.1)                                                                  | Adotar             |
+| **D-152** | **O Trello é visualização; a base interna é a fonte da verdade** (D-09 resolvida). Demanda existe primeiro na base e depois no quadro; card órfão e demanda sem card são sinalizados na conferência (RF-39, §4.3)                                                                                                                | Adotar             |
+
 
 ---
 
@@ -758,3 +836,4 @@ Recorte dos riscos de `01` §15 que mudam **o que o produto faz**, não apenas c
 4. **Escrever a Parte II da Spec.** Com D-07 e D-09 resolvidas, ela deixou de ser ficção: a matriz definitiva de escopos e a modelagem da demanda estão destravadas. Falta apenas o levantamento do Trello, que depende da chave de API
 
 > **Atualização de 27/08/2026.** A Parte I da Spec (chassi, motor de custo, cache, receptor de callbacks e esquema de dados) segue válida integralmente — nada nas respostas do escritório a contradiz. O que muda é que a **Parte II** ganhou insumo: escopos por papel com abrangência definida, e a demanda modelada com a base interna como fonte da verdade.
+

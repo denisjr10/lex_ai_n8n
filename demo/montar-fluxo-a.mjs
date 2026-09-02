@@ -111,6 +111,33 @@ for (const c of listaClientes.clientes || []) {
   }
 }
 
+// QUEM APROVA SEM SER ADVOGADO APARECE NA TELA, TODA VEZ.
+//
+// A D-06 e a D-142 reservam a aprovação de envio ao cliente ao advogado, e o
+// código não impede outra configuração — quem decide é a lista. Isso é certo:
+// a lista é do escritório, e travar em código o que é decisão de negócio seria
+// a Regra 3 ao contrário.
+//
+// O risco não é a exceção; é ela sobreviver ao motivo. Uma liberação "só para
+// a demonstração" que ninguém reverte vira, semanas depois, uma pessoa sem
+// habilitação fazendo sair mensagem para cliente de verdade — e sem que
+// ninguém tenha decidido isso em momento nenhum.
+//
+// Então avisa, alto, a cada geração. Não bloqueia: bloquear seria eu decidir
+// no lugar do escritório. Avisar é fazer a exceção custar uma linha de atenção
+// por vez, que é o preço justo dela.
+const aprovamSemSerAdvogado = lista.colaboradores
+  .filter((c) => c.pode_aprovar_envio_ao_cliente === true && c.papel !== 'advogado');
+if (aprovamSemSerAdvogado.length) {
+  console.log(`\x1b[33m
+  ATENÇÃO — ${aprovamSemSerAdvogado.length} pessoa(s) aprovam envio ao cliente SEM SEREM ADVOGADO:
+    ${aprovamSemSerAdvogado.map((c) => `${c.nome} (${c.papel})`).join('\n    ')}
+
+  A D-06 e a D-142 reservam essa aprovação ao advogado. Se isto é liberação
+  temporária de demonstração, reverta em demo/listas/colaboradores.json assim
+  que ela terminar.\x1b[0m`);
+}
+
 const emSegredo = instantaneo.processos.filter((p) => p.segredo_justica).length;
 console.log(`instantâneo : ${instantaneo.origem} · ${instantaneo.processos.length} processo(s)`
   + (emSegredo ? ` · ${emSegredo} em segredo de justiça` : ''));

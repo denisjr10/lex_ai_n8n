@@ -754,6 +754,20 @@ Efeito colateral bem-vindo: com os convidados como estagiários, a demonstraçã
 
 **A: 138 · B: 101 verificações. Os 5 nós de envio conferidos na credencial atual.**
 
+### Os convidados ganharam nome e papel — 02/09/2026
+
+| Pessoa | Papel | Aprova envio ao cliente? |
+|---|---|---|
+| Dênis Júnior | advogado | ✅ |
+| **Malu Souza** | advogado | ✅ |
+| **Estefanny** | colaboradora | ⚠️ **sim — exceção só da demo** (D-171) |
+| **Andressa** | colaboradora | ⚠️ **sim — exceção só da demo** (D-171) |
+| Colega de teste | estagiario | ❌ — é ele que mostra o barramento |
+
+🔴 **PENDÊNCIA APÓS A APRESENTAÇÃO: reverter Estefanny e Andressa para `pode_aprovar_envio_ao_cliente: false`** em `demo/listas/colaboradores.json`. A D-06 e a D-142 reservam essa aprovação ao advogado; a liberação é explícita, datada e pedida pelo usuário — mas **o risco não é a exceção, é ela sobreviver ao motivo**. O gerador do fluxo A passa a avisar, em amarelo e a cada geração, quem aprova sem ser advogado.
+
+Verificado pessoa a pessoa no código: os quatro com aprovação enviam ao cliente; **o estagiário não envia, e nele o texto ao cliente sequer é montado** — não é só o envio que não acontece.
+
 ## O primeiro uso real derrubou dois defeitos que 86 testes não viram — 01/09/2026
 
 Dois minutos de conversa de verdade no WhatsApp acharam o que a bateria automática não achou. Nenhum dos dois é falha de segurança: em ambos o sistema faz exatamente o que foi mandado, e é **a conversa** que fica impossível (R-53).
