@@ -297,8 +297,23 @@ const COM_CLIENTE = (clientes.clientes || []).find(c => (c.processos || []).leng
 const ID_COM_CLIENTE = COM_CLIENTE ? COM_CLIENTE.processos[0] : null;
 const PROC_COM_CLIENTE = ID_COM_CLIENTE
   ? instantaneo.processos.find(p => p.id === ID_COM_CLIENTE) : null;
+// PRECISA EXCLUIR OS PROCESSOS DE TODOS OS CLIENTES, e não só o do primeiro.
+// Com um cliente na lista, olhar só o primeiro dava no mesmo; com três, este
+// teste passou a escolher um processo que TEM destinatário e a reprovar por
+// isso — o defeito estava no teste, não no fluxo.
+const VINCULADOS = new Set(
+  (clientes.clientes || []).flatMap(c => c.processos || []));
+
+// Quando todo processo fora do segredo tem cliente — que é o caso na
+// apresentação — não sobra processo real para exercitar este caminho. Ele
+// continua importando: é o que impede o fluxo de inventar destinatário. Então
+// o teste usa um id que não existe em lista nenhuma, e nunca vai existir.
+// O nó em prova só faz a busca do destino; para ele, "sem cliente" é sem
+// cliente, venha de um processo real ou de um id que ninguém cadastrou.
 const PROC_SEM_CLIENTE = instantaneo.processos.find(
-  p => !p.segredo_justica && p.id !== ID_COM_CLIENTE);
+    p => !p.segredo_justica && !VINCULADOS.has(p.id))
+  || instantaneo.processos.find(p => !VINCULADOS.has(p.id))
+  || { id: 'AUTOS-SEM-CLIENTE-NA-LISTA', numero_cnj: '0000000-00.0000.0.00.0000' };
 
 /** Clica num botão como o Telegram o devolve: 'acao|processo|autor'. */
 function decidir(userId, acao, processo, autor = userId) {

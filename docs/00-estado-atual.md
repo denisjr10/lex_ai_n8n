@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-09-01 |
+| Atualizado em | 2026-09-02 |
 | Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
 | Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
 | 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08, renovação em **26/09**. ⚠️ **Com o saldo expirado, a remoção pela API pode ser recusada** (o 403 de saldo bloqueado veio antes do preço da rota, em 23/08). **Conferir no painel e remover por lá, ou pelo suporte, até 22/09.** Uma recarga com esta assinatura ainda ativa passa a financiar cobrança mensal que ninguém está olhando |
@@ -731,6 +731,28 @@ node demo/reapontar.mjs
 ```
 
 **Pendente:** a instância atual expirou e o usuário criou outra; falta gravar o token novo e rodar o comando. Depois disso, dois testes nunca exercitados ao vivo — o **chamado ao advogado no Telegram** ("vou ganhar essa causa?") e a **conversa da escolha de processo** corrigida hoje.
+
+## A demo ganhou elenco: três clientes e três convidados — 02/09/2026
+
+A apresentação ao escritório deixa de ter um cliente só.
+
+| Cliente simulado | Processo | Papel na cena |
+|---|---|---|
+| **Ana Beatriz Siqueira Lacerda** (número do Dênis) | AUTOS-06 + AUTOS-07 | o único com **mais de um processo** — a ação e o agravo do mesmo caso |
+| **Vinicius Andrade Peixoto** | AUTOS-04 — previdência, 18 andamentos | cliente de um processo |
+| **Tiago Correia Bandeira** | AUTOS-05 — progressão funcional, 53 andamentos | cliente de um processo |
+
+Os números são de colaboradores do escritório, que atuam como clientes na hora.
+
+**O isolamento foi verificado nos três sentidos**, e é a cena central: a mesma pergunta feita pelos três devolve coisas diferentes; um número de fora é recusado sem que se confirme que processo algum existe; e **cada um citando o CNJ do outro** recebe *"trato apenas do processo vinculado ao seu cadastro"* — sem confirmar nem desmentir que aquele processo exista.
+
+**Três IDs de Telegram entraram para o bot (D-170), como estagiário.** O papel não foi informado, e papel não informado entra como o de **menor privilégio** — Regra 5 aplicada ao cadastro de pessoas, não só ao tráfego. Promover a advogado é uma linha; conceder aprovação por engano não se desfaz, porque quem aprova faz sair mensagem para cliente de verdade. **Falta confirmar nome e papel de cada um.**
+
+Efeito colateral bem-vindo: com os convidados como estagiários, a demonstração mostra ao vivo **o barramento e o encaminhamento ao advogado**.
+
+**Um defeito de teste que a lista maior expôs (R-54).** O fluxo A reprovou três verificações ao regerar — não era o fluxo. O teste escolhia o "processo sem destinatário" excluindo apenas os processos do **primeiro** cliente, e com três acabava pegando um que passara a ter dono. Pior: agora **todo processo fora do segredo tem cliente**, então não sobra processo real para exercitar aquele caminho. Corrigido para excluir os de todos e, quando não sobra nenhum, usar um id que não existe em lista alguma.
+
+**A: 138 · B: 101 verificações. Os 5 nós de envio conferidos na credencial atual.**
 
 ## O primeiro uso real derrubou dois defeitos que 86 testes não viram — 01/09/2026
 
