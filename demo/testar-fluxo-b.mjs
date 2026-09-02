@@ -370,17 +370,47 @@ const noChamado = wf.nodes.find((n) => n.name === 'Chamar colaborador (Telegram)
 checar('o chamado existe como nó de Telegram', Boolean(noChamado));
 checar('o chamado tenta de novo antes de desistir',
   noChamado.retryOnFail === true && noChamado.maxTries >= 3);
-checar('o chamado tem saída de erro — falha não vira silêncio',
-  noChamado.onError === 'continueErrorOutput', `onError=${noChamado.onError}`);
 checar('o chamado usa credencial, não token embutido',
   Boolean(noChamado.credentials && noChamado.credentials.telegramApi) &&
   !JSON.stringify(noChamado.parameters).match(/\d{8,}:[A-Za-z0-9_-]{30,}/));
-checar('o destinatário do chamado é um advogado, não qualquer colaborador',
-  colaboradores.some((c) => c.papel === 'advogado' &&
-    String(c.telegram_user_id) === String(noChamado.parameters.chatId)),
-  `chatId=${noChamado.parameters.chatId}`);
 
-const saidas = wf.connections['Chamar colaborador (Telegram)'].main;
+// O CHAMADO VAI PARA TODOS OS APROVADORES, e não para um escolhido. No teste
+// real ele chegou a uma pessoa só — os colaboradores, que também podem
+// resolver, não ficavam sabendo de nada. Chamar um só tem o mesmo defeito do
+// encaminhamento antigo: se essa pessoa estiver em audiência, o cliente
+// esperou por quem não vai olhar.
+const espalhaChamado = wf.nodes.find((n) => n.name === 'Espalhar o chamado');
+checar('o chamado é espalhado, não mandado a um só',
+  Boolean(espalhaChamado) && noChamado.parameters.chatId.includes('$json.chatId'),
+  noChamado.parameters.chatId);
+
+const APROVADORES = colaboradores.filter((c) => c.pode_aprovar_envio_ao_cliente);
+const alvos = (espalhaChamado.parameters.jsCode.match(/"id":\s*(\d+)/g) || [])
+  .map((m) => m.replace(/\D/g, ''));
+checar('todos os aprovadores estão entre os chamados',
+  APROVADORES.every((c) => alvos.includes(String(c.telegram_user_id))),
+  `alvos=${alvos.join(',')}`);
+checar('quem não pode aprovar NÃO é chamado',
+  colaboradores.filter((c) => !c.pode_aprovar_envio_ao_cliente)
+    .every((c) => !alvos.includes(String(c.telegram_user_id))));
+
+// O botão é o que fecha o ciclo: sem ele, a pessoa lê o chamado, sai do
+// Telegram e responde por outro caminho — e o escritório perde o registro.
+checar('o chamado traz o botão de responder ao cliente',
+  Boolean(noChamado.parameters.inlineKeyboard) &&
+  noChamado.parameters.replyMarkup === 'inlineKeyboard' &&
+  noChamado.parameters.inlineKeyboard.rows[0].row.buttons[0]
+    .additionalFields.callback_data.startsWith('=responder|'));
+
+// UMA PERGUNTA DO CLIENTE, UMA RESPOSTA AO CLIENTE. Avisar quatro pessoas não
+// pode virar quatro mensagens de volta para o WhatsApp dele.
+const juntar = wf.nodes.find((n) => n.name === 'Alguém foi avisado?');
+checar('as várias mensagens viram uma resposta só ao cliente',
+  Boolean(juntar) && juntar.parameters.mode === 'runOnceForAllItems');
+checar('basta UM ter recebido para o aviso valer',
+  /chegou > 0/.test(juntar.parameters.jsCode), juntar.parameters.jsCode.slice(0, 120));
+
+const saidas = wf.connections['Deu para avisar?'].main;
 checar('o sucesso do chamado leva ao texto que afirma o aviso',
   saidas[0][0].node === 'Responder — o escritório foi avisado', saidas[0][0].node);
 checar('a falha do chamado leva ao texto que NÃO afirma o aviso',
@@ -436,8 +466,28 @@ function codigoDoModelo() {
   return wf.nodes.find((n) => n.name === 'Responder ao cliente').parameters.messages.messageValues[0].message;
 }
 checar('o modelo é proibido de falar de prazo', /NUNCA fale de prazo/i.test(codigoDoModelo()));
-checar('o cliente não tem botão nenhum',
-  !JSON.stringify(wf).includes('inlineKeyboard') && !JSON.stringify(wf).includes('callback_data'));
+// O CLIENTE CONTINUA SEM BOTÃO NENHUM — e agora a verificação precisa dizer
+// isso com mais cuidado, porque o fluxo passou a ter um botão: o "✍️ Responder
+// ao cliente", que vai no chamado ao COLABORADOR, pelo Telegram.
+//
+// A distinção é a razão de ser da Demo B. O cliente só lê; quem age é o
+// escritório. Olhar o JSON inteiro atrás da palavra "inlineKeyboard" confundia
+// as duas coisas — o que importa é que nenhum nó que fala com o WHATSAPP
+// tenha botão.
+{
+  const paraOCliente = wf.nodes.filter((n) => n.type === 'n8n-nodes-base.httpRequest' &&
+    String(n.parameters.url || '').includes('uazapi'));
+  checar('o cliente não tem botão nenhum',
+    paraOCliente.length > 0 &&
+    paraOCliente.every((n) => !JSON.stringify(n).includes('inlineKeyboard') &&
+                              !JSON.stringify(n).includes('callback_data') &&
+                              !JSON.stringify(n).includes('button')),
+    `${paraOCliente.length} nó(s) de envio ao cliente`);
+  // E o botão que existe é do colaborador, no Telegram — nunca no WhatsApp.
+  checar('o único botão do fluxo é do colaborador, no Telegram',
+    wf.nodes.filter((n) => n.parameters && n.parameters.inlineKeyboard)
+      .every((n) => n.type === 'n8n-nodes-base.telegram'));
+}
 checar('o webhook responde na hora, sem esperar o modelo',
   wf.nodes.find((n) => n.name === 'Webhook da Uazapi').parameters.responseMode === 'onReceived');
 checar('nenhum nó nasce ativo', wf.active !== true);

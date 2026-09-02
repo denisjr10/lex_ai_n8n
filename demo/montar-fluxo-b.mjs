@@ -171,8 +171,17 @@ const colabPath = fs.existsSync(path.join(AQUI, 'listas', 'colaboradores.json'))
   ? path.join(AQUI, 'listas', 'colaboradores.json')
   : path.join(AQUI, 'listas', 'colaboradores.exemplo.json');
 const listaColab = JSON.parse(fs.readFileSync(colabPath, 'utf8'));
+// QUEM É CHAMADO É QUEM PODE RESOLVER, e isso se lê de `pode_aprovar`, não do
+// papel. A primeira versão filtrava por `papel === 'advogado'` e mandava para o
+// PRIMEIRO deles — o resultado no teste real foi um chamado que chegou a uma
+// pessoa só, enquanto os colaboradores, que também podem resolver, não ficavam
+// sabendo de nada.
+//
+// Chamar um só tem o mesmo defeito do encaminhamento antigo: se essa pessoa
+// estiver em audiência, o cliente esperou por alguém que não vai olhar. Quem
+// estiver disponível resolve — mas para isso todos precisam receber.
 const ADVOGADOS = (listaColab.colaboradores || [])
-  .filter((c) => c.papel === 'advogado' && c.telegram_user_id)
+  .filter((c) => c.pode_aprovar_envio_ao_cliente === true && c.telegram_user_id)
   .map((c) => ({ id: c.telegram_user_id, nome: c.nome }));
 
 // Falha fecha (Regra 5). Sem advogado na lista não há a quem chamar — e um
@@ -724,15 +733,58 @@ const nodes = [
           leftValue: '={{ $json.escalar }}', rightValue: '' }] },
       options: {} }, [460, 620]),
 
+  // Um item por pessoa: o nó do Telegram manda uma mensagem por item, então é
+  // isto que transforma "chamar o escritório" em "chamar todo mundo que pode
+  // resolver". Mesmo desenho do espalhador do fluxo A.
+  no('Espalhar o chamado', 'n8n-nodes-base.code', 2,
+    { mode: 'runOnceForAllItems', jsCode: [
+      `const PESSOAS = ${JSON.stringify(ADVOGADOS)};`,
+      'const d = $input.first().json;',
+      'return PESSOAS.map(p => ({ json: { ...d, chatId: p.id, paraNome: p.nome } }));',
+    ].join('\n') }, [700, 620]),
+
   no('Chamar colaborador (Telegram)', 'n8n-nodes-base.telegram', 1.2,
-    { chatId: String(ADVOGADOS[0].id),
+    { chatId: '={{ $json.chatId }}',
       text: '={{ $json.avisoParaColaborador }}',
-      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [700, 620],
+      // O BOTÃO É O QUE FECHA O CICLO. Sem ele o chamado é um aviso: a pessoa
+      // lê, sai do Telegram e responde por outro caminho, e o escritório perde
+      // o registro de que respondeu. Com ele, a resposta nasce aqui e passa
+      // pela mesma aprovação de sempre.
+      replyMarkup: 'inlineKeyboard',
+      inlineKeyboard: { rows: [ { row: { buttons: [
+        { text: '✍️ Responder ao cliente',
+          additionalFields: { callback_data: '=responder|{{ $json.numero }}|{{ $json.motivo }}' } }
+      ] } } ] },
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [940, 620],
     { retryOnFail: true, maxTries: 3, waitBetweenTries: 2000,
-      // Saída de erro, e não `continueRegularOutput`: engolir a falha faria o
-      // cliente ouvir "já avisei o escritório" quando ninguém foi avisado.
-      onError: 'continueErrorOutput',
+      // Agora que são VÁRIOS destinatários, a saída de erro separada não serve
+      // mais: com quatro pessoas, uma falha e três sucessos mandariam o fluxo
+      // pelos dois caminhos ao mesmo tempo, e o cliente receberia duas
+      // respostas contraditórias. Os itens seguem todos por uma saída só, e
+      // quem decide o que dizer ao cliente é o nó seguinte, olhando o conjunto.
+      onError: 'continueRegularOutput',
       credentials: { telegramApi: cred.telegram } }),
+
+  // UMA PERGUNTA DO CLIENTE, UMA RESPOSTA AO CLIENTE. Sem este nó, avisar
+  // quatro pessoas mandaria quatro mensagens de volta para o WhatsApp dele.
+  //
+  // E ele também responde à pergunta que importa: "alguém foi avisado?".
+  // Basta UM ter recebido para que "já avisei o escritório" seja verdade — o
+  // escritório foi avisado, não todo o escritório.
+  no('Alguém foi avisado?', 'n8n-nodes-base.code', 2,
+    { mode: 'runOnceForAllItems', jsCode: [
+      'const itens = $input.all();',
+      'const chegou = itens.filter(i => !i.json.error).length;',
+      'const d = itens[0] ? itens[0].json : {};',
+      'return [{ json: { ...d, avisadosComSucesso: chegou, avisado: chegou > 0 } }];',
+    ].join('\n') }, [1180, 620]),
+
+  no('Deu para avisar?', 'n8n-nodes-base.if', 2.2,
+    { conditions: { options: { caseSensitive: true, version: 2, typeValidation: 'loose' },
+      combinator: 'and', conditions: [
+        { operator: { type: 'boolean', operation: 'true', singleValue: true },
+          leftValue: '={{ $json.avisado }}', rightValue: '' }] },
+      options: {} }, [1420, 620]),
 
   envio('Responder — o escritório foi avisado',
     CORPO_ENVIO(`$('Porteiro do cliente (verificação em código)').item.json.numero`,
@@ -753,12 +805,17 @@ const connections = {
     [{ node: 'Precisa de gente?', type: 'main', index: 0 }],
   ] },
   'Precisa de gente?': { main: [
-    [{ node: 'Chamar colaborador (Telegram)', type: 'main', index: 0 }],   // escalar
+    [{ node: 'Espalhar o chamado', type: 'main', index: 0 }],              // escalar
     [{ node: 'Responder sem consultar', type: 'main', index: 0 }],         // recusa comum
   ] },
+  'Espalhar o chamado': { main: [[{ node: 'Chamar colaborador (Telegram)', type: 'main', index: 0 }]] },
   'Chamar colaborador (Telegram)': { main: [
+    [{ node: 'Alguém foi avisado?', type: 'main', index: 0 }],
+  ] },
+  'Alguém foi avisado?': { main: [[{ node: 'Deu para avisar?', type: 'main', index: 0 }]] },
+  'Deu para avisar?': { main: [
     [{ node: 'Responder — o escritório foi avisado', type: 'main', index: 0 }],
-    [{ node: 'Responder — não consegui avisar', type: 'main', index: 0 }],  // saída de erro
+    [{ node: 'Responder — não consegui avisar', type: 'main', index: 0 }],
   ] },
   'Ficha do cliente': { main: [[{ node: 'Responder ao cliente', type: 'main', index: 0 }]] },
   'Modelo — cliente': { ai_languageModel: [[{ node: 'Responder ao cliente', type: 'ai_languageModel', index: 0 }]] },

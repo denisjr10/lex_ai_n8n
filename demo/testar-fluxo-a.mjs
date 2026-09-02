@@ -182,6 +182,54 @@ checar('o fluxo publicado embute no máximo 20 movimentações por processo',
   maiorEmbutido <= 20, `maior embutido: ${maiorEmbutido}`);
 
 // ---------------------------------------------------------------------------
+// QUEM ACERTA MAIS DO NOME GANHA. A busca casava por qualquer sobrenome em
+// comum, e isso aparecia no gesto mais natural que existe: digitar o nome
+// completo do cliente. Numa base com parentes — que é toda base de escritório
+// de família — "Tiago Correia Bandeira" trazia junto os processos da Beatriz
+// Correia Bandeira, todos em segredo. Cinco opções, três cadeadas, para uma
+// pergunta que tinha uma resposta só.
+console.log('\n\x1b[1mBusca por nome — parentes não podem sequestrar a pergunta\x1b[0m');
+{
+  const nomeDe = (p) => (p.envolvidos || []).map((e) => e.nome).filter(Boolean)[0];
+  // Um processo cuja primeira parte tem sobrenome repartido com outra pessoa
+  // da base é exatamente o caso difícil; se não houver, o teste não se aplica.
+  const tokens = (n) => String(n || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().split(' ').filter((t) => t.length >= 4);
+
+  const comXara = instantaneo.processos.find((p) => {
+    const meus = tokens(nomeDe(p));
+    return instantaneo.processos.some((o) => o.id !== p.id &&
+      (o.envolvidos || []).some((e) => e.nome !== nomeDe(p) &&
+        tokens(e.nome).some((t) => meus.includes(t))));
+  });
+
+  if (!comXara) {
+    console.log('  \x1b[33m—\x1b[0m 2 verificações puladas: não há sobrenome repetido entre partes');
+  } else {
+    const nomeCompleto = nomeDe(comXara);
+    const r = rodar(P, msg(ADVOGADO.telegram_user_id, nomeCompleto)).json;
+    // O nome completo é do dono de UM processo, ou dos processos daquela mesma
+    // pessoa — nunca dos de um parente que só divide o sobrenome.
+    const resolveu = r.processoId === comXara.id;
+    const listaSoDele = r.rota === 'negado' &&
+      String(r.texto).split('\n').filter((l) => l.startsWith('· '))
+        .every((l) => instantaneo.processos.some((p) =>
+          l.includes(p.numero_cnj) && (p.envolvidos || []).some((e) => e.nome === nomeCompleto)));
+    checar(`nome completo ("${nomeCompleto}") não traz processo de parente`,
+      resolveu || listaSoDele,
+      `rota=${r.rota} processo=${r.processoId}`);
+
+    // E o sobrenome sozinho CONTINUA ambíguo: aí a dúvida é real, e o certo é
+    // perguntar. A correção não pode ter comprado precisão virando chute.
+    const sobrenome = tokens(nomeCompleto).slice(-2).join(' ');
+    const s = rodar(P, msg(ADVOGADO.telegram_user_id, sobrenome)).json;
+    checar(`sobrenome sozinho ("${sobrenome}") continua perguntando qual`,
+      s.rota === 'negado' && /mais de um processo/i.test(String(s.texto)),
+      `rota=${s.rota}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 console.log('\n\x1b[1mSegredo de justiça — a barreira que nasceu dos autos reais\x1b[0m');
 if (!SIGILOSO) {
   console.log('  \x1b[33m—\x1b[0m 4 verificações puladas: não há processo em segredo neste instantâneo');
@@ -243,7 +291,12 @@ if (!SEM_PODER.telegram_user_id) {
     neg.textoFinal.includes('📨 ENVIADO PARA APROVAÇÃO'), neg.textoFinal.slice(0, 120));
 }
 
-const desc = rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id, 'descartar', PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
+// Proposta própria: sem identidade, este descarte herdaria a chave de um caso
+// anterior e cairia na trava de "já decidida".
+memoriaNova();
+const desc = rodar(R, rodar(P, clique(ADVOGADO.telegram_user_id,
+  `descartar|${ABERTO.id}|${ADVOGADO.telegram_user_id}|proposta-do-descarte`,
+  PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
 checar('descarte é registrado', desc.textoFinal.includes('❌ DESCARTADO'));
 
 // ---------------------------------------------------------------------------
@@ -437,6 +490,123 @@ if (!SEM_PODER.telegram_user_id || !PROC_COM_CLIENTE) {
 memoriaNova();
 
 // ===========================================================================
+// A PROPOSTA PASSA A EXISTIR NA TELA DE VÁRIAS PESSOAS, e isso cria uma corrida
+// que antes não existia: com um destinatário só, ninguém disputava o clique.
+console.log('\n\x1b[1mDecisão compartilhada — todos veem, o primeiro decide\x1b[0m');
+{
+  const APROVADORES = lista.colaboradores.filter((c) => c.pode_aprovar_envio_ao_cliente);
+  if (APROVADORES.length < 2 || !SEM_PODER.telegram_user_id || !PROC_COM_CLIENTE) {
+    console.log('  \x1b[33m—\x1b[0m 6 verificações puladas: precisa de 2+ aprovadores e um processo com cliente');
+  } else {
+    const A1 = APROVADORES[0], A2 = APROVADORES[1];
+    const AUTOR = SEM_PODER.telegram_user_id;
+    const cliqueDe = (quem) => rodar(R, rodar(P, clique(quem,
+      `aprovar|${PROC_COM_CLIENTE.id}|${AUTOR}`, PROPOSTA_COMO_O_TELEGRAM_DEVOLVE)).json).json;
+
+    // O encaminhamento vai para TODOS os aprovadores, e não para um escolhido.
+    // Escolher um significa a proposta esperar por quem está em audiência.
+    memoriaNova();
+    const enc = cliqueDe(AUTOR);
+    checar('o encaminhamento vai para TODOS os aprovadores',
+      enc.encaminhados.length === APROVADORES.length,
+      `${enc.encaminhados.length} de ${APROVADORES.length}`);
+
+    // Quem decide dispara aviso aos outros — menos ao autor, que tem aviso
+    // próprio e não pode receber duas mensagens pelo mesmo fato.
+    memoriaNova();
+    const dec = cliqueDe(A1.telegram_user_id);
+    checar('quem decide avisa os demais aprovadores', dec.avisos.length >= 1);
+    checar('quem decidiu não avisa a si mesmo',
+      !dec.avisos.some((a) => String(a.chatId) === String(A1.telegram_user_id)));
+    checar('o aviso diz o nome de quem decidiu', String(dec.avisos[0].texto).includes(A1.nome));
+
+    // O AVISO CONTA A DECISÃO, NÃO A ENTREGA. No instante em que ele é montado
+    // a entrega ainda não aconteceu — é a D-101 na tela de terceiros.
+    checar('o aviso NÃO afirma que a mensagem chegou ao cliente',
+      !/foi para o cliente|entregue|chegou ao cliente/i.test(String(dec.avisos[0].texto)),
+      String(dec.avisos[0].texto));
+
+    // A corrida. Sem esta trava o cliente recebe a mesma mensagem duas vezes, e
+    // nenhuma das duas execuções acusa erro: cada uma fez certo o que lhe foi
+    // pedido. Quem percebe é o cliente.
+    const segundo = cliqueDe(A2.telegram_user_id);
+    checar('o segundo a clicar NÃO envia de novo ao cliente',
+      segundo.desfecho === 'ja-decidida' && segundo.enviarAoCliente === false &&
+      segundo.textoAoCliente === null,
+      `desfecho=${segundo.desfecho} envia=${segundo.enviarAoCliente}`);
+    checar('e ele fica sabendo quem decidiu antes',
+      String(segundo.textoFinal).includes(A1.nome), String(segundo.textoFinal).slice(0, 120));
+  }
+}
+memoriaNova();
+
+// ===========================================================================
+// RESPONDER AO CHAMADO. O cliente perguntou algo que o robô não responde, o
+// escritório foi chamado no Telegram — e agora responde por ali mesmo. O texto
+// não sai como foi escrito: passa pelo modelo, que ajusta o tom, e volta como
+// proposta com os mesmos três botões. Responder continua exigindo aprovação.
+console.log('\n\x1b[1mResponder ao cliente a partir do chamado\x1b[0m');
+{
+  const clientes = JSON.parse(fs.readFileSync(
+    fs.existsSync(path.join(AQUI, 'listas', 'clientes.json'))
+      ? path.join(AQUI, 'listas', 'clientes.json')
+      : path.join(AQUI, 'listas', 'clientes.exemplo.json'), 'utf8'));
+  const CLI = (clientes.clientes || [])[0];
+
+  if (!CLI || !ADVOGADO.telegram_user_id) {
+    console.log('  \x1b[33m—\x1b[0m 7 verificações puladas: falta cliente ou aprovador na lista');
+  } else {
+    const numero = String(CLI.whatsapp).replace(/\D/g, '');
+    const botao = (quem, num) => clique(quem, `responder|${num}|prazo`, 'chamado');
+
+    memoriaNova();
+    const abriu = rodar(P, botao(ADVOGADO.telegram_user_id, numero)).json;
+    checar('o botão do chamado pede o texto da resposta', abriu.rota === 'aviso-clique' &&
+      /Escreva a resposta/i.test(String(abriu.texto)), `rota=${abriu.rota}`);
+
+    const RASCUNHO = 'o prazo pra fazenda pagar é de 60 dias, ja pedi o cumprimento';
+    const resp = rodar(P, msg(ADVOGADO.telegram_user_id, RASCUNHO)).json;
+    checar('a mensagem seguinte vira o rascunho da resposta',
+      resp.rota === 'responder-cliente' && resp.rascunho === RASCUNHO, `rota=${resp.rota}`);
+    checar('o destinatário sai da LISTA, não do botão',
+      resp.clienteNome === CLI.nome && resp.clienteNumero === numero,
+      `${resp.clienteNome} / ${resp.clienteNumero}`);
+
+    // Quem não pode aprovar envio também não pode responder: a pergunta que
+    // gerou o chamado é justamente a que só quem aprova pode responder.
+    if (SEM_PODER.telegram_user_id) {
+      memoriaNova();
+      const barrado = rodar(P, botao(SEM_PODER.telegram_user_id, numero)).json;
+      checar('quem não pode aprovar não pode responder ao cliente',
+        /não pode responder/i.test(String(barrado.texto)), String(barrado.texto).slice(0, 80));
+    }
+
+    // Número fora da lista não vira destinatário, mesmo vindo de um botão que
+    // nós mesmos criamos (Regra 1: o escopo não mora no que chega).
+    memoriaNova();
+    rodar(P, botao(ADVOGADO.telegram_user_id, '5511999998888'));
+    const fora = rodar(P, msg(ADVOGADO.telegram_user_id, 'qualquer coisa')).json;
+    checar('número fora da lista não recebe resposta',
+      fora.rota === 'negado' && !fora.clienteNumero, `rota=${fora.rota}`);
+
+    // A resposta ajustada desemboca na proposta de sempre — com botões.
+    const proposta = wf.nodes.find((n) => n.name === 'Propor resposta ao cliente');
+    checar('a resposta ajustada volta como proposta com botões',
+      Boolean(proposta) && proposta.parameters.replyMarkup === 'inlineKeyboard');
+
+    // O modelo VESTE, não INVENTA. Se ele puder completar o que o rascunho não
+    // disse, um "deve sair em breve" chega ao cliente com a assinatura do
+    // escritório — a alucinação mais cara que este projeto pode produzir.
+    const sistema = wf.nodes.find((n) => n.name === 'Ajustar a resposta ao cliente')
+      .parameters.messages.messageValues[0].message;
+    checar('o modelo é proibido de acrescentar o que o rascunho não disse',
+      /NÃO acrescente informação que não está no rascunho/i.test(sistema) &&
+      /NÃO fala de prazo/i.test(sistema));
+  }
+}
+memoriaNova();
+
+// ===========================================================================
 console.log('\n\x1b[1mEstrutura do fluxo\x1b[0m');
 const proposta = wf.nodes.find(n => n.name === 'Propor envio (aguarda aprovação)');
 checar('teclado está no nível de topo do nó', proposta.parameters.replyMarkup === 'inlineKeyboard');
@@ -478,13 +648,31 @@ checar('sem regra que case, o fluxo para em vez de seguir',
 for (const nome of ['Propor envio (aguarda aprovação)', 'Repropor texto editado', 'Encaminhar ao advogado']) {
   const n = wf.nodes.find(x => x.name === nome);
   const dados = n.parameters.inlineKeyboard.rows[0].row.buttons.map(b => b.additionalFields.callback_data);
-  checar(`botões de "${nome}" carregam processo e autor`,
-    dados.length === 3 && dados.every(d => d.startsWith('=') && d.split('|').length === 3),
+  // Quatro campos: ação, processo, autor e a identidade da proposta. O
+  // processo entrou porque sem ele a aprovação usava a memória curta e podia
+  // enviar ao cliente errado; a identidade entrou porque sem ela a trava de
+  // "primeiro decide" barraria a segunda proposta legítima do mesmo processo.
+  checar(`botões de "${nome}" carregam processo, autor e proposta`,
+    dados.length === 3 && dados.every(d => d.startsWith('=') && d.split('|').length === 4),
     JSON.stringify(dados[0]));
 }
 const encNo = wf.nodes.find(n => n.name === 'Encaminhar ao advogado');
-checar('o encaminhamento vai para o advogado, não para quem clicou',
-  encNo.parameters.chatId.includes('advogadoChatId'));
+// O destinatário deixou de ser um campo fixo: o espalhador emite um item por
+// aprovador, e o nó do Telegram manda uma mensagem para cada um.
+checar('o encaminhamento sai para o destinatário do item, não para quem clicou',
+  encNo.parameters.chatId.includes('$json.chatId'), encNo.parameters.chatId);
+const espalhador = wf.nodes.find(n => n.name === 'Espalhar encaminhamento');
+checar('existe um espalhador que vira um item por aprovador',
+  Boolean(espalhador) && espalhador.parameters.mode === 'runOnceForAllItems');
+const avisador = wf.nodes.find(n => n.name === 'Avisar os demais aprovadores');
+checar('o aviso aos demais não derruba a execução se falhar',
+  Boolean(avisador) && avisador.onError === 'continueRegularOutput');
+// A identidade da proposta é o que permite travar a corrida SEM barrar uma
+// segunda proposta legítima sobre o mesmo processo.
+checar('todo botão carrega a identidade da proposta',
+  wf.nodes.filter(n => n.parameters && n.parameters.inlineKeyboard).every(n =>
+    n.parameters.inlineKeyboard.rows[0].row.buttons.every(b =>
+      b.additionalFields.callback_data.split('|').length === 4)));
 const filtro = wf.nodes.find(n => n.name === 'Tem quem avisar?');
 checar('o aviso a quem redigiu só sai se houver o que dizer',
   filtro.parameters.conditions.conditions[0].operator.operation === 'notEmpty');

@@ -179,6 +179,11 @@ const CODIGO_PORTEIRO = `
 const AVISO_TOPO = ${JSON.stringify(AVISO_TOPO)};
 const NOTA_IA = ${JSON.stringify(NOTA_IA)};
 const COLABORADORES = ${JSON.stringify(lista.colaboradores, null, 2)};
+// A lista de clientes entra aqui porque responder a um chamado precisa saber
+// para quem se responde — e esse "para quem" tem de sair da lista, nunca do
+// que chegou pelo botão (Regra 1).
+const CLIENTES = ${JSON.stringify((listaClientes.clientes || []).map(c => ({
+  whatsapp: c.whatsapp, nome: c.nome, processos: c.processos || [] })), null, 2)};
 const PROCESSOS = ${JSON.stringify(instantaneo.processos.map(p => ({
   id: p.id,
   numero: p.numero_cnj,
@@ -267,7 +272,33 @@ if (cb) {
   // processo viesse da memória, e a pessoa consultasse OUTRO processo entre
   // receber a proposta e clicar em aprovar, a mensagem sairia para o cliente
   // errado. O botão precisa saber do que ele trata.
-  const [acao, procDoBotao, autorDoBotao] = String(cb.data || '').split('|');
+  const [acao, procDoBotao, autorDoBotao, propostaDoBotao] = String(cb.data || '').split('|');
+
+  // --- o botão "✍️ Responder ao cliente", vindo do chamado da Demo B --------
+  // As duas demos usam O MESMO BOT, e só um fluxo pode ter o gatilho do
+  // Telegram. Então o clique num botão criado lá chega aqui — e é por isso que
+  // o ciclo consegue fechar entre os dois fluxos sem nenhuma ponte extra.
+  //
+  // O que este clique faz é abrir um estado, não escrever nada: a PRÓXIMA
+  // mensagem desta pessoa vira o rascunho da resposta ao cliente.
+  if (acao === 'responder') {
+    if (!base.podeAprovar) {
+      return { json: { ...base, rota: 'aviso-clique', callbackId: cb.id,
+        texto: '⛔ <b>Você não pode responder ao cliente</b>\\n\\n' +
+          'Quem responde a pedido de prazo ou de chance de êxito é quem pode aprovar envio ao cliente. ' +
+          'Chame alguém da lista.' }};
+    }
+    if (!memoria.respostaPendente) memoria.respostaPendente = {};
+    memoria.respostaPendente[String(de.id)] = {
+      numeroCliente: procDoBotao || null,   // o 2º campo aqui é o número, não o processo
+      motivo: autorDoBotao || null
+    };
+    return { json: { ...base, rota: 'aviso-clique', callbackId: cb.id,
+      texto: '✍️ <b>Escreva a resposta ao cliente</b>\\n\\n' +
+        'Mande aqui, na próxima mensagem, o que você quer dizer a ele. Pode ser em rascunho, ' +
+        'do jeito que sair — o texto é ajustado para o tom do escritório antes de ir.\\n\\n' +
+        '<i>Nada é enviado direto: a versão ajustada volta para você aprovar.</i>' }};
+  }
 
   // barreira 2: só advogado aprova envio ao cliente (Regra 2 + D-06).
   // A tentativa segue pelo MESMO caminho do clique legítimo — assim o botão
@@ -278,6 +309,7 @@ if (cb) {
   return { json: { ...base, rota: 'aprovacao', acao: efetiva, acaoPedida: acao,
     callbackId: cb.id, messageId: msg.message_id,
     processoId: procDoBotao || memoria.ultimoProcesso[String(de.id)] || null,
+    propostaId: propostaDoBotao || null,
     // Quem redigiu, quando não é quem está decidindo. Preenchido só nos botões
     // de uma proposta encaminhada — é por aqui que o desfecho volta para ele.
     autorChatId: autorDoBotao && String(autorDoBotao) !== String(de.id) ? autorDoBotao : null,
@@ -293,6 +325,44 @@ const texto = String((msg && msg.text) || '').trim();
 // nenhum. Agora a próxima mensagem daquela pessoa É o texto corrigido, e volta
 // como nova proposta — com os mesmos três botões, porque texto editado por
 // humano continua precisando de aprovação de advogado (Regra 2).
+// --- resposta pendente: o que o botão ✍️ do chamado deixou em aberto -------
+// Mesmo desenho da edição, e vem ANTES dela porque é o estado mais recente que
+// a pessoa abriu. O rascunho não vai ao cliente como foi escrito: passa pelo
+// modelo, que o veste com o tom do escritório — e volta como PROPOSTA, com os
+// mesmos três botões. Responder continua exigindo aprovação (Regra 2).
+if (!memoria.respostaPendente) memoria.respostaPendente = {};
+const respPendente = memoria.respostaPendente[String(de.id)];
+const textoBruto = String((msg && msg.text) || '').trim();
+if (respPendente && textoBruto) {
+  delete memoria.respostaPendente[String(de.id)];
+
+  if (/^(cancelar|cancela|deixa|esquece|para|\\/cancelar)\\b/i.test(textoBruto)) {
+    return { json: { ...base, rota: 'negado',
+      texto: 'Resposta cancelada. Nada foi enviado ao cliente.' }};
+  }
+
+  // O ESCOPO SAI DA LISTA, TAMBÉM AQUI. O número veio de um botão que nós
+  // mesmos criamos, mas conferi-lo contra a lista custa uma linha e fecha a
+  // porta para um número que chegue por outro caminho (Regra 1).
+  const digitosCliente = String(respPendente.numeroCliente || '').replace(/\\D/g, '');
+  const doCliente = CLIENTES.find(c => {
+    const n = String(c.whatsapp || '').replace(/\\D/g, '');
+    return n === digitosCliente ||
+      n.replace(/^(55\\d{2})9(\\d{8})$/, '$1$2') === digitosCliente.replace(/^(55\\d{2})9(\\d{8})$/, '$1$2');
+  });
+  if (!doCliente) {
+    return { json: { ...base, rota: 'negado',
+      texto: '⛔ <b>Não encontrei esse cliente na lista do escritório</b>\\n\\nNada foi enviado.' }};
+  }
+
+  return { json: { ...base, rota: 'responder-cliente',
+    rascunho: textoBruto,
+    motivoDoChamado: respPendente.motivo || null,
+    clienteNumero: String(doCliente.whatsapp || '').replace(/\\D/g, ''),
+    clienteNome: doCliente.nome,
+    processoId: (doCliente.processos || [])[0] || null }};
+}
+
 if (!memoria.edicaoPendente) memoria.edicaoPendente = {};
 const pendente = memoria.edicaoPendente[String(de.id)];
 if (pendente && texto) {
@@ -359,9 +429,27 @@ const porNumero = PROCESSOS.find(p =>
 
 // Nome de parte: casa por sobrenome ou nome completo, nunca por pedaço curto.
 // "Ana" sozinha nao decide nada quando ha oito processos.
-const porNome = porNumero ? [] : PROCESSOS.filter(p => p.partes.some(nome =>
+// QUEM ACERTA MAIS DO NOME GANHA. A versão anterior casava por QUALQUER token
+// em comum, e o resultado aparecia justo no gesto mais natural: digitar o nome
+// completo do cliente. "Tiago Correia Bandeira" trazia junto os três processos
+// da Beatriz Correia Bandeira — parentes, sobrenome igual, e todos em segredo
+// de justiça. Uma lista de cinco, três delas cadeadas, para uma pergunta que
+// tinha uma resposta só.
+//
+// Não vazava nada (o segredo é barrado depois, e a lista mostra só o cadeado),
+// mas transformava a pergunta certa numa escolha confusa.
+//
+// Agora conta-se QUANTOS pedaços do nome cada parte acerta, e só os melhores
+// ficam. "Tiago Correia Bandeira" acerta 3 no processo dele e 2 nos da
+// Beatriz: sobra um. "Correia Bandeira" acerta 2 em todos — segue ambíguo, e
+// segue perguntando, porque aí a dúvida é real.
+const pontuar = (p) => Math.max.apply(null, [0].concat(p.partes.map(nome =>
   semAcento(nome).split(' ').filter(t => t.length >= 4)
-    .some(t => alvoTexto.indexOf(t) !== -1)));
+    .filter(t => alvoTexto.indexOf(t) !== -1).length)));
+
+const pontos = porNumero ? [] : PROCESSOS.map(p => ({ p, n: pontuar(p) })).filter(x => x.n > 0);
+const melhor = pontos.length ? Math.max.apply(null, pontos.map(x => x.n)) : 0;
+const porNome = pontos.filter(x => x.n === melhor).map(x => x.p);
 
 // Ambiguidade nao se resolve no chute: pergunta-se.
 if (!porNumero && porNome.length > 1) {
@@ -508,6 +596,39 @@ FORMA:
 - NÃO escreva nota de rodapé, aviso de uso de inteligência artificial nem assinatura. O fluxo acrescenta isso automaticamente.`;
 
 // ===========================================================================
+// Ajustar a resposta que o colaborador escreveu
+// ===========================================================================
+// AQUI O MODELO NÃO INVENTA CONTEÚDO — ELE VESTE. Quem decidiu o que dizer foi
+// a pessoa; o modelo cuida do tom, da clareza e do que a OAB exige. É uma
+// diferença que muda o risco inteiro: se ele pudesse acrescentar, um rascunho
+// de duas linhas poderia sair como três parágrafos que ninguém escreveu.
+//
+// E há uma tentação a fechar. O chamado nasceu de uma pergunta sobre PRAZO ou
+// sobre CHANCE DE GANHAR — justamente o que o robô se recusou a responder. Se
+// o rascunho traz essa resposta, ela é do advogado, e pode sair. O que não
+// pode é o modelo COMPLETAR o que o rascunho não disse: "deve sair em breve"
+// aparecendo do nada é a alucinação mais cara que este projeto pode produzir,
+// porque chega ao cliente com a assinatura do escritório.
+const SISTEMA_RESPOSTA = `Você recebe o RASCUNHO de uma resposta escrita por uma pessoa do escritório de advocacia e o reescreve como mensagem ao cliente, para WhatsApp.
+
+O QUE VOCÊ FAZ: ajusta tom, clareza e cortesia. Corrige português. Tira jargão jurídico — o cliente é leigo.
+
+O QUE VOCÊ NUNCA FAZ:
+- NÃO acrescente informação que não está no rascunho. Nem data, nem valor, nem etapa do processo, nem expectativa.
+- Se o rascunho NÃO fala de prazo, você NÃO fala de prazo. Nem "em breve", nem "nos próximos dias", nem "assim que possível".
+- Se o rascunho NÃO fala de chance de êxito, você NÃO fala. Nem para tranquilizar.
+- NÃO prometa retorno, contato ou providência que o rascunho não prometa.
+- NÃO crie urgência nem use linguagem de venda (Provimento 205/2021 da OAB: comunicação informativa e sóbria).
+
+SE O RASCUNHO TRAZ prazo ou avaliação de chance, MANTENHA — quem escreveu foi uma pessoa habilitada, e é a resposta dela que o cliente pediu. Reescreva com as palavras dela, sem suavizar nem reforçar.
+
+FORMA:
+- Escreva APENAS a mensagem ao cliente. Sem saudação a quem escreveu o rascunho, sem comentários seus, sem aspas em volta.
+- Comece por "Olá!" e trate o cliente por você.
+- No máximo 6 linhas, tom cordial e calmo.
+- NÃO escreva rodapé, aviso de uso de inteligência artificial nem assinatura. O fluxo acrescenta isso.`;
+
+// ===========================================================================
 // Montagem do grafo
 // ===========================================================================
 // ===========================================================================
@@ -553,10 +674,21 @@ if (!cred.uazapi || !cred.uazapi.id) {
  *  o processo, para que aprovar nunca use o processo errado se a pessoa
  *  consultou outro no meio do caminho; o autor, para que o desfecho volte
  *  para quem redigiu quando quem decide e outra pessoa. */
-const BOTOES = (proc, autor) => ({ rows: [ { row: { buttons: [
-  { text: '✅ Aprovar e enviar', additionalFields: { callback_data: `=aprovar|{{ ${proc} }}|{{ ${autor} }}` } },
-  { text: '✏️ Editar',          additionalFields: { callback_data: `=editar|{{ ${proc} }}|{{ ${autor} }}` } },
-  { text: '❌ Descartar',       additionalFields: { callback_data: `=descartar|{{ ${proc} }}|{{ ${autor} }}` } }
+// CADA PROPOSTA CARREGA A PRÓPRIA IDENTIDADE, no quarto campo do botão.
+//
+// Sem ela, a trava de 'primeiro decide' teria de identificar a proposta por
+// processo + autor — e aí a SEGUNDA proposta sobre o mesmo processo, feita
+// pela mesma pessoa, seria recusada como 'já decidida'. Uma trava que barra o
+// clique legítimo é pior que trava nenhuma: ela transforma o certo em erro,
+// e diz ao usuário uma coisa falsa sobre o que aconteceu.
+//
+// A identidade nasce com a proposta e viaja com ela: as cópias encaminhadas
+// repetem a MESMA, que é o que faz a trava funcionar entre telas diferentes.
+// Cabe no limite de 64 bytes do callback_data com folga.
+const BOTOES = (proc, autor, proposta) => ({ rows: [ { row: { buttons: [
+  { text: '✅ Aprovar e enviar', additionalFields: { callback_data: `=aprovar|{{ ${proc} }}|{{ ${autor} }}|{{ ${proposta} }}` } },
+  { text: '✏️ Editar',          additionalFields: { callback_data: `=editar|{{ ${proc} }}|{{ ${autor} }}|{{ ${proposta} }}` } },
+  { text: '❌ Descartar',       additionalFields: { callback_data: `=descartar|{{ ${proc} }}|{{ ${autor} }}|{{ ${proposta} }}` } }
 ] } } ] });
 
 function no(nome, tipo, versao, params, pos, extra = {}) {
@@ -587,7 +719,13 @@ const nodes = [
           outputKey: 'direto' },
         { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
           { operator: { type: 'string', operation: 'equals' }, leftValue: '={{ $json.rota }}', rightValue: 'reproposta' }] },
-          outputKey: 'reproposta' }
+          outputKey: 'reproposta' },
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' }, leftValue: '={{ $json.rota }}', rightValue: 'aviso-clique' }] },
+          outputKey: 'aviso-clique' },
+        { conditions: { options: { caseSensitive: true, version: 2 }, combinator: 'and', conditions: [
+          { operator: { type: 'string', operation: 'equals' }, leftValue: '={{ $json.rota }}', rightValue: 'responder-cliente' }] },
+          outputKey: 'responder-cliente' }
       ] }, options: { fallbackOutput: 'none' } }, [220, 300]),
 
   no('Ficha do processo', 'n8n-nodes-base.code', 2,
@@ -620,6 +758,45 @@ const nodes = [
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [960, 100],
     { credentials: { telegramApi: cred.telegram } }),
 
+  // --- responder ao cliente, a partir do chamado da Demo B ------------------
+  // O clique no botão "✍️ Responder ao cliente" só abre um estado. Estes dois
+  // nós fecham o círculo do clique: apagam o "relógio" do Telegram e dizem à
+  // pessoa o que fazer em seguida. Sem eles o botão fica girando, e quem clicou
+  // não sabe se aconteceu alguma coisa.
+  no('Confirmar clique (chamado)', 'n8n-nodes-base.telegram', 1.2,
+    { resource: 'callback', operation: 'answerQuery',
+      queryId: '={{ $json.callbackId }}', results: {} }, [460, 1180],
+    { credentials: { telegramApi: cred.telegram } }),
+
+  no('Pedir o texto da resposta', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
+      text: "={{ $('Porteiro (verificação em código)').item.json.texto }}",
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [700, 1180],
+    { credentials: { telegramApi: cred.telegram } }),
+
+  no('Modelo — resposta', '@n8n/n8n-nodes-langchain.lmChatOpenAi', 1,
+    { model: 'gpt-4o-mini', options: { temperature: 0.2 } }, [700, 1520],
+    { credentials: { openAiApi: cred.openai } }),
+
+  no('Ajustar a resposta ao cliente', '@n8n/n8n-nodes-langchain.chainLlm', 1.4,
+    { promptType: 'define',
+      text: '=O cliente perguntou sobre: {{ $json.motivoDoChamado }}\n\nRASCUNHO ESCRITO POR {{ $json.nome }} ({{ $json.papel }}):\n{{ $json.rascunho }}',
+      messages: { messageValues: [{ message: SISTEMA_RESPOSTA }] } }, [700, 1360]),
+
+  // Desemboca na MESMA proposta de sempre, com os mesmos três botões. Responder
+  // a um chamado não é um atalho para o cliente: é mais um texto que precisa de
+  // aprovação (Regra 2). Quem escreveu pode ser quem aprova — mas o clique
+  // continua existindo, e continua ficando registrado.
+  no('Propor resposta ao cliente', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
+      text: "={{ " + JSON.stringify(AVISO_TOPO) + " + '\\n\\n' + '<b>Resposta ao cliente — proposta</b>\\n<i>Para ' + $('Porteiro (verificação em código)').item.json.clienteNome + '. Ajustada a partir do seu rascunho. Nada foi enviado.</i>\\n\\n' + $json.text.trim() + '\\n\\n<i>" + NOTA_IA + "</i>' }}",
+      replyMarkup: 'inlineKeyboard',
+      inlineKeyboard: BOTOES("$('Porteiro (verificação em código)').item.json.processoId",
+                             "$('Porteiro (verificação em código)').item.json.userId",
+                             '$execution.id'),
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [960, 1360],
+    { credentials: { telegramApi: cred.telegram } }),
+
   no('Propor envio (aguarda aprovação)', 'n8n-nodes-base.telegram', 1.2,
     { chatId: "={{ $('Porteiro (verificação em código)').item.json.chatId }}",
       text: "={{ $('Ficha do processo (redação)').item.json.avisoTopo + '\\n\\n' + '<b>Proposta de mensagem ao cliente</b>\\n<i>Nada foi enviado. Nada sai sem aprovação de advogado.</i>\\n\\n' + $json.text.trim() + '\\n\\n<i>" + NOTA_IA + "</i>' }}",
@@ -627,7 +804,7 @@ const nodes = [
       // Dentro de additionalFields eles são simplesmente ignorados — a mensagem
       // chega sem botão nenhum, e sem erro que denuncie o problema.
       replyMarkup: 'inlineKeyboard',
-      inlineKeyboard: BOTOES("$('Ficha do processo (redação)').item.json.processoId", "$('Ficha do processo (redação)').item.json.userId"),
+      inlineKeyboard: BOTOES("$('Ficha do processo (redação)').item.json.processoId", "$('Ficha do processo (redação)').item.json.userId", '$execution.id'),
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [960, 300],
     { credentials: { telegramApi: cred.telegram } }),
 
@@ -655,14 +832,44 @@ const ROTULOS = {
   negado:      '⛔ ENVIO NÃO AUTORIZADO'
 };
 
-// Para qual advogado vai o que o estagiário não pode aprovar. O primeiro da
-// lista, e só. Se não houver advogado nenhum cadastrado, não há para onde
-// encaminhar — e aí a recusa volta a ser recusa seca, que é o comportamento
-// correto: falha fecha (Regra 5).
-const advogado = ADVOGADOS.find(a => String(a.id) !== String(j.userId)) || null;
-const encaminhar = j.acao === 'encaminhado' && Boolean(advogado);
-const acaoReal = j.acao === 'encaminhado' && !advogado ? 'negado' : j.acao;
+// O QUE O ESTAGIÁRIO NÃO PODE APROVAR VAI PARA TODOS OS APROVADORES, e não
+// para um escolhido. Escolher um cria o pior desenho possível: se a pessoa
+// escolhida estiver em audiência, a proposta espera por ela sem que ninguém
+// saiba. Mandando para todos, quem estiver disponível resolve.
+//
+// Se não houver aprovador nenhum além do autor, não há para onde encaminhar —
+// e a recusa volta a ser recusa seca, que é o certo: falha fecha (Regra 5).
+const destinatarios = ADVOGADOS.filter(a => String(a.id) !== String(j.userId));
+const advogado = destinatarios[0] || null;
+const encaminhar = j.acao === 'encaminhado' && destinatarios.length > 0;
+const acaoReal = j.acao === 'encaminhado' && !destinatarios.length ? 'negado' : j.acao;
 const rotulo = ROTULOS[acaoReal] || '—';
+
+// PRIMEIRO QUE DECIDE, DECIDE — e isto deixa de ser detalhe no momento em que a
+// mesma proposta passa a existir na tela de várias pessoas.
+//
+// Sem trava, duas pessoas clicando "Aprovar" na mesma proposta produzem DOIS
+// envios ao cliente, com o mesmo texto, com segundos de diferença. Não é um
+// erro que o sistema perceba: cada execução faz certo o que lhe pediram. Quem
+// percebe é o cliente, recebendo a mesma mensagem duas vezes do escritório.
+//
+// A chave é a proposta, não a pessoa: o processo mais quem a redigiu. É o que
+// identifica "esta proposta" mesmo estando aberta em telas diferentes.
+//
+// ⚠️ O armazenamento estático só persiste em execução de PRODUÇÃO (fluxo ativo).
+// No editor, cada teste manual começa limpo — a trava parece não existir.
+const memoriaG = $getWorkflowStaticData('global');
+memoriaG.decididas = memoriaG.decididas || {};
+const chaveProposta = 'p:' + (j.processoId || '?') + ':' +
+  (j.propostaId || ('autor:' + (j.autorChatId || j.userId)));
+const jaDecidida = memoriaG.decididas[chaveProposta] || null;
+
+// Encaminhar não fecha a proposta — é justamente o pedido para que outro
+// decida. Só decisão de verdade tranca.
+const decideAgora = ['aprovar', 'descartar'].indexOf(acaoReal) !== -1;
+if (decideAgora && !jaDecidida) {
+  memoriaG.decididas[chaveProposta] = { por: j.nome, acao: acaoReal, quando };
+}
 
 
 // Editar abre um estado: a PRÓXIMA mensagem desta pessoa é o texto corrigido.
@@ -807,13 +1014,66 @@ const avisoAoAutor = !j.autorChatId ? null
   ? '✏️ <b>' + esc(j.nome) + ' está reescrevendo a sua proposta</b>'
   : null;
 
-const desfecho = encaminhar ? 'encaminhar'
+// A CORRIDA. Se outra pessoa já decidiu esta proposta, este clique não envia
+// nada — e quem clicou fica sabendo quem decidiu, o quê e quando, em vez de
+// receber um silêncio que parece defeito.
+const perdeuACorrida = decideAgora && Boolean(jaDecidida);
+
+// QUEM MAIS PRECISA SABER. Todo aprovador que não seja quem clicou, porque a
+// proposta pode estar aberta na tela dele agora. O autor tem aviso próprio
+// (avisoAoAutor), então sai desta lista para não receber duas mensagens.
+// O AVISO CONTA A DECISÃO, NÃO A ENTREGA. No instante em que ele é montado, a
+// aprovação é fato e a entrega ainda não aconteceu — dizer aqui que "foi para o
+// cliente" seria a D-101 outra vez, agora na tela de terceiros, que é o pior
+// lugar para desmentir depois. A falta de destinatário, essa sim, já é fato:
+// a busca na lista acontece neste mesmo nó.
+const rotuloDoDesfecho = acaoReal === 'aprovar' && enviarAoCliente
+    ? 'aprovou esta proposta'
+  : acaoReal === 'aprovar' ? 'aprovou — mas não há cliente vinculado, e nada será enviado'
+  : acaoReal === 'descartar' ? 'descartou esta proposta'
+  : acaoReal === 'editar' ? 'está reescrevendo esta proposta'
+  : null;
+
+const avisoAosDemais = (!rotuloDoDesfecho || perdeuACorrida) ? null
+  : '👥 <b>' + esc(j.nome) + ' ' + esc(rotuloDoDesfecho) + '</b>\\n' +
+    '<i>' + esc('proposta de ' + (j.autorNome || j.nome) + ' · ' + quando) + '</i>\\n\\n' +
+    '<i>Você não precisa fazer nada. Se a proposta estiver aberta aí, ela já foi resolvida.</i>';
+
+const avisos = avisoAosDemais
+  ? destinatarios
+      .filter(a => String(a.id) !== String(j.autorChatId || ''))
+      .map(a => ({ chatId: a.id, texto: avisoAosDemais }))
+  : [];
+
+// O encaminhamento vai para TODOS os aprovadores, cada um com os seus botões.
+const encaminhados = encaminhar
+  ? destinatarios.map(a => ({ chatId: a.id, nome: a.nome }))
+  : [];
+
+const textoPerdeuACorrida = perdeuACorrida
+  ? montar('🔒 JÁ DECIDIDA',
+      '\\n\\n<i>' + esc(jaDecidida.por + ' já havia ' +
+        (jaDecidida.acao === 'aprovar' ? 'aprovado' : 'descartado') +
+        ' esta proposta em ' + jaDecidida.quando + '. O seu clique não repetiu a ação — ' +
+        'o cliente não recebeu a mensagem duas vezes.') + '</i>')
+  : null;
+
+const desfecho = perdeuACorrida ? 'ja-decidida'
+  : encaminhar ? 'encaminhar'
   : acaoReal !== 'aprovar' ? 'nada'
   : enviarAoCliente ? 'enviar' : 'sem-destino';
 
 return { json: { ...j, trilha,
-  textoFinal, textoFinalEnviado, textoFinalFalhou,
-  acao: acaoReal, enviarAoCliente, textoAoCliente, desfecho,
+  textoFinal: perdeuACorrida ? textoPerdeuACorrida : textoFinal,
+  textoFinalEnviado, textoFinalFalhou,
+  acao: acaoReal,
+  // Perder a corrida cancela o envio e o texto ao cliente. Não é "quase
+  // enviar": é não enviar, e nada abaixo pode reabrir esse caminho.
+  enviarAoCliente: enviarAoCliente && !perdeuACorrida,
+  textoAoCliente: perdeuACorrida ? null : textoAoCliente,
+  desfecho,
+  perdeuACorrida, jaDecididaPor: jaDecidida ? jaDecidida.por : null,
+  avisos, encaminhados,
   textoEncaminhado, avisoAoAutor,
   advogadoChatId: encaminhar ? advogado.id : null,
   advogadoNome: advogado ? advogado.nome : null,
@@ -845,7 +1105,7 @@ return { json: { ...j, trilha,
   no('Repropor texto editado', 'n8n-nodes-base.telegram', 1.2,
     { chatId: '={{ $json.chatId }}', text: '={{ $json.textoProposta }}',
       replyMarkup: 'inlineKeyboard',
-      inlineKeyboard: BOTOES('$json.processoId', '$json.userId'),
+      inlineKeyboard: BOTOES('$json.processoId', '$json.userId', '$execution.id'),
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [460, 940],
     { credentials: { telegramApi: cred.telegram } }),
 
@@ -922,12 +1182,43 @@ return { json: { ...j, trilha,
   // tinha que chamar o advogado pelo braço. A proposta chega ao advogado COM
   // os três botões, e os botões carregam o processo e quem redigiu — quem
   // aprova é ele, com a identidade dele. Ninguém aprova no lugar de ninguém.
+  // --- os dois espalhadores -------------------------------------------------
+  // O nó do Telegram manda UMA mensagem por item que recebe. Então quem
+  // transforma "uma decisão" em "avisar cinco pessoas" é este nó: ele devolve
+  // um item por destinatário, e o Telegram faz o resto sozinho. Sem isto seria
+  // preciso um laço, que no n8n é sempre mais frágil do que parece.
+  no('Espalhar encaminhamento', 'n8n-nodes-base.code', 2,
+    { mode: 'runOnceForAllItems', jsCode: [
+      "const d = $('Registrar decisão').first().json;",
+      'return (d.encaminhados || []).map(a => ({ json: { ...d, chatId: a.chatId, paraNome: a.nome } }));',
+    ].join('\n') }, [1220, 860]),
+
+  no('Espalhar avisos', 'n8n-nodes-base.code', 2,
+    { mode: 'runOnceForAllItems', jsCode: [
+      "const d = $('Registrar decisão').first().json;",
+      '// Lista vazia devolve zero itens, e aí nada depois disto roda. É como se',
+      '// diz "não avise ninguém" no n8n sem precisar de um Filtro só para isso.',
+      'return (d.avisos || []).map(a => ({ json: { ...d, chatId: a.chatId, texto: a.texto } }));',
+    ].join('\n') }, [1220, 1080]),
+
+  no('Avisar os demais aprovadores', 'n8n-nodes-base.telegram', 1.2,
+    { chatId: '={{ $json.chatId }}',
+      text: '={{ $json.texto }}',
+      additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1460, 1080],
+    { retryOnFail: true, maxTries: 2, waitBetweenTries: 1500,
+      // Aviso que não chega não pode derrubar a execução: a decisão já valeu, e
+      // o envio ao cliente é o que importa. Aqui, e SÓ aqui, engolir a falha é
+      // o certo — nada afirma a ninguém que o aviso chegou.
+      onError: 'continueRegularOutput',
+      credentials: { telegramApi: cred.telegram } }),
+
   no('Encaminhar ao advogado', 'n8n-nodes-base.telegram', 1.2,
-    { chatId: "={{ $('Registrar decisão').item.json.advogadoChatId }}",
+    { chatId: '={{ $json.chatId }}',
       text: "={{ $('Registrar decisão').item.json.textoEncaminhado }}",
       replyMarkup: 'inlineKeyboard',
       inlineKeyboard: BOTOES("$('Registrar decisão').item.json.processoId",
-                             "$('Registrar decisão').item.json.userId"),
+                             "$('Registrar decisão').item.json.userId",
+                             "$('Registrar decisão').item.json.propostaId"),
       additionalFields: { parse_mode: 'HTML', appendAttribution: false } }, [1460, 860],
     { credentials: { telegramApi: cred.telegram } }),
 
@@ -959,7 +1250,12 @@ const connections = {
       [{ node: 'Registrar decisão', type: 'main', index: 0 }],
       [{ node: 'Responder sem consultar', type: 'main', index: 0 }],
       [{ node: 'Repropor texto editado', type: 'main', index: 0 }],
+      [{ node: 'Confirmar clique (chamado)', type: 'main', index: 0 }],
+      [{ node: 'Ajustar a resposta ao cliente', type: 'main', index: 0 }],
   ] },
+  'Confirmar clique (chamado)': { main: [[{ node: 'Pedir o texto da resposta', type: 'main', index: 0 }]] },
+  'Modelo — resposta': { ai_languageModel: [[{ node: 'Ajustar a resposta ao cliente', type: 'ai_languageModel', index: 0 }]] },
+  'Ajustar a resposta ao cliente': { main: [[{ node: 'Propor resposta ao cliente', type: 'main', index: 0 }]] },
   'Ficha do processo':           { main: [[{ node: 'Responder ao colaborador', type: 'main', index: 0 }]] },
   'Ficha do processo (redação)': { main: [[{ node: 'Redigir mensagem ao cliente', type: 'main', index: 0 }]] },
   'Modelo — consulta': { ai_languageModel: [[{ node: 'Responder ao colaborador', type: 'ai_languageModel', index: 0 }]] },
@@ -970,13 +1266,22 @@ const connections = {
   'Confirmar clique':  { main: [[{ node: 'Atualizar mensagem', type: 'main', index: 0 }]] },
   // A mensagem no Telegram é atualizada ANTES do envio: quem clicou vê na hora
   // que a decisão foi registrada, e a confirmação de envio chega logo atrás.
-  'Atualizar mensagem': { main: [[{ node: 'Desfecho da aprovação', type: 'main', index: 0 }]] },
+  // Duas saídas em paralelo: o desfecho (que pode enviar ao cliente) e o aviso
+  // aos outros aprovadores. São independentes de propósito — um aviso que não
+  // sai não pode segurar um envio ao cliente, e um envio que falha não pode
+  // impedir que os colegas saibam que a proposta já foi resolvida.
+  'Atualizar mensagem': { main: [[
+      { node: 'Desfecho da aprovação', type: 'main', index: 0 },
+      { node: 'Espalhar avisos', type: 'main', index: 0 },
+  ]] },
+  'Espalhar avisos': { main: [[{ node: 'Avisar os demais aprovadores', type: 'main', index: 0 }]] },
+  'Espalhar encaminhamento': { main: [[{ node: 'Encaminhar ao advogado', type: 'main', index: 0 }]] },
   'Desfecho da aprovação': { main: [
       [{ node: 'Enviar ao cliente (WhatsApp)', type: 'main', index: 0 }],
       // 'sem-destino' — a própria mensagem já foi reescrita com o aviso de que
       // nada saiu; só falta avisar quem redigiu, se não foi quem decidiu.
       [{ node: 'Tem quem avisar?', type: 'main', index: 0 }],
-      [{ node: 'Encaminhar ao advogado', type: 'main', index: 0 }],
+      [{ node: 'Espalhar encaminhamento', type: 'main', index: 0 }],
       // 'nada' — editar, descartar, negado. Nada sai daqui para o cliente, mas
       // quem redigiu ainda pode precisar saber o que houve.
       [{ node: 'Tem quem avisar?', type: 'main', index: 0 }],

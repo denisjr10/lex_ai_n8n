@@ -231,8 +231,38 @@
     },
     {
       "parameters": {
-        "chatId": "898717066",
+        "mode": "runOnceForAllItems",
+        "jsCode": "const PESSOAS = [{\"id\":898717066,\"nome\":\"Dênis Júnior\"},{\"id\":8827683329,\"nome\":\"Malu Souza\"},{\"id\":6013518861,\"nome\":\"Estefanny\"},{\"id\":8928302439,\"nome\":\"Andressa\"}];\nconst d = $input.first().json;\nreturn PESSOAS.map(p => ({ json: { ...d, chatId: p.id, paraNome: p.nome } }));"
+      },
+      "name": "Espalhar o chamado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
         "text": "={{ $json.avisoParaColaborador }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✍️ Responder ao cliente",
+                    "additionalFields": {
+                      "callback_data": "=responder|{{ $json.numero }}|{{ $json.motivo }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "additionalFields": {
           "parse_mode": "HTML",
           "appendAttribution": false
@@ -242,19 +272,63 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        700,
+        940,
         620
       ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "onError": "continueErrorOutput",
+      "onError": "continueRegularOutput",
       "credentials": {
         "telegramApi": {
           "id": "bUpBJwqst2NKCYMj",
           "name": "[LEX-DEMO] Telegram"
         }
       }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const itens = $input.all();\nconst chegou = itens.filter(i => !i.json.error).length;\nconst d = itens[0] ? itens[0].json : {};\nreturn [{ json: { ...d, avisadosComSucesso: chegou, avisado: chegou > 0 } }];"
+      },
+      "name": "Alguém foi avisado?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.avisado }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Deu para avisar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1420,
+        620
+      ]
     },
     {
       "parameters": {
@@ -358,7 +432,7 @@
       "main": [
         [
           {
-            "node": "Chamar colaborador (Telegram)",
+            "node": "Espalhar o chamado",
             "type": "main",
             "index": 0
           }
@@ -372,7 +446,40 @@
         ]
       ]
     },
+    "Espalhar o chamado": {
+      "main": [
+        [
+          {
+            "node": "Chamar colaborador (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Chamar colaborador (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Alguém foi avisado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alguém foi avisado?": {
+      "main": [
+        [
+          {
+            "node": "Deu para avisar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deu para avisar?": {
       "main": [
         [
           {
