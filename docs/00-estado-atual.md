@@ -4,9 +4,9 @@
 |---|---|
 | Atualizado em | 2026-09-02 |
 | Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
-| Callback | ✅ **PROVADO nos dois caminhos.** Receptor `OymAtbNYI1pjfWkA`: recusou 2 entregas sem `Authorization` e aceitou 3 do Escavador. `callback.criativeia.com.br/webhook/escavador-callback` — **não** é o host do editor |
-| 🔴 **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário criada em 26/08, renovação em **26/09**. ⚠️ **Com o saldo expirado, a remoção pela API pode ser recusada** (o 403 de saldo bloqueado veio antes do preço da rota, em 23/08). **Conferir no painel e remover por lá, ou pelo suporte, até 22/09.** Uma recarga com esta assinatura ainda ativa passa a financiar cobrança mensal que ninguém está olhando |
-| ⏳ Aparição | 🔴 **NUNCA CAPTURADA — é a perda real da expiração.** Três leituras, todas vazias e gratuitas (27/08 madrugada e meio-dia). O contrato da aparição de diário oficial — a peça que dispara prazo (D-62, E2) — segue **não medido**, conhecido só pelo OpenAPI, que a R-44 manda não tratar como fonte. Só se fecha com saldo novo |
+| Callback | ✅ **PROVADO, E EM PRODUÇÃO DE FATO.** Receptor `OymAtbNYI1pjfWkA`: **35 entregas** — 33 `autentico` e 2 `RECUSADO` (os testes sem `Authorization`). ⚠️ O webhook é `responseMode: onReceived`, então **toda execução aparece como `success`** no painel, inclusive a recusada — o "não" está no dado, não no status. 🔴 **E ele não guarda nada** (D-181): dois nós, webhook e carimbo, sem gravação. O evento vive só no histórico do n8n, que é onde a RNF-08 diz que não pode viver |
+| ⚠️ **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário, renovação em **26/09**. 🔄 **A leitura mudou em 02/09 (D-182): ela não é resíduo de teste — é a fonte viva do contrato de prazo**, entregando ~6 publicações reais por dia útil a custo zero. Removê-la deixou de ser faxina e virou decisão sobre a frente E2, a ser tomada **antes de 26/09**. O risco de renovação sem ninguém olhando continua de pé; o que mudou é que agora há alguém olhando |
+| ✅ **Aparição** | 🟢 **MEDIDA — 30 entregas reais, e o custo foi R$ 0,00.** O contrato que se dava por perdido chegava por **callback** desde 27/08, e segue chegando: ~6 publicações por dia útil, de 22 processos, **26 delas intimação** — a publicação que faz prazo correr. **13 chegaram depois de a cota expirar**, porque callback não depende de saldo. 🔴 **E o polling errou:** as leituras de `/aparicoes` voltaram vazias no mesmo dia em que o callback entregava (R-55). Contrato em `15-contrato-da-aparicao.md`; D-177 a D-182 |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
 | 🟢 **O escritório respondeu** | **27/08.** Cinco perguntas que travavam o PRD voltaram: identidade individual **pelo Telegram** (D-147), advogado vê **a base inteira** (D-146), Trello é **visualização** (D-152), colaborador **também confere prazo** (D-145), e a infra é **do prestador** (D-148). **D-07 e D-09 estão resolvidas.** PRD na v2.0; D-142 a D-154 e R-46 a R-49 somados. Ver §"As respostas do escritório chegaram" |
 | 🔎 **Revisão externa** | **28–31/08.** O Codex revisou o projeto inteiro. **A maior parte procede** — 12 achados abertos, do webhook aberto da Demo B ao disjuntor contornável. **Um virou trava (D-155):** a Demo B afirma ao cliente que um advogado revisou o texto, e nenhum revisa — a frase **fica**, porque a demo mostra o texto de produção, e o que entrou foi a amarra que impede a frase de sobreviver sem o aviso de demonstração. Três achados **não** procedem — os arquivos de exemplo são fictícios, os processos estão de fato anonimizados (nomes E número CNJ), e os pacotes vazios são esqueletos de marco. **Onze dos doze achados foram fechados** — cinco em 31/08 e seis em 01/09 — webhook autenticado, auditoria antes do ato, disjuntor por segmento, segredo de justiça fechando, a D-142 dentro do código (D-156), e o **isolamento entre escritórios em duas camadas** (D-157), **uso único de aprovação** (D-158) e os menores. Falta só o **HMAC no anonimizador, adiado por decisão do usuário até depois da apresentação** (D-159). Ver §"Uma revisão externa passou no projeto inteiro" |
@@ -541,6 +541,48 @@ O mesmo para a chave composta: com ela, `ERROR`; sem ela, `INSERT 0 1`. E o cen�
 
 9 configurações TypeScript, 29 arquivos `.mjs`, 34 JSONs, os 44 testes do domínio e do chassi, e nenhum link quebrado na documentação. Nenhuma chamada à API externa foi feita.
 
+## A aparição estava chegando o tempo todo — 02/09/2026
+
+Fui conferir se o receptor de callback funcionava. Funciona — e trouxe junto a correção de um item de cabeçalho deste documento. Contrato completo em `docs/15-contrato-da-aparicao.md`.
+
+### O que este documento dizia, e estava errado
+
+> *"⏳ Aparição — **NUNCA CAPTURADA — é a perda real da expiração.** O contrato da aparição de diário oficial — a peça que dispara prazo — segue **não medido**. Só se fecha com saldo novo."*
+
+**Ele foi medido, 30 vezes, e não custou nada.** As duas leituras de `/api/v1/monitoramentos/{id}/aparicoes` em 27/08 voltaram `items: []`, e a conclusão foi que a vigilância não tinha produzido nada. No mesmo dia, às 06:02 UTC, o Escavador entregava quatro eventos `diario_movimentacao_nova` no nosso receptor — e seguiu entregando todo dia útil desde então.
+
+```
+27/08  4        31/08  8        total  30 publicações
+28/08  5        01/09  7               22 processos distintos
+                02/09  6               6,0 por dia útil
+```
+
+**26 das 30 são intimação** — a publicação que faz prazo correr, e a razão de ser da frente E2. Cada uma traz o processo vinculado com CNJ, os envolvidos com OAB, o texto íntegro (mediana de 1.059 caracteres) e o link do PDF. 126 campos mapeados.
+
+**Treze chegaram em 01/09 e 02/09, depois de a cota expirar.** Callback não depende de saldo.
+
+### Quatro coisas que isso muda
+
+**🔴 O polling não é fonte confiável (R-55, D-177).** Ele e o callback discordaram, e o polling errou. Não se sabe por quê — se a rota lista outra coisa, se o parâmetro estava errado, ou se há defasagem de indexação. O sintoma é o pior possível: uma fonte de publicação que responde *"nada novo"* quando há algo novo é indistinguível de um dia tranquilo, e o custo de errar é prazo perdido. O callback passa a ser o caminho primário.
+
+**🔴 Existem três vocabulários para "quem é parte", e a D-132 só conhecia um (D-180).** O diário traz `Polo Ativo`/`Polo Passivo`/`Advogado` e **não** traz `tipo_normalizado`. Somados ao `RECLAMANTE`/`RECLAMADO` do importador de PDF (D-135) e ao `Autor`/`Réu` da V2 (D-132), são três. A conclusão do Bloco E — *"não há tabela de tradução a construir"* — vale **dentro da V2, entre ramos da Justiça**, e é falsa **entre fontes**. O eixo da tradução é a fonte, não o tribunal.
+
+**🔴 As duas datas vieram iguais, e isso não é uma regra (R-56, D-179).** `data_disponibilizacao` e `data_publicacao` coincidiram nas 30 amostras — dois tribunais, cinco dias. No processo civil os conceitos se separam, e a diferença é de um dia útil: exatamente a margem que decide se um prazo foi cumprido.
+
+**🔄 A vigilância `2813617` mudou de natureza (D-182).** Ela estava na lista de resíduos a remover. Não é: é a **fonte viva do contrato mais importante do projeto**, entregando publicação real de graça. Renova em **26/09**, e a decisão sobre ela passou a ser sobre a frente de prazo, não sobre faxina.
+
+### 🔴 E o que se faz com o evento hoje: nada
+
+O receptor tem dois nós — webhook e um `Code` que confere o token e carimba. **Não grava em banco, não enfileira, não escreve arquivo.** O evento vive só no histórico de execução do n8n, que é onde a RNF-08 diz que ele não pode viver (D-181).
+
+A instância retém execuções há ~302 dias, então **não há perda em curso** — a urgência é menor do que parece. Mas retenção é configuração, não garantia. As 30 amostras foram copiadas para `captura/respostas-brutas/callback-execucoes.local.json`, fora do Git, e essa é hoje a única cópia fora do n8n.
+
+### Duas notas de higiene
+
+**O token do callback está em texto puro dentro do nó `Code`**, embutido na publicação por `captura/montar-receptor-callback.mjs:119`. **Não está no repositório** — vive em `captura/callback-token.local`, ignorado pelo Git. Mas ficou legível na saída do terminal ao inspecionar o nó. **Convém rotacionar**, e guardar como credencial do n8n em vez de literal no código: literal em código é o que o torna imprimível por acidente.
+
+**`monitoramento.descricao` carrega o nome da advogada em texto puro** e vem em toda entrega. Importa na hora de decidir o que o receptor de produção grava.
+
 ## Onde estamos
 
 Fases 0 e 1 concluídas. Os dois mapeamentos de API estão prontos — Escavador e Trello.
@@ -578,6 +620,7 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 | **Marco 1 — fundação: monorepo, esquema do banco e migrações** · 25 de 25 provas de regra | `12-fundacao-marco-1.md` |
 | **Marco 2 — o chassi: sessão, escopo, abrangência, erro e envelope** · a matriz de escopo inteira | `13-chassi-marco-2.md` |
 | **Marco 3 — a auditoria: grava, recusa alteração e reconstrói pelo `requisicao_id`** · 23 de 23 contra o banco | `14-auditoria-marco-3.md` |
+| **O contrato da aparição em diário oficial — medido em 30 entregas reais de callback, a custo zero** | `15-contrato-da-aparicao.md` |
 
 ## As regras saíram do prompt e viraram barreira — 25/08/2026
 
@@ -919,15 +962,11 @@ Termina quando uma chamada que estouraria o orçamento é recusada **antes** de 
 
 > ✅ **Marco 3 fechado em 31/08** — 23 de 23 contra o banco de pé. Ver §"O marco 3 fechou".
 
-### 2. Capturar uma aparição de diário oficial — gratuito
+### 2. ✅ Feito de outro jeito — a aparição veio por callback
 
-Duas leituras em 27/08, as duas vazias — o esperado para uma vigilância sobre o nome de uma advogada só.
+Ver §"A aparição estava chegando o tempo todo". **30 publicações medidas, custo zero.** O que sobrou de aberto não é capturar: é **entender por que o polling discordou** (R-55) — e isso depende de saldo.
 
-```bash
-node captura/monitorar.mjs aparicoes 2813617 --executar
-```
-
-**Repetir a cada dia útil.** Enquanto não vier, a vigilância não se remove (D-121). Depois de capturada — ou até 22/09, o que vier primeiro — remover.
+O passo prático agora é **fazer o receptor gravar** (D-181), que não depende de recarga nem do escritório.
 
 ### 3. ✅ Feito — as cinco perguntas voltaram em 27/08
 
@@ -977,7 +1016,7 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-162** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+**D-01 a D-182** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
 
 - ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
 - 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08
@@ -1018,7 +1057,7 @@ As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` 
 - ~~**URL pública de callback**~~ ✅ **De pé e provada em 26/08** — `callback.criativeia.com.br/webhook/escavador-callback`, validada nos dois caminhos
 - **Credenciais do Trello** — chave de API, token e segredo da aplicação (este último é o que assina os webhooks)
 - ~~Acesso à instância n8n~~ ✅ **Em uso** — chave de API guardada em `demo/n8n.local`, rotacionada em 26/08 depois de dois vazamentos (R-42)
-- 🔴 **Aparição de diário oficial** — **não foi capturada, e o saldo expirou em 01/09.** Continua sendo o último contrato não validado, e agora **depende de recarga**. Ver §"O saldo de teste expirou"
+- ✅ **Aparição de diário oficial** — **capturada, 30 vezes, e sem gastar nada.** Veio por callback, não por leitura: `15-contrato-da-aparicao.md`. **Não depende de recarga.** O que ainda depende é entender por que o polling discordou (R-55)
 - ⚠️ **Resolver a assinatura `2813617`** até **22/09** — a D-121 (segurar até capturar a aparição) **caiu com a expiração**: não há mais como capturar sem recarga. Conferir o estado no painel; se a remoção pela API for recusada por saldo bloqueado, remover pelo painel ou pelo suporte. **E fazer isso antes de qualquer recarga**
 - ~~Acesso à instância n8n do cliente~~ ✅ **Resolvido em 27/08 (D-148)** — a instância é a do prestador, fornecida com o serviço. Cria obrigação contratual nova: sob a LGPD, o escritório é controlador e o prestador é operador (R-48). **Precisa de cláusula antes de o primeiro dado real entrar**
 - **Levar ao escritório os números e as quatro perguntas novas** — o texto para a advogada proprietária está pronto no PRD §9.3.1
