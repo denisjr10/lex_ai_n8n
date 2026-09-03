@@ -10,6 +10,12 @@
   "references": [
     {
       "path": "../../packages/dominio"
+    },
+    {
+      "path": "../../packages/mcp-core"
+    },
+    {
+      "path": "../../services/auditoria"
     }
   ]
 }

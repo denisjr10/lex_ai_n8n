@@ -23,4 +23,33 @@
  * O receptor já foi validado nos DOIS caminhos em 26/08 — recusou entrega sem
  * autenticação e aceitou a legítima (D-118). Preenchido no MARCO 8 (Spec §15).
  */
-export {}
+// ---------------------------------------------------------------------------
+// MARCO 8, adiantado em 02/09 pela D-181
+//
+// O receptor no n8n nao gravava: dois nos, webhook e carimbo, e o evento vivia
+// so no historico de execucao. Medido na instancia: ids de 492 a 11.740 e 173
+// sobreviventes — 98,5% descartados. "Efemero" nao era retorica.
+//
+//   `chave.ts`      duas chaves para duas perguntas; o `uuid` nao e nenhuma
+//   `envolvido.ts`  a tabela de traducao que a D-132 disse nao existir
+//   `gravar.ts`     a entrega vira linha, e a origem invalida vira sinal
+// ---------------------------------------------------------------------------
+
+export { chaveDoEvento, resumoDoTeor, semEnvelope } from './chave.js';
+export {
+  normalizarEnvolvidoDoDiario,
+  traduzirTipo,
+  ADVOGADO_DE_NAO_VEM_PREENCHIDO,
+  type EnvolvidoNormalizado,
+  type Fonte,
+  type PapelDoEnvolvido,
+  type TipoNormalizado,
+} from './envolvido.js';
+export {
+  gravarEntrega,
+  lerPublicacaoDoDiario,
+  type EntregaDeCallback,
+  type Fornecedor,
+  type ResultadoDaGravacao,
+} from './gravar.js';
+

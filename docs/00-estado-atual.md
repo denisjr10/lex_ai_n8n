@@ -4,7 +4,7 @@
 |---|---|
 | Atualizado em | 2026-09-02 |
 | Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
-| Callback | ✅ **PROVADO, E EM PRODUÇÃO DE FATO.** Receptor `OymAtbNYI1pjfWkA`: **35 entregas** — 33 `autentico` e 2 `RECUSADO` (os testes sem `Authorization`). ⚠️ O webhook é `responseMode: onReceived`, então **toda execução aparece como `success`** no painel, inclusive a recusada — o "não" está no dado, não no status. 🔴 **E ele não guarda nada** (D-181): dois nós, webhook e carimbo, sem gravação. O evento vive só no histórico do n8n, que é onde a RNF-08 diz que não pode viver |
+| Callback | ✅ **PROVADO, E AGORA GRAVANDO.** 35 entregas recebidas; **33 eventos, 30 publicações e 100 envolvidos no banco** (D-181 fechada). ⚠️ O webhook é `responseMode: onReceived`, então toda execução aparece como `success` no painel, inclusive a recusada — o "não" está no dado, não no status. A gravação hoje é por **recolhimento** (`ferramentas/receptor/recolher-do-n8n.mjs`), porque o n8n é remoto e o banco é local; o receptor gravando na hora depende do marco 7 |
 | ⚠️ **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário, renovação em **26/09**. 🔄 **A leitura mudou em 02/09 (D-182): ela não é resíduo de teste — é a fonte viva do contrato de prazo**, entregando ~6 publicações reais por dia útil a custo zero. Removê-la deixou de ser faxina e virou decisão sobre a frente E2, a ser tomada **antes de 26/09**. O risco de renovação sem ninguém olhando continua de pé; o que mudou é que agora há alguém olhando |
 | ✅ **Aparição** | 🟢 **MEDIDA — 30 entregas reais, e o custo foi R$ 0,00.** O contrato que se dava por perdido chegava por **callback** desde 27/08, e segue chegando: ~6 publicações por dia útil, de 22 processos, **26 delas intimação** — a publicação que faz prazo correr. **13 chegaram depois de a cota expirar**, porque callback não depende de saldo. 🔴 **E o polling errou:** as leituras de `/aparicoes` voltaram vazias no mesmo dia em que o callback entregava (R-55). Contrato em `15-contrato-da-aparicao.md`; D-177 a D-182 |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
@@ -541,6 +541,67 @@ O mesmo para a chave composta: com ela, `ERROR`; sem ela, `INSERT 0 1`. E o cen�
 
 9 configurações TypeScript, 29 arquivos `.mjs`, 34 JSONs, os 44 testes do domínio e do chassi, e nenhum link quebrado na documentação. Nenhuma chamada à API externa foi feita.
 
+## O receptor passou a gravar, e o resgate encontrou dois defeitos — 02/09/2026
+
+As 35 entregas saíram do histórico do n8n e entraram no banco: **33 eventos, 30 publicações, 100 envolvidos, 70 registros de auditoria.** Três migrações novas (011, 012, 013) e o `@lex/receptor-callbacks` saindo do esqueleto.
+
+```
+npm run verificar   →   46 de 46 · 23 de 23 · 109 testes
+```
+
+### 🔴 A retenção do n8n: eu errei, e o usuário corrigiu
+
+Reportei que "não há perda em curso, a instância retém ~302 dias". **Estava errado**, e o erro era de raciocínio: li a data da execução mais antiga **sobrevivente** e tratei como se fosse a janela de retenção. Sobrevivente não é amostra da população.
+
+O usuário apontou que o n8n descarta execuções e que o que sobra é o que alguém anotou à mão. A medição confirma:
+
+```
+ids de execução   492 a 11.740     →  11.249 no intervalo
+sobreviventes                      →         173
+taxa de sobrevivência              →        1,5%
+```
+
+**11.076 execuções já foram descartadas.** As 30 aparições estavam na fila. Virou **R-57**.
+
+### 🔴 O defeito que o dado real encontrou: `publicacao_hash_unico`
+
+Trinta publicações entraram e viraram **21**. A restrição `UNIQUE (inquilino_id, hash)` — sobre o resumo do teor, desenhada no papel na migração 006 — descartou nove:
+
+| | |
+|---|---|
+| **7 ocorrências** do mesmo texto de 123 caracteres, em **sete processos diferentes** | intimação padrão. Guardou uma, **descartou seis intimações de seis casos** |
+| 2 e 3 ocorrências | republicação do mesmo ato em edições seguintes |
+
+O primeiro caso é o pior cenário do projeto acontecendo em silêncio: `ON CONFLICT DO NOTHING` não levanta exceção, o contador não acusa, e o prazo daqueles seis processos nunca chegaria a existir na base.
+
+A suposição — *"duas publicações com o mesmo texto são a mesma publicação"* — é plausível no papel e falsa duas vezes contra o dado. A migração 013 a desfaz: o `hash` continua, como **índice**, e passa de restrição que fecha sozinha para pergunta que alguém responde. A identidade passa a ser o `id_externo` (D-183, D-184).
+
+**E havia uma prova de regra verde afirmando o comportamento errado.** O caso *"a MESMA publicação chegando por dois caminhos"* passava — provando exatamente o que perdia prazo. Foi substituído por dois: um que recusa a mesma publicação do mesmo fornecedor, e outro que **exige** que duas publicações diferentes com o mesmo teor entrem as duas. O segundo é o que teria pego o defeito no dia em que foi escrito.
+
+### 🔴 O defeito que era meu: repetido desistia na porta
+
+Corrigido o esquema, o recolhimento rodou de novo e **não recuperou nada** — os eventos já estavam gravados e o código devolvia "repetido" antes de tentar a publicação.
+
+*"Já processei"* é sobre a **entrega**, nunca sobre tudo o que ela carregava. Uma falha no meio deixa o evento gravado e o conteúdo não, e se a repetição desiste, o único conserto é apagar registro de recepção — que não se apaga. Agora a gravação da publicação é idempotente por conta própria e roda sempre (D-186).
+
+O relatório também mentia: dizia *"9 eventos novos"* sobre nove que não tinham nada de novos. O tipo de retorno era uma união que obrigava a escolher um rótulo entre dois fatos independentes. Virou plano (D-187).
+
+### O que mais entrou
+
+**Entrega com origem inválida é gravada e não vira publicação** (D-185). Duas gravações com valor de verdade diferente: que uma requisição chegou é fato nosso e vale registrar mesmo hostil; o que ela **diz** é afirmação de terceiro. Aceitar origem não conferida na base que dispara alerta de prazo seria deixar um desconhecido escrever no acervo — e bastaria descobrir a URL do webhook.
+
+**A idempotência de callback passou a ser por escritório** (D-188, migração 012) — fecha o achado 13 da revisão. A chave é resumo de conteúdo, e dois escritórios em polos opostos da mesma ação produzem a mesma chave; com política por linha ligada, o segundo perderia a entrega em silêncio.
+
+**A tabela de tradução da D-180 virou esquema.** `publicacao_envolvido` guarda `tipo_na_fonte` e `tipo_normalizado` lado a lado. Os 48 advogados ficaram com `tipo_normalizado` nulo, e isso é correto: advogado não é polo, e o diário não diz de quem ele é — o campo `advogado_de` existiria para isso e veio vazio nas 48 ocorrências.
+
+### O que ainda não é
+
+O recolhimento é uma **ponte, e é honesto sobre isso**: o n8n roda em `auto.criativeia.com.br` e o PostgreSQL em `127.0.0.1`. O nó não alcança o banco, e não há endpoint público — ele é o marco 7. Enquanto o recolhedor for o único caminho, **entrega que chegue e seja podada antes do próximo recolhimento some**.
+
+```bash
+LEX_INQUILINO_ID=<uuid> node ferramentas/receptor/recolher-do-n8n.mjs --gravar
+```
+
 ## A aparição estava chegando o tempo todo — 02/09/2026
 
 Fui conferir se o receptor de callback funcionava. Funciona — e trouxe junto a correção de um item de cabeçalho deste documento. Contrato completo em `docs/15-contrato-da-aparicao.md`.
@@ -1016,7 +1077,7 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-182** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+**D-01 a D-188** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
 
 - ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
 - 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08

@@ -185,12 +185,34 @@ const CASOS = [
        ('11111111-1111-1111-1111-111111111111', 'escavador', 'resumo-abc', 'atualizacao', true);`,
     'D-116 / R-43'
   ),
+  // ⚠️ ESTE PAR DE CASOS SUBSTITUI UM CASO SO, QUE ESTAVA ERRADO.
+  //
+  // Ate 02/09 havia aqui uma prova de que "a MESMA publicacao chegando por dois
+  // caminhos" era recusada — pelo `hash` do teor. A intencao era certa: ruido
+  // destroi a confianca no alerta. O MECANISMO e que era falso.
+  //
+  // Na primeira vez que dado real entrou na tabela, 30 publicacoes viraram 21.
+  // Sete PROCESSOS DIFERENTES trouxeram a mesma intimacao padrao de 123
+  // caracteres, e a restricao de hash guardou uma e descartou SEIS — sem erro,
+  // sem contador, sem nada. Seis intimacoes de seis casos que nunca chegariam a
+  // existir na base (migracao 013).
+  //
+  // O caso antigo passava. Ele provava exatamente o comportamento que perdia
+  // prazo, e a prova verde dava confianca nisso. Faltava o caso de baixo, que e
+  // o que teria mostrado o defeito no dia em que foi escrito.
   deveRecusar(
-    'a MESMA publicacao chegando por dois caminhos',
-    `INSERT INTO publicacao (inquilino_id, fonte, data_publicacao, teor, hash) VALUES
-       ('11111111-1111-1111-1111-111111111111', 'DJE-AP', '2026-08-27', 'intimacao', 'h1'),
-       ('11111111-1111-1111-1111-111111111111', 'DJE-AP', '2026-08-27', 'intimacao', 'h1');`,
-    'ruido destroi a confianca no alerta'
+    'a MESMA publicacao chegando duas vezes do MESMO fornecedor',
+    `INSERT INTO publicacao (inquilino_id, fonte, data_publicacao, teor, hash, id_externo) VALUES
+       ('11111111-1111-1111-1111-111111111111', 'escavador_diario', '2026-08-27', 'intimacao', 'h1', '1718477492'),
+       ('11111111-1111-1111-1111-111111111111', 'escavador_diario', '2026-08-27', 'intimacao', 'h2', '1718477492');`,
+    'D-178 — a identidade e o id do fornecedor, nao o resumo do texto'
+  ),
+  devePassar(
+    'DUAS publicacoes diferentes com o MESMO teor',
+    `INSERT INTO publicacao (inquilino_id, fonte, data_publicacao, teor, hash, id_externo) VALUES
+       ('11111111-1111-1111-1111-111111111111', 'escavador_diario', '2026-08-28', 'intimacao padrao', 'h1', '1718477492'),
+       ('11111111-1111-1111-1111-111111111111', 'escavador_diario', '2026-08-28', 'intimacao padrao', 'h1', '1718476647');`,
+    'migracao 013 — tribunal publica formula identica para processos diferentes'
   ),
 
   // ---- Regra 5: negar por padrao ------------------------------------------
