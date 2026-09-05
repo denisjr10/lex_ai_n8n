@@ -157,7 +157,11 @@ postgresbackupmcp            *:5433->5432/tcp
 wootrico_wootrico-webhook    *:3000->3000/tcp
 ```
 
-O `*:` é **todas as interfaces**, o IP público incluído. Em Swarm, porta publicada assim atravessa o `ufw` pela forma como o Docker escreve as regras de rede — então "o firewall está ligado" **não** prova que estejam fechadas. 🚧 **Pendente de confirmação por teste externo.** Ver **R-63**.
+O `*:` é **todas as interfaces**, o IP público incluído.
+
+🔴 **CONFIRMADO em 05/09.** `Test-NetConnection 72.60.14.3 -Port 5432` de fora da rede do servidor devolveu **`TcpTestSucceeded: True`**. A suspeita era que em Swarm a porta publicada atravessa o `ufw` — atravessa mesmo. **O PostgreSQL responde à internet, e a única coisa entre ela e o banco é a senha.**
+
+Com precisão, para não exagerar nem amenizar: isso **não** significa que alguém entrou — não há evidência em nenhuma direção, e conferir os registros de autenticação do banco é o próximo passo. Significa que qualquer pessoa pode tentar senha indefinidamente, sem limite e sem ninguém ver, e que qualquer falha conhecida do PostgreSQL ou do pgbouncer fica ao alcance direto. Ver **R-63**.
 
 ## 9. Os quatro papéis do n8n, e o banco
 
@@ -180,7 +184,9 @@ O `*:` é **todas as interfaces**, o IP público incluído. Em Swarm, porta publ
 pgbackweb_pgbackweb   replicated   0/1
 ```
 
-**Zero de uma réplica.** Há ferramenta de backup instalada, com endereço público, **fora do ar** — desde quando, não se sabe.
+**Zero de uma réplica.** E a leitura de 05/09 mostrou que não está apenas "parado": está em **laço de falha**. Reinicia e morre com `task: non-zero exit (201)` a cada ~6 segundos, indefinidamente — o Swarm tenta subir, o container sai com erro, o Swarm tenta de novo. **Nenhum backup roda há tanto tempo quanto esse laço dura.**
+
+⚠️ **E o `NODE` da tarefa é `srv1093898`, não `srv957606`.** O enxame tem **dois nós** — o `portainer_agent` em modo `global 2/2` confirma. **Existe uma segunda máquina que este levantamento não olhou**, e os achados R-62 a R-66 podem valer para ela também.
 
 Isso responde a pergunta 55 de um jeito que ninguém esperava, e fecha um ciclo: a pergunta 46 achou **194 fluxos existindo em um lugar só, sem versionamento**; esse lugar é este PostgreSQL; e o backup dele está parado. Ver **R-66**.
 
@@ -254,7 +260,9 @@ Quem lê o ambiente de um serviço lê os segredos. E quem entra no Portainer l�
 | # | Pergunta | Estado |
 |---|---|---|
 | 57 | Quem tem acesso administrativo à infra | 🔴 **Só o usuário responde.** Vale para o servidor **e** para o Portainer |
-| — | As portas 5432/5433 estão abertas ao mundo? | 🚧 **Teste pendente** — `Test-NetConnection` a partir de fora |
+| — | ~~A porta 5432 está aberta ao mundo?~~ | 🔴 **CONFIRMADO ABERTA em 05/09.** A 5433 ainda não foi testada |
+| — | **O segundo nó do enxame (`srv1093898`)** | 🚧 **Novo, e não foi olhado.** `docker node ls` |
+| — | Há tentativa de autenticação falha nos registros do PostgreSQL? | 🚧 Converte "exposto" em "o que de fato aconteceu" |
 | — | Grafana, RabbitMQ e MinIO ainda estão com senha inicial? | 🚧 Pendente |
-| — | Por que o `pgbackweb` não sobe | 🚧 Pendente — `docker service ps pgbackweb_pgbackweb --no-trunc` |
+| — | Por que o `pgbackweb` não sobe | 🟡 **Parcial:** laço de falha com `exit 201`, no nó `srv1093898`. Falta o registro do container |
 | — | Backup: existe restauração já testada? | 🔴 Presume-se que não |

@@ -137,7 +137,13 @@
 56. ✅ **RESPONDIDA — existe: Prometheus v3.4.2 + Grafana 12.1.1**, ambos no ar e coletando.
 
     **Isso corrige parcialmente o R-60:** o `/metrics` do n8n não é vazamento acidental, está ligado de propósito porque o Prometheus o coleta — o que é boa prática. O defeito é ele ser alcançável **da internet pública** em vez de só pela rede interna. E o Prometheus **também está público**, sem autenticação (ele não tem nenhuma por padrão), carregando `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true`, que vaza id de workflow. Ver **R-62**.
-57. 🚧 **SÓ O USUÁRIO RESPONDE.** Quem mais tem acesso administrativo — ao servidor por SSH **e** ao Portainer? *(Último login humano registrado: 24/07. A pergunta vale para os dois, porque com o Portainer publicado na internet, "acesso administrativo" deixou de ser sinônimo de "acesso ao servidor".)*
+57. ✅ **RESPONDIDA em 05/09 — somente o usuário.** Nenhuma outra pessoa tem acesso administrativo ao servidor por SSH nem ao Portainer.
+
+    **Isso melhora bastante o quadro dos R-62 a R-64, e não os apaga.** Melhora porque o número de pessoas com a chave é um, o menor possível — não há credencial de ex-colaborador esquecida, nem conta compartilhada de administração. Não apaga porque **o risco medido não é sobre quem tem acesso autorizado: é sobre quem pode tentar sem ter.** O Portainer publicado na internet e a porta 5432 confirmada aberta (R-63) estão ao alcance de qualquer pessoa do mundo, e nada disso passa por "quem tem acesso administrativo".
+
+    ⚠️ **E aparece o outro lado do mesmo fato: ponto único de falha humano.** Uma pessoa só conhece a infraestrutura, e ela é a mesma que responde pelo projeto. Para uma plataforma que vai guardar processo de escritório de advocacia, "o único que sabe entrar ficou indisponível" é um cenário que precisa de resposta — e a resposta não é dar acesso a mais gente, é **documentar a infra e guardar o acesso de emergência em lugar seguro**. Ver **R-67**.
+
+    ⚠️ **Ressalva medida em 05/09:** o enxame tem **dois nós** — `srv957606` e `srv1093898`. A resposta foi dada olhando um; vale confirmar que o segundo não tem chave ou usuário a mais.
 
 #### O que a Parte B2 achou sem ninguém perguntar
 
