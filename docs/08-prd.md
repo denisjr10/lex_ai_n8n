@@ -554,8 +554,9 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 
 | Caminho                                                          | Como funciona                                                         | Custo para 200 processos                                                    |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Monitorar cada processo no tribunal (V2)                         | Um monitoramento por processo                                         | 200 × R$ 3,00/mês = **R$ 600,00/mês**                                       |
-| Monitorar cada processo, variante mensal com documentos públicos | Idem, frequência menor                                                | 200 × R$ 0,18/mês = **R$ 36,00/mês**                                        |
+| Monitorar cada processo no tribunal (V2), frequência diária      | Um monitoramento por processo, conferido todo dia                     | 200 × R$ 3,00/mês = **R$ 600,00/mês**                                       |
+| Idem, variante **diária com documentos públicos**                | Mesma frequência, e ainda traz a peça pública                         | 200 × R$ 2,30/mês = **R$ 460,00/mês**                                       |
+| Idem, variante **mensal com documentos públicos**                | Uma conferência por mês — barato porque olha pouco (§9.3.2)          | 200 × R$ 0,18/mês = **R$ 36,00/mês**                                        |
 | **Monitorar o nome dos advogados no diário oficial (V1)**        | Um monitoramento por advogado, captura toda publicação que o mencione | **R$ 3,00/mês por advogado** · escritório com 5 advogados: **R$ 15,00/mês** |
 
 
@@ -596,6 +597,63 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 4. **Registrar o que aconteceu.** O consumo real deste ciclo é o que dimensiona o próximo. É assim que o número deixa de ser chute em três meses
 
 **E como a vigilância é operada no dia a dia:** a assinatura **fica ligada indefinidamente**. Removê-la é a operação de maior dano silencioso do projeto (R-14), restrita a `remover_monitoramento` — ferramenta separada, escopo separado, confirmação explícita (D-29) — e reservada a eventos de cadastro: o advogado sai do escritório, transfere a OAB, o escritório deixa de atuar numa jurisdição. **Remoção rotineira só existe em ambiente de teste.**
+
+#### 9.3.2 Quem vigia o quê — a vigilância nomeada por advogada
+
+✅ **D-205, decidida em 05/09.** Até aqui a §9.3 tratava a escolha em abstrato. Com a carteira medida (D-193 — ~289 processos da **Malu Souza** e ~24 da **Ana Beatriz**), ela passa a ter nome:
+
+
+| Advogada        | Carteira | Caminho                                                    | Custo mensal                      |
+| ----------------- | ---------- | ------------------------------------------------------------ | ----------------------------------- |
+| **Malu Souza**  | ~289     | **V1 — nome no diário oficial** ✅ decidido               | **R$ 3,00/mês**, o nome dela      |
+| **Ana Beatriz** | ~24      | **V2 — um monitoramento por processo** 🟡 falta a variante | de **R$ 4,32** a **R$ 72,00/mês** |
+
+
+**Por que a Malu vai de V1 e não de V2.** 289 processos × R$ 3,00 seriam **R$ 867,00/mês**. O nome dela num monitoramento de diário custa **R$ 3,00/mês** e cobre *todos* os processos em que ela está constituída — inclusive os que o escritório ainda não cadastrou. É a diferença de duas ordens de grandeza que abre esta seção, aplicada a um caso com nome.
+
+**A escolha que sobra é a da Ana Beatriz, e ela é de frequência — não de documentos.**
+
+Os dois caminhos da pergunta são a **mesma rota da API** (`POST /api/v2/monitoramentos/processos`). O que muda são dois campos do corpo: `frequencia` e `documentos_publicos`. O preço do painel deixa isso claro quando se olha a grade inteira:
+
+
+| `frequencia` | `documentos_publicos` | Preço/mês por processo | Ana Beatriz (24 processos) |
+| -------------- | ----------------------- | ------------------------ | ---------------------------- |
+| diária       | não                   | R$ 3,00                | **R$ 72,00**               |
+| diária       | **sim**               | R$ 2,30                | **R$ 55,20**               |
+| semanal      | **sim**               | R$ 0,55                | **R$ 13,20**               |
+| mensal       | **sim**               | R$ 0,18                | **R$ 4,32**                |
+
+
+**O que "documentos públicos" acrescenta.** Sem o campo, o monitoramento avisa que *houve* movimentação e diz o teor. Com o campo, ele traz junto a **peça pública** — o documento em si, quando o tribunal o publica. É insumo de leitura; não muda a detecção. É a parte **boa e barata** da escolha, e não é o que separa as duas opções.
+
+**O que a frequência acrescenta — e este é o ponto.** `frequencia` é de quanto em quanto tempo o Escavador vai olhar aquele processo no site do tribunal. Diária = todo dia. Mensal = **uma vez por mês**.
+
+
+|                  | **Diária** (R$ 2,30 a R$ 3,00)                                                                          | **Mensal** (R$ 0,18)                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Vantagem**     | Atraso máximo de ~1 dia entre o ato e o alerta. **Serve para prazo**                                    | Custa 6% do outro. Para 24 processos, R$ 4,32 contra R$ 72,00                                         |
+| **Desvantagem**  | ~17× mais caro. Numa carteira grande seria proibitivo — mas 24 processos cabem                          | **Atraso de até 30 dias.** Um prazo de 15 dias nasce, corre e **vence** entre uma conferência e a seguinte |
+| **Serve para**   | Vigilância de prazo (E2)                                                                                | Higiene de cadastro: descobrir com atraso que um processo mudou de fase, arquivou, baixou             |
+
+
+> 🔴 **Monitoramento mensal não é vigilância de prazo — é um relatório mensal.** Ele detecta com atraso maior que o próprio prazo que deveria proteger. Adotá-lo em E2 seria comprar, por R$ 4,32/mês, a **aparência** de vigilância: o painel mostraria "monitorado", nenhuma rotina acusaria falha, e a perda de prazo apareceria depois de já ter acontecido. Colide de frente com a RF-15 (*silêncio nunca é interpretado como "nada aconteceu"*) e com o motivo pelo qual E2 vem antes de E3 (§4.1).
+
+**Recomendação, com posição:** para a Ana Beatriz, **frequência diária**. A diferença para a variante mensal é de **R$ 67,68 por mês** — menos que uma hora de trabalho de advogada, e muito menos que uma preclusão. Frequência é exatamente o que se paga em vigilância de prazo; economizar nela é economizar na única coisa que E2 entrega.
+
+**Duas ressalvas antes de criar qualquer coisa:**
+
+1. **A anomalia dos R$ 2,30 continua sem confirmação.** O painel marca "diária **com** documentos públicos" mais barata que "diária **sem**" (R$ 2,30 contra R$ 3,00), o que não faz sentido comercial. Foi perguntado ao suporte em 25/08 e é a **única das seis perguntas que não voltou** (`07-painel-escavador-achados.md` §5 e §11). Por R-44, declaração de fornecedor é indício, nunca fonte — e aqui não há nem declaração
+2. **Monitoramento é cobrança recorrente, e o cabeçalho `Creditos-Utilizados` não a revela** — a criação em si mediu R$ 0,00. O preço se confirma **no extrato do painel**, não na resposta da API. O procedimento: criar **um** monitoramento, para **um** processo da Ana Beatriz, na variante escolhida; conferir no painel o que foi cobrado; só então criar os 23 restantes. Isso também limita o dano se o preço vier diferente do anunciado
+
+
+| #         | Requisito                                                                                                                             | Critério de aceite                                                                                                                                                        |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RF-42** | Todo monitoramento de processo (V2) registra na base a `frequencia` e o `documentos_publicos` escolhidos, com quem escolheu e a data | Nenhum monitoramento nasce com o valor padrão da API por omissão — mesma regra da franquia (RF-40). O inventário responde "com que frequência este processo é visto"     |
+| **RF-43** | Monitoramento de frequência **não diária** é sinalizado no inventário como **fora da vigilância de prazo**                          | A conferência de RF-36 distingue "vigiado para prazo" de "vigiado para higiene". Cobertura mensal **nunca** conta como cobertura de prazo                                |
+| **RF-44** | O inventário de vigilância cobre **as duas advogadas**, cada uma pelo seu caminho                                                    | A conferência de RF-36 acusa alarme se faltar o monitoramento V1 da Malu **ou** se algum processo da Ana Beatriz estiver sem monitoramento V2. Ambas as listagens são gratuitas (R-41) |
+
+
+---
 
 ### 9.4 O atendimento ao cliente não consulta a API paga — e agora, nunca
 
