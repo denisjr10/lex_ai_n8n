@@ -3,6 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Atualizado em | 2026-09-05 |
+| 🟢 **A seção A1 da descoberta fechou** | **05/09.** O escritório respondeu estrutura e pessoas por inteiro: **sete pessoas** (advogadas Malu Souza e Ana Beatriz; colaboradoras Andressa Jamile, Estefanny Passos, Bia Nunes, Paula Pinheiro e Mota), **sem hierarquia** e **sem divisão por área**. As três perguntas que travavam o PRD voltaram: **4a** — colaborador vê a base inteira, com perfil individual mantido (**D-192**); **4b/4c** — ~**313 processos** ativos e **nenhum cliente de alto volume**, o que **confirma P-07** (**D-193**). Duas coisas nasceram disso: **não existe "sócia responsável"** para o N2 do rito de prazo, e a resposta *"todos aprovam, sob supervisão"* encosta na Regra Inegociável 2 (**D-194**, aberta). E **R-59**: colaboradoras operam os sistemas externos com credenciais das advogadas, e a auditoria da plataforma não alcança isso. A pergunta **5** voltou como pedido de esclarecimento — respondida no documento |
 | Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
 | Callback | ✅ **PROVADO, E GRAVANDO.** Recolhido em 05/09: **37 eventos, 34 publicações, 112 envolvidos, 26 processos** — 30 delas intimação, de 27/08 a 04/09. ⚠️ O webhook é `responseMode: onReceived`, então toda execução aparece como `success` no painel, inclusive a recusada — o "não" está no dado, não no status. Recolher com **`npm run receptor:recolher`** (D-191); o receptor gravando na hora depende do marco 7 |
 | ⚠️ **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário, renovação em **26/09**. 🔄 **A leitura mudou em 02/09 (D-182): ela não é resíduo de teste — é a fonte viva do contrato de prazo**, entregando ~6 publicações reais por dia útil a custo zero. Removê-la deixou de ser faxina e virou decisão sobre a frente E2, a ser tomada **antes de 26/09**. O risco de renovação sem ninguém olhando continua de pé; o que mudou é que agora há alguém olhando |
@@ -1150,10 +1151,21 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 > ✅ **Atualizado em 27/08.** As cinco que travavam o PRD foram respondidas — 16a–16c, D-07, D-09, D-64 e a instância n8n. O que segue abaixo é o que sobrou, mais o que nasceu das respostas.
 
-**Novas, nascidas das respostas de 27/08:**
+**Respondidas em 05/09 (seção A1 inteira):**
 
-- **Pergunta 4a** — o **colaborador** também vê a base inteira, ou fica na carteira? A resposta falou só de advogados
-- **Perguntas 4b e 4c** — quantos processos ativos o escritório tem (ordem de grandeza basta), e existe algum cliente com mais de 200 processos? É o que fecha a premissa P-07 e dimensiona os tetos de bloco
+- ✅ **Perguntas 1 a 3** — sete pessoas, duas advogadas e cinco colaboradoras; **sem hierarquia** e **sem divisão por área**. O escopo nunca terá eixo de matéria
+- ✅ **Pergunta 4a** — o colaborador **também vê a base inteira**, e o perfil individual fica mantido para todos (D-192). Efeito colateral registrado em **R-59**
+- ✅ **Perguntas 4b e 4c** — ~**313 processos** ativos (289 + 24) e **nenhum cliente com 200 processos ou mais**. **P-07 confirmada**; pior caso de varredura são dois blocos (D-193)
+- ✅ **Pergunta 6** — todos aprovam hoje, sob supervisão informal de advogado. Descritivo respondido; **a decisão de produto continua aberta em D-194**
+
+**Que nasceram das respostas de 05/09:**
+
+- 🚧 **Pergunta 5** — quem é o **responsável interno pelo projeto**? O escritório pediu que o papel fosse explicado; a explicação está no item 5 de `02-descoberta-perguntas-abertas.md`, e falta o nome
+- 🚧 **D-194** — colaborador pode carimbar aprovação de **ato com efeito de prazo**? A proposta separa por consequência: mensagem informativa qualquer perfil aprova, ato de prazo exige advogada identificada
+- 🚧 **O N2 do rito de prazo perdeu o destinatário.** Sem hierarquia, não existe "sócia responsável" para quem escalar — a pergunta 20b precisa ser reescrita antes de ir ao escritório
+
+**Ainda novas, de 27/08:**
+
 - **Perguntas 20a a 20d** — o rito do alerta de prazo: quanto tempo até chamar todos os advogados (proposta: 2 h úteis), até escalar para a sócia (4 h úteis), qual é o horário útil, e quanto tempo um pedido de aprovação pode ficar parado antes de vencer
 - **Os números** — franquia de aparições (proposta: 1.000/mês por advogado), tetos de bloco por papel, tetos de orçamento. **O texto pronto para a conversa com a advogada proprietária está no PRD §9.3.1**
 - **D-62** — o escritório vai confirmar a vigilância de diário por nome de advogado

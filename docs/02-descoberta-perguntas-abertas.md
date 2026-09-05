@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Status | **Parcialmente respondido** — cinco perguntas que travavam o PRD voltaram em 27/08; quatro novas nasceram delas |
-| Versão | 0.2 |
-| Data | 2026-08-27 (criado em 2026-08-17) |
+| Status | **Parcialmente respondido** — a seção A1 fechou em 05/09 (só a 5 voltou como pedido de esclarecimento); antes disso, cinco perguntas que travavam o PRD voltaram em 27/08 |
+| Versão | 0.3 |
+| Data | 2026-09-05 (criado em 2026-08-17) |
 | Finalidade | Levantar as informações que faltam para fechar o PRD. Dividido por destinatário. |
 
 > **Como usar.** A Parte A é para o escritório (pode ser enviada como está). A Parte B é técnica, para quem administra os sistemas. A Parte C é sua, sobre contratos e infraestrutura. Nem toda pergunta bloqueia o início — as marcadas com 🚧 bloqueiam.
@@ -15,15 +15,24 @@
 
 ### A1. Estrutura e pessoas
 
-1. Quantos advogados e quantos colaboradores? Há estagiários com acesso distinto?
-2. Existe hierarquia relevante além de "advogado / colaborador" — sócio, associado, coordenador de área?
-3. O escritório é dividido por áreas de atuação (cível, trabalhista, tributário…)? O acesso deve ser segmentado por área?
-4. ✅ **RESPONDIDA em 27/08 — base inteira.** *"Os advogados têm acesso à base inteira, pois eles se ajudam nos processos um do outro."* Decisão D-07 resolvida; ver D-146 e PRD §3.1. Três desdobramentos:
-    - **4a.** 🚧 **E o colaborador?** A resposta falou de advogados. O colaborador (equipe administrativa, estagiários, paralegais) também enxerga a base inteira, ou fica restrito aos processos da área/carteira em que trabalha? *(Até a resposta, ele segue restrito — é o padrão seguro.)*
-    - **4b.** 🚧 **Quantos processos ativos o escritório tem, aproximadamente?** Cem, quinhentos, dois mil? Ordem de grandeza basta. *(A API cobra por bloco de 200 resultados — este número dimensiona o custo de qualquer consulta ampla. Premissa P-07.)*
-    - **4c.** 🚧 **Existe algum cliente que é parte em muitos processos** — uma empresa, um banco, uma prefeitura, uma operadora — que sozinho passe de 200 processos? *(Se existir, é ele que faz a conta explodir, e precisa de tratamento próprio.)*
-5. Quem será o responsável interno pelo projeto — a pessoa que aprova decisões e tira dúvidas?
-6. Quem aprova respostas a clientes hoje? Isso muda por tipo de assunto ou por valor da causa?
+> **Respondida por inteiro em 05/09**, exceto a pergunta 5, que voltou como pedido de esclarecimento. Gerou **D-192 a D-194** e **R-59**.
+
+1. ✅ **RESPONDIDA em 05/09 — sete pessoas, duas advogadas e cinco colaboradoras.** Não há estagiário com acesso distinto; a distinção que existe é a de papel.
+
+    | Papel | Pessoas |
+    |---|---|
+    | Advogada | Malu Souza · Ana Beatriz |
+    | Colaboradora | Andressa Jamile · Estefanny Passos · Bia Nunes · Paula Pinheiro · Mota |
+
+    *(O número dimensiona coisas concretas: são **sete contas individuais** de Telegram a cadastrar no Caminho B (D-147), sete linhas na tabela de identidade, e é sobre sete pessoas — não sobre uma equipe grande — que o rito de escalada da pergunta 20 precisa fazer sentido. Escritório desse tamanho **não tem plantão**: se as duas advogadas estiverem em audiência, o alerta não tem para quem escalar. Ver R-52.)*
+2. ✅ **RESPONDIDA em 05/09 — não há hierarquia relevante.** Não existe sócio, associado nem coordenador de área como camada de decisão. **Isso deixa a pergunta 20b sem resposta possível na forma em que foi escrita:** o "N2" do rito de prazo previa escalar para *a sócia responsável*, e não há uma. A escalada terminal do escritório são as duas advogadas — ver D-193.
+3. ✅ **RESPONDIDA em 05/09 — sem divisão por área, e sem segmentação de acesso.** *"Atua em todas as áreas, sem divisão específica ou segmentação, nem entre os colaboradores; todos cuidam de todos os processos de todas as áreas."* Não haverá escopo por matéria na matriz de privilégios: o eixo do escopo é **papel** (advogado/colaborador) e **escritório** (isolamento entre inquilinos), nunca área de atuação.
+4. ✅ **RESPONDIDA em 27/08 — base inteira.** *"Os advogados têm acesso à base inteira, pois eles se ajudam nos processos um do outro."* Decisão D-07 resolvida; ver D-146 e PRD §3.1. Os três desdobramentos foram respondidos em 05/09:
+    - **4a.** ✅ **RESPONDIDA em 05/09 — o colaborador também vê a base inteira.** *"Os colaboradores têm acesso completo também, pois eles fazem movimentação em nome dos advogados e com o acesso e credenciais dos advogados, mas sempre sob observação, orientação e acompanhamento dos advogados."* O usuário registrou que **essa é decisão interna do escritório, sobre a qual não tem ingerência**, e que **a individualização de perfis fica mantida para todos** — advogados e colaboradores — para que toda ação seja registrada e auditável, como o projeto prevê. Ver **D-192**; o padrão restritivo provisório cai. ⚠️ A frase *"com as credenciais dos advogados"* descreve a prática atual **nos sistemas externos** (tribunal, PJe, e-mail) e é justamente o que a plataforma não vai reproduzir — ver **R-59**.
+    - **4b.** ✅ **RESPONDIDA em 05/09 — cerca de 313 processos ativos.** Aproximadamente **289** da advogada Malu Souza e **24** da advogada Ana Beatriz. A ordem de grandeza é de **centenas, não de milhares** — ver D-193 e o efeito sobre P-07.
+    - **4c.** ✅ **RESPONDIDA em 05/09 — não existe cliente de alto volume.** *"Não há nenhum cliente nesse nível."* Nenhuma parte concentra 200 processos ou mais; o caso que faria a conta explodir não existe nesta carteira.
+5. 🚧 **DEVOLVIDA em 05/09 — precisa de esclarecimento.** *Quem será o responsável interno pelo projeto — a pessoa que aprova decisões e tira dúvidas?* O usuário perguntou se se trata do administrador do sistema ou de um "gerente" do escritório. **Nenhum dos dois exatamente: é o papel de interlocutor único**, a pessoa do escritório que responde as perguntas desta descoberta, dá o "de acordo" nos números propostos e decide quando houver conflito entre o que duas pessoas do escritório pediram. É papel de **negócio**, não técnico — quem o exerce não precisa entender de n8n nem de API, precisa ter autoridade para dizer "é assim que o escritório trabalha". Pode acumular com o papel de **administrador da plataforma** (quem cadastra e desliga contas), mas os dois são distintos: o administrador executa, o responsável decide. *(Num escritório de sete pessoas sem hierarquia — pergunta 2 —, o candidato natural é uma das duas advogadas.)*
+6. ✅ **RESPONDIDA em 05/09 — todos aprovam, sob supervisão de advogado.** *"Todos os advogados e colaboradores (mas sempre sob observação, orientação e acompanhamento dos advogados)."* Não varia por assunto nem por valor da causa. ⚠️ **Isso encosta na Regra Inegociável 2** — *ato com efeito jurídico ou de prazo exige aprovação de advogado identificado*. "Sob observação" funciona numa sala com sete pessoas; num botão de aprovação, ou o sistema exige advogado ou não exige, e não há meio-termo. A proposta está em **D-194**, e precisa do "de acordo" do escritório.
 
 ### A2. Clientes e atendimento
 
@@ -157,8 +166,10 @@ As perguntas 🚧 são as que travam alguma coisa:
 | ~~4 — alcance do acesso do advogado~~ | Matriz de privilégios (D-07) | ✅ **Respondida em 27/08 — base inteira** (D-146) |
 | ~~23 — papel do Trello~~ | Prioridade da frente Trello (D-09) | ✅ **Respondida em 27/08 — quadro de trabalho** (D-152) |
 | ~~16b / 16c — licenças individuais do Workspace~~ | Modelo de identidade do projeto (D-21, R-11) | ✅ **Respondida em 27/08 — Caminho B, pelo Telegram** (D-147) |
-| **4a — alcance do acesso do colaborador** | Matriz definitiva de escopos (Spec Parte II) | 🚧 **Nova, aberta** |
-| **4b / 4c — volume da carteira e cliente de alto volume** | Tetos de bloco e premissa P-07 (PRD §9.2, §11.1) | 🚧 **Nova, aberta** |
+| ~~4a — alcance do acesso do colaborador~~ | Matriz definitiva de escopos (Spec Parte II) | ✅ **Respondida em 05/09 — base inteira, com perfil individual** (D-192) |
+| ~~4b / 4c — volume da carteira e cliente de alto volume~~ | Tetos de bloco e premissa P-07 (PRD §9.2, §11.1) | ✅ **Respondida em 05/09 — ~313 processos, sem cliente de alto volume** (D-193) |
+| **5 — responsável interno pelo projeto** | Interlocutor único das decisões de negócio | 🚧 **Devolvida em 05/09** — o escritório pediu que o papel fosse explicado |
+| **6 — colaborador pode aprovar ato de prazo?** | Regra Inegociável 2 e o botão de aprovação (RN-09) | 🚧 **Nova, aberta** (D-194) |
 | **20a–20d — rito do alerta de prazo e expiração de aprovação** | Configuração de E2 e do ciclo de aprovação (RF-13, RN-09) | 🚧 **Nova, aberta** |
 | 58 — plano contratado do Escavador | Escopo do MCP Escavador | 🟡 Saldo em providência |
 | 9 — situação do número de WhatsApp | Cronograma da frente F1 | 🟡 Em providência |

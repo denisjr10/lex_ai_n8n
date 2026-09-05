@@ -838,7 +838,8 @@ Duas escolhas de ordem que merecem justificativa:
 | ~~Número CNJ real~~ | Escritório | Marco 10, verificação ponta a ponta | ✅ **Resolvido** — TJAP e TRT8 capturados |
 | Perguntas 26 e 27 — campos personalizados e Butler | ~~Escritório~~ → **Nós** | Qualquer escrita no Trello | 🟡 **Reatribuído em 27/08** — o escritório não sabe responder; vira levantamento técnico nosso com a chave de API |
 | ~~Pergunta 12~~ → **20a–20d** — prazos de escalada e de expiração de aprovação | Escritório | Configuração do rito de alerta e do ciclo de aprovação | 🚧 **Aberto.** O rito está desenhado com valores propostos (PRD §5.2.1 e §6.2.5); faltam os números |
-| Perguntas 4b–4c — volume da carteira | Escritório | Tetos de bloco e reserva pelo pior caso (§6.5) | 🚧 **Novo, aberto** — premissa P-07 |
+| ~~Perguntas 4b–4c — volume da carteira~~ | Escritório | Tetos de bloco e reserva pelo pior caso (§6.5) | ✅ **Respondido em 05/09** — ~313 processos, sem cliente de alto volume; pior caso são **dois blocos**. P-07 confirmada (D-193) |
+| **Pergunta 6 — colaborador aprova ato de prazo?** | Escritório | Escopo de ação na matriz de privilégios e no ciclo de aprovação | 🚧 **Novo, aberto** — proposta em D-194; a matriz de LEITURA já fechou em `escritorio` para os dois papéis (D-192) |
 | Números dos tetos e da franquia de aparições | Escritório | Configuração do motor de custo e da vigilância | 🚧 **Aberto** — propostas em D-149 |
 | ~~**P-06** — preços de catálogo ou limitados pelo bônus~~ | Escavador | O §6 fica como está; o desenho "preço é dado" evitou reescrita | ✅ **Respondido em 25/08** — a tabela é o catálogo do pré-pago |
 | ~~"Até 200 itens": termos ou aparições?~~ | Escavador | D-62 confirmada e barateada (D-106) | ✅ **Respondido em 25/08** — são **aparições** |

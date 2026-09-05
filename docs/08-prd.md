@@ -100,7 +100,9 @@ Isso é uma escolha legítima de um escritório pequeno, onde a colaboração cr
 
 > **Por que registrar em vez de bloquear.** Bloquear atrapalharia exatamente a colaboração que o escritório descreveu. Registrar não atrapalha nada e responde à única pergunta que importa depois de um incidente: *quem viu o quê, e quando?* O escritório perde a barreira e ganha o espelho.
 
-🚧 **Fica em aberto o mesmo ponto para o colaborador.** A resposta falou de advogados. O colaborador segue com abrangência `carteira` até que o escritório diga o contrário — ver pergunta 4a em `02-descoberta-perguntas-abertas.md`.
+✅ **RESOLVIDO em 05/09 — o colaborador também tem abrangência `escritorio`.** O escritório confirmou que colaboradores atuam sobre todos os processos, *"em nome dos advogados e sob observação deles"*. A abrangência provisória `carteira` cai; RF-37 e RF-38 valem igualmente para os dois papéis, e o **perfil individual continua obrigatório para as sete pessoas** (RN-02, Regra 7) — é o que mantém o espelho funcionando. Ver **D-192**.
+
+⚠️ **O espelho tem uma borda.** A mesma resposta revelou que, **nos sistemas externos** (tribunal, PJe, e-mail), colaboradoras operam com as credenciais das advogadas. A auditoria da plataforma registra quem pediu o que **dentro dela** e não alcança o que acontece fora — a trilha parece completa e não é. Ver **R-59**: é decisão interna do escritório, e a plataforma se declara pelo que de fato registra.
 
 ### 3.2 O que separa cliente de todo o resto
 
@@ -709,22 +711,24 @@ Atualizadas em 27/08 com as respostas do escritório.
 | **P-04**     | Há saldo contratado no Escavador quando E1 entrar em operação                   | 🟡 **Em providência**               | A cota de teste expira em **01/09/2026** (renovada; a v1.0 dizia 23/08). Sem saldo, E1 não opera em produção                                                                                                                                                                                                                          |
 | **P-05**     | O escritório usará WhatsApp Business Platform oficial                           | 🟡 **A confirmar**                  | Biblioteca não oficial arrisca banimento do número; E4 não vai ao ar. D-10 permanece                                                                                                                                                                                                                                                  |
 | ~~**P-06**~~ | ✅ **Encerrada em 25/08.** Os preços do painel **são** o catálogo do pré-pago    | —                                   | O §9 se apoia em preço confirmado e medido                                                                                                                                                                                                                                                                                            |
-| **P-07**     | O volume da carteira cabe em um bloco de 200 na maioria das consultas           | 🚧 **Depende de duas contagens**    | Ver §11.1                                                                                                                                                                                                                                                                                                                             |
+| **P-07**     | O volume da carteira cabe em um bloco de 200 na maioria das consultas           | ✅ **Confirmada em 05/09**           | ~313 processos ativos (289 + 24) e **nenhum cliente com 200 processos ou mais**. Consulta ampla cabe em um bloco; o pior caso conhecido é **dois**. R-25 fica pequeno e os tetos da §9.2 se sustentam. Ver §11.1 e D-193                                                                                                                |
 | **P-08**     | A infraestrutura (n8n, banco, MCP) é do prestador, não do escritório            | ✅ **Confirmada**                    | Destrava a implementação inteira, e cria obrigação contratual de operador de dados (RNF-19, D-148, R-48)                                                                                                                                                                                                                              |
 
 
-### 11.1 O que P-07 quer dizer, e o que precisa ser perguntado ao escritório
+### 11.1 O que P-07 quer dizer, e o que as contagens responderam
 
 O escritório respondeu *"não entendi; o que eu preciso confirmar?"*. Justo — a premissa estava escrita em jargão. Traduzindo:
 
 As rotas de listagem cobram por bloco de 200 (§9.2). A premissa P-07 diz: *"na maior parte das vezes, a resposta vai caber em um bloco só, e vai custar R$ 3,00"*. Se isso for verdade, R-25 é um risco pequeno. Se for falso — se as consultas normalmente devolverem 500 ou 1.000 resultados —, cada consulta custa R$ 9,00 ou R$ 15,00, e os tetos da §9.2 ficam apertados demais para o trabalho fluir.
 
-**São duas perguntas ao escritório, e as duas têm resposta simples** (perguntas 4b e 4c em `02-descoberta-perguntas-abertas.md`):
+**As duas contagens chegaram em 05/09** (perguntas 4b e 4c em `02-descoberta-perguntas-abertas.md`), e a premissa se confirma:
 
-1. **Quantos processos ativos o escritório tem, aproximadamente?** Cem? Quinhentos? Dois mil? — dimensiona o custo de qualquer varredura por carteira
-2. **Existe algum cliente que é parte em muitos processos?** Uma empresa, um banco, uma prefeitura, uma operadora — alguém que sozinho tenha mais de 200 processos. Se existir, é esse cliente que faz a conta explodir, e ele precisa de tratamento próprio (consulta processo a processo, nunca por listagem de envolvido)
+1. **Quantos processos ativos?** ~**313** — cerca de 289 da advogada Malu Souza e 24 da Ana Beatriz. Centenas, não milhares
+2. **Existe cliente com mais de 200 processos?** **Não.** Nenhuma parte concentra volume que exija tratamento próprio
 
-Não precisa de número exato. Ordem de grandeza resolve.
+O efeito prático: uma varredura da carteira inteira custa **dois blocos** no pior caso, não dez, e a consulta do dia a dia — por cliente, por processo — cabe folgadamente em um. Os tetos da §9.2 não precisam ser afrouxados, e a consulta processo a processo prevista para o "cliente de alto volume" **não precisa ser construída agora**: não há a quem aplicá-la. Ver **D-193**.
+
+⚠️ **A mesma resposta cobrou um preço em outro lugar.** Com sete pessoas e sem hierarquia (perguntas 1 e 2 da descoberta), **não existe a "sócia responsável"** para quem a §5.2.1 mandava escalar no N2. O rito de prazo termina nas duas advogadas, e precisa ser redesenhado com isso — ver §5.2.1 e a pergunta 20b.
 
 ---
 
@@ -760,8 +764,9 @@ Numeração de `02-descoberta-perguntas-abertas.md`. 🚧 marca o que trava deci
 | ~~D-09~~                           | Trello é fonte da verdade ou visualização?                                                        | Escritório               | ✅ **Respondida em 27/08** — visualização (§4.3, D-152)                                                                                                                         |
 | ~~12~~                             | Prazo de escalada de alerta não lido                                                              | Escritório               | ⚠️ **Referência corrigida.** A pergunta 12 do questionário é sobre horário de atendimento, não sobre escalada. O rito foi escrito em §5.2.1 e as perguntas viraram **20a–20d** |
 | 🚧 **20a–20d**                     | N1, N2, horário útil, último degrau da escalada e janela de expiração de aprovação — RF-13, RN-09 | Escritório               | 🔴 **Nova, aberta**                                                                                                                                                            |
-| 🚧 **4a**                          | O colaborador também vê a base inteira, ou segue na carteira?                                     | Escritório               | 🔴 **Nova, aberta** — a resposta de 27/08 falou só de advogados                                                                                                                |
-| 🚧 **4b–4c**                       | Quantos processos ativos? Há cliente com mais de 200 processos? — P-07                            | Escritório               | 🔴 **Nova, aberta** (§11.1)                                                                                                                                                    |
+| ~~4a~~                             | O colaborador também vê a base inteira, ou segue na carteira?                                     | Escritório               | ✅ **Respondida em 05/09** — base inteira, com perfil individual mantido (D-192, R-59)                                                                                          |
+| ~~4b–4c~~                          | Quantos processos ativos? Há cliente com mais de 200 processos? — P-07                            | Escritório               | ✅ **Respondida em 05/09** — ~313 processos, sem cliente de alto volume. **P-07 confirmada** (§11.1, D-193)                                                                     |
+| 🚧 **6**                           | Colaborador pode aprovar ato com efeito de prazo? — Regra Inegociável 2, RN-09                    | Escritório               | 🔴 **Nova, aberta.** O escritório disse "todos aprovam, sob supervisão"; supervisão informal não cabe num botão. Proposta em D-194                                             |
 | **26 e 27**                        | Campos personalizados e automações Butler existentes — RF-20                                      | ~~Escritório~~ → **Nós** | 🟡 **Reatribuída em 27/08.** O escritório não sabe responder. Vira levantamento técnico nosso, assim que a chave de API do Trello chegar                                       |
 | 🚧 **Franquia, tetos e orçamento** | Os números da §9.2, §9.3.1 e §9.5                                                                 | Escritório               | 🔴 **Aberto** — propostas escritas, aguardando o de acordo                                                                                                                     |
 | ~~Ao suporte do Escavador~~        | "Até 200 itens" são aparições, não termos                                                         | Escavador                | ✅ Respondida em 25/08 — §9.3                                                                                                                                                   |
