@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-09-02 |
+| Atualizado em | 2026-09-04 |
 | Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
 | Callback | ✅ **PROVADO, E AGORA GRAVANDO.** 35 entregas recebidas; **33 eventos, 30 publicações e 100 envolvidos no banco** (D-181 fechada). ⚠️ O webhook é `responseMode: onReceived`, então toda execução aparece como `success` no painel, inclusive a recusada — o "não" está no dado, não no status. A gravação hoje é por **recolhimento** (`ferramentas/receptor/recolher-do-n8n.mjs`), porque o n8n é remoto e o banco é local; o receptor gravando na hora depende do marco 7 |
 | ⚠️ **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário, renovação em **26/09**. 🔄 **A leitura mudou em 02/09 (D-182): ela não é resíduo de teste — é a fonte viva do contrato de prazo**, entregando ~6 publicações reais por dia útil a custo zero. Removê-la deixou de ser faxina e virou decisão sobre a frente E2, a ser tomada **antes de 26/09**. O risco de renovação sem ninguém olhando continua de pé; o que mudou é que agora há alguém olhando |
@@ -695,7 +695,8 @@ se aplica em código, nunca por instrução no prompt. As regras inegociáveis d
 | `estado-do-repo.mjs` | `SessionStart` | Injeta estado do Git, orçamento do Escavador e o cabeçalho deste documento antes da primeira pergunta |
 | `guarda-escavador.mjs` | `PreToolUse` | Regra 8 — bloqueia chamada à API paga; ler documentação continua livre |
 | `guarda-segredo.mjs` | `PreToolUse` | R-12 e D-95 — bloqueia `git add -f`, caminho proibido e segredo em commit; CNJ pergunta em vez de bloquear |
-| `fechar-ciclo.mjs` | `Stop` | Cobra a atualização deste documento quando a sessão mexeu na memória do projeto |
+| `anotar-escrita.mjs` | `PostToolUse` | Anota o que a sessão escreveu, para que a cobrança saiba de quem é a autoria (somado em 04/09) |
+| `fechar-ciclo.mjs` | `Stop` | Cobra a atualização deste documento quando a sessão escreveu na memória do projeto |
 
 O `estado-do-repo.mjs` foi criado por uma sessão paralela mais cedo no mesmo
 dia; os outros três foram somados a ele, e ele ganhou a fotografia da árvore de
@@ -704,6 +705,33 @@ externa e sem acesso à rede.
 
 **Reinicie o Claude Code depois de mexer em `.claude/settings.json`** — uma
 sessão que começou antes da mudança segue com a configuração antiga.
+
+## O cobrador do estado estava cego, e culpava a sessão errada — 04/09/2026
+
+Uma revisão dos hooks encontrou **quatro defeitos no `fechar-ciclo.mjs`**, três
+já corrigidos e um que fica registrado como escolha consciente. Os dois
+primeiros são a mesma classe de erro que o projeto já viu no segredo de justiça
+e no disjuntor: a barreira parecia de pé, e não estava.
+
+| # | Defeito | Estado |
+|---|---|---|
+| 1 | **Vigiava 4 pastas de 9.** A lista de inclusão era de 25/08, quando não havia código. `services/`, `dados/`, `testes/` e `ferramentas/` nasceram invisíveis — **13 dos 24 arquivos** dos últimos dez commits passavam batidos, e uma sessão inteira de construção parava em silêncio | ✅ **Corrigido (D-189)** — virou lista de **exclusão**: tudo conta, menos build, log e descartáveis. Pasta nova já nasce coberta |
+| 2 | **Sem fotografia, desistia.** Falha *abrindo*, contra a Regra 5 — bastava a foto sumir para a cobrança sumir junto | ✅ **Corrigido** — as anotações de escrita valem sozinhas; foto ilegível vira aviso, não silêncio |
+| 3 | **Culpava a sessão errada.** Atribuía a esta sessão tudo que mudasse no disco. Em 02/09 barrou uma sessão que só **leu** arquivos, cobrando-a por trabalho que outra sessão fizera segundos antes | ✅ **Corrigido (D-190)** — o `anotar-escrita.mjs` registra cada escrita enquanto acontece. Onde a prova não alcança, cobra **declarando** que a autoria não está provada |
+| 4 | **`stop_hook_active` é uma saída.** Barrado uma vez, basta parar de novo | 🟡 **Fica** — é a trava que impede laço infinito. Escolha entre dois problemas, não defeito |
+
+**O que ainda não existe:** nenhum hook obriga a **ler** este documento antes de
+agir. O `estado-do-repo.mjs` injeta o cabeçalho — **19 de 799 linhas, 2,4%** — e
+pede "leia o documento inteiro". Pedido não é tranca, e a Regra 1 diz que isso
+não vale. A proposta pendente é um hook de `UserPromptSubmit` que, a cada
+mensagem, injete **só o que mudou** neste documento desde a última leitura da
+sessão. O documento inteiro custaria **~28.000 tokens por mensagem**; o trecho
+que mudou custa algumas centenas, e só quando outra sessão mexeu. **Adiado por
+decisão do usuário**, para ser avaliado à parte.
+
+Os três hooks corrigidos ganharam suítes de teste (**22 casos** no
+`testar-anotar-escrita`, **17** no `testar-fechar-ciclo`), e os casos que
+precisam *passar* pesam tanto quanto os que precisam bloquear — ver **R-58**.
 
 ## O que os mapeamentos concluíram
 

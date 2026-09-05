@@ -11,20 +11,25 @@ aplica em código, nunca por instrução no prompt.
 
 Estão declarados em `.claude/settings.json`, que é versionado de propósito.
 
-## Os quatro hooks
+## Os cinco hooks
 
 | Arquivo | Evento | O que faz |
 |---|---|---|
 | `estado-do-repo.mjs` | `SessionStart` | Injeta o estado do Git, o orçamento do Escavador e o cabeçalho de `docs/00-estado-atual.md` no contexto, antes da primeira pergunta. Também tira uma fotografia da árvore de trabalho para o `fechar-ciclo` |
 | `guarda-escavador.mjs` | `PreToolUse` | Bloqueia comando ou `WebFetch` que chame a API paga do Escavador |
 | `guarda-segredo.mjs` | `PreToolUse` | Bloqueia `git add -f`, `git add` de caminho proibido e commit que carregue segredo ou arquivo de dado de cliente |
-| `fechar-ciclo.mjs` | `Stop` | Se a sessão mexeu na memória do projeto sem atualizar `docs/00-estado-atual.md`, interrompe a parada e cobra o fechamento do ciclo |
+| `anotar-escrita.mjs` | `PostToolUse` | Anota cada arquivo que esta sessão escreveu, para que a cobrança do ciclo saiba de quem é a autoria |
+| `fechar-ciclo.mjs` | `Stop` | Se a sessão escreveu na memória do projeto sem atualizar `docs/00-estado-atual.md`, interrompe a parada e cobra o fechamento do ciclo |
 
 ### `guarda-escavador.mjs` — o disjuntor de crédito
 
-A cota de teste é de **R$ 50,00, R$ 3,00 por requisição, teto de 16**, sem
-rota gratuita e sem recarga contratada. É o único erro deste projeto que custa
-dinheiro e não se desfaz.
+Chamada à API é o único erro deste projeto que custa dinheiro e não se desfaz.
+
+O custo **varia por rota**, e existem **rotas gratuitas** — a tarifa plana de
+R$ 3,00 que o suporte informou foi desmentida pela medição (D-108), e o teto de
+16 requisições não existe (D-119). Isso não afrouxa nada: gratuito se confirma
+pelo cabeçalho medido, nunca por suposição. A cota de teste **expirou em
+01/09/2026**, e recarga é decisão do usuário.
 
 - **Barra:** comando que junte `escavador.com` a um invocador de rede (`curl`,
   `wget`, `node`, `python`, `Invoke-RestMethod`…), qualquer execução de
@@ -63,22 +68,61 @@ O `CLAUDE.md` manda, ao terminar trabalho relevante, atualizar
 `docs/00-estado-atual.md`, commitar em português e enviar. A conversa não
 sobrevive à sessão; o documento sim.
 
-Para não ser chato, ele compara o `git status` do fim com a **fotografia**
-tirada no início da sessão — só cobra o que *esta* sessão mexeu, e só nas
-pastas que são a memória do projeto (`docs/`, `demo/`, `captura/`, `.claude/`).
+Ele cobra pelo que a sessão **provadamente escreveu** — a lista que o
+`anotar-escrita.mjs` foi acumulando — e não pelo que apareceu no disco.
 
 - Mexeu na memória e **não** atualizou o estado → **interrompe** e cobra
 - Já atualizou o estado, falta registrar → **aviso leve**, não interrompe
 - Nada novo, ou já dentro de um ciclo de cobrança → **fica calado**
+- Mudou algo que a sessão **não** escreveu, e ela nunca rodou terminal capaz
+  de escrever → **fica calado**: é trabalho de outra sessão
+- Mudou algo que ela não escreveu, mas ela **rodou** terminal que escreve →
+  **cobra, com ressalva** de que a autoria não está provada
+
+O que conta como trabalho é definido por **exclusão**: tudo conta, menos
+`node_modules/`, `dist/`, `.log`, `tmp/` e as próprias anotações de sessão.
+A lista era de inclusão até 04/09 e ficou dez dias desatualizada — `services/`,
+`dados/` e `testes/` nasceram invisíveis, e o hook não enxergava 13 dos 24
+arquivos dos últimos dez commits. Por exclusão, a pasta nova já nasce coberta.
+
+Fotografia **ausente** não desarma a cobrança (isso era falha *abrindo*, contra
+a Regra 5): as anotações de escrita continuam valendo sozinhas. Fotografia
+**ilegível** com árvore suja vira aviso, em vez de silêncio.
 
 O campo `stop_hook_active` garante que ele nunca entre em laço infinito. Para
 transformar a cobrança em aviso simples, troque `const BLOQUEAR = true` por
 `false` no topo do arquivo.
 
+### `anotar-escrita.mjs` — quem escreveu o quê
+
+Roda depois de cada `Write`, `Edit`, `NotebookEdit` e comando de terminal, e
+anota em `.claude/.sessoes/<sessão>.escritas.txt` o caminho de cada arquivo que
+**esta** sessão escreveu. Comando de terminal não diz quais arquivos tocou, então
+ali ele grava só a marca `!bash-escreveu` — o suficiente para o `fechar-ciclo`
+saber que a possibilidade existiu.
+
+Existe por causa de um defeito medido em 02/09: uma sessão que apenas **leu**
+arquivos foi barrada e cobrada por alterações que outra sessão, rodando em
+paralelo, fizera segundos antes. Sem este registro, a autoria era um palpite.
+
+Ele grava em modo *append* (acrescentar ao fim, sem reler) porque duas
+ferramentas podem rodar ao mesmo tempo — ler-modificar-gravar um JSON perderia
+anotações na corrida. E ignora `2>/dev/null` e `2>&1` ao decidir se um comando
+escreve: eles aparecem em quase todo comando, e se contassem, a marca estaria
+sempre ligada e não distinguiria mais nada.
+
 ## Manutenção
 
-Os quatro são Node puro (o projeto já usa `.mjs`), sem dependência externa e
+Os cinco são Node puro (o projeto já usa `.mjs`), sem dependência externa e
 sem acesso à rede. Rodam igual em PowerShell e em Git Bash.
+
+Três deles têm suíte de testes própria, que monta um repositório Git
+descartável e encena as situações — nenhuma depende de commit deste projeto,
+então não apodrecem com o tempo:
+
+```bash
+node .claude/hooks/testar-anotar-escrita.mjs && node .claude/hooks/testar-fechar-ciclo.mjs && node .claude/hooks/testar-guarda-escavador.mjs && node .claude/hooks/testar-guarda-segredo.mjs
+```
 
 Para testar um hook sem esperar ele disparar, alimente-o pela entrada padrão
 com o JSON que o Claude Code enviaria:
