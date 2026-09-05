@@ -99,8 +99,8 @@
 ### B1. n8n
 
 41. ✅ **RESPONDIDA em 05/09 — `v1.123.18`, self-hosted.** Sobre Node.js v22.21.0, no ar há ~43 dias sem reinício. A versão sai do endpoint `/metrics`, que responde sem autenticação — ver R-60.
-42. ✅ **RESPONDIDA em 05/09 — queue mode, confirmado por medição.** As métricas de fila (`n8n_queue_job_enqueued_total`) só existem em queue mode. **O número de workers não sai por aí** — worker publica métrica no processo dele, e o que respondeu foi o *leader*. Fica valendo **um worker**, como informação declarada. *(Importa para E2: com um worker, um lote de publicações do diário processa uma de cada vez, e o alerta de prazo entra na fila atrás do que já estiver rodando dos outros clientes.)*
-43. ✅ **RESPONDIDA — PostgreSQL.** Não sai pela API; declarado pelo usuário.
+42. ✅ **RESPONDIDA em 05/09 — queue mode, confirmado por medição.** As métricas de fila (`n8n_queue_job_enqueued_total`) só existem em queue mode. **O número de workers não sai por aí** — worker publica métrica no processo dele, e o que respondeu foi o *leader*. ✅ **Confirmado na infra em 05/09: um worker, medido** — e o n8n está em **quatro serviços**: `editor` (1), `webhook` (**2 réplicas**), `worker` (1) e `mcp_api` (1). *(Importa para E2: com um worker, um lote de publicações do diário processa uma de cada vez, e o alerta de prazo entra na fila atrás do que já estiver rodando dos outros clientes.)*
+43. ✅ **RESPONDIDA e medida em 05/09 — PostgreSQL 16**, imagem `pgvector/pgvector:pg16`, com `pgbouncer` na frente. ⚠️ O n8n conecta como o **superusuário `postgres`** — ver pergunta 52 e **D-201**.
 44. ✅ **RESPONDIDA em 05/09 — todos disponíveis, e já em uso real na instância.** `AI Agent`, `MCP Server Trigger`, `Chat Trigger`, `Tool Workflow` (21 usos), `lmChatOpenAi`, `googleGemini`, `memoryBufferWindow`. A 1.123 é folgadamente posterior ao mínimo de qualquer um. **Nenhum risco de versão para o desenho da plataforma.**
 45. ✅ **RESPONDIDA em 05/09 — 194 workflows, 9 ativos.** E o número não é a resposta importante: **cinco dos nove ativos são de outros clientes do prestador** (Font Liberty, Nexus AI, Hermes MCP). A instância é compartilhada — ver **R-60** e a tabela em `16-levantamento...` §2. Nenhum deles é afetado pelo que este projeto fizer, desde que ninguém mexa neles; o inverso não é verdade, e é isso que R-61 trata.
 46. ✅ **RESPONDIDA em 05/09 — não há versionamento nenhum.** Não há *source control* (é recurso Enterprise, e `/projects` responde 403), nem exportação versionada. **Os 194 fluxos existem em um lugar só: o banco da instância.** Um fluxo salvo por cima não tem como voltar.
@@ -113,19 +113,54 @@
     Por que importa aqui: hoje, mexer num fluxo ativo mexe **no fluxo ativo**, com clientes reais do outro lado, e sem versionamento (pergunta 46) não há como voltar. Com 194 fluxos e 9 no ar, o custo de um salvamento errado é imediato.
 
     **Não é bloqueador para o prazo de 10–15/09, e não proponho montar agora.** A frente LEX já contorna o problema por outro caminho — os fluxos nascem de código versionado e são publicados por script, então o "ensaio" acontece no repositório. Fica como recomendação de operação, para depois da entrega.
-50. 🟡 **PARCIAL — o que a aplicação vê foi medido; o host não.** 333 MB residentes, ~0,8% de um núcleo em média nos 43 dias. CPU total, memória total, disco e limites de execução dependem do acesso à infra. Combinado: fica para depois.
+50. ✅ **RESPONDIDA por inteiro em 05/09.** **2 vCPU, 7,8 GB de RAM** (3,1 em uso), **96,73 GB de disco** (20,1% usados), carga 0,12 — a máquina está ociosa, com **20 containers em 2 núcleos**. **Limites de execução:** 1 h por padrão, 2 h de teto — folgado. ⚠️ **`N8N_PAYLOAD_SIZE_MAX=16` — teto de 16 MB por requisição, e isso é restrição real:** autos em PDF passam disso com frequência, e o sintoma não é erro de lógica — é a requisição ser recusada na porta, o que aparece como "não chegou". O desvio é o **MinIO**, que já está no ar. Ver **D-204**.
 
 ### B2. Infraestrutura
 
-> **Sobre o acesso que você ofereceu.** Sim, tem como — e a forma segura **não é** me dar credencial de administrador. Ver a resposta no chat de 05/09: o caminho é você rodar meia dúzia de comandos de leitura e me mandar a saída. Cinco minutos, nada exposto, e responde 51 a 57 de uma vez. Até lá as sete continuam abertas.
+> ✅ **Respondida em 05/09**, no terminal do servidor, por comandos de leitura que o usuário rodou e cuja saída ele conferiu antes de entregar. Nenhuma credencial trafegou. Detalhe inteiro na **Parte II** de [`16-levantamento-instancia-n8n.md`](16-levantamento-instancia-n8n.md). **Nasceram R-62 a R-66, e três deles precedem qualquer dado real do escritório.**
 
-51. 🔴 Onde a infra está hospedada — provedor e região?
-52. 🔴 Há PostgreSQL disponível para uso da aplicação, ou precisa ser provisionado? *(O n8n já usa um — pergunta 43. A pergunta é se a plataforma compartilha esse ou ganha o dela, e a resposta certa é **o dela**: banco de aplicação com regra de linha e auditoria não divide espaço com o banco operacional de uma ferramenta de terceiros.)*
-53. 🔴 Como os servidores MCP serão implantados — mesmo host do n8n, containers separados?
-54. 🔴 Há gerenciador de segredos, ou os segredos vivem no n8n?
-55. 🔴 Política de backup atual: o quê, com que frequência, e já foi testada uma restauração? *(Com 194 fluxos sem versionamento — pergunta 46 —, esta virou a pergunta mais importante da seção.)*
-56. 🔴 Monitoramento e alertas existentes? *(Sabemos que `/metrics` está de pé e **aberto** — R-60. Falta saber se alguém o coleta, ou se ele só está exposto.)*
-57. 🔴 Quem tem acesso administrativo à infra?
+51. ✅ **RESPONDIDA — Hostinger**, VPS `srv957606`, Ubuntu 22.04.5 LTS, **2 vCPU / 7,8 GB de RAM / 96,73 GB de disco** (20,1% usados). Região não identificada; a Hostinger opera no Brasil e nos EUA, e para LGPD isso importa — fica como sub-pergunta.
+
+    ⚠️ **Não é `docker compose`, é Docker Swarm** — 22 stacks, 24 serviços, 20 containers, criados pelo **Portainer**. A informação inicial era "compose na mão"; os nomes de container desmentiram. Consequência prática: as definições podem não existir em arquivo no disco, e sim dentro do Portainer.
+52. ✅ **RESPONDIDA — existe, e é melhor do que o esperado, com uma ressalva séria.** `pgvector/pgvector:pg16` — **PostgreSQL 16 com pgvector** (extensão de busca por similaridade, útil para base de conhecimento), com **pgbouncer** na frente. Há um segundo, `postgresbackupmcp`, na porta 5433.
+
+    🔴 **A ressalva: o n8n conecta como `postgres`, o superusuário.** Quem tem essa credencial alcança **todos os bancos do servidor**, e ela vive em variável de ambiente que qualquer um com acesso ao Portainer lê. **A plataforma não vai morar ali nessas condições** — ver **D-201**. Barreira de banco que se contorna com a credencial do vizinho não é barreira.
+53. ✅ **RESPONDIDA — como stack de Swarm, igual às outras.** E há precedente pronto: **`n8n_mcp_api` é uma quarta instância do n8n dedicada a servir `/mcp`**, publicada em `callback.criativeia.com.br/mcp`. O caminho de publicar um MCP já existe e está andando.
+
+    Recomendação: os MCP da plataforma **não** ganham endereço público no Traefik — falam com o n8n pela rede interna do Swarm. Endereço público só para o que precisa receber de fora.
+54. ✅ **RESPONDIDA — não há gerenciador de segredos; eles vivem em variável de ambiente, em texto plano.** `DB_POSTGRESDB_PASSWORD`, `N8N_ENCRYPTION_KEY` e `N8N_SMTP_PASS` estão no ambiente do serviço. **O Docker Swarm tem cofre nativo (`docker secret`) e ele não está em uso.**
+
+    Isoladamente seria tolerável — infra pequena, um administrador. Junto com o Portainer publicado na internet (R-62), deixa de ser: quem entra no Portainer lê o ambiente de **todos** os serviços. Ver **R-64**.
+55. 🔴 **RESPONDIDA, e é a pior resposta do levantamento — o backup existe e está PARADO.** `pgbackweb_pgbackweb` roda com **0 de 1 réplica**, sem data conhecida.
+
+    Isso fecha um ciclo ruim: a pergunta 46 achou **194 fluxos existindo num lugar só, sem versionamento**; esse lugar é este PostgreSQL; e o backup dele está fora do ar. Restauração testada: presume-se que não — e **restauração nunca testada é hipótese, não backup**. Ver **R-66**.
+56. ✅ **RESPONDIDA — existe: Prometheus v3.4.2 + Grafana 12.1.1**, ambos no ar e coletando.
+
+    **Isso corrige parcialmente o R-60:** o `/metrics` do n8n não é vazamento acidental, está ligado de propósito porque o Prometheus o coleta — o que é boa prática. O defeito é ele ser alcançável **da internet pública** em vez de só pela rede interna. E o Prometheus **também está público**, sem autenticação (ele não tem nenhuma por padrão), carregando `N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true`, que vaza id de workflow. Ver **R-62**.
+57. 🚧 **SÓ O USUÁRIO RESPONDE.** Quem mais tem acesso administrativo — ao servidor por SSH **e** ao Portainer? *(Último login humano registrado: 24/07. A pergunta vale para os dois, porque com o Portainer publicado na internet, "acesso administrativo" deixou de ser sinônimo de "acesso ao servidor".)*
+
+#### O que a Parte B2 achou sem ninguém perguntar
+
+| # | Achado | Estado |
+|---|---|---|
+| **R-62** | **Treze serviços publicados na internet, e três não deveriam:** Portainer (plano de controle do Docker inteiro), Prometheus (sem autenticação) e pgbackweb (backup e restauração de banco). Grafana, RabbitMQ e MinIO também públicos, com login não conferido | 🔴 **O mais grave.** Precede dado real do escritório |
+| **R-63** | **`pgbouncer *:5432`, `postgresbackupmcp *:5433` e `wootrico *:3000` publicados direto no host**, fora do Traefik. Em Swarm isso atravessa o `ufw` | 🚧 **Suspeita medida, NÃO confirmada.** Teste externo pendente |
+| **R-64** | Segredos em variável de ambiente, sem cofre — e o Swarm tem um | 🔴 É o R-62 visto de outro lado |
+| **R-65** | `NODE_FUNCTION_ALLOW_BUILTIN=*` — nó de código de **qualquer um dos 194 fluxos** alcança o sistema de arquivos e pode abrir processo | 🟠 Puxa contra o `BLOCK_ENV_ACCESS`, que está corretamente ligado |
+| **R-66** | O backup está parado | 🔴 Ver pergunta 55 |
+| **D-203** | **A retenção de execução é 14 dias OU 10.000 execuções** — o R-57 deixou de ser estimativa | ✅ Medido na configuração |
+| **D-204** | **Teto de 16 MB por requisição** (`N8N_PAYLOAD_SIZE_MAX`) — autos em PDF passam disso. Restrição real de E3 | ✅ Medido |
+| **D-202** | **Evolution API, wuzapi e Chatwoot já estão no ar** — a infraestrutura de WhatsApp **não oficial** existe, e é a única que cabe no prazo | 🔴 Decisão do usuário e da Malu |
+
+#### Ainda pendente na infra
+
+| O que | Como |
+|---|---|
+| As portas 5432/5433 estão abertas ao mundo? | `Test-NetConnection <ip> -Port 5432` **de fora** da máquina |
+| Grafana, RabbitMQ e MinIO ainda com senha inicial? | Tentar entrar |
+| Por que o `pgbackweb` não sobe | `docker service ps pgbackweb_pgbackweb --no-trunc` |
+| Região do datacenter da Hostinger | Painel da Hostinger — importa para LGPD |
+| **57** — quem tem acesso administrativo | Só o usuário responde |
 
 ---
 
