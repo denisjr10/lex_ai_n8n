@@ -43,9 +43,28 @@
  * pedido de eliminação apaga o conteúdo sem mexer na trilha, que é append-only
  * e não aceitaria o apagamento.
  *
- * Uso:
- *   node ferramentas/receptor/recolher-do-n8n.mjs --conferir   # não grava nada
- *   node ferramentas/receptor/recolher-do-n8n.mjs --gravar
+ * ---------------------------------------------------------------------------
+ * Uso — pelos atalhos do npm, que funcionam igual em qualquer terminal:
+ *
+ *   npm run receptor:conferir    # lê e não grava nada
+ *   npm run receptor:recolher    # grava
+ *
+ * ⚠️ POR QUE OS ATALHOS, E NÃO A VARIÁVEL DE AMBIENTE NA FRENTE DO COMANDO.
+ *
+ * A instrução original era `LEX_INQUILINO_ID=... node ...`, que é sintaxe de
+ * **bash**. No PowerShell isso não existe: ele lê o texto inteiro como nome de
+ * programa e responde "não é reconhecido como cmdlet". Custou uma tentativa
+ * frustrada de quem foi rodar.
+ *
+ * A lição não é "documentar as duas sintaxes" — é não depender de nenhuma. A
+ * máquina de trabalho é Windows, e comando que só funciona no shell de quem o
+ * escreveu não é comando, é pegadinha. O `npm run` é o mesmo texto em bash, em
+ * PowerShell e no cmd.
+ *
+ * De onde vem o inquilino, em ordem:
+ *   1. `--inquilino <uuid>` na linha de comando
+ *   2. `LEX_INQUILINO_ID` no ambiente
+ *   3. `LEX_INQUILINO_ID` em `infra/.env`, que o Git ignora — o normal
  */
 
 import fs from 'node:fs';
@@ -68,7 +87,10 @@ const GRAVAR = args.includes('--gravar');
 const WORKFLOW = 'OymAtbNYI1pjfWkA';
 
 if (!GRAVAR && !args.includes('--conferir')) {
-  console.error('\n  informe --conferir (não grava) ou --gravar\n');
+  console.error(
+    '\n  informe --conferir (nao grava) ou --gravar\n\n' +
+    '  Mais simples:  npm run receptor:conferir   ou   npm run receptor:recolher\n',
+  );
   process.exit(1);
 }
 
@@ -111,12 +133,19 @@ async function n8n(caminho) {
 // errado é o tipo de engano que a política por linha não pega, porque a linha
 // fica coerente — só está no lugar errado.
 // ---------------------------------------------------------------------------
-const INQUILINO = process.env['LEX_INQUILINO_ID'];
+const posInquilino = args.indexOf('--inquilino');
+const INQUILINO =
+  (posInquilino >= 0 ? args[posInquilino + 1] : undefined) ?? process.env['LEX_INQUILINO_ID'];
 if (GRAVAR && !INQUILINO) {
   console.error(
-    '\n  falta LEX_INQUILINO_ID — de qual escritório são estas publicações.\n' +
-    '  Sem ele não há padrão a assumir: gravar no escritório errado produz\n' +
-    '  linha coerente no lugar errado, que nenhuma política detecta.\n',
+    '\n  Falta dizer DE QUAL ESCRITORIO sao estas publicacoes.\n\n' +
+    '  Nao ha padrao a assumir de proposito: gravar no escritorio errado produz\n' +
+    '  linha coerente no lugar errado, e nenhuma politica de banco detecta isso.\n\n' +
+    '  O jeito normal - grave uma vez em infra/.env (que o Git ignora):\n' +
+    '      LEX_INQUILINO_ID=<uuid>\n' +
+    '  e depois e so:  npm run receptor:recolher\n\n' +
+    '  Ou, avulso:\n' +
+    '      node ferramentas/receptor/recolher-do-n8n.mjs --gravar --inquilino <uuid>\n',
   );
   process.exit(1);
 }
@@ -191,7 +220,7 @@ for (const [k, n] of Object.entries(porTipo)) ok(`${n}x  ${k}`);
 if (!GRAVAR) {
   console.log(
     `\n${cor.ama}Modo --conferir: nada foi gravado.${cor.off}\n` +
-      `  Para gravar:  ${cor.cin}LEX_INQUILINO_ID=<uuid> node ferramentas/receptor/recolher-do-n8n.mjs --gravar${cor.off}\n`,
+      `  Para gravar:  ${cor.cin}npm run receptor:recolher${cor.off}\n`,
   );
   process.exit(0);
 }

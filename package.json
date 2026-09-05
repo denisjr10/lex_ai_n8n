@@ -19,6 +19,8 @@
     "banco:estado": "node ferramentas/banco/migrar.mjs --estado",
     "banco:conferir": "node ferramentas/banco/conferir-regras.mjs",
     "banco:auditoria": "node ferramentas/banco/conferir-auditoria.mjs",
+    "receptor:conferir": "node ferramentas/receptor/recolher-do-n8n.mjs --conferir",
+    "receptor:recolher": "node ferramentas/receptor/recolher-do-n8n.mjs --gravar",
     "banco:derrubar": "node ferramentas/banco/subir.mjs --derrubar",
     "banco:zerar": "node ferramentas/banco/subir.mjs --zerar",
     "verificar": "node ferramentas/banco/migrar.mjs --conferir && node ferramentas/banco/conferir-regras.mjs && node ferramentas/banco/conferir-auditoria.mjs && npm run testes",

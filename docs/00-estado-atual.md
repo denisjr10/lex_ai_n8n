@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-09-04 |
+| Atualizado em | 2026-09-05 |
 | Crédito Escavador | 🔴 **EXPIRADO em 01/09/2026.** Foram gastos **R$ 6,00 de R$ 50,00** em 21 requisições; os **R$ 44,00 restantes evaporaram** — saldo de teste não vira crédito. O programa de validação de contrato foi cumprido quase inteiro (ver §"O saldo de teste expirou"). **Nenhuma chamada nova sem recarga**, e recarga é decisão do usuário, negociada com o comercial (R-22) |
-| Callback | ✅ **PROVADO, E AGORA GRAVANDO.** 35 entregas recebidas; **33 eventos, 30 publicações e 100 envolvidos no banco** (D-181 fechada). ⚠️ O webhook é `responseMode: onReceived`, então toda execução aparece como `success` no painel, inclusive a recusada — o "não" está no dado, não no status. A gravação hoje é por **recolhimento** (`ferramentas/receptor/recolher-do-n8n.mjs`), porque o n8n é remoto e o banco é local; o receptor gravando na hora depende do marco 7 |
+| Callback | ✅ **PROVADO, E GRAVANDO.** Recolhido em 05/09: **37 eventos, 34 publicações, 112 envolvidos, 26 processos** — 30 delas intimação, de 27/08 a 04/09. ⚠️ O webhook é `responseMode: onReceived`, então toda execução aparece como `success` no painel, inclusive a recusada — o "não" está no dado, não no status. Recolher com **`npm run receptor:recolher`** (D-191); o receptor gravando na hora depende do marco 7 |
 | ⚠️ **Assinaturas ativas** | **1 — id `2813617`**, vigilância em diário, renovação em **26/09**. 🔄 **A leitura mudou em 02/09 (D-182): ela não é resíduo de teste — é a fonte viva do contrato de prazo**, entregando ~6 publicações reais por dia útil a custo zero. Removê-la deixou de ser faxina e virou decisão sobre a frente E2, a ser tomada **antes de 26/09**. O risco de renovação sem ninguém olhando continua de pé; o que mudou é que agora há alguém olhando |
 | ✅ **Aparição** | 🟢 **MEDIDA — 30 entregas reais, e o custo foi R$ 0,00.** O contrato que se dava por perdido chegava por **callback** desde 27/08, e segue chegando: ~6 publicações por dia útil, de 22 processos, **26 delas intimação** — a publicação que faz prazo correr. **13 chegaram depois de a cota expirar**, porque callback não depende de saldo. 🔴 **E o polling errou:** as leituras de `/aparicoes` voltaram vazias no mesmo dia em que o callback entregava (R-55). Contrato em `15-contrato-da-aparicao.md`; D-177 a D-182 |
 | Bloco C | ✅ **FECHADO de ponta a ponta, e custou R$ 0,00.** Solicitação `55413945` concluiu em 3h45, o n8n recebeu 2 segundos depois com `veredito: autentico`. E revelou que **o `uuid` do Escavador não serve como chave de idempotência** — ver `06-orcamento...` §5.6 |
@@ -540,6 +540,40 @@ O mesmo para a chave composta: com ela, `ERROR`; sem ela, `INSERT 0 1`. E o cen�
 ### O que a revisão confirmou que está de pé
 
 9 configurações TypeScript, 29 arquivos `.mjs`, 34 JSONs, os 44 testes do domínio e do chassi, e nenhum link quebrado na documentação. Nenhuma chamada à API externa foi feita.
+
+## O recolhimento virou um comando só, e o ritmo do diário caiu — 05/09/2026
+
+**37 eventos, 34 publicações, 112 envolvidos, 26 processos** no banco. Quatro publicações novas desde 02/09.
+
+### 🔴 A instrução de 02/09 só funcionava em bash
+
+O comando entregue foi `LEX_INQUILINO_ID=... node ...` — sintaxe de **bash**. A máquina de trabalho é Windows, e o PowerShell lê o texto inteiro como nome de programa: *"não é reconhecido como cmdlet"*.
+
+É a pior categoria de erro: **o comando estava certo e mesmo assim não funcionava**, e quem recebe não tem como distinguir "escreveram errado" de "eu digitei errado".
+
+A correção não foi documentar as duas sintaxes — foi não depender de nenhuma (D-191):
+
+```bash
+npm run receptor:conferir    # lê e não grava
+npm run receptor:recolher    # grava
+```
+
+`npm run` é o mesmo texto em bash, PowerShell e cmd. O inquilino agora vem, em ordem, de `--inquilino <uuid>`, do ambiente, ou de `infra/.env` — e o último é o normal, porque configuração que se digita toda vez é configuração que um dia se digita errado.
+
+### O ritmo do diário caiu pela metade, e vale acompanhar
+
+| Dia | Publicações |
+|---|---|
+| 31/08 seg | 8 |
+| 01/09 ter | 7 |
+| 02/09 qua | 6 |
+| **03/09 qui** | **3** |
+| **04/09 sex** | **1** |
+| 05/09 sáb | 0 — fim de semana, esperado |
+
+Pode ser variação normal: a vigilância é sobre o nome de **uma** advogada, e volume de publicação oscila. Mas a queda coincide com a expiração da cota em 01/09, e isso merece um olho — se a assinatura estiver degradando em silêncio, o sintoma seria exatamente este.
+
+**Não dá para investigar sem gastar**: conferir o estado da vigilância exige chamada à API, e não há saldo. Fica como observação, a reavaliar na semana que vem. Próximo dia útil: **terça, 08/09** — segunda é 7 de setembro.
 
 ## O receptor passou a gravar, e o resgate encontrou dois defeitos — 02/09/2026
 
@@ -1105,7 +1139,7 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-188** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+**D-01 a D-191** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
 
 - ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
 - 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08

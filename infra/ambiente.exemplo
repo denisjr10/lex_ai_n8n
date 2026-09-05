@@ -18,3 +18,9 @@ POSTGRES_PORT=5433
 # Senha do papel da APLICACAO (lex_app), criado pela migracao 007. E o papel
 # que os servicos usam — e o que NAO pode alterar nem apagar auditoria.
 LEX_APP_PASSWORD=desenvolvimento-local-app
+
+# De qual escritorio sao os dados que o recolhedor de callbacks grava
+# (npm run receptor:recolher). Sem ele o script recusa gravar, de proposito:
+# publicacao no escritorio errado produz linha coerente no lugar errado, e
+# nenhuma politica de banco detecta isso.
+LEX_INQUILINO_ID=00000000-0000-0000-0000-000000000000
