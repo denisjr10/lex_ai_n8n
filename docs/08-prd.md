@@ -603,15 +603,20 @@ Há dois caminhos para descobrir que algo aconteceu num processo, e eles diferem
 ✅ **D-205, decidida em 05/09.** Até aqui a §9.3 tratava a escolha em abstrato. Com a carteira medida (D-193 — ~289 processos da **Malu Souza** e ~24 da **Ana Beatriz**), ela passa a ter nome:
 
 
-| Advogada        | Carteira | Caminho                                                    | Custo mensal                      |
-| ----------------- | ---------- | ------------------------------------------------------------ | ----------------------------------- |
-| **Malu Souza**  | ~289     | **V1 — nome no diário oficial** ✅ decidido               | **R$ 3,00/mês**, o nome dela      |
-| **Ana Beatriz** | ~24      | **V2 — um monitoramento por processo** 🟡 falta a variante | de **R$ 4,32** a **R$ 72,00/mês** |
+| Advogada        | Carteira                                  | Caminho                                        | Custo mensal                 |
+| ----------------- | ------------------------------------------- | ------------------------------------------------ | ------------------------------ |
+| **Malu Souza**  | ~289                                      | **V1 — nome no diário oficial**               | **R$ 3,00/mês**, o nome dela |
+| **Ana Beatriz** | ~24 acompanhados, de um total maior       | **V1 — nome no diário oficial + triagem**     | **R$ 3,00/mês**, o nome dela |
+
+
+> ⚠️ **Revisto em 05/09 — a linha da Ana Beatriz mudou de V2 para V1 (D-206).** A versão anterior desta seção previa monitoramento por processo para ela, a R$ 55,20–72,00/mês, e deixava a frequência em aberto. O contexto que faltava: **a Ana Beatriz não é exclusiva deste escritório** — atua também em outros —, e a Malu acompanha **apenas alguns** dos processos dela. Isso derruba o V2 por dois lados: ele custa 20× mais e ainda **cobre menos**, porque só vê o processo que alguém cadastrou. O detalhamento está em §9.3.3.
 
 
 **Por que a Malu vai de V1 e não de V2.** 289 processos × R$ 3,00 seriam **R$ 867,00/mês**. O nome dela num monitoramento de diário custa **R$ 3,00/mês** e cobre *todos* os processos em que ela está constituída — inclusive os que o escritório ainda não cadastrou. É a diferença de duas ordens de grandeza que abre esta seção, aplicada a um caso com nome.
 
-**A escolha que sobra é a da Ana Beatriz, e ela é de frequência — não de documentos.**
+**A escolha entre `diaria` e `mensal` deixou de valer para a Ana Beatriz** (D-206), mas continua valendo para qualquer monitoramento por processo que o escritório venha a criar por razão específica — então fica registrada.
+
+**Quando se escolhe V2, a escolha é de frequência — não de documentos.**
 
 Os dois caminhos da pergunta são a **mesma rota da API** (`POST /api/v2/monitoramentos/processos`). O que muda são dois campos do corpo: `frequencia` e `documentos_publicos`. O preço do painel deixa isso claro quando se olha a grade inteira:
 
@@ -638,7 +643,7 @@ Os dois caminhos da pergunta são a **mesma rota da API** (`POST /api/v2/monitor
 
 > 🔴 **Monitoramento mensal não é vigilância de prazo — é um relatório mensal.** Ele detecta com atraso maior que o próprio prazo que deveria proteger. Adotá-lo em E2 seria comprar, por R$ 4,32/mês, a **aparência** de vigilância: o painel mostraria "monitorado", nenhuma rotina acusaria falha, e a perda de prazo apareceria depois de já ter acontecido. Colide de frente com a RF-15 (*silêncio nunca é interpretado como "nada aconteceu"*) e com o motivo pelo qual E2 vem antes de E3 (§4.1).
 
-**Recomendação, com posição:** para a Ana Beatriz, **frequência diária**. A diferença para a variante mensal é de **R$ 67,68 por mês** — menos que uma hora de trabalho de advogada, e muito menos que uma preclusão. Frequência é exatamente o que se paga em vigilância de prazo; economizar nela é economizar na única coisa que E2 entrega.
+**Recomendação, com posição:** monitoramento por processo criado para proteger prazo é **sempre `diaria`**. Frequência é exatamente o que se paga em vigilância de prazo; economizar nela é economizar na única coisa que E2 entrega. A variante mensal tem um uso legítimo — higiene de cadastro —, e **nunca** conta como cobertura de prazo (RF-43).
 
 **Duas ressalvas antes de criar qualquer coisa:**
 
@@ -651,6 +656,82 @@ Os dois caminhos da pergunta são a **mesma rota da API** (`POST /api/v2/monitor
 | **RF-42** | Todo monitoramento de processo (V2) registra na base a `frequencia` e o `documentos_publicos` escolhidos, com quem escolheu e a data | Nenhum monitoramento nasce com o valor padrão da API por omissão — mesma regra da franquia (RF-40). O inventário responde "com que frequência este processo é visto"     |
 | **RF-43** | Monitoramento de frequência **não diária** é sinalizado no inventário como **fora da vigilância de prazo**                          | A conferência de RF-36 distingue "vigiado para prazo" de "vigiado para higiene". Cobertura mensal **nunca** conta como cobertura de prazo                                |
 | **RF-44** | O inventário de vigilância cobre **as duas advogadas**, cada uma pelo seu caminho                                                    | A conferência de RF-36 acusa alarme se faltar o monitoramento V1 da Malu **ou** se algum processo da Ana Beatriz estiver sem monitoramento V2. Ambas as listagens são gratuitas (R-41) |
+
+
+---
+
+#### 9.3.3 O advogado compartilhado — vigiar tudo e registrar só o que é nosso
+
+✅ **D-206, 05/09.** Advogado que atua em mais de um escritório é a regra, não a exceção, e o desenho precisa dar conta disso sem escolher entre **ver demais** e **ver de menos**.
+
+**O caso concreto.** A Ana Beatriz atua também em outros escritórios. A Malu acompanha ~24 processos dela; o total da Ana Beatriz é maior — a estimativa do escritório é de 3 a 5 vezes. Vigiar o **nome** dela captura tudo, inclusive o que é de outro escritório. Vigiar **processo a processo** captura só o que foi cadastrado, e cadastro incompleto vira cegueira (R-69).
+
+##### O que a medição respondeu, antes de desenhar qualquer coisa
+
+Quatro números saíram dos **34 callbacks reais** recolhidos entre 27/08 e 04/09 e da resposta de criação do monitoramento `2813617`. Eles reduzem o problema:
+
+
+| O que se temia                                              | O que a medição diz                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| *"O ruído da Ana Beatriz vai estourar a franquia da Malu"* | **Não vai — a franquia é por monitoramento.** A criação devolveu `limite_aparicoes: 1000` no objeto do monitoramento, junto de `quantidade_aparicoes_mes`. Um segundo monitoramento tem a franquia dele. O ruído de um **não cega** o outro           |
+| *"Vai ser uma enxurrada de eventos"*                        | **São ~5 por dia útil, no total.** 34 aparições em 7 dias úteis, para uma carteira de ~289 processos — ou ~107/mês, ~0,37 por processo/mês. Aplicada à Ana Beatriz, a mesma taxa dá **~27 a 45 aparições/mês** no total dela                          |
+| *"Vai cair publicação de todo o Brasil"*                    | **Já não cai.** O monitoramento nasce com `origens_ids` restrito aos **5 diários do Amapá** (DJAP, TRT-8, TRF1-SJAP, TRE-AP, DOEAP), de 181 disponíveis. Processo da Ana Beatriz em outro estado **nunca chega** — o filtro geográfico já está de pé |
+| *"Dá para filtrar pelos advogados listados na publicação"*  | 🔴 **Não dá.** Ver abaixo — é o achado que decide o desenho                                                                                                                                                                                             |
+
+
+**Sobra, então, um problema pequeno e real:** as publicações de processos da Ana Beatriz **no Amapá, para outros escritórios**. Pela taxa medida, algo como **uma por dia útil**. Não é enxurrada — mas é conteúdo de cliente de terceiro entrando na nossa base, e isso não se resolve com tolerância.
+
+##### Onde filtrar: na origem ou no receptor — e por que não é a mesma coisa
+
+**Na origem** (no Escavador) é o único lugar que **economiza franquia**, e há dois campos:
+
+- **`origens_ids`** — quais diários vigiar. **É o bom**: recorta por jurisdição, é editável no meio do ciclo (`PUT /api/v1/monitoramentos/{id}` aceita), e não corre risco de prazo, porque diário de estado em que o escritório não atua não traz prazo do escritório. **Já está em uso**
+- **`termos_auxiliares`** — exigir que outro termo apareça junto. 🔴 **Recusado, e a recusa é anterior a esta conversa**: está registrada em `captura/monitoramento.local.json` — *"falso positivo custa leitura; falso negativo custa prazo"*. Restringir por termo faz sumir a publicação que traz só o nome. **A recusa continua de pé**, e vale igualmente para a Ana Beatriz
+
+**No receptor** (do nosso lado, depois que o callback chega) não se economiza um centavo de franquia — economiza-se execução, armazenamento, ruído de alerta e **exposição a dado de terceiro**. Em compensação é **seguro**: o que a triagem descarta foi recebido e ficou registrado, então um erro de triagem é visível e reversível. Erro de filtro na origem é invisível para sempre.
+
+> **A regra que sai daí:** filtro na origem só por **jurisdição**. Tudo que for sobre *de quem é o processo* se decide **no receptor**.
+
+##### A chave da triagem é o CNJ — e não são os advogados listados
+
+Isto foi medido nos 34 callbacks, e é o ponto que decide o desenho:
+
+
+| Chave candidata                                     | Presença nos 34 callbacks | Serve?                                                                                          |
+| ----------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `movimentacao.processo.numero_novo` (**o CNJ**)     | **34 de 34 — 100%**       | ✅ **Sim.** Vem estruturado, não é extraído do texto                                            |
+| `movimentacao.envolvidos[]` com `pivot_tipo` ADVOGADO | 34 de 34 têm a lista      | 🔴 **Não.** A Malu aparece nela em **28 de 34** — a lista existe, mas **está incompleta em 18%** |
+
+
+Os 6 casos em que ela não aparece são publicações do **monitoramento dela**, captadas porque o nome dela está no texto da página, mas cujo `envolvidos` traz só 2 pessoas para um processo que tem mais. **`envolvidos` é um índice incompleto, não a lista de partes.** Filtrar por "algum advogado do escritório está na lista?" descartaria em silêncio quase 1 em cada 5 publicações legítimas — o que é R-02, perda de prazo, com uma causa que ninguém encontraria depois.
+
+##### A triagem de pertinência — três saídas, nenhuma delas silenciosa
+
+RF-17 e RF-18 já proíbem descarte em silêncio, e essa proibição não se afrouxa aqui. Então isto **não é um filtro, é uma triagem**, e ela tem três saídas:
+
+
+| Saída                     | Condição                                                        | O que acontece                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅ **Acompanhado**        | O CNJ consta da base como processo da carteira do escritório     | Caminho completo: registro integral, movimentação, e o rito de alerta de §5.2.1                                                        |
+| ⚪ **Não acompanhado**    | O CNJ é conhecido e está **explicitamente** marcado como de fora | **Registro mínimo e permanente**: CNJ, data, origem, id da aparição. **Sem conteúdo, sem envolvidos, sem PDF.** Não gera alerta        |
+| 🟠 **Desconhecido**       | O CNJ nunca foi visto pela base                                  | **Fila humana.** Nunca descartado. Alguém classifica, e a classificação vale para as próximas aparições daquele processo             |
+
+
+**A terceira linha é o motivo de tudo isto existir.** Ela é a R-69 virada do avesso: o V1 enxerga processo que ninguém cadastrou, e uma triagem do tipo *"descarta o que eu não conheço"* jogaria fora exatamente a vantagem que fez escolher o V1. Processo novo da Ana Beatriz que a Malu passou a acompanhar aparece aqui **antes** de alguém lembrar de cadastrá-lo.
+
+**O registro mínimo é a resposta de proteção de dados, não uma sobra.** Ele prova que a entrega chegou e que o escritório **não leu** o que não era dele. Guardar o conteúdo de processo de cliente de outro escritório seria acumular dado sem mandato para tê-lo; guardar só que ele passou é minimização.
+
+**Como isso convive com a gravação imediata do receptor (D-181).** O bruto é gravado na chegada, sempre — é a única prova de que o callback chegou, e a triagem pode errar. O que a triagem decide é o que sobe para processo, movimentação e alerta. O corpo do que ficou "não acompanhado" é **expurgado ao fim da janela de conferência** *(proposta: 30 dias)*, sobrando o registro mínimo para sempre.
+
+> ⚖️ **Regra Inegociável 3.** "Quais processos este escritório acompanha" é **regra de negócio do escritório**, e por isso a triagem **não entra no servidor MCP**. Ela vive no receptor, no n8n, ou no Policy Gate. O MCP continua genérico: entrega a aparição, não opina sobre de quem ela é.
+
+
+| #         | Requisito                                                                                                                                     | Critério de aceite                                                                                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RF-45** | Toda aparição de diário passa por triagem de pertinência **pelo CNJ**, com as três saídas acima, antes de virar movimentação ou alerta      | Aparição de processo de fora não gera alerta e não persiste conteúdo. Aparição de CNJ desconhecido **sempre** vai para a fila humana — nunca é descartada                    |
+| **RF-46** | A triagem **nunca** usa a lista de envolvidos como critério de exclusão                                                                       | Medido: `envolvidos` traz o advogado do próprio monitoramento em apenas 82% dos casos. Exclusão por essa chave é bug, e o teste de regressão usa os 6 callbacks que a derrubam |
+| **RF-47** | Marcar um processo como **não acompanhado** é ato nominal, datado, reversível e listado na conferência periódica                              | Nenhum processo entra em "não acompanhado" por inferência da automação. A lista do que o escritório escolheu não ver é consultável a qualquer momento                        |
+| **RF-48** | O filtro na origem (`origens_ids`) recorta **apenas por jurisdição**; nenhum recorte de titularidade é feito antes do callback chegar         | `termos_auxiliares` permanece vazio. Qualquer proposta de usá-lo exige decisão formal, porque troca falso positivo por falso negativo                                          |
 
 
 ---
