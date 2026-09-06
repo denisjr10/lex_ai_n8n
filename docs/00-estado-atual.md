@@ -2,7 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Atualizado em | 2026-09-05 |
+| Atualizado em | 2026-09-06 |
+| 🔴 **O CALENDÁRIO FOI CONTADO, E O ESCOPO PRECISA DE RECORTE** | **06/09** — [`17-plano-de-execucao.md`](17-plano-de-execucao.md), e é **ele** que diz o que fazer agora; a seção "Próximo passo" deste documento está congelada em 31/08. A conta: **07/09 é feriado nacional**, o que deixa **seis dias úteis** até 15/09 — 08, 09, 10, 11, 14 e 15 —, o saldo do Escavador só é contratado no primeiro deles, e faltam **sete marcos** (os 4 a 10 da Spec §15) contra três entregues em ritmo mais folgado. **D-207** propõe o recorte: **E2 inteira** — ela já recebe dado real por callback desde 27/08, e falta ligar o que chega a um alerta com nome e rito — e **E1 com a fundação inteira mais UMA consulta ponta a ponta**, deixando cache (RF-06), painel de custo (RF-08) e relatório de acesso amplo (RF-37) para a fase seguinte. Se a Malu recusar o recorte, **mover a data — não apertar o trabalho**. O plano traz ainda o que **bloqueia** o quê, o que **pode ser pulado**, o que **começa fora de ordem** e **quais sessões podem rodar em paralelo** sem uma apagar a outra. 🔴 **Três bloqueadores não-técnicos que ninguém está tocando:** a cláusula de LGPD antes do primeiro dado real (R-48), os quatro consertos de infra que precedem produção (R-62 a R-66) e **as sete identidades de Telegram — não existe bot de produção nem uma pessoa cadastrada**, e alerta que não chega a ninguém não é vigilância |
 | 🟢 **O ESCOPO FECHOU, E O PRAZO É O EIXO** | **De acordo dado pela Malu Souza em 05/09** (D-195, agora ✅ Confirmada): **E1 + E2 em produção até 15/09**, com **10/09 como ideal**; E3 e E4 viram fase seguinte, com data própria. Contratação em **escopo fechado** — estouro não vira hora extra, vira escopo não entregue —, então **pedido novo dentro desta janela é mudança de escopo, não ajuste**. E4 saiu por motivo fora do nosso alcance (D-197) e E3 depende da chave do Trello, que ainda não existe. O saldo do Escavador é contratado em **08/09**, e **isso não trava E1+E2 até lá** — fundação, chassi e auditoria estão de pé e verificados, e a vigilância entrega publicação real por callback desde 27/08 a custo zero |
 | ⚖️ **A REGRA 2 CEDEU — DE PROPÓSITO, E COM PREÇO ESCRITO** | **05/09.** O escritório **recusou** a proposta da D-194: a colaboradora **pode** carimbar ato com efeito de prazo. Isso flexibiliza a Regra Inegociável 2, então subiu como **decisão formal**, não como configuração — como o próprio registro da D-194 mandava. A flexibilização foi **delimitada em vez de aceita em branco**: a faixa A4 se dividiu em **A4a** (interno e reversível — silenciar um alerta; colaboradora pode) e **A4b** (sai do escritório ou produz direito; **advogada identificada, sem exceção**), pela mesma régua que dividiu a A3 em D-142. Quatro compensações entram junto: perfil individual, **motivo declarado** sem o qual não fecha, **aviso nominal imediato** à advogada com botão de reabrir, e o resumo de fim de dia listando o que foi encerrado. 🔴 **O preço é o R-68:** expirada a janela de reversão, **o silêncio da advogada ratifica** — o que contraria a RF-15 e a linha *Nunca* do rito. **Efeito prático em E1+E2: só a RF-13.** Não existe ato A4b neste escopo — E1 é leitura e a RF-11 proíbe a plataforma de calcular prazo |
 | 🟢 **A vigilância ganhou nome, e o advogado compartilhado ganhou desenho** | **05/09** — D-205 revisada pela **D-206**, PRD §9.3.2 e §9.3.3. **As duas advogadas vão de V1** (nome no diário oficial): Malu e Ana Beatriz, **R$ 3,00/mês cada**. O V2 por processo caiu para a Ana Beatriz — custava 20× mais (R$ 55,20–72,00) e cobria menos, porque só vê processo cadastrado. O problema real é que ela **atua em outros escritórios** e a Malu acompanha só ~24 dos processos dela. **Quatro medições reduziram o problema:** a franquia é **por monitoramento** (o ruído de uma não cega a outra); o volume real é de **~5 aparições por dia útil para ~289 processos**, o que projeta ~27–45/mês no total da Ana Beatriz; o `origens_ids` **já restringe aos 5 diários do Amapá**; e 🔴 **o `envolvidos` não serve de filtro — a Malu aparece nele em só 28 de 34 aparições do próprio monitoramento dela.** O **CNJ veio em 34 de 34**. Desenho: **triagem de pertinência pelo CNJ, no receptor**, com três saídas — acompanhado, não acompanhado (registro mínimo, sem conteúdo) e **desconhecido → fila humana, nunca descarte**. Gera **RF-45 a RF-48** e **R-70**. Por Regra 3, não entra no MCP |
@@ -725,6 +726,8 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 | **Marco 2 — o chassi: sessão, escopo, abrangência, erro e envelope** · a matriz de escopo inteira | `13-chassi-marco-2.md` |
 | **Marco 3 — a auditoria: grava, recusa alteração e reconstrói pelo `requisicao_id`** · 23 de 23 contra o banco | `14-auditoria-marco-3.md` |
 | **O contrato da aparição em diário oficial — medido em 30 entregas reais de callback, a custo zero** | `15-contrato-da-aparicao.md` |
+| **Levantamento da instância n8n e do servidor — medido, não declarado** · R-60 a R-67 | `16-levantamento-instancia-n8n.md` |
+| **Plano de execução até 15/09 — ordem, bloqueios, o que pular e como paralelizar sessões** | `17-plano-de-execucao.md` |
 
 ## As regras saíram do prompt e viraram barreira — 25/08/2026
 
@@ -1082,6 +1085,8 @@ HTTP 403
 
 ## Próximo passo
 
+> ⚠️ **ESTA SEÇÃO ESTÁ VELHA — 06/09.** Ela foi escrita em 31/08, antes de o prazo de 15/09 existir (D-195), antes de a infra ser medida e antes de o calendário ser contado. **O próximo passo agora está em [`17-plano-de-execucao.md`](17-plano-de-execucao.md)**, com a ordem, os bloqueios e o calendário. O que segue abaixo continua tecnicamente correto sobre os marcos, e é por isso que fica — mas não é mais a lista de prioridades.
+
 > Atualizado em 31/08, com os marcos 1, 2 e 3 fechados e cinco achados da revisão externa corrigidos.
 
 ### 1. Marco 4 — motor de custo · sem gastar nada
@@ -1148,7 +1153,9 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-191** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+**D-01 a D-207** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+
+> ⚠️ **06/09 — a pilha de aval virou dívida.** São **173 decisões em 🟡 Proposta** contra 2 ✅ Confirmadas. A maior parte é registro de coisa que o projeto já fez e que ninguém contestou; ler as 173 não é caminho. O passo **P-17** do plano produz o digesto — a lista curta das que ainda mudam desenho, mais um "de acordo em bloco" datado para o resto.
 
 - ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
 - 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08
