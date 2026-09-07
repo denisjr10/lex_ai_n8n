@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Status | **Parcialmente respondido** — a seção A1 fechou em 05/09 (só a 5 voltou como pedido de esclarecimento); antes disso, cinco perguntas que travavam o PRD voltaram em 27/08 |
-| Versão | 0.6 — apareceu um software de gestão jurídica |
+| Versão | 0.7 — a Parte A6 entrou, e o backup voltou |
 | Data | 2026-09-07 (criado em 2026-08-17) |
 | Finalidade | Levantar as informações que faltam para fechar o PRD. Dividido por destinatário. |
 
@@ -192,11 +192,61 @@
 
 ### A6. Conformidade
 
-36. Existe contrato de honorários padrão? Ele menciona uso de tecnologia ou de IA?
-37. Existe DPO ou responsável por LGPD designado?
-38. Há política interna de segurança da informação ou de uso de IA?
-39. Existe restrição do escritório quanto a dados saírem do país?
-40. Que assuntos são especialmente sensíveis (família, criminal, menores) e demandam tratamento mais restritivo?
+> 🟡 **Respondida em 07/09**, e a seção inteira devolve a mesma coisa: **as bases existem, os documentos não.** Há contrato, há responsável designado, há noção clara do que é sensível — e **não há política de segurança, não há política de uso de IA, e não há decisão sobre dados saírem do país**, justamente quando a plataforma inteira depende de provedores fora dele. Gerou **D-211**, **R-73** e **R-74**.
+
+36. **Existe contrato de honorários padrão? Ele menciona uso de tecnologia ou de IA?**
+
+    🟡 **RESPONDIDA em 07/09 — existe, não menciona, e será corrigido se for preciso.**
+
+    **É preciso.** Não por formalismo: o cliente do escritório precisa saber que os dados do processo dele passam por (a) uma infraestrutura operada por um **terceiro** que não é o escritório (D-148, R-48), e (b) **provedores de modelo de IA fora do país** (D-198). Nenhuma das duas coisas é irregular; as duas precisam estar ditas.
+
+    **O que o projeto precisa que o contrato cubra** — a redação é da advogada, não nossa:
+    - que o escritório usa ferramenta automatizada e de IA no tratamento do caso;
+    - que há **operador** de dados contratado, identificado;
+    - que há **transferência internacional** de dados (LGPD art. 33), com a base legal escolhida;
+    - que **decisão jurídica continua sendo humana** — o que a Regra Inegociável 2 já garante em código, e o contrato só declara.
+37. **Existe DPO ou responsável por LGPD designado?**
+
+    🟡 **RESPONDIDA em 07/09 — a advogada Malu Souza, e o usuário naquilo que disser respeito ao sistema que desenvolve e administra.**
+
+    ⚠️ **Há uma sobreposição de papéis a nomear, e ela não é um problema hoje.** Na LGPD, quem decide as finalidades é o **controlador** (o escritório) e quem trata por conta dele é o **operador** (o prestador — o usuário, por D-148). O **encarregado** (é o nome que a LGPD dá ao DPO) é designado pelo controlador e é quem responde ao titular e à ANPD.
+
+    Com o usuário acumulando "operador" e "responsável pela parte do sistema", **quem audita o operador é o próprio operador**. Em escritório de sete pessoas com um prestador só, isso é normal e administrável. Vira problema no dia de um incidente, quando alguém pergunta quem apurou — e a resposta não pode ser "quem causou". **Encaminhamento barato:** o encarregado formal perante o titular e a ANPD é a **Malu**, sempre; o usuário responde tecnicamente **para** ela, e não no lugar dela. Somado ao **R-48**.
+38. **Há política interna de segurança da informação ou de uso de IA?**
+
+    🔴 **RESPONDIDA em 07/09 — ainda não, nenhuma das duas.**
+
+    **É a lacuna que dá peso a todas as outras desta seção.** O **R-72** registrou que documento de cliente provavelmente já transita por IA de consumo (ChatGPT, Claude — pergunta 34); a **39** diz que não há restrição sobre dados saírem do país; e a **40** identifica matérias que exigem tratamento mais restrito. **As três só viram regra dentro de uma política** — sem ela, cada pessoa decide sozinha, todo dia, e ninguém está errado porque não há o que contrariar.
+
+    **Não trava o prazo de 15/09** e não é entrega nossa. Mas uma política de uso de IA para sete pessoas cabe em duas páginas, e é o documento de maior efeito por página do projeto inteiro.
+39. **Existe restrição do escritório quanto a dados saírem do país?**
+
+    🔴 **RESPONDIDA em 07/09 — ainda não.**
+
+    ⚠️ **"Ainda não há restrição" não é o mesmo que "está liberado"** — é decisão que não foi tomada. E ela já está sendo tomada na prática, por omissão, porque **a plataforma inteira depende de fornecedor fora do país**:
+
+    | O que sai | Para onde | Desde quando |
+    |---|---|---|
+    | Conteúdo de prompt (peça, publicação, dado de processo) | **OpenRouter**, e por trás dele OpenAI, Google, Anthropic | Decisão D-198 |
+    | Uso direto da equipe | ChatGPT e Claude | Já hoje (R-72) |
+    | **Backup do banco** | **Cloudflare R2** | **07/09**, ver pergunta 55 |
+    | Mensagem ao cliente | Meta (WhatsApp), se E4 acontecer | D-197 |
+
+    Isso **não é irregular** — a LGPD permite transferência internacional, com base legal (art. 33) e informação ao titular. O que não pode é acontecer **sem ninguém ter decidido**. Ver **R-74**; a saída prática é o item que a 36 acrescenta ao contrato.
+40. **Que assuntos são especialmente sensíveis (família, criminal, menores) e demandam tratamento mais restritivo?**
+
+    ✅ **RESPONDIDA em 07/09 — família, criminal, menores, e todo processo em segredo de justiça.**
+
+    🟢 **Metade disso o projeto já faz.** Segredo de justiça sempre foi tratado à parte: a **RF-38** diz que *"base inteira" não inclui segredo de justiça*, a **RNF-16** exige escopo próprio, e em 24/08 o alvo de teste do fornecedor foi **trocado** (D-96) justamente por estar em segredo. A parte nova são as **matérias**.
+
+    ⚠️ **E a parte nova exige uma distinção que é fácil de errar.** A pergunta 3 respondeu *"sem divisão por área, sem segmentação de acesso"* — e continua valendo. **Os dois não se contradizem porque são eixos diferentes:**
+
+    | Eixo | Pergunta 3 | Pergunta 40 |
+    |---|---|---|
+    | **Quem pode ver** | Todos veem tudo. **Não muda** | — |
+    | **O que o sistema faz sozinho** | — | **Muda.** Automatismo fica mais curto em matéria sensível |
+
+    Ninguém perde acesso. O que encolhe é o que a plataforma faz **sem humano no meio**. O desenho está em **D-211**, e o risco que ele cria — classificação errada falha em silêncio — em **R-73**.
 
 ---
 
@@ -269,9 +319,19 @@
     Isoladamente seria tolerável — infra pequena, um administrador. Junto com o Portainer publicado na internet (R-62), deixa de ser: quem entra no Portainer lê o ambiente de **todos** os serviços. Ver **R-64**.
 55. **Política de backup atual: o quê, com que frequência, e já foi testada uma restauração?**
 
-    🔴 **RESPONDIDA, e é a pior resposta do levantamento — o backup existe e está PARADO.** `pgbackweb_pgbackweb` roda com **0 de 1 réplica**, sem data conhecida.
+    ✅ **RESOLVIDA em 07/09 — o backup voltou, por outro caminho.** O `pgbackweb` estava em **laço de falha** (`exit 201` a cada ~6 s, medido em 06/09) e foi **substituído por `rclone`**, gravando direto no **Cloudflare R2** do usuário.
 
-    Isso fecha um ciclo ruim: a pergunta 46 achou **194 fluxos existindo num lugar só, sem versionamento**; esse lugar é este PostgreSQL; e o backup dele está fora do ar. Restauração testada: presume-se que não — e **restauração nunca testada é hipótese, não backup**. Ver **R-66**.
+    *(Histórico, porque o caminho importa: a pergunta 46 achou **194 fluxos existindo num lugar só, sem versionamento**; esse lugar é o PostgreSQL da instância; e o backup dele estava fora do ar. Era a pior resposta do levantamento.)*
+
+    ⚠️ **Três coisas ficam de pé, e a primeira é a que fecha o R-66:**
+
+    | # | O que falta | Por quê |
+    |---|---|---|
+    | 1 | **Uma restauração testada**, em banco descartável | **Restauração nunca testada é hipótese, não backup.** O `rclone` copiar arquivo prova que a cópia sai — não prova que ela volta, nem que o `pg_dump` de origem está completo. **R-66 só cai depois disto** |
+    | 2 | **O backup está cifrado?** | Sai da máquina e vai para armazenamento de terceiro. O `rclone` tem modo `crypt`; se não estiver ligado, o dump viaja e repousa em claro — e ele contém **as credenciais do n8n e os 194 fluxos** |
+    | 3 | **O R2 fica fora do país** | Cai direto na pergunta **39**, que respondeu *"ainda não há restrição"*. Backup de dado de escritório de advocacia atravessando fronteira é transferência internacional, e entra na mesma conta do R-74 |
+
+    **E uma pergunta de higiene:** onde vive a credencial do R2? Se for variável de ambiente como o resto (R-64), ela herda o mesmo alcance — e agora com o backup do lado de lá.
 56. **Monitoramento e alertas existentes?**
 
     ✅ **RESPONDIDA — existe: Prometheus v3.4.2 + Grafana 12.1.1**, ambos no ar e coletando.
@@ -398,7 +458,7 @@
 
 ## Bloqueadores em resumo
 
-> **Atualizado em 07/09.** Das 74 perguntas, **76 estão respondidas** — mais as derivadas 20a, 20b, 20d e 20e, que fecharam o rito de prazo. 🔴 **E a 30 abriu a maior pergunta ainda de pé na Parte A:** o escritório já usa **Astrea** e **Jusbrasil**, e parte do que E1 e E2 propõem pode estar duplicando o que já existe (D-210, R-71). O que sobra está abaixo — e a primeira linha é a que reorganiza todas as outras.
+> **Atualizado em 07/09.** Das 74 perguntas, **81 estão respondidas** — a Parte A6 inteira entrou — mais as derivadas 20a, 20b, 20d e 20e, que fecharam o rito de prazo. 🔴 **E a 30 abriu a maior pergunta ainda de pé na Parte A:** o escritório já usa **Astrea** e **Jusbrasil**, e parte do que E1 e E2 propõem pode estar duplicando o que já existe (D-210, R-71). O que sobra está abaixo — e a primeira linha é a que reorganiza todas as outras.
 
 | Pergunta | Trava | Estado |
 |---|---|---|
@@ -421,7 +481,9 @@
 | 15 — caixas de e-mail | Desenho da frente F3 | 🔴 Aberta |
 | ~~16a — quantas pessoas usam a conta compartilhada~~ | Custo de reavaliar o Caminho A no futuro | ✅ **Respondida em 07/09 — seis** (Malu + as cinco colaboradoras). O Caminho A vira calculável, e **a Ana Beatriz ficou de fora**, o que alimenta a 15 |
 
-| **Perguntas 7 a 14, 15, 17 a 22, 24 a 25, 28 a 29, 32, 36 a 40** | Escopo fino de E3 e E4, e conformidade | 🔴 **Sem resposta.** A3 e A5 voltaram parciais em 07/09; **A2, A4 e A6 ainda não foram ao escritório** — e a A6 ganhou peso pela resposta da 34 (R-72) |
+| **Perguntas 7 a 14, 15, 17 a 22, 24, 25, 28, 29, 32** | Escopo fino de E3 e E4 | 🔴 **Sem resposta.** A3 e A5 voltaram parciais; **A2 e A4 ainda não foram ao escritório** |
+| **38 e 39 — não há política de uso de IA nem decisão sobre dados fora do país** | O contrato (36), o R-72 e o desenho de matéria sensível (D-211) | 🔴 **Respondidas em 07/09 com "ainda não", e é isso que as torna urgentes.** A plataforma inteira depende de fornecedor fora do país, **o backup agora também** — e a decisão está sendo tomada por omissão (R-74) |
+| **40 → D-211 — matéria sensível** | O que o automatismo pode fazer sozinho em família, criminal e menores | 🟠 **Respondida, e virou desenho.** Depende de classificação confiável, que falha em silêncio quando erra (R-73) |
 
 ### Resolvidas, por data
 
