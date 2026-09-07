@@ -6,6 +6,7 @@
 | 🔴 **NINGUÉM ESTÁ VIGIANDO PRAZO HOJE, E HÁ UMA ASSINATURA QUE SUGERE O CONTRÁRIO** | **08/09.** A pergunta 30 tinha revelado que o escritório usa **Astrea**, e o risco levantado foi duplicação (R-71). O esclarecimento com a Malu **inverteu isso**: o Astrea foi contratado *"apenas para experimentar"* e **não está em uso** — plano de entrada, **uma licença para sete pessoas**, **sem API** (confirmado com a Aurum), e o monitoramento de publicação *"deveria ser, mas não está sendo feito"*. O Jusbrasil é conta **pessoal**, consulta isolada. **Não há dois sistemas: há zero.** R-71 cai; nasce **R-75**, com dois efeitos — um vale **hoje e independe do projeto** (assinatura ativa que ninguém usa ocupando o lugar de uma rede que não existe), outro vale depois (**E2 passa a ser a única camada automática**, sem fundo de reserva, e o que há por baixo é a conferência humana da pergunta 20, **ainda sem resposta**). Reforça a D-209 e encarece o R-73 |
 | ⚠️ **"Substituir o Astrea" precisa de fronteira escrita** | **08/09** (**D-212**). *"Se esse projeto suprir as necessidades, ela não continua a assinatura"* — e **"as necessidades" não estão escritas**. O Astrea cobre nominalmente agenda e financeiro; **o escopo acordado não cobre**, e o recorte de 15/09 (D-207) cobre menos ainda. Em **escopo fechado**, expectativa não escrita não vira aditivo — vira decepção, e ela aparece **depois** do cancelamento. Uma página com "cobre" e "não cobre", com o de acordo da Malu, **antes** de cancelar |
 | 🟢 **O rito do alerta de prazo fechou, e o escritório escolheu o lado seguro** | **07/09** (**D-208**, **D-209**). N1 de **2 h úteis**, N2 de **4 h úteis até a Malu**, expiração de aprovação em **4 h/2 h**. E a 20e escolheu **REABRIR** em vez de fechar: **o R-68 cai** — o silêncio da advogada volta a não significar nada, e a RF-15 e a linha **Nunca** do PRD §5.2.1 valem de novo sem exceção. ⚠️ Em troca nasceu o **R-70**: alerta que reabre de 4 em 4 horas vira ruído. A D-209 resolve separando **estado** de **aviso** — reabrir muda o estado e **não reenvia**; o alerta vira *pendente de advogada* e aparece **uma vez por dia** no resumo. 🚧 **Tudo isso está inerte até a 20c** (horário útil) fechar: "2 horas úteis" precisa de um relógio que diga o que é útil |
+| 🟢 **A pilha de aval foi triada — 179, não 173, e o digesto existe** | **08/09** (**P-17**, [`18-digesto-de-aval.md`](18-digesto-de-aval.md)). A §13 tem **179 em 🟡 Proposta** e **31 confirmadas** — a conta antiga de "173 contra 2" estava errada dos dois lados. Elas saíram em três grupos: **13 que pedem leitura individual** (6 urgentes antes de 15/09), **156 de acordo em bloco** e **10 que não deveriam estar em Proposta**. 🔴 **A mais urgente não espera aval, espera reversão:** a **D-171** liberou duas colaboradoras a aprovar envio ao cliente *"só para a apresentação de 02/09"*, e `demo/listas/colaboradores.json` **ainda traz `true`** — uma exceção à Regra Inegociável 2 que sobreviveu seis dias ao motivo. ⚠️ E a §13 tem **três identificadores duplicados** (D-157, D-158, D-159), colisão já vazada para três documentos. **Nenhum status foi alterado** — o aval é do usuário |
 | 🟡 **A conformidade: as bases existem, os documentos não** | **07/09**, Parte A6 inteira. Há contrato (não menciona IA, *"será corrigido"*), há encarregado (**Malu**, com o usuário no que toca ao sistema — sobreposição somada ao **R-48**: quem audita o operador é o próprio operador), e há noção clara do que é sensível. **Não há política de segurança, não há política de uso de IA (38), e não há decisão sobre dados saírem do país (39)** — e a decisão está sendo tomada **por omissão** (**R-74**): já são quatro fluxos atravessando a fronteira, e **o backup entrou na conta em 07/09**. Não é irregular; a LGPD permite com base legal e informação ao titular. O que não pode é acontecer sem escolha — e o titular aqui é **parte em processo judicial** |
 | 🟠 **Matéria sensível encurta o automatismo, nunca o acesso** | **07/09** (**D-211**), respondida a 40: família, criminal, menores e todo processo em segredo. Segredo já era tratado (RF-38, RNF-16, D-96); as **matérias** são novas. **Não contradiz a pergunta 3** — são eixos diferentes: ninguém perde acesso, o que encolhe é o que a plataforma faz **sem humano no meio**. Cinco efeitos, e o primeiro é barato o bastante para entrar com E2: **o alerta mostra QUE há prazo, sem o teor**. ⚠️ **R-73**: tudo isso depende de classificar o processo, e classificação errada **falha em silêncio** — família lido como cível não dá erro, só recebe o tratamento comum e o teor sai. Classificação ausente ou desconhecida é tratada como **sensível** |
 | 🟠 **O backup voltou pela metade** | **07/09.** O `pgbackweb` estava em **laço de falha** (`exit 201` a cada ~6 s) e saiu; entrou **`rclone` gravando no Cloudflare R2**. Os 194 fluxos deixaram de viver num lugar só. **O R-66 NÃO cai ainda:** `rclone` copiar prova que a cópia **sai**, não que ela **volta**. Faltam (1) **restauração testada** em banco descartável — é a que fecha o risco —, (2) saber se o dump está **cifrado**, porque ele carrega as credenciais do n8n, e (3) o **R2 fica fora do país**, o que joga o backup dentro do R-74 |
@@ -711,7 +712,7 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 2. ✅ **Feito** — Demo B (cliente no WhatsApp via Uazapi) construída, publicada e testada ao vivo
 3. ✅ **Feito** — o ciclo fechou: aprovar no Telegram envia a mensagem ao cliente no WhatsApp (D-99)
 4. **Ensaiar o roteiro inteiro** com a instância viva, do lado do colaborador e do lado do cliente
-5. Decidir o nível de anonimização com a advogada (D-97) — o interruptor já existe
+5. ✅ **Vencido** — a apresentação de 02/09 rodou anonimizada, o padrão da **D-97** valeu e o interruptor `--nomes-reais` nunca foi acionado. A decisão está no grupo C do digesto, para ser fechada como cumprida
 
 ## Concluído
 
@@ -737,6 +738,7 @@ Em paralelo, a **demonstração** (Nota Técnica 03) saiu do papel: a Demo A res
 | **O contrato da aparição em diário oficial — medido em 30 entregas reais de callback, a custo zero** | `15-contrato-da-aparicao.md` |
 | **Levantamento da instância n8n e do servidor — medido, não declarado** · R-60 a R-67 | `16-levantamento-instancia-n8n.md` |
 | **Plano de execução até 15/09 — ordem, bloqueios, o que pular e como paralelizar sessões** | `17-plano-de-execucao.md` |
+| **Digesto de aval — as 179 propostas triadas em 13 para ler, 156 para bloco e 10 para fechar** | `18-digesto-de-aval.md` |
 
 ## As regras saíram do prompt e viraram barreira — 25/08/2026
 
@@ -1162,14 +1164,25 @@ A **Parte II** da Spec é escrita quando as respostas do escritório chegarem.
 
 ## Decisões
 
-**D-01 a D-207** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
+**D-01 a D-212** estão em `01-diretrizes-gerais.md` §13 — registro único e centralizado.
 
-> ⚠️ **06/09 — a pilha de aval virou dívida.** São **173 decisões em 🟡 Proposta** contra 2 ✅ Confirmadas. A maior parte é registro de coisa que o projeto já fez e que ninguém contestou; ler as 173 não é caminho. O passo **P-17** do plano produz o digesto — a lista curta das que ainda mudam desenho, mais um "de acordo em bloco" datado para o resto.
+> ✅ **08/09 — a pilha foi triada, e o digesto existe.** O passo **P-17** fechou: [`18-digesto-de-aval.md`](18-digesto-de-aval.md) separa as 179 propostas em **13 que pedem leitura individual**, **156 de acordo em bloco** e **10 que não deveriam estar em Proposta**. **Nenhum status foi alterado** — o aval é do usuário, e é ele que destrava o **P-02**, o PRD e a Spec.
 
-- ✅ Confirmadas: D-01 (n8n como orquestrador), D-02 (camada MCP reutilizável), as da demo (D-86 a D-102), e agora **D-07, D-09, D-25, D-61, D-63 a D-67, D-146, D-147 e D-152**, todas resolvidas ou confirmadas pelo escritório em 27/08
-- 🟡 Propostas aguardando aval do usuário: todas as demais, incluindo **D-142 a D-145 e D-148 a D-151**, novas em 27/08
-- 🔴 Em aberto: **D-62** (vigiar diário por nome de advogado) — o escritório vai confirmar
-- ⚠️ **Renumeradas em 27/08:** as duas decisões do suporte do Escavador de 25/08 passaram de D-101/D-102 para **D-153/D-154**, por colisão de numeração com as decisões da demo
+**A contagem de 08/09**, feita linha a linha sobre a §13 — o número 173 era de 06/09 e envelheceu:
+
+| Estado | Linhas |
+|---|---|
+| 🟡 Proposta | **179** |
+| ✅ Confirmada / Resolvida | **31** — não 2; a conta antiga ignorava as da demo, as do escritório e as da revisão externa |
+| 🔴 Em aberto | 3 — **D-197, D-202, D-212** |
+| 🔄 Revisada | 1 — D-205 (estado fora da convenção de três; ver digesto §6) |
+| ❌ Derrubada | 1 — D-153 |
+| **Total** | **215 linhas, 212 identificadores** |
+
+- 🔴 **As 6 urgentes do grupo A**, antes de 15/09: **D-171** (exceção da Regra 2 ainda ativa no disco), **D-182** (a vigilância renova em 26/09), **D-207** (o recorte do escopo), **D-206** (a triagem por CNJ), **D-209** (a janela que reabre) e **D-211** (matéria sensível)
+- 🟠 **As 7 do grupo A que podem esperar:** D-149, D-201, D-198, D-148, D-192, D-159 (HMAC) e D-196
+- ⚠️ **A §13 tem três identificadores duplicados — D-157, D-158 e D-159**, cada um com dois significados, e a colisão já vazou para este documento (linha 31 usa um sentido, as linhas 378 a 382 usam o outro), para o `14-auditoria-marco-3.md` e para o P-24 do plano. **Terceira vez** que isso acontece, depois de D-101/D-102 e da colisão de RF no PRD (P-18). A correção proposta está no digesto §5.1 e **aguarda o "pode ir" do usuário**
+- ⚠️ **Renumeradas em 27/08:** as duas decisões do suporte do Escavador de 25/08 passaram de D-101/D-102 para **D-153/D-154**, por colisão com as decisões da demo
 
 ## Pendências com o escritório
 

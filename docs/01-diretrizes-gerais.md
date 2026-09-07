@@ -516,6 +516,10 @@ lex_ai_n8n/
 
 Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fechada; **Em aberto** = precisa de informação do escritório.
 
+> 📖 **Esta tabela não se lê inteira — leia o digesto.** Contado em 08/09: **215 linhas**, das quais **179 em 🟡 Proposta** e **31 ✅ Confirmadas**. O [`18-digesto-de-aval.md`](18-digesto-de-aval.md) separa as 179 em **13 que pedem leitura individual**, **156 de acordo em bloco** e **10 que não deveriam estar em Proposta** — e é por ele que o aval do P-02 se dá.
+>
+> ⚠️ **Colisão de numeração conhecida, ainda não corrigida.** **D-157, D-158 e D-159** aparecem **duas vezes cada**, com significados diferentes: um trio da revisão externa de 01/09 e outro do Marco 3 da auditoria. A correção proposta — renumerar o trio de 01/09 para D-213 a D-215 — está no digesto §5.1 e aguarda o aval do usuário. Até lá, **cite estas três sempre com a data ou o assunto ao lado**.
+
 | ID | Decisão | Recomendação | Status |
 |---|---|---|---|
 | D-01 | n8n como camada de orquestração | — | ✅ **Confirmada** |
