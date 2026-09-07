@@ -124,7 +124,7 @@
 
         🟢 **O escritório escolheu o lado seguro sobre o cômodo, e isso derruba o R-68.** O silêncio da advogada deixa de ratificar o encerramento: passa a exigir toque dela. Com isso, a promessa da RF-15 (*silêncio nunca é interpretado como "nada aconteceu"*) e a linha **Nunca** do rito no PRD §5.2.1 (*alerta de prazo não se encerra sozinho*) voltam a valer sem exceção — que era exatamente o que a D-194 tinha aberto.
 
-        ⚠️ **A escolha segura cria um problema novo, e ele precisa de resposta:** se reabrir é o padrão, **o que acontece no segundo ciclo?** Advogada em audiência o dia inteiro vê o mesmo alerta reabrir de 4 em 4 horas, indefinidamente — e alerta que repete vira alerta que ninguém lê (R-52). Ver **R-70**, e a proposta em **D-209**: a reabertura **não repete o mesmo aviso**; ela sobe direto para o N2 e o alerta fica em estado de *pendente de advogado*, visível no resumo de fim de dia útil, sem novo disparo até alguém tocar.
+        ⚠️ **A escolha segura cria um problema novo, e ele precisa de resposta:** se reabrir é o padrão, **o que acontece no segundo ciclo?** Advogada em audiência o dia inteiro vê o mesmo alerta reabrir de 4 em 4 horas, indefinidamente — e alerta que repete vira alerta que ninguém lê (R-52). Ver **R-76** (era R-70 até a renumeração de 08/09), e a proposta em **D-209**: a reabertura **não repete o mesmo aviso**; ela sobe direto para o N2 e o alerta fica em estado de *pendente de advogado*, visível no resumo de fim de dia útil, sem novo disparo até alguém tocar.
 21. 🔴 Que tipos de anexo aparecem — PDF pesquisável, PDF digitalizado, imagem, áudio, planilha, .docx?
 22. 🔴 Existe modelo/padrão de resposta já usado pelo escritório?
 

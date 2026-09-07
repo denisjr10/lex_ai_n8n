@@ -99,11 +99,11 @@ O recorte proposto (**D-207**):
 
 **Trava:** formalmente, toda a construção. O PRD (v2.0) e a Spec Parte I (v1.2) estão desde 27/08 em "🟡 Proposta — aguarda aval do usuário".
 
-**O tamanho real do problema:** ~~173 decisões em 🟡 Proposta contra 2 confirmadas~~ → **179 em 🟡 Proposta contra 31 confirmadas**, recontado linha a linha em 08/09. A pilha cresceu (D-208 a D-212 nasceram em 07 e 08/09) e a contagem antiga errava dos dois lados. Continua sendo dívida acumulada, não uma pilha de escolhas pendentes.
+**O tamanho real do problema:** ~~173 decisões em 🟡 Proposta contra 2 confirmadas~~ → **182 em 🟡 Proposta contra 31 confirmadas**, recontado linha a linha em 08/09. A pilha cresceu (D-208 a D-212 em 07 e 08/09, e D-216 a D-218 na própria triagem) e a contagem antiga errava dos dois lados. Continua sendo dívida acumulada, não uma pilha de escolhas pendentes.
 
-✅ **O digesto está pronto:** [`18-digesto-de-aval.md`](18-digesto-de-aval.md), produzido pelo **P-17** em 08/09. As 179 saíram em três grupos — **13 que pedem leitura individual** (a estimativa era 8 a 12; a décima terceira não foi cortada para caber no número), **156 de acordo em bloco** e **10 que não deveriam estar em Proposta**.
+✅ **O digesto está pronto:** [`18-digesto-de-aval.md`](18-digesto-de-aval.md), produzido pelo **P-17** em 08/09. As 182 saíram em três grupos — **15 que pedem leitura individual** (a estimativa era 8 a 12; nenhuma foi cortada para caber no número), **159 de acordo em bloco** e **8 que não deveriam estar em Proposta**.
 
-**Recomendação:** ler a §3 do digesto — 13 decisões, cerca de 4 linhas cada, das quais **6 são urgentes antes de 15/09** —, dar o de acordo em bloco da §4 com data, e decidir as 10 da §5. 🔴 **Uma delas não espera aval e sim reversão:** a **D-171** deixou duas colaboradoras aprovando envio ao cliente "só para a apresentação de 02/09", e o arquivo ainda traz `true`.
+**Recomendação:** ler a §3 do digesto — 13 decisões, cerca de 4 linhas cada, das quais **6 são urgentes antes de 15/09** —, dar o de acordo em bloco da §4 com data, e decidir as 10 da §5. ✅ **Duas já foram resolvidas em 08/09:** a colisão de numeração (D-213 a D-215, R-76) e a **D-171** — que não era exceção esquecida e sim decisão de negócio da advogada proprietária, agora registrada como **D-216**, com **D-217** e **D-218** junto.
 
 ### P-03 · 👤🔴🚧 Levar à Malu o pacote de números e as perguntas que sobraram
 
@@ -196,8 +196,8 @@ A ordem canônica é a da **Spec §15** — não a seção "Próximo passo" do `
 
 | # | Passo | O que está errado |
 |---|---|---|
-| **P-17** | ✅ **Feito em 08/09** — [`18-digesto-de-aval.md`](18-digesto-de-aval.md) | Eram **179** em 🟡 Proposta contra **31** confirmadas, não 173 contra 2. Triadas em **13 / 156 / 10**. Nenhum status foi alterado — o aval é do usuário, e é ele que destrava o **P-02** |
-| **P-18** | 🤖🔀 **Corrigir a colisão de numeração no PRD** — **e na §13 também** | **RF-42, RF-43, RF-44 e RF-45 estão cada um definido duas vezes**, com significados diferentes — os do catálogo de gabaritos (§6.3) e os da vigilância (§9.3). ⚠️ **E o P-17 achou a mesma coisa na §13 das diretrizes: D-157, D-158 e D-159 têm dois significados cada**, e a colisão já vazou para o `00-estado-atual.md`, o `14-auditoria-marco-3.md` e o **P-24** abaixo. Terceira vez, depois de D-101/D-102 em 27/08. Correção proposta no digesto §5.1, **aguardando o aval do usuário** |
+| **P-17** | ✅ **Feito em 08/09** — [`18-digesto-de-aval.md`](18-digesto-de-aval.md) v1.1 | São **182** em 🟡 Proposta contra **31** confirmadas, não 173 contra 2. Triadas em **15 / 159 / 8**. Nenhum status foi alterado — o aval é do usuário, e é ele que destrava o **P-02** |
+| **P-18** | 🤖🔀 **Corrigir a colisão de numeração no PRD** — **e na §13 também** | **RF-42, RF-43, RF-44 e RF-45 estão cada um definido duas vezes**, com significados diferentes — os do catálogo de gabaritos (§6.3) e os da vigilância (§9.3). ✅ **A parte da §13 foi corrigida em 08/09:** D-157, D-158 e D-159 tinham dois significados cada, e o trio da revisão externa virou **D-213 a D-215**; o **R-70** também estava duplicado e o do ruído virou **R-76**. **Falta a parte do PRD**, e falta a prevenção: um hook que recuse commit com identificador repetido em `01-diretrizes-gerais.md` e no PRD — terceira ocorrência do mesmo defeito, e as três têm a mesma causa (uma sessão registra um bloco novo sem conferir o último número usado) |
 | **P-19** | 🤖🔀 **Atualizar o que envelheceu** | O `README.md` diz **7 migrações e 44 testes** e sua tabela de documentos para no `05`; o disco tem **13 migrações, 92 testes e 17 documentos**. O cabeçalho do `00-estado-atual.md` diz **10 migrações**, e sua seção "Onde estamos" diz **"Fase 2"** enquanto o cabeçalho do mesmo documento diz **"Fase 3"** |
 | **P-20** | 🤖⏭️ **Preparar as Partes A2 a A6 da descoberta** | 25 perguntas nunca enviadas. Dimensionam **E3 e E4** — fora desta fase |
 
@@ -210,7 +210,7 @@ A ordem canônica é a da **Spec §15** — não a seção "Próximo passo" do `
 | **P-21** | 👤🔴 **Decidir a assinatura `2813617` antes de 26/09** | Data dura. Ela renova sozinha e passa a cobrar |
 | **P-22** | 👤 Chave de API do Trello em **conta dedicada** do escritório (D-196), depois o inventário do Butler | Antes da primeira gravação no Trello, nunca depois — o Butler reage ao que escrevermos |
 | **P-23** | 👤 WhatsApp por BSP, não direto pela Meta (D-197) | E4. Pelo caminho da Meta são semanas, e o tempo é da Meta |
-| **P-24** | 🤖 HMAC no anonimizador (**D-159 da revisão externa de 01/09** — ver a colisão no P-18), retentativa com idempotência, cofre de segredos no Swarm | Achados abertos, nenhum urgente. ⚠️ A **D-211** encareceu este: anonimização antes de saída externa deixou de ser opcional |
+| **P-24** | 🤖 HMAC no anonimizador (**D-215**, era D-159 até a renumeração de 08/09), retentativa com idempotência, cofre de segredos no Swarm | Achados abertos, nenhum urgente. ⚠️ A **D-211** encareceu este: anonimização antes de saída externa deixou de ser opcional |
 | **P-25** | 🤖 Entender por que o *polling* discordou do callback (R-55) | Precisa de crédito, baixo valor agora |
 
 ---
