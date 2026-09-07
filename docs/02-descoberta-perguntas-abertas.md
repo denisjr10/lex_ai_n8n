@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Status | **Parcialmente respondido** — a seção A1 fechou em 05/09 (só a 5 voltou como pedido de esclarecimento); antes disso, cinco perguntas que travavam o PRD voltaram em 27/08 |
-| Versão | 0.7 — a Parte A6 entrou, e o backup voltou |
-| Data | 2026-09-07 (criado em 2026-08-17) |
+| Versão | 0.8 — o Astrea não estava sendo usado |
+| Data | 2026-09-08 (criado em 2026-08-17) |
 | Finalidade | Levantar as informações que faltam para fechar o PRD. Dividido por destinatário. |
 
 > **Como usar.** A Parte A é para o escritório (pode ser enviada como está). A Parte B é técnica, para quem administra os sistemas. A Parte C é sua, sobre contratos e infraestrutura. Nem toda pergunta bloqueia o início — as marcadas com 🚧 bloqueiam.
@@ -142,53 +142,59 @@
 
 ### A5. Demais plataformas
 
-> 🟡 **Parcialmente respondida em 07/09**, e **a 30 é a resposta mais consequente desta seção inteira**: o escritório já usa um software de gestão jurídica. Isso não invalida o projeto — mas obriga a saber o que ele já faz **antes** de E1 e E2 entrarem em operação, sob pena de a plataforma duplicar o que já existe. Ver **D-210** e **R-71**.
+> ✅ **Fechada em 08/09**, depois de o usuário conferir com a Malu e a equipe. A 30 tinha levantado o maior risco da Parte A — **e o esclarecimento derrubou esse risco e colocou outro no lugar, pior.** O Astrea existe, está pago e **não está sendo usado**; o Jusbrasil é conta pessoal. Ou seja: **hoje não há nada vigiando prazo automaticamente**, e há uma assinatura que sugere o contrário. **R-71 cai; nasce R-75.** Ver também **D-210** (fechada) e **D-212**.
 
 30. **Existe software de gestão jurídica (Astrea, Projuris, ADVBOX, Legal One, SAJ ADV, outro)?**
 
-    🔴 **RESPONDIDA em 07/09 — sim, o Astrea** (da Aurum).
+    ✅ **RESPONDIDA em 07/09 e ESCLARECIDA em 08/09 — existe o Astrea (Aurum), mas ele não está em uso.**
 
-    ⚠️ **Isto reabre uma pergunta que o projeto tratava como fechada.** O Astrea é uma plataforma de gestão para escritórios, e a família de produtos dele cobre — em algum grau, a confirmar — **cadastro de processos, agenda, controle de prazos e acompanhamento de publicações**. Ou seja: parte do que E1 e E2 propõem pode já existir e já estar paga.
+    *"Ela havia contratado o Astrea recentemente, mas foi apenas para experimentar, e na prática eles não estão usando. A ideia é que, se esse projeto suprir as necessidades (integrado com o Trello), ela não vai mais continuar com a assinatura."*
 
-    **Não sabemos o quanto**, e não vamos afirmar de memória (Regra: verificação antes de afirmar). O que precisa ser levantado, em ordem de urgência, está em **D-210**:
+    As quatro perguntas da D-210 voltaram respondidas:
 
-    | # | O que perguntar | Por que trava |
-    |---|---|---|
-    | a | **O Astrea já monitora publicações e avisa de prazo?** Se sim, com que módulo, e o escritório confia nele? | É **E2 inteira**. Dois sistemas alertando o mesmo prazo é pior que um — ver **R-71** |
-    | b | **O cadastro de processos vive no Astrea?** | Define quem é a fonte da verdade do processo, e a D-09/D-152 respondeu isso sobre o Trello, não sobre o Astrea |
-    | c | **O Astrea tem API, e o plano contratado dá acesso a ela?** | Define se dá para integrar ou se a plataforma vive ao lado |
-    | d | **Qual plano, e quantas licenças?** | Custo já pago que o projeto pode estar prestes a duplicar |
+    | # | Pergunta | Resposta (08/09) | Efeito |
+    |---|---|---|---|
+    | a | O Astrea já monitora publicações e avisa de prazo? | **"Deveria ser, mas não está sendo feito"** | 🔴 **Inverte o risco.** Não há duplicação — **há ausência.** Ver **R-75** |
+    | b | O cadastro de processos vive nele? | **"Deveria ser, mas não está sendo feito"** | A fonte da verdade do processo continua sendo a base interna da plataforma (D-152). Sem disputa |
+    | c | Tem API, e o plano dá acesso? | **"Já entramos em contato com eles, e não possuem API"** | 🔴 **Decisivo.** Integrar está fora de questão — some a opção "a plataforma consome a vigilância do Astrea" |
+    | d | Qual plano, e quantas licenças? | **Plano de entrada, uma licença** | Custo baixo, e **uma licença para sete pessoas** confirma que nunca virou ferramenta de equipe |
 
-    **Isto vale mais que qualquer outra pergunta ainda aberta da Parte A**, e precisa ir à Malu junto com a 20c.
+    **O que isso resolve:** a plataforma não vai duplicar vigilância que já funcione, porque não há nenhuma funcionando. **E2 deixa de estar em questão.**
+
+    **O que isso abre, e é maior:** o projeto passa a ser **a única rede de segurança de prazo do escritório**, sem nada por baixo. Antes eu supunha que o Astrea era um fundo de reserva; não é. Ver **R-75**, e o recorte que **D-212** exige antes de a assinatura ser cancelada.
 31. **Onde ficam os documentos hoje — Google Drive, OneDrive, Dropbox, servidor local?**
 
     ✅ **RESPONDIDA em 07/09 — Google Drive.**
 
-    ⚠️ **E o Drive está sob a conta compartilhada** (pergunta 16, R-11), usada por **seis pessoas** (16a). Então o mesmo buraco de auditoria do e-mail vale para o documento: não há como saber quem abriu, baixou ou apagou o quê. Para autos e peças de escritório de advocacia, isso é mais pesado que para e-mail.
+    ⚠️ **E o Drive está sob a conta compartilhada** (pergunta 16, R-11), usada por **seis pessoas** (16a). O mesmo buraco de auditoria do e-mail vale para o documento: não há como saber quem abriu, baixou ou apagou o quê. Para autos e peças, isso pesa mais que para e-mail.
 
-    **De útil para o desenho:** o servidor do prestador já tem **MinIO** (armazenamento de objetos, medido em 06/09) — o que a plataforma produzir ou receber não precisa passar pelo Drive compartilhado. E o teto de 16 MB por requisição do n8n (D-204) já apontava para lá.
-32. 🔴 Há sistema financeiro/de honorários? Ele precisa ser integrado? *(Sem resposta. ⚠️ O Astrea normalmente cobre isso — a resposta pode ser "o próprio Astrea", e essa é uma das coisas a confirmar na D-210.)*
+    **De útil para o desenho:** o servidor do prestador já tem **MinIO** (medido em 06/09) — o que a plataforma produzir ou receber não precisa passar pelo Drive compartilhado. O teto de 16 MB por requisição do n8n (D-204) já apontava para lá.
+32. 🟡 **Há sistema financeiro/de honorários? Ele precisa ser integrado?**
+
+    🔴 **Sem resposta direta — e o esclarecimento de 08/09 tornou a resposta provável um "não".** O Astrea, que normalmente cobriria isso, não está em uso. ⚠️ **Mas isso é dedução, não resposta**, e a pergunta importa por outro motivo agora: se a expectativa é a plataforma **substituir** o Astrea, é preciso saber se financeiro entra nessa conta. **Não entra no escopo de 15/09** — ver **D-212**.
 33. **Há assinatura de outra ferramenta de consulta processual além do Escavador (Judit, Jusbrasil, Digesto, Codilo)?**
 
-    🟠 **RESPONDIDA em 07/09 — Jusbrasil.**
+    ✅ **RESPONDIDA em 07/09 e ESCLARECIDA em 08/09 — Jusbrasil, mas não concorre.**
 
-    ⚠️ **Segunda sobreposição na mesma seção.** O Jusbrasil também oferece consulta processual e acompanhamento. Junto com o Astrea, são **duas ferramentas já pagas** que tocam o mesmo terreno de E1 e E2 — e o orçamento do Escavador é justamente o ponto mais apertado do projeto (saldo zero, contratação em 08/09).
+    *"É usado apenas para consultas isoladas, é apenas uma conta pessoal da advogada, não é corporativa, não irá concorrer com o sistema desse projeto."*
 
-    **A pergunta que isso levanta não é técnica, é de decisão:** o escritório quer **somar** uma terceira fonte, ou **substituir** o que já tem? São respostas diferentes, e a segunda muda o que se contrata na terça. Ver **D-210**.
+    🟢 **A segunda sobreposição também caiu.** Consulta pontual feita por uma pessoa numa conta pessoal não é fonte de vigilância e não disputa com E1 nem E2. **Nada a decidir antes da contratação de saldo** — o que tira uma trava da conversa de 08/09.
+
+    *(Fica um resíduo pequeno, que não é problema hoje: consulta processual em conta pessoal não passa pela auditoria da plataforma. É o mesmo padrão do R-59 — o que se faz fora não é registrado dentro —, e não muda nada no desenho.)*
 34. **Usam alguma ferramenta de IA hoje? Qual, e para quê?**
 
     ✅ **RESPONDIDA em 07/09 — ChatGPT e Claude**, ambos para *"auxílio geral de pesquisa (em especial de cunho jurídico — legal, jurisprudencial, etc.), na elaboração e na revisão de documentos"*.
 
-    🟢 **De bom:** a equipe já trabalha com IA. A plataforma não vai encontrar resistência cultural, e a expectativa do que a IA faz e não faz já existe. É uma vantagem real de adoção.
+    🟢 **De bom:** a equipe já trabalha com IA. A plataforma não vai encontrar resistência cultural, e a expectativa do que a IA faz e não faz já existe. É vantagem real de adoção.
 
-    ⚠️ **De aberto, e é fato a registrar, não julgamento:** *"revisão de documentos"* de um escritório de advocacia significa que **peça e documento de cliente provavelmente são colados numa interface de consumo**. Isso importa para as perguntas **37, 38 e 39** (DPO, política de uso de IA, dados fora do país), que continuam sem resposta — e importa para o contrato de honorários (pergunta 36). Ver **R-72**. *(A plataforma não muda isso sozinha: ela oferece um caminho auditado para o mesmo trabalho, e o uso direto continua existindo ao lado.)*
+    ⚠️ **De aberto, e é fato a registrar, não julgamento:** *"revisão de documentos"* de escritório de advocacia significa que peça e documento de cliente provavelmente são colados numa interface de consumo. Importa para as perguntas **37 a 39** e para o contrato (**36**). Ver **R-72**.
 35. **Existe base de conhecimento interna — modelos de peça, teses, procedimentos? Em que formato?**
 
     ✅ **RESPONDIDA em 07/09 — sim, em `.docx` e `.pdf`.**
 
-    🟢 **Boa notícia para o desenho, e o servidor já tem a peça que falta:** o PostgreSQL da infra é `pgvector/pgvector:pg16` — **já vem com a extensão de busca por similaridade** (medido em 06/09), que é exatamente o que uma base de conhecimento consultável exige. Não precisa provisionar nada novo.
+    🟢 **O servidor já tem a peça que falta:** o PostgreSQL da infra é `pgvector/pgvector:pg16` — **já vem com a extensão de busca por similaridade** (medido em 06/09), que é o que uma base de conhecimento consultável exige. Nada novo a provisionar.
 
-    **O que falta saber:** **quantos** documentos, **onde** estão (Drive? Astrea?) e se os `.pdf` são pesquisáveis ou digitalizados — a pergunta 21 faz a mesma distinção para anexos, e a diferença decide se dá para ler o texto ou se precisa de OCR (reconhecimento óptico, que transforma imagem de texto em texto). **Fora do escopo de 15/09** (D-207); entra quando E3 chegar.
+    **O que falta saber:** **quantos** documentos, **onde** estão, e se os `.pdf` são pesquisáveis ou digitalizados — a pergunta 21 faz a mesma distinção para anexos, e ela decide se dá para ler o texto ou se precisa de OCR. **Fora do escopo de 15/09** (D-207); entra com E3.
 
 ### A6. Conformidade
 
@@ -458,7 +464,7 @@
 
 ## Bloqueadores em resumo
 
-> **Atualizado em 07/09.** Das 74 perguntas, **81 estão respondidas** — a Parte A6 inteira entrou — mais as derivadas 20a, 20b, 20d e 20e, que fecharam o rito de prazo. 🔴 **E a 30 abriu a maior pergunta ainda de pé na Parte A:** o escritório já usa **Astrea** e **Jusbrasil**, e parte do que E1 e E2 propõem pode estar duplicando o que já existe (D-210, R-71). O que sobra está abaixo — e a primeira linha é a que reorganiza todas as outras.
+> **Atualizado em 08/09.** Das 74 perguntas, **83 estão respondidas** — a A5 fechou — a Parte A6 inteira entrou — mais as derivadas 20a, 20b, 20d e 20e, que fecharam o rito de prazo. 🔴 **E a 30 abriu a maior pergunta ainda de pé na Parte A:** o escritório já usa **Astrea** e **Jusbrasil**, e parte do que E1 e E2 propõem pode estar duplicando o que já existe (D-210, R-71). O que sobra está abaixo — e a primeira linha é a que reorganiza todas as outras.
 
 | Pergunta | Trava | Estado |
 |---|---|---|
@@ -470,8 +476,9 @@
 | **5 — responsavel interno** | Interlocutor unico das decisoes de negocio | ✅ **Respondida em 05/09 — Malu Souza** (D-200) |
 | **6 — colaborador pode aprovar ato de prazo?** | Regra Inegociavel 2 e o botao de aprovacao (RN-09) | 🚧 **Aberta** — proposta em D-194 |
 | ~~20a, 20b, 20d, 20e — os números do rito de prazo~~ | Configuração de E2 e do ciclo de aprovação (RF-13, RN-09) | ✅ **RESPONDIDAS em 07/09** (D-208). 2 h úteis no N1, 4 h até a Malu no N2, 4 h/2 h de expiração de aprovação, e a janela de reabertura **expira REABRINDO** — o lado seguro, e **R-68 cai** (D-209) |
-| **30 — o escritório usa o Astrea** | **E1 e E2 podem estar duplicando o que já existe e já está pago** | 🔴 **NOVA em 07/09, e é a mais consequente da Parte A.** Quatro perguntas de levantamento em **D-210**; o risco de dois sistemas alertando o mesmo prazo está em **R-71**. Vai à Malu junto com a 20c |
-| **33 — e também o Jusbrasil** | Escopo do MCP e o que se contrata no fornecedor em 08/09 | 🟠 **Nova em 07/09.** Segunda sobreposição: somar uma terceira fonte, ou substituir? A resposta muda a contratação de terça |
+| ~~30 e 33 — Astrea e Jusbrasil~~ | E1 e E2 duplicarem o que já existe | ✅ **FECHADAS em 08/09, e a duplação não existe.** O Astrea está pago e **não é usado**, tem plano de entrada, **uma licença** e **nenhuma API**; o Jusbrasil é conta pessoal para consulta isolada. **R-71 cai** |
+| **⚠️ O que ficou no lugar** | **Não há rede de segurança de prazo — e há uma assinatura que sugere que há** | 🔴 **NOVO em 08/09, e vale mais que o risco que caiu.** Hoje, antes do projeto existir, **nada vigia prazo automaticamente**. Ver **R-75** |
+| **A plataforma vai substituir o Astrea** | Escopo fechado (73) contra expectativa não escrita | 🔴 **NOVO em 08/09.** *"Se esse projeto suprir as necessidades, ela não continua a assinatura"* — e "as necessidades" não estão escritas. Ver **D-212** |
 | **20c — horário útil** | **O relógio de toda a escalada de E2** — sem ele os números da D-208 não significam nada | 🚧 **Pendente, com data: terça (08/09)**, com a Malu. Cinco definições com proposta estão na A3; falta a **lista de feriados** |
 | **20 (principal) — como o escritório confere prazo hoje** | Validação do rito antes de E2 entrar em operação | 🔴 **Aberta, e as cinco derivadas fecharam sem ela** |
 | **16a → 15 — a Ana Beatriz não usa a caixa compartilhada** | Desenho da frente E3, e o alcance de R-11 | 🔴 **Nova, de 07/09.** São **seis** na conta, não sete: onde chega o e-mail dos processos dela? |
