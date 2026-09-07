@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Status | **Parcialmente respondido** — a seção A1 fechou em 05/09 (só a 5 voltou como pedido de esclarecimento); antes disso, cinco perguntas que travavam o PRD voltaram em 27/08 |
-| Versão | 0.4 — as perguntas voltaram para junto das respostas |
-| Data | 2026-09-06 (criado em 2026-08-17) |
+| Versão | 0.5 — o rito do alerta de prazo fechou |
+| Data | 2026-09-07 (criado em 2026-08-17) |
 | Finalidade | Levantar as informações que faltam para fechar o PRD. Dividido por destinatário. |
 
 > **Como usar.** A Parte A é para o escritório (pode ser enviada como está). A Parte B é técnica, para quem administra os sistemas. A Parte C é sua, sobre contratos e infraestrutura. Nem toda pergunta bloqueia o início — as marcadas com 🚧 bloqueiam.
@@ -69,28 +69,64 @@
 
 ### A3. E-mail
 
-15. 🚧 Quantas caixas de e-mail devem ser monitoradas, e quais? (Ex.: `contato@`, caixa pessoal de sócio, caixa de intimações.)
+> 🟡 **Parcialmente respondida em 07/09.** O **rito do alerta de prazo fechou por inteiro** — 20a, 20b, 20d e 20e voltaram com números, e a 20e escolheu **o lado seguro** (D-208, D-209; **R-68 cai**). A **20c** voltou como pedido de esclarecimento, com proposta concreta abaixo. As perguntas **15, 17, 18, 19, 20 (principal), 21 e 22 seguem abertas** — e a 15 ganhou urgência nova pelo que a 16a revelou.
+
+15. 🚧 **Quantas caixas de e-mail devem ser monitoradas, e quais?** *(Ex.: `contato@`, caixa pessoal de sócio, caixa de intimações.)*
+
+    🔴 **Aberta — e a resposta da 16a mudou o peso dela.** A caixa compartilhada é usada por **seis das sete pessoas**, e a que falta é a **advogada Ana Beatriz**. Então a pergunta deixou de ser só "quantas caixas": passou a ser **"onde chega o e-mail dos processos da Ana Beatriz, e essa caixa entra no monitoramento?"** Uma caixa que ela não usa não vê o que é endereçado a ela.
 16. **Qual serviço de e-mail o escritório usa, e como as contas estão organizadas — uma por pessoa, ou compartilhada?**
 
-    ✅ **RESPONDIDA — Google Workspace Business Starter, com uma única conta compartilhada por toda a equipe.** Ver R-11 e Nota Técnica 01 §1.6. Desdobramentos nas perguntas 16a a 16c.
-    - **16a.** 🚧 Quantas pessoas usam essa conta hoje? *(Define o custo de migrar para licenças individuais. **Continua sem resposta** — e é o número que o escritório vai precisar quando reavaliar o Caminho A.)*
+    ✅ **RESPONDIDA — Google Workspace Business Starter, com uma única conta compartilhada por toda a equipe.** Ver R-11 e Nota Técnica 01 §1.6.
+    - **16a.** **Quantas pessoas usam essa conta hoje?** *(Define o custo de migrar para licenças individuais — é o número que o escritório vai precisar quando reavaliar o Caminho A.)*
+
+        ✅ **RESPONDIDA em 07/09 — seis pessoas: a advogada Malu Souza e as cinco colaboradoras.**
+
+        ⚠️ **São seis das sete, e a que falta é a Ana Beatriz.** Ninguém disse isso; sai da conta. Alimenta a pergunta 15, e não é detalhe: com ~24 processos (D-193) o volume dela é pequeno, mas **um prazo perdido não é**.
+
+        **O que o número destrava:** o custo do Caminho A vira calculável — **seis licenças**, ou sete se a Ana Beatriz entrar. *(O preço vigente sai da página do Google, não da memória.)* E o alcance de **R-11** fica medido: a conta compartilhada é usada por seis pessoas, o que dimensiona exatamente o que se perde em auditoria de e-mail e Drive.
     - **16b.** **O escritório vai contratar licenças individuais do Workspace agora?**
 
         ✅ **RESPONDIDA em 27/08 — não, por ora.** O escritório optou por **não** contratar licenças individuais do Workspace agora, para evitar gasto no início da implementação.
     - **16c.** **A identidade individual do projeto pode vir do Telegram + painel, com ciência das implicações?**
 
         ✅ **RESPONDIDA em 27/08 — sim, com ciência.** A identidade individual do projeto virá do **Telegram + painel** (Caminho B): uma conta por colaborador e por advogado, todas identificadas e cadastradas pelo escritório. *"Foi informado acerca das implicações disso, e o escritório aceitou os riscos."* Ver **D-147**; **R-11 permanece aberto para e-mail e Drive**, e **R-47** registra o risco novo (identidade ancorada em número de telefone, sem desligamento central).
-17. Volume aproximado de e-mails/dia e proporção de spam.
-18. Quais tipos de e-mail chegam com maior frequência? Quais são os críticos?
-19. Como intimações e comunicações de tribunal chegam hoje — e-mail, sistema do tribunal, ambos?
-20. Existe rotina atual de conferência de prazos? Quem faz e como? *(Sabemos, desde 27/08, que **colaboradores também conferem** — o que muda a quem o alerta é entregue. Falta o resto do desenho, nas quatro perguntas abaixo.)*
-    - **20a.** 🚧 **Quanto tempo o escritório aceita que um alerta de prazo fique sem ninguém confirmar que leu, antes de o sistema chamar todos os advogados?** *(Nossa proposta: 2 horas úteis. É o "N1" do rito descrito no PRD §5.2.1.)*
-    - **20b.** 🚧 **E antes de escalar para o último degrau?** *(Nossa proposta: 4 horas úteis — o "N2". ✅ **Reescrita em 05/09:** a versão anterior perguntava "antes de escalar para a sócia responsável", e a resposta da pergunta 2 mostrou que **não existe sócia** — não há hierarquia. Sem alguém acima, o N2 precisa de outro destino. **Nossa proposta é a advogada Malu Souza**, por dois motivos que não são de organograma: ela é a responsável interna pelo projeto (D-200) e ~289 dos ~313 processos são dela (D-193). Confirma?)*
-    - **20c.** 🚧 **Qual é o horário útil considerado?** *(O relógio da escalada só corre nele — publicação que chega às 18h de sexta começa a contar na segunda. Sem isso, o sistema acordaria a sócia às 3h da manhã.)*
-    - **20d.** 🚧 **Quanto tempo um pedido de aprovação pode ficar parado antes de vencer e precisar ser refeito?** *(Nossa proposta: 4 horas úteis para mensagem ao cliente, 2 horas úteis para ato com efeito de prazo. Aprovar um texto oito horas depois é autorizar a descrição de um mundo que já mudou — ver PRD §6.2.5.)*
-    - **20e.** 🚧 **Quanto tempo a advogada tem para reabrir um alerta de prazo que a colaboradora encerrou?** *(Nova em 05/09, nasceu da **D-194**. O escritório respondeu que a colaboradora pode encerrar alerta com efeito de prazo. Para isso não virar prazo perdido em silêncio, ela declara o motivo e a advogada responsável é avisada na hora, com um botão de reabrir. **Nossa proposta: 4 horas úteis.** ⚠️ E há uma segunda pergunta dentro desta, que é a mais importante: **quando a janela expira sem a advogada reagir, o alerta fecha ou reabre?** Fechar é o cômodo e é o que está desenhado; reabrir é o seguro. Hoje o silêncio dela ratifica o encerramento — ver **R-68**.)*
-21. Que tipos de anexo aparecem — PDF pesquisável, PDF digitalizado, imagem, áudio, planilha, .docx?
-22. Existe modelo/padrão de resposta já usado pelo escritório?
+17. 🔴 Volume aproximado de e-mails/dia e proporção de spam.
+18. 🔴 Quais tipos de e-mail chegam com maior frequência? Quais são os críticos?
+19. 🔴 Como intimações e comunicações de tribunal chegam hoje — e-mail, sistema do tribunal, ambos?
+20. 🔴 **Existe rotina atual de conferência de prazos? Quem faz e como?** *(Sabemos, desde 27/08, que **colaboradores também conferem** — o que muda a quem o alerta é entregue.)*
+
+    ⚠️ **A pergunta principal segue aberta, e as cinco derivadas fecharam.** Isso é desconfortável de propósito: os números do rito novo estão definidos (20a–20e) **sem que se saiba como o escritório confere prazo hoje**. O rito foi desenhado no vazio, e vai funcionar — mas se a rotina atual tiver um passo que ninguém mencionou, ele aparece só quando o sistema atravessar esse passo. Vale perguntar antes de E2 entrar em operação.
+    - **20a.** **Quanto tempo o escritório aceita que um alerta de prazo fique sem ninguém confirmar que leu, antes de o sistema chamar todos os advogados?** *(Nossa proposta: 2 horas úteis. É o "N1" do rito descrito no PRD §5.2.1.)*
+
+        ✅ **RESPONDIDA em 07/09 — 2 horas úteis**, conforme a proposta. Ver **D-208**.
+    - **20b.** **E antes de escalar para o último degrau?** *(Nossa proposta: 4 horas úteis — o "N2", com a advogada **Malu Souza** como destino, por ser a responsável interna (D-200) e concentrar ~289 dos ~313 processos (D-193). Reescrita em 05/09, porque a resposta da pergunta 2 mostrou que **não existe sócia** — não há hierarquia.)*
+
+        ✅ **RESPONDIDA em 07/09 — confirmado: 4 horas úteis, escalando para a Malu Souza.** Ver **D-208**.
+    - **20c.** 🚧 **Qual é o horário útil considerado?** *(O relógio da escalada só corre nele — publicação que chega às 18h de sexta começa a contar na segunda.)*
+
+        🔄 **DEVOLVIDA em 07/09 — o escritório perguntou o que exatamente isso significa.** Significa **cinco definições**, e a proposta de cada uma está abaixo, para confirmar ou corrigir:
+
+        | # | O que precisa ser definido | Nossa proposta |
+        |---|---|---|
+        | 1 | **Dias da semana** em que o relógio corre | Segunda a sexta |
+        | 2 | **Janela diária** | **08h às 18h** |
+        | 3 | **Fuso horário** | **America/Sao_Paulo** — é o mesmo do Amapá (UTC−3) e **já é o que a instância usa** (`GENERIC_TIMEZONE`, medido em 06/09) |
+        | 4 | **O almoço conta?** | **Conta** — o relógio não pausa. Mais simples, e a diferença é de 2 h num prazo de 2 h a 4 h |
+        | 5 | **Feriados** | Nacionais + estaduais do Amapá + municipais de Macapá. **Precisa da lista**, e ela precisa ser mantida — feriado não avisa que chegou |
+
+        **E uma regra de borda, que é o motivo de tudo isso existir:** publicação que chega **fora** da janela não começa a contar na hora — começa na abertura seguinte. Publicação de sexta às 17h50 dispara o N1 na segunda às 09h50, não no sábado de madrugada. ⚠️ **Isso é decisão de conforto, não de segurança:** o prazo processual corre no calendário dele, independentemente do nosso relógio. A plataforma **sinaliza indício e nunca calcula prazo** (D-64) — o horário útil governa só quando o sistema incomoda alguém.
+    - **20d.** **Quanto tempo um pedido de aprovação pode ficar parado antes de vencer e precisar ser refeito?** *(Nossa proposta: 4 horas úteis para mensagem ao cliente, 2 horas úteis para ato com efeito de prazo. Aprovar um texto oito horas depois é autorizar a descrição de um mundo que já mudou — ver PRD §6.2.5.)*
+
+        ✅ **RESPONDIDA em 07/09 — conforme a proposta: 4 horas úteis para mensagem ao cliente, 2 horas úteis para ato com efeito de prazo.** Ver **D-208**.
+    - **20e.** **Quanto tempo a advogada tem para reabrir um alerta de prazo que a colaboradora encerrou — e, quando a janela expira sem ela reagir, o alerta fecha ou reabre?** *(Nasceu da D-194. Nossa proposta: 4 horas úteis. A segunda metade é a que importa: fechar é o cômodo, reabrir é o seguro — ver R-68.)*
+
+        ✅ **RESPONDIDA em 07/09 — 4 horas úteis, e a janela expira REABRINDO.**
+
+        🟢 **O escritório escolheu o lado seguro sobre o cômodo, e isso derruba o R-68.** O silêncio da advogada deixa de ratificar o encerramento: passa a exigir toque dela. Com isso, a promessa da RF-15 (*silêncio nunca é interpretado como "nada aconteceu"*) e a linha **Nunca** do rito no PRD §5.2.1 (*alerta de prazo não se encerra sozinho*) voltam a valer sem exceção — que era exatamente o que a D-194 tinha aberto.
+
+        ⚠️ **A escolha segura cria um problema novo, e ele precisa de resposta:** se reabrir é o padrão, **o que acontece no segundo ciclo?** Advogada em audiência o dia inteiro vê o mesmo alerta reabrir de 4 em 4 horas, indefinidamente — e alerta que repete vira alerta que ninguém lê (R-52). Ver **R-70**, e a proposta em **D-209**: a reabertura **não repete o mesmo aviso**; ela sobe direto para o N2 e o alerta fica em estado de *pendente de advogado*, visível no resumo de fim de dia útil, sem novo disparo até alguém tocar.
+21. 🔴 Que tipos de anexo aparecem — PDF pesquisável, PDF digitalizado, imagem, áudio, planilha, .docx?
+22. 🔴 Existe modelo/padrão de resposta já usado pelo escritório?
 
 ### A4. Trello
 
@@ -321,7 +357,7 @@
 
 ## Bloqueadores em resumo
 
-> **Atualizado em 06/09.** Das 74 perguntas, **71 estão respondidas**. O que sobra está abaixo — e a primeira linha é a que reorganiza todas as outras.
+> **Atualizado em 07/09.** Das 74 perguntas, **72 estão respondidas** — mais as derivadas 20a, 20b, 20d e 20e, que fecharam o rito de prazo. O que sobra está abaixo — e a primeira linha é a que reorganiza todas as outras.
 
 | Pergunta | Trava | Estado |
 |---|---|---|
@@ -332,14 +368,17 @@
 | ~~51–57 — infraestrutura~~ | Implantação dos MCP, banco da aplicação, cofre de segredos | ✅ **Respondidas em 05–06/09, por medição.** Em troca, deixaram uma lista de conserto: **R-62 a R-67**, e o **Portainer publicado na internet** é o mais urgente dela |
 | **5 — responsavel interno** | Interlocutor unico das decisoes de negocio | ✅ **Respondida em 05/09 — Malu Souza** (D-200) |
 | **6 — colaborador pode aprovar ato de prazo?** | Regra Inegociavel 2 e o botao de aprovacao (RN-09) | 🚧 **Aberta** — proposta em D-194 |
-| **20a–20e — rito do alerta de prazo, expiracao de aprovacao e janela de reversao** | Configuracao de E2 e do ciclo de aprovacao (RF-13, RN-09) | 🚧 **Aberta.** A **20b foi reescrita** em 05/09 (sem hierarquia, o ultimo degrau proposto e a Malu Souza — D-200), e a **20e nasceu** da D-194: quanto tempo a advogada tem para reabrir alerta encerrado por colaboradora, e o que acontece quando a janela expira em silencio (R-68) |
+| ~~20a, 20b, 20d, 20e — os números do rito de prazo~~ | Configuração de E2 e do ciclo de aprovação (RF-13, RN-09) | ✅ **RESPONDIDAS em 07/09** (D-208). 2 h úteis no N1, 4 h até a Malu no N2, 4 h/2 h de expiração de aprovação, e a janela de reabertura **expira REABRINDO** — o lado seguro, e **R-68 cai** (D-209) |
+| **20c — horário útil** | O relógio de toda a escalada de E2 | 🔄 **Devolvida em 07/09** — o escritório pediu que fosse explicada. Cinco definições com proposta estão na A3; falta a **lista de feriados** |
+| **20 (principal) — como o escritório confere prazo hoje** | Validação do rito antes de E2 entrar em operação | 🔴 **Aberta, e as cinco derivadas fecharam sem ela** |
+| **16a → 15 — a Ana Beatriz não usa a caixa compartilhada** | Desenho da frente E3, e o alcance de R-11 | 🔴 **Nova, de 07/09.** São **seis** na conta, não sete: onde chega o e-mail dos processos dela? |
 | **75 — a Ana Beatriz tambem vai de V1** | Vigilancia de prazo (E2) dos processos compartilhados | 🔄 **Reescrita em 05/09 (D-206).** A pergunta original era a frequencia do monitoramento por processo — **caiu**: com a Ana Beatriz atuando em outros escritorios, o V1 pelo nome dela custa R$ 3,00/mes contra R$ 55,20-72,00 e ainda cobre mais. **O que resta perguntar a Malu:** (a) confirma o V1 para a Ana Beatriz; (b) **quais dos processos dela o escritorio acompanha** — e a lista precisa existir, porque e a chave da triagem (RF-45); (c) o `limite_aparicoes` do monitoramento novo, que nao pode ser aumentado depois (R-46) |
 | **Os numeros propostos** — franquia de aparicoes, tetos de bloco, tetos de orcamento | Configuracao de E2 e do disjuntor (D-149) | 🔴 **Aberto** — aguarda o de acordo do escritorio |
 | **71 — teto de gasto mensal com IA** | Disjuntor no eixo de IA (Regra 6) | 🟡 **Adiada pelo usuario.** Nao trava a entrega; entra na lista de numeros que faltam |
 | 15 — caixas de e-mail | Desenho da frente F3 | 🔴 Aberta |
-| 16a — quantas pessoas usam a conta compartilhada | Custo de reavaliar o Caminho A no futuro | 🔴 Aberta |
+| ~~16a — quantas pessoas usam a conta compartilhada~~ | Custo de reavaliar o Caminho A no futuro | ✅ **Respondida em 07/09 — seis** (Malu + as cinco colaboradoras). O Caminho A vira calculável, e **a Ana Beatriz ficou de fora**, o que alimenta a 15 |
 | 30 — software de gestao juridica | Arquitetura de integracao | 🔴 Aberta |
-| **Perguntas 7 a 14, 17 a 22, 24 a 25, 28 a 29, 31 a 40** | Escopo fino de E3 e E4 | 🔴 **Nao enviadas ao escritorio ainda** — Partes A2 a A6 |
+| **Perguntas 7 a 14, 15, 17 a 22, 24 a 25, 28 a 29, 31 a 40** | Escopo fino de E3 e E4 | 🔴 **Sem resposta.** A A3 voltou parcial em 07/09; A2 e A4 a A6 ainda não foram ao escritório |
 
 ### Resolvidas, por data
 
