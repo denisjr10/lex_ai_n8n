@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | **2.0 — reescrita para ser lida por quem decide, não por quem programou.** Cada ficha do grupo A ganhou contexto, exemplo concreto, o custo em reais quando existe e uma linha de decisão para marcar. Entrou o **glossário** da §9. Nenhum conteúdo de decisão mudou entre a v1.1 e esta |
+| Versão | **2.1 — os cinco primeiros avais chegaram, e três delas geraram decisão nova.** A-1, A-2, A-4 e A-5 confirmadas; **A-3 recusada** (não recortar, mover a data). Nasceram **D-219 a D-222**, na nova §3.1. **2.0 — reescrita para ser lida por quem decide, não por quem programou.** Cada ficha do grupo A ganhou contexto, exemplo concreto, o custo em reais quando existe e uma linha de decisão para marcar. Entrou o **glossário** da §9. Nenhum conteúdo de decisão mudou entre a v1.1 e esta |
 | Data | 2026-09-08 |
 | Estado | 🟢 **Pronto para leitura.** Não altera o estado de nenhuma decisão — o aval é do usuário |
 | Fase | 3 — construção |
@@ -59,12 +59,12 @@ Contado em **08/09** sobre `01-diretrizes-gerais.md` §13, linha a linha:
 
 | Estado | Linhas |
 |---|---|
-| 🟡 **Proposta** | **182** — eram 179 antes de D-216 a D-218 nascerem, em 08/09 |
-| ✅ Confirmada / Resolvida | 31 |
+| 🟡 **Proposta** | **181** — cinco saíram com os avais de 08/09, e quatro entraram (D-219 a D-222) |
+| ✅ Confirmada / Resolvida | **35** |
 | 🔴 Em aberto | 3 — D-197, D-202, D-212 |
 | 🔄 Revisada | 1 — D-205 |
-| ❌ Derrubada | 1 — D-153 |
-| **Total de linhas** | **218**, e agora **218 identificadores distintos** |
+| ❌ Derrubada / Recusada | 2 — D-153 e **D-207** |
+| **Total de linhas** | **222**, e **222 identificadores distintos** |
 
 Três correções ao que o `00-estado-atual.md` e o plano diziam:
 
@@ -80,11 +80,11 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 
 | Grupo | Critério | Quantas |
 |---|---|---|
-| **A — precisa da sua leitura** | Ainda muda desenho, custa dinheiro, afrouxa uma Regra Inegociável, ou é irreversível depois de aplicada | **15** |
+| **A — precisa da sua leitura** | Ainda muda desenho, custa dinheiro, afrouxa uma Regra Inegociável, ou é irreversível depois de aplicada | **14 pendentes** — eram 15, cinco foram decididas em 08/09 e quatro novas entraram |
 | **B — de acordo em bloco** | Registro de coisa que o projeto já fez, que já está no código ou nos documentos, e que ninguém contestou. Confirmar é formalizar o que já existe | **159** |
 | **C — não deveria estar em Proposta** | Superada, contradita por decisão mais nova, ou dependia de resposta que já chegou | **8** |
 
-15 + 159 + 8 = **182**. Toda decisão em Proposta está em exatamente um grupo.
+14 + 159 + 8 = **181**. Toda decisão em Proposta está em exatamente um grupo.
 
 **O filtro do grupo A, em detalhe.** Uma decisão entra na §3 se responde **sim** a pelo menos uma destas quatro perguntas:
 
@@ -99,19 +99,25 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 
 ---
 
-## 3. Grupo A — as 15 que pedem a sua leitura
+## 3. Grupo A — as que pedem a sua leitura
 
-### 3.0 O quadro das 15, antes de entrar em cada uma
+> ✅ **Cinco foram decididas em 08/09** — A-1, A-2, A-4 e A-5 adotadas; **A-3 recusada**, com a data movendo em vez do escopo encolhendo. As fichas delas ficam aqui, marcadas, porque o registro de *o que foi decidido e com que fundamento* vale mais que a economia de espaço.
+>
+> 🆕 **Três dessas decisões vieram com perguntas suas, e as perguntas acharam buracos reais no desenho.** As respostas viraram **D-219 a D-222**, na **§3.1** — quatro fichas novas, no fim desta seção.
 
-> 🔴 = urgente, tem data em cima · 🟠 = pode ser lida depois de 15/09 sem prejuízo
+**Sobram 10 das originais + 4 novas = 14 pendentes.**
+
+### 3.0 O quadro, antes de entrar em cada uma
+
+> 🔴 = urgente, tem data em cima · 🟠 = pode ser lida depois de 15/09 sem prejuízo · ✅ = já decidida · ❌ = recusada
 
 | # | Decisão | Em uma frase | Testes que ela dispara | Custo direto |
 |---|---|---|---|---|
-| **A-1** | 🔴 D-216 | As atendentes aprovam mensagem ao cliente; o que compromete continua com advogada | Afrouxa Regra 2 · Muda desenho | — |
-| **A-2** | 🔴 D-182 | A vigilância que já entrega publicação real renova em 26/09 | Custa dinheiro · Irreversível | **R$ 3,00/mês** |
-| **A-3** | 🔴 D-207 | O que entra e o que sai da entrega de 15/09 | Muda desenho · Contrato | — |
-| **A-4** | 🔴 D-206 | Publicação é triada por número de processo, no receptor | Muda desenho · Custa dinheiro | evita **R$ 52–69/mês** |
-| **A-5** | 🔴 D-209 | Alerta encerrado por colaboradora reabre se nenhuma advogada tocar | Muda desenho · Afrouxa Regra 2 | — |
+| **A-1** | ✅ D-216 | As atendentes aprovam mensagem ao cliente; o que compromete continua com advogada | Afrouxa Regra 2 · Muda desenho | — |
+| **A-2** | ✅ D-182 | A vigilância que já entrega publicação real renova em 26/09 | Custa dinheiro · Irreversível | **R$ 3,00/mês** |
+| **A-3** | ❌ D-207 | O que entra e o que sai da entrega de 15/09 | Muda desenho · Contrato | — |
+| **A-4** | ✅ D-206 | Publicação é triada por número de processo, no receptor | Muda desenho · Custa dinheiro | evita **R$ 52–69/mês** |
+| **A-5** | ✅ D-209 | Alerta encerrado por colaboradora reabre se nenhuma advogada tocar | Muda desenho · Afrouxa Regra 2 | — |
 | **A-6** | 🔴 D-211 | Matéria sensível encurta o automatismo, não o acesso | Muda desenho | — |
 | **A-14** | 🔴 D-217 | A advogada é avisada por exceção, e prestada contas por resumo | Muda desenho | — |
 | **A-7** | 🟠 D-149 | Os tetos de gasto ganham número e vão à Malu | Custa dinheiro | teto **R$ 300/mês** |
@@ -122,6 +128,10 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 | **A-12** | 🟠 D-215 | O HMAC no anonimizador continua adiado | Muda desenho · LGPD | — |
 | **A-13** | 🟠 D-196 | A chave do Trello nasce em conta dedicada, não na da Malu | Irreversível | 1 licença |
 | **A-15** | 🟠 D-218 | O catálogo de gabaritos sobe de prioridade | Muda desenho | — |
+| **A-16** | 🔴 D-219 | A data se move — E2 em 15/09, E1 completa em 30/09 | Muda desenho · Contrato | — |
+| **A-17** | 🟠 D-220 | Como um processo novo entra na lista da triagem | Muda desenho | — |
+| **A-18** | 🟠 D-221 | Como se cadastra um advogado novo para ser vigiado | Custa dinheiro · Irreversível | **R$ 3,00/mês** cada |
+| **A-19** | 🔴 D-222 | Como a advogada confirma, no primeiro e no segundo ciclo | Muda desenho | — |
 
 **Como cada ficha está organizada:** *em uma frase* → *o que está em jogo* (o cenário concreto) → *o que a decisão determina* → *se você disser não* → *recomendação* → *linha de decisão para marcar*.
 
@@ -156,10 +166,8 @@ Isso não é detalhe de implementação: a própria D-156 escreveu a regra desta
 
 **Recomendação: adotar**, e implementar como **escopo verificado no chassi** (permissão conferida em código, antes da ação) — nunca como instrução escrita no *prompt* (o texto que se manda ao modelo de IA). É a **Regra Inegociável 1**: o agente de IA nunca é a fronteira de segurança, porque instrução em prompt se contorna com conversa.
 
-**Sua decisão:**
-- [ ] Adotar como recomendado
-- [ ] Adotar, mas quero rever a lista de "informa" × "compromete" com a Malu antes
-- [ ] Não adotar — toda mensagem ao cliente exige advogada
+✅ **DECIDIDO em 08/09 — adotar como recomendado.** A D-216 está **✅ Confirmada** na §13.
+**O que isso põe em movimento:** a fronteira *informa* × *compromete* passa a valer, e o afrouxamento da conferência de papel em A3b vira trabalho de implementação em vez de pergunta em aberto. Continua inteira a exigência de advogada em **A4b** e em **matéria sensível**.
 
 ---
 
@@ -186,10 +194,8 @@ Isso não é detalhe de implementação: a própria D-156 escreveu a regra desta
 
 **Data dura: 26/09.** Ela renova sozinha. Não decidir é decidir por manter, tendo pago.
 
-**Sua decisão:**
-- [ ] Manter, e tratar junto com a contratação de saldo
-- [ ] Manter, e me avisar de novo em 20/09 para reconfirmar
-- [ ] Remover antes de 26/09 (ciente de que não dá para recriar sem saldo)
+✅ **DECIDIDO em 08/09 — manter, e tratar junto com a contratação de saldo.** A D-182 está **✅ Confirmada** na §13.
+**O que isso põe em movimento:** a vigilância NÃO se remove, e a renovação de 26/09 entra na conversa do **P-04**. A data continua dura — ela renova sozinha.
 
 ---
 
@@ -223,10 +229,10 @@ Sete marcos em seis dias, com o insumo pago chegando no primeiro deles, e cada m
 
 Este é o passo **P-01** do plano, e ele define a prioridade de tudo o mais — por isso está entre os primeiros.
 
-**Sua decisão:**
-- [ ] Adotar o recorte e levar à Malu
-- [ ] Adotar com ajuste (diga o que muda de lado)
-- [ ] Não recortar, e negociar mover a data de 15/09
+❌ **RECUSADO em 08/09 — não recortar, e negociar mover a data**, *"para que possamos fazer tudo e entregar completo e verificado"*. A D-207 está **❌ Recusada** na §13.
+**Isto não contraria a decisão — é a saída que ela mesma previa:** recusado o recorte, a alternativa é **mover a data, não apertar o trabalho**.
+**O que isso põe em movimento:** cache (RF-06), painel de custo (RF-08) e relatório de acesso amplo (RF-37) **voltam ao escopo**. A data vira a **D-219**, ficha **A-16** da §3.1 — com um número, porque mover data sem número não se negocia.
+⚠️ **E3 e E4 continuam fora**, por força da D-195, que a Malu já acordou. "Fazer tudo" aqui significa **E1 e E2 inteiras**.
 
 ---
 
@@ -264,10 +270,8 @@ A terceira saída existe porque cadastro incompleto é normal, e "não achei na 
 
 🚧 **Depende de um insumo que ainda não temos:** a lista dos ~24 processos da Ana Beatriz que o escritório acompanha. É o pedido mais bloqueante do passo **P-03** — sem ela, a triagem não tem contra o que comparar.
 
-**Sua decisão:**
-- [ ] Adotar, e pedir a lista dos ~24 à Malu com prioridade
-- [ ] Adotar com ajuste na saída "desconhecido"
-- [ ] Não adotar
+✅ **DECIDIDO em 08/09 — adotar, e pedir a lista dos ~24 à Malu com prioridade.** A D-206 está **✅ Confirmada** na §13.
+🆕 **E a sua pergunta achou um buraco real.** Você perguntou como processos e advogados **futuros** entram nessa triagem — e a D-206 não respondia. Viraram a **D-220** (ficha **A-17**) e a **D-221** (ficha **A-18**), na §3.1.
 
 ---
 
@@ -301,10 +305,8 @@ O alerta pendente aparece **uma vez por dia** no resumo de fim de dia útil, nã
 
 ⚠️ **O resíduo que software não resolve:** alerta pendente sobrevive enquanto ninguém ler o resumo. Isso é compromisso de operação, não de código.
 
-**Sua decisão:**
-- [ ] Adotar
-- [ ] Adotar, mas quero definir a regra do segundo ciclo antes
-- [ ] Não adotar (a janela expira fechando)
+✅ **DECIDIDO em 08/09 — adotar, e a Malu deu o de acordo sobre a regra do segundo ciclo.** A D-209 está **✅ Confirmada** na §13.
+🆕 **A sua segunda pergunta achou a outra metade que faltava:** *como a advogada confirma, na prática?* O primeiro ciclo estava desenhado; o segundo não estava. Virou a **D-222**, ficha **A-19** da §3.1.
 
 ---
 
@@ -623,6 +625,154 @@ Mas a D-156 recusa a faixa A3a enquanto o catálogo de gabaritos não existir �
 
 ---
 
+## 3.1 Nasceram dos seus avais de 08/09 — quatro decisões novas
+
+Três delas existem porque as suas perguntas encontraram buracos reais no desenho. A quarta é a consequência direta de você ter recusado o recorte.
+
+### A-16 · D-219 🔴 — a data se move, e a proposta são duas datas em vez de uma
+
+**Em uma frase.** Você recusou o recorte; a alternativa é mover a data — e mover data sem número não se negocia, então aqui está o número.
+
+**O que está em jogo.** A Malu deu o de acordo dela em **05/09** sobre 15/09 (D-195, ✅ Confirmada). Mudar isso é **conversa com ela**, não aviso. E há um agravante de contexto: o **R-75** — hoje **ninguém está vigiando prazo no escritório**. O Astrea que parecia ser a rede de segurança foi contratado "para experimentar" e não está em uso. Cada semana que E2 não entra é uma semana em que a rede não existe.
+
+**A proposta: faseamento, não adiamento.** A diferença importa — **nada sai do escopo**, só se ordena o que chega primeiro:
+
+| Data | O que entra | Por que esta ordem |
+|---|---|---|
+| **15/09** | **E2 inteira em produção** — vigilância de prazo, triagem, alerta com nome e rito | É a frente que **protege prazo**, e a mais adiantada: o callback já entrega publicação real desde 27/08. Falta ligar o que chega a um alerta |
+| **30/09** | **E1 completa** — fundação, consulta processual, mais os três itens que o recorte tirava: cache (RF-06), painel de custo (RF-08), relatório de acesso amplo (RF-37) | É o que não cabia. **17 dias úteis** a partir de 08/09, contra os 6 que sobravam |
+
+**A conta, e ela é apertada — vale dizer em voz alta.** Os três marcos entregues levaram cerca de **5 dias úteis**. Faltam **sete**, mais a integração e os dois requisitos que o recorte tirava. 17 dias úteis dá folga, não conforto.
+
+**Por que faseamento e não simplesmente 30/09 para tudo.** Uma data que se move e **não entrega nada no caminho** gasta a confiança que o projeto acumulou. Uma data que se move **entregando na data original a metade que protege prazo** gasta muito menos — e entrega justamente o que o R-75 tornou urgente. Há ainda um motivo de calendário: a renovação da vigilância cai em **26/09**, dentro da janela, o que põe a decisão de custo na frente de quem decide enquanto o trabalho corre.
+
+⚠️ **O que NÃO volta ao escopo.** E3 (Trello) e E4 (WhatsApp) continuam fora, por força da **D-195**, que está confirmada e teve o de acordo da Malu. "Fazer tudo" aqui significa **E1 e E2 inteiras** — se você quis dizer as quatro frentes, isto muda de figura e precisamos conversar antes de levar à Malu.
+
+**Recomendação: levar as duas datas à Malu junto com o P-01.** Se ela recusar o faseamento e exigir 15/09 cheio, a conversa volta para o recorte da D-207 — e aí ele é a única saída que não passa por entregar sem verificar.
+
+**Sua decisão:**
+- [ ] Levar o faseamento 15/09 (E2) + 30/09 (E1) à Malu
+- [ ] Levar só uma data — 30/09 para tudo
+- [ ] Outra data (diga qual)
+- [ ] ⚠️ Eu quis dizer E1 a E4, não só E1+E2 — vamos conversar antes
+
+---
+
+### A-17 · D-220 🟠 — como um processo novo entra na lista da triagem
+
+> Resposta à sua pergunta em A-4. **O buraco era real:** a D-206 desenhou a triagem e a RF-47 disse como um processo entra em *não acompanhado* — ninguém tinha escrito como ele entra em **acompanhado**. Sem isso a triagem funciona no dia da carga inicial e envelhece a partir do dia seguinte.
+
+**Em uma frase.** Três portas, e a principal é a própria fila de triagem — o cadastro acontece sozinho, no momento em que importa.
+
+**As três portas, em ordem de uso real:**
+
+| # | Porta | Quando é usada | Quem faz |
+|---|---|---|---|
+| **1** | **Carga inicial**, em lote | Uma vez só — os ~289 da Malu e os ~24 da Ana Beatriz | Operação, junto com o P-03 |
+| **2** | **A fila humana da triagem** ⭐ | **O tempo todo, daqui para a frente** | Quem estiver de plantão, pelo Telegram |
+| **3** | **Cadastro direto pelo bot** | No intervalo entre o processo ser distribuído e aparecer no diário pela primeira vez | Colaboradora ou advogada |
+
+**A porta 2 é a resposta, e vale explicar por quê.** Lembre que a triagem tem três saídas, e a terceira é *desconhecido → fila humana, nunca descarte*. Essa fila **já é o cadastro**:
+
+> Chega publicação de um CNJ que ninguém conhece → vai para a fila → a pessoa responde uma pergunta só: **"este processo é acompanhado pelo escritório?"**
+> **Sim** → o processo é criado na base como acompanhado, nominal e datado, e a publicação segue o caminho completo, virando alerta.
+> **Não** → registro mínimo permanente, sem conteúdo (é a RF-47: ato nominal, datado e reversível).
+
+**O ganho é que ninguém precisa lembrar de nada.** Processo novo do escritório aparece no diário em dias ou semanas — e é exatamente aí que ele entra na base, com a informação na frente de quem decide. Cadastro que depende de alguém lembrar é cadastro que envelhece.
+
+**O limite honesto, e é o que justifica a porta 3.** Entre a distribuição do processo e a primeira publicação, ele **não está na base**. Se nesse intervalo alguém quiser consultá-lo pelo bot, não acha. A porta 3 cobre isso: manda o CNJ ao bot, e ele entra.
+
+⚠️ **A porta 3 NÃO consulta a capa do processo.** Consultar custaria crédito para confirmar um número que a pessoa acabou de digitar. O CNJ sozinho basta para a triagem funcionar, e o processo se enriquece na primeira publicação que chegar.
+
+⚠️ **E não conte com painel web.** A D-16 prevê um, mas ele **não é nenhum dos dez marcos** da Spec — não existe em E1+E2 nem no escopo cheio. Cadastro que dependa dele não tem porta nenhuma até a fase seguinte. Por isso as três portas acima são todas Telegram ou lote.
+
+**Recomendação: adotar.** A porta 2 sai junto com a triagem (é E2, requisito RF-45); a porta 3 cabe no bot de E1; a porta 1 é operação, não código.
+
+**Sua decisão:**
+- [ ] Adotar as três portas
+- [ ] Adotar, mas quero que a porta 3 consulte a capa mesmo custando crédito
+- [ ] Outra coisa
+
+---
+
+### A-18 · D-221 🟠 — como se cadastra um advogado novo para ser vigiado
+
+> Resposta à segunda metade da sua pergunta em A-4. **Você acertou o mecanismo:** sim, cadastra-se um monitoramento novo no Escavador. O que faltava era dizer que o cadastro tem **duas metades**, e que confundi-las é o que produz assinatura esquecida pagando sozinha.
+
+**Em uma frase.** Uma metade é grátis e reversível; a outra custa R$ 3,00/mês para sempre e tem um campo que não se conserta depois.
+
+| Metade | Onde | Custa | Reversível? |
+|---|---|---|---|
+| **1 — A pessoa** | Na nossa base: nome, OAB, e se é exclusiva do escritório ou compartilhada | **R$ 0,00** | Sim |
+| **2 — O monitoramento** | No Escavador: V1, tipo `termo`, o nome da pessoa, jurisdição restrita aos diários do Amapá | **R$ 3,00/mês, recorrente** | Remover antes da renovação para de cobrar no ciclo seguinte |
+
+⚠️ **A armadilha, e ela é cara.** A **franquia de aparições** (o teto mensal de publicações que a assinatura cobre) é definida **na criação** e **não pode ser alterada depois** — a rota de edição do Escavador simplesmente não aceita esse campo. Errar obriga a **criar tudo de novo, pagando de novo**. Por isso o cadastro de advogado novo tem um passo humano obrigatório: **decidir a franquia com a Malu antes de criar**, nunca por padrão do sistema.
+
+🔑 **E aqui está o campo que faltava no desenho, e que a sua pergunta revelou.** O advogado é marcado como **exclusivo** ou **compartilhado**, e isso **muda o padrão da fila — nunca a decisão**:
+
+| Advogada | Marcação | O que "CNJ desconhecido" provavelmente significa | O que a fila sugere |
+|---|---|---|---|
+| Malu | **Exclusiva** | Processo nosso que ainda não cadastramos | *Acompanhar* |
+| Ana Beatriz | **Compartilhada** | Processo de outro escritório | *Não acompanhar* |
+
+**Nos dois casos quem decide é gente** — a RF-47 continua inteira, e nada entra em "não acompanhado" por inferência da automação. O que muda é qual botão vem primeiro e o que a fila diz. Sem esse campo, a fila da Ana Beatriz teria o padrão da Malu e produziria dezenas de decisões por mês **contra o padrão errado** — que é o jeito de a pessoa começar a clicar no automático.
+
+**O custo de escala, para você ter presente.** Cada advogado compartilhado novo é R$ 3,00/mês, para sempre, até alguém remover. Cinco parcerias dessas são R$ 15,00/mês — barato, e **fácil de esquecer**. É o risco R-13. O antídoto já existe como requisito: a **conferência periódica do inventário de vigilâncias contra o quadro de advogados** (RF-36), que precisa ser ligada.
+
+**Recomendação: adotar**, com o campo exclusivo/compartilhado e a RF-36 ligada.
+
+**Sua decisão:**
+- [ ] Adotar
+- [ ] Adotar sem o campo exclusivo/compartilhado (a fila trata todos igual)
+- [ ] Outra coisa
+
+---
+
+### A-19 · D-222 🔴 — como a advogada confirma, no primeiro e no segundo ciclo
+
+> Resposta à sua pergunta em A-5. **Metade já estava desenhada; a outra metade não estava**, e você achou exatamente a metade que faltava.
+
+**Em uma frase.** Botão, sempre — e no segundo ciclo são dois botões, com significados diferentes.
+
+**Ciclo 1 — já estava definido.** O alerta chega no Telegram com um botão **"Ciente"** (PRD §5.2.1), e ele significa coisas diferentes conforme quem clica:
+
+| Quem clica | O que acontece |
+|---|---|
+| **Colaboradora** | Registra a triagem e para o reenvio **para ela**. Desde a D-194, ela também pode **encerrar**, com motivo declarado |
+| **Advogada** | Encerra a escalada |
+
+⚠️ **E o PRD já responde uma parte da sua dúvida, com todas as letras:** *"Confirmar não é resolver. 'Ciente' significa **eu li**. O que fazer com o prazo é trabalho jurídico, e a plataforma não acompanha isso — ela só garante que ninguém pode dizer que não viu."* Isso é fronteira deliberada, não lacuna: a plataforma **sinaliza indício de prazo e nunca calcula prazo** (RF-11, D-64).
+
+**Ciclo 2 — é o que esta decisão fecha.** Depois que o alerta reabre e aparece no resumo de fim de dia útil, **o resumo carrega os botões**. Cada alerta pendente vem com um par:
+
+| Botão | O que a advogada está dizendo | O que acontece com o alerta |
+|---|---|---|
+| **✅ Confirmo o encerramento** | *"Olhei, concordo com a colaboradora. Não há prazo aqui, ou já foi tratado"* | **Fecha de verdade.** Sai da lista. Não reabre |
+| **📌 Assumo este alerta** | *"Discordo, ou quero olhar melhor. Este é meu agora"* | Continua **aberto, com dona**. Sai de *pendente de advogada* e vira *em tratamento por X*. Para de escalar, porque já tem responsável nomeado |
+
+**É isto que "toque humano" significa na prática:** um clique, num dos dois botões, dentro do resumo diário. Não é mandar mensagem para o bot, não é entrar em lugar nenhum.
+
+**Por que botão e nunca mensagem de texto** — as três razões vêm de erros que este projeto já cometeu e pagou:
+
+1. **D-167.** Sistema que oferece uma opção com um rótulo é obrigado a aceitar aquele rótulo de volta. Pedir para digitar cria o caminho em que a pessoa responde certo e o sistema não entende — e isso já aconteceu aqui, com um cliente respondendo três vezes a mesma pergunta.
+2. **D-99.** O botão carrega consigo **de que ele trata**. Com três alertas pendentes, um *"confirmo"* digitado não diz **qual** — e adivinhar, sobre prazo, é o erro mais caro possível.
+3. Digitar é um passo a mais, e o passo a mais é onde a pessoa desiste.
+
+**Um terceiro estado que faltava nome.** O que acontece com um alerta **assumido**? Ele não pode ficar aberto em silêncio para sempre, senão "assumir" vira o jeito de fazer desaparecer. Proposta: alerta assumido **continua no resumo**, em seção própria, com **há quantos dias** — não escala, não reenvia, e não some. Quem assumiu fecha com o mesmo botão ✅.
+
+**Teto prático.** No máximo **5 alertas com botão** no corpo do resumo. Acima disso, o resumo diz o número e mostra os cinco mais antigos — porque um resumo com trinta botões é ilegível, e porque, com vinte pendentes, a mensagem certa não é a lista: é que o rito está falhando.
+
+**E se as duas advogadas clicarem ao mesmo tempo?** Já resolvido pela D-214 (aprovação vale uma vez): o primeiro clique vale, o segundo recebe *"já confirmado por X"*.
+
+**Recomendação: adotar.**
+
+**Sua decisão:**
+- [ ] Adotar
+- [ ] Adotar, mas quero um terceiro botão (diga qual)
+- [ ] Outra coisa
+
+---
+
 ## 4. Grupo B — de acordo em bloco
 
 **159 decisões.** Todas registram coisa que o projeto já fez, que já está no código, nos documentos ou na medição, e que ninguém contestou. Confirmar é formalizar o que já existe.
@@ -755,10 +905,11 @@ Não fazem parte do P-17, mas seria desonesto ter visto e não registrado.
 |---|---|---|
 | 1 | ✅ **Feito em 08/09** — renumeração das colisões (D-213 a D-215, R-76) | 🤖 |
 | 2 | ✅ **Feito em 08/09** — a D-171 virou D-216, e a pergunta do aviso virou D-217 e D-218 | 🤖 |
-| 3 | Ler a §3 — 15 decisões, das quais **7 urgentes**, marcando a linha de decisão de cada uma | 👤 você |
-| 4 | Dar o de acordo em bloco da §4, com data, na §13 | 👤 você |
-| 5 | Dizer o que fazer com as **8** da §5 | 👤 você |
-| 6 | Aplicar as mudanças de status na §13 e fechar o P-02 | 🤖 uma sessão, depois de 3, 4 e 5 |
+| 3 | ✅ **Cinco decididas em 08/09** — A-1, A-2, A-4, A-5 adotadas e A-3 recusada | 👤 feito |
+| 4 | Ler o que sobrou da §3 e a §3.1 — **14 pendentes**, das quais **3 urgentes** (A-14, A-16, A-19) | 👤 você |
+| 5 | Dar o de acordo em bloco da §4, com data, na §13 | 👤 você |
+| 6 | Dizer o que fazer com as **8** da §5 | 👤 você |
+| 7 | Aplicar o resto das mudanças de status na §13 e fechar o P-02 | 🤖 uma sessão, depois de 4, 5 e 6 |
 
 **Você não precisa fazer 3, 4 e 5 na mesma sentada.** O passo 4 é o que mais destrava por unidade de esforço — 159 decisões saem da pilha com um parágrafo. Os passos 3 e 5 podem vir depois.
 

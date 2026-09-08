@@ -80,7 +80,9 @@ P-09 Policy Gate ─────────────────────
 
 ## 4. Bloco 0 — urgente e bloqueador
 
-### P-01 · 👤🔴🚧 Recortar o escopo com a Malu — antes de 08/09
+### P-01 · 👤🔴🚧 ~~Recortar o escopo~~ → **negociar a data** com a Malu
+
+> ❌ **Mudou em 08/09.** O usuário recusou o recorte: *"não recortar, e negociar mover a data de 15/09, para que possamos fazer tudo e entregar completo e verificado"*. **O passo continua sendo o primeiro de todos e continua sendo uma conversa com a Malu** — mudou o que se leva a ela. Em vez do recorte, leva-se a proposta de **faseamento da D-219**: **E2 inteira em 15/09** (a frente que protege prazo, e o R-75 diz que hoje ninguém está vigiando) e **E1 completa em 30/09**. Nada sai do escopo. ⚠️ Se ela recusar o faseamento e exigir 15/09 cheio, a conversa volta para o recorte — e aí ele é a única saída que não passa por entregar sem verificar.
 
 **Trava:** a prioridade de todo o resto. Sem isso, as sessões constroem na ordem errada e o dia 15 chega com sete meias-entregas em vez de duas inteiras.
 
@@ -282,7 +284,7 @@ Todos tocam `packages/mcp-core/src/chassi.ts` e `etapas.ts`, todos precisam do b
 
 ## 10. O calendário
 
-Assumindo a **D-207** aceita.
+❌ **ESTE CALENDÁRIO CAIU EM 08/09.** Ele assumia a **D-207** aceita, e o usuário a **recusou**: *"não recortar, e negociar mover a data"*. O que vale agora é a proposta da **D-219** — **faseamento**, com **E2 inteira em 15/09** e **E1 completa em 30/09** —, e ela **depende do de acordo da Malu**. As linhas abaixo ficam como registro do que se planejava, e como base do replanejamento: a ordem dos passos e as dependências entre eles **não mudam**; o que muda é que há 17 dias úteis em vez de 6, e que cache (P-10), painel de custo e relatório de acesso amplo voltaram ao escopo. 🚧 **O calendário novo se escreve depois da conversa com a Malu**, não antes.
 
 | Dia | Usuário (👤) | Sessões (🤖) |
 |---|---|---|
@@ -297,9 +299,13 @@ Assumindo a **D-207** aceita.
 
 Está apertado e **sem folga real**. O que quebra primeiro, se quebrar, é o Trilho 1 — e é por isso que P-01 vem antes de tudo.
 
+> 📌 **O que a D-219 muda nesta tabela, quando ela for replanejada.** O gargalo deixa de ser o calendário e passa a ser a **sequência de marcos**: sete marcos, cada um fechando com sua própria suíte. A janela de 15/09 passa a ser dedicada a **E2** — P-11 (receptor e triagem), P-14 (fluxos) e P-16 (monitoramentos) —, e E1 ocupa a segunda janela. **P-09 continua podendo começar hoje**, porque não depende de nada.
+
 ---
 
 ## 11. Decisão que este documento propõe
+
+❌ **RESOLVIDA EM 08/09 — e resolvida contra a proposta.** O usuário recusou o recorte e escolheu mover a data, o que é exatamente a alternativa que a própria D-207 previa. A decisão viva passou a ser a **D-219** (faseamento: E2 em 15/09, E1 completa em 30/09), e ela precisa do de acordo da Malu. A linha abaixo fica como registro.
 
 | # | Decisão | Recomendação |
 |---|---|---|
