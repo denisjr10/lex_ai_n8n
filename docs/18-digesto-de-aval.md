@@ -9,6 +9,8 @@
 | Passo | **P-17** do [plano de execução](17-plano-de-execucao.md) §6. Destrava o **P-02** |
 | Herda de | `01-diretrizes-gerais.md` §13 (registro único e centralizado), `17-plano-de-execucao.md`, `00-estado-atual.md` |
 
+> 🆕 **Atualizado em 08/09, fim do dia.** A pergunta sobre gestão de tarefa no Trello gerou **D-226 a D-231**. Duas delas pedem leitura individual e viraram as fichas **A-23** e **A-24** — e a **A-23 é a única deste digesto que é mudança de escopo**, o que a faz ir à Malu, não só a você. As contagens abaixo foram remedidas sobre o arquivo; a reconciliação completa dos grupos A/B/C continua pendente, e a soma de §3 ainda diverge da de §2 desde antes desta sessão.
+>
 > **O que este documento é.** A leitura curta da pilha de aval. A §13 das diretrizes tem **184 decisões em 🟡 Proposta**, e ler as 184 não é caminho — a maior parte é registro de coisa que o projeto já fez e que ninguém contestou. Aqui elas estão separadas em três grupos: as que **precisam da sua leitura uma a uma** (§3), as que se confirmam **em bloco, com uma data** (§4), e as que **não deveriam estar em Proposta** (§5).
 >
 > **O que este documento não é.** Ele não decide nada e não muda nenhum status. A §13 continua sendo o registro único; este é o índice de leitura dela. **Nenhuma linha da §13 foi alterada para produzir este digesto.**
@@ -59,7 +61,7 @@ Contado em **08/09** sobre `01-diretrizes-gerais.md` §13, linha a linha:
 
 | Estado | Linhas |
 |---|---|
-| 🟡 **Proposta** | **184** — cinco saíram com os avais de 08/09, e sete entraram: D-219 a D-222 (dos avais) e **D-223 a D-225** (da pergunta sobre o painel) |
+| 🟡 **Proposta** | **187**, recontado no fim de 08/09 sobre 231 linhas da §13. Cinco saíram com os avais do dia, e doze entraram: D-219 a D-222 (dos avais), **D-223 a D-225** (da pergunta sobre o painel) e **D-226 a D-230** (da pergunta sobre o Trello). A D-231 nasceu já ✅ |
 | ✅ Confirmada / Resolvida | **36** — uma delas (**D-205**) marcada 🔄 Revisada dentro da mesma célula, o que fazia a contagem anterior separá-la e chegar a 35 + 1 |
 | 🔴 Em aberto | 3 — D-197, D-202, D-212 |
 | ❌ Derrubada / Recusada | 2 — D-153 e **D-207** |
@@ -80,7 +82,7 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 | Grupo | Critério | Quantas |
 |---|---|---|
 | **A — precisa da sua leitura** | Ainda muda desenho, custa dinheiro, afrouxa uma Regra Inegociável, ou é irreversível depois de aplicada | **14 pendentes** — eram 15, cinco foram decididas em 08/09 e quatro novas entraram |
-| **B — de acordo em bloco** | Registro de coisa que o projeto já fez, que já está no código ou nos documentos, e que ninguém contestou. Confirmar é formalizar o que já existe | **159** |
+| **B — de acordo em bloco** | Registro de coisa que o projeto já fez, que já está no código ou nos documentos, e que ninguém contestou. Confirmar é formalizar o que já existe | **162** — as três novas são D-228, D-229 e D-230, técnicas e decorrentes da D-226 |
 | **C — não deveria estar em Proposta** | Superada, contradita por decisão mais nova, ou dependia de resposta que já chegou | **8** |
 
 14 + 159 + 8 = **181**. Toda decisão em Proposta está em exatamente um grupo.
@@ -134,6 +136,8 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 | **A-18** | 🟠 D-221 | Como se cadastra um advogado novo para ser vigiado | Custa dinheiro · Irreversível | **R$ 3,00/mês** cada |
 | **A-19** | 🔴 D-222 | Como a advogada confirma, no primeiro e no segundo ciclo | Muda desenho | — |
 | **A-20** | 🟠 D-223 | O painel são três camadas, e nenhuma entra em E1 ou E2 | Muda desenho · Cumpre RF só em parte | **8–13 dias** na fase seguinte |
+| **A-23** | 🔴 D-226 | 🆕 O alerta de prazo vira tarefa no Trello — e isso é mudança de escopo | Muda desenho · **Contrato** | fatia mínima de E3 |
+| **A-24** | 🔴 D-227 | 🆕 A data do card é de triagem, jamais o prazo processual | Muda desenho · **Risco jurídico** | — |
 | **A-21** | 🟠 D-224 | O super admin é você, por acesso técnico — não existe console | Muda desenho · LGPD · Segurança | — |
 | **A-22** | 🟢 D-225 | RF-08 e RF-37 saem por relatório gerado, não por tela | — | — |
 
@@ -664,7 +668,7 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 
 ### A-17 · D-220 🟠 — como um processo novo entra na lista da triagem
 
-> Resposta à sua pergunta em A-4. **O buraco era real:** a D-206 desenhou a triagem e a RF-47 disse como um processo entra em *não acompanhado* — ninguém tinha escrito como ele entra em **acompanhado**. Sem isso a triagem funciona no dia da carga inicial e envelhece a partir do dia seguinte.
+> Resposta à sua pergunta em A-4. **O buraco era real:** a D-206 desenhou a triagem e a RF-54 disse como um processo entra em *não acompanhado* — ninguém tinha escrito como ele entra em **acompanhado**. Sem isso a triagem funciona no dia da carga inicial e envelhece a partir do dia seguinte.
 
 **Em uma frase.** Três portas, e a principal é a própria fila de triagem — o cadastro acontece sozinho, no momento em que importa.
 
@@ -680,7 +684,7 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 
 > Chega publicação de um CNJ que ninguém conhece → vai para a fila → a pessoa responde uma pergunta só: **"este processo é acompanhado pelo escritório?"**
 > **Sim** → o processo é criado na base como acompanhado, nominal e datado, e a publicação segue o caminho completo, virando alerta.
-> **Não** → registro mínimo permanente, sem conteúdo (é a RF-47: ato nominal, datado e reversível).
+> **Não** → registro mínimo permanente, sem conteúdo (é a RF-54: ato nominal, datado e reversível).
 
 **O ganho é que ninguém precisa lembrar de nada.** Processo novo do escritório aparece no diário em dias ou semanas — e é exatamente aí que ele entra na base, com a informação na frente de quem decide. Cadastro que depende de alguém lembrar é cadastro que envelhece.
 
@@ -690,7 +694,7 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 
 ⚠️ **E não conte com painel web.** A D-16 prevê um, mas ele **não é nenhum dos dez marcos** da Spec — não existe em E1+E2 nem no escopo cheio. ✅ **Confirmado e datado em 08/09 pela D-223** ([Nota Técnica 04](19-painel-web-e-administracao.md)): as camadas 1 e 2 vão para depois de 30/09. Cadastro que dependa dele não tem porta nenhuma até a fase seguinte. Por isso as três portas acima são todas Telegram ou lote.
 
-**Recomendação: adotar.** A porta 2 sai junto com a triagem (é E2, requisito RF-45); a porta 3 cabe no bot de E1; a porta 1 é operação, não código.
+**Recomendação: adotar.** A porta 2 sai junto com a triagem (é E2, requisito RF-52); a porta 3 cabe no bot de E1; a porta 1 é operação, não código.
 
 **Sua decisão:**
 - [ ] Adotar as três portas
@@ -719,7 +723,7 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 | Malu | **Exclusiva** | Processo nosso que ainda não cadastramos | *Acompanhar* |
 | Ana Beatriz | **Compartilhada** | Processo de outro escritório | *Não acompanhar* |
 
-**Nos dois casos quem decide é gente** — a RF-47 continua inteira, e nada entra em "não acompanhado" por inferência da automação. O que muda é qual botão vem primeiro e o que a fila diz. Sem esse campo, a fila da Ana Beatriz teria o padrão da Malu e produziria dezenas de decisões por mês **contra o padrão errado** — que é o jeito de a pessoa começar a clicar no automático.
+**Nos dois casos quem decide é gente** — a RF-54 continua inteira, e nada entra em "não acompanhado" por inferência da automação. O que muda é qual botão vem primeiro e o que a fila diz. Sem esse campo, a fila da Ana Beatriz teria o padrão da Malu e produziria dezenas de decisões por mês **contra o padrão errado** — que é o jeito de a pessoa começar a clicar no automático.
 
 **O custo de escala, para você ter presente.** Cada advogado compartilhado novo é R$ 3,00/mês, para sempre, até alguém remover. Cinco parcerias dessas são R$ 15,00/mês — barato, e **fácil de esquecer**. É o risco R-13. O antídoto já existe como requisito: a **conferência periódica do inventário de vigilâncias contra o quadro de advogados** (RF-36), que precisa ser ligada.
 
@@ -870,6 +874,78 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 - [ ] Outra coisa
 
 ---
+
+---
+
+### A-23 · D-226 🔴 — o alerta de prazo vira tarefa no Trello
+
+> Resposta à sua pergunta de 08/09: *"não adianta apenas disparar alerta de prazo e registrar internamente no banco de dados se isso não for registrado num lugar onde possa ser gerenciado como tarefa."*
+
+**Em uma frase.** Todo alerta de prazo passa a virar uma **tarefa**, com responsável e estado — e a tarefa aparece como **card no Trello**, onde a equipe já trabalha.
+
+**O buraco era real, e estava escrito no nosso próprio documento.** O rito do alerta (PRD §5.2.1) terminava assim: *"Confirmar não é resolver. O que fazer com o prazo é trabalho jurídico, e **a plataforma não acompanha isso**."* Ou seja: o sistema provava que alguém **viu** o prazo, e parava aí. Depois do "Ciente", o prazo saía do sistema e voltava a viver na memória das pessoas.
+
+Isso seria tolerável se houvesse outra rede embaixo. **Não há** — é o que a R-75 descobriu em 08/09: o Astrea está pago e não é usado, e a conferência de prazo hoje é humana e sem processo escrito.
+
+**A prova de que não estava previsto:** o único requisito do projeto que criava card no Trello era a **RF-20**, e o gatilho dela é **e-mail de demanda de cliente** (entrega E3). A tabela `alerta` não tinha campo nenhum ligando um alerta a uma tarefa.
+
+**O que passa a acontecer:**
+
+| Momento | Hoje (desenho antigo) | Com a D-226 |
+|---|---|---|
+| Chega a publicação | Vira alerta no Telegram | Vira alerta **e tarefa**, no mesmo ato |
+| Alguém clica "Ciente" | Para o reenvio. Fim | Para o reenvio, e a tarefa continua **aberta e visível no quadro** |
+| O trabalho é feito | Ninguém sabe. Não há registro | O card muda de lista, e o encerramento pede **motivo** |
+| Ninguém faz nada | O alerta some do topo da conversa | O card fica no quadro, com data de triagem estourada |
+
+**O que isto custa, e é a parte desconfortável.** O Trello inteiro é a entrega **E3**, e E3 saiu da janela de 15/09 pela **D-195** — com o de acordo da Malu, em 05/09. A contratação é de **escopo fechado**. Então isto é **mudança de escopo, não ajuste** (R-83), e precisa ir a ela — junto com a D-219, porque são a mesma conversa.
+
+Entra a **fatia mínima**: 3 das 12 ferramentas do Trello, os campos personalizados e um webhook. Não entra nada de e-mail, classificação ou resposta automática.
+
+**Dois bloqueadores que não dependem de nós:** a **chave de API em conta dedicada** (A-13, D-196), que não existe, e o **inventário do Butler** — a automação nativa do Trello, que reage às nossas escritas e que ninguém no escritório sabe descrever (R-81).
+
+**Por isso a entrega tem duas metades:** a **tarefa na base** roda sem depender de nada disso, e o campo do card fica esperando; o **card no Trello** liga quando a chave chegar. Se fosse ao contrário, o prazo ficaria sem lugar de gestão até a chave aparecer — e ela "chega quando chegar".
+
+**Se você disser NÃO.** O alerta continua provando ciência e não entregando gestão, e o acompanhamento do prazo permanece fora do sistema — que é exatamente o estado que a R-75 descreve como "não há rede nenhuma".
+
+**Recomendação: adotar, e levar à Malu junto com a D-219.**
+
+**Sua decisão:**
+- [ ] Adotar — e levar a mudança de escopo à Malu
+- [ ] Adotar só a metade que não depende do Trello (a tarefa na base), e decidir o card depois
+- [ ] Não adotar
+
+---
+
+### A-24 · D-227 🔴 — a data do card é de triagem, jamais o prazo processual
+
+**Em uma frase.** O card de prazo tem data de vencimento, sim — mas ela responde *"até quando alguém precisa olhar isto"*, e **nunca** *"quando o prazo vence"*.
+
+**Por que isto é uma ficha separada, e não um detalhe da anterior.** Porque é onde a D-226 poderia atropelar uma regra que o escritório já aprovou.
+
+A **RF-11** diz, com todas as letras: *"o alerta diz 'há indício de prazo' e encaminha a advogado; **nunca** afirma 'o prazo vence em X'"*. A razão está no próprio PRD: contar prazo processual envolve dia útil, suspensão, feriado forense local, prerrogativa e intimação ficta — **errar por um dia é dano irreversível**, e por isso a plataforma sinaliza indício e quem conta é advogada.
+
+**Um card com data de vencimento preenchida pela automação é a plataforma afirmando um prazo.** E afirma **pior** do que num texto: a data fica vermelha, notifica, entra no calendário de quem olha o quadro — e ninguém lembra que aquele número veio de um robô que não sabe contar prazo.
+
+**A saída, e ela é limpa:**
+
+| Elemento | O que é |
+|---|---|
+| **Data inicial do card** | O momento em que a publicação chegou. É fato medido |
+| **Data final do card** | A hora-limite da **triagem** — o N2 do rito, 4 horas úteis (D-208). *"Até quando alguém precisa olhar isto"* |
+| **Etiqueta `prazo não calculado`** | Nasce em todo card. Enquanto ela estiver lá, **aquela data não é prazo** |
+| **O prazo verdadeiro** | Escrito **à mão**, por advogada identificada, depois de contar — e registrado como ato dela, não da plataforma |
+
+**O risco que fica, mesmo assim.** Um card no quadro, com data e cor, é mais convincente que uma linha de texto — e a convicção vem do formato, não de alguém ter feito a conta. É a **R-80**, e ela é a mesma forma do problema do Astrea: uma coisa paga e visível sugerindo uma proteção que não existe. Não dá para eliminar; dá para deixar visível, e é o que a etiqueta faz.
+
+**Se você disser NÃO** — isto é, se a automação puder escrever o prazo processual: a plataforma passa a afirmar prazo, contra a RF-11 e a D-64, e o primeiro erro de contagem sai com a cara do sistema. Isso exigiria decisão formal e ciência da Malu do risco.
+
+**Recomendação: adotar. É a condição de a D-226 poder existir.**
+
+**Sua decisão:**
+- [ ] Adotar — data de triagem, com a etiqueta `prazo não calculado`
+- [ ] Card sem data nenhuma, só a advogada preenche
+- [ ] Automação calcula o prazo processual *(exige decisão formal e ciência do risco)*
 
 ## 4. Grupo B — de acordo em bloco
 

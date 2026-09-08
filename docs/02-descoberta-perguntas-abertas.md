@@ -133,10 +133,10 @@
 23. **O Trello é a fonte da verdade da demanda, ou é visualização de algo que vive em outro lugar?**
 
     ✅ **RESPONDIDA em 27/08 — quadro de trabalho.** *"O Trello é quadro de trabalho."* A fonte da verdade da demanda é a **base interna** da plataforma; o Trello é a vitrine onde a equipe trabalha. Decisão D-09 resolvida; ver D-152 e PRD §4.3.
-24. Quantos quadros, e qual a lógica deles — por área, por cliente, por fase, por pessoa?
-25. Qual o fluxo típico de um card, da criação ao encerramento?
+24. 🔴 **BLOQUEADORA DE E2 desde 08/09.** Quantos quadros, e qual a lógica deles — por área, por cliente, por fase, por pessoa? *Era escopo fino de E3 e nunca foi enviada. A **D-226** fez o alerta de prazo virar card, e sem esta resposta **não há onde criar o card**. Se houver um quadro por área ou por pessoa, ela decide também qual recebe o card de prazo.*
+25. 🔴 **BLOQUEADORA DE E2 desde 08/09.** Qual o fluxo típico de um card, da criação ao encerramento? *Idem. Define os nomes das listas e o caminho do card de prazo — que, por Regra 3 e pela **D-230**, vive no n8n e não no MCP. Sem ela **não há para onde mover** o card quando a advogada assume o prazo.*
 26. ⚙️ **REATRIBUÍDA em 27/08 — vira levantamento técnico nosso.** Quais campos personalizados (Custom Fields) estão em uso? *O escritório informou que ninguém sabe responder. Será levantado por nós com a API, assim que a chave do Trello chegar.*
-27. ⚙️ **REATRIBUÍDA em 27/08 — vira levantamento técnico nosso.** Há Power-Ups ou automações (Butler) ativos? Quais? *Idem. **Este é o mais crítico dos dois:** o Butler reage às nossas escritas, e uma automação desconhecida pode mover, arquivar ou notificar em cima do que a plataforma criar. Precisa ser inventariado **antes da primeira gravação no Trello**, não depois.*
+27. ⚙️ **REATRIBUÍDA em 27/08 — vira levantamento técnico nosso.** 🔴 **E subiu para bloqueadora de E2 em 08/09.** Há Power-Ups ou automações (Butler) ativos? Quais? *Idem. **Este é o mais crítico dos dois:** o Butler reage às nossas escritas, e uma automação desconhecida pode mover, arquivar ou notificar em cima do que a plataforma criar. Precisa ser inventariado **antes da primeira gravação no Trello**, não depois — e desde a **D-226** isso deixou de ser disciplina e virou **bloqueio em código** (RF-62, R-81).*
 28. Todos usam o Trello de fato, ou ele coexiste com planilhas e grupos de WhatsApp?
 29. Plano contratado (Standard, Premium, Enterprise) e número de licenças.
 
@@ -471,7 +471,7 @@
 | **72 — o prazo: 10/09 ideal, 15/09 limite** | **O escopo inteiro** | 🔴 **Respondida, e e o novo eixo do projeto.** Em escopo fechado (73), o que nao couber precisa ser negociado agora. Ver **D-195** |
 | **67–69 — WhatsApp: sem conta, sem numero, sem template** | E4 · Atendimento ao cliente | 🔴 **Nao cabe em 15/09 pelo caminho da Meta.** Verificacao de negocio e aprovacao de template levam semanas, e o tempo e da Meta. Ver **D-197** |
 | **58 — plano do Escavador, a contratar em 08/09** | **E1 e E2**, integralmente | 🔴 **Caminho critico.** Cota expirada em 01/09, saldo zero. Sem contratacao na terca, nenhuma consulta roda |
-| **65 — chave de API do Trello** | E3, e as perguntas 26–27 (Butler) | 🟡 **Em providencia.** O inventario do Butler precisa acontecer **antes** da primeira gravacao no Trello |
+| **65 — chave de API do Trello** | ~~E3~~ → 🔴 **E2 também, desde 08/09 (D-226)**, e as perguntas 24–27 | 🟡 **Em providencia.** O inventario do Butler precisa acontecer **antes** da primeira gravacao no Trello |
 | ~~51–57 — infraestrutura~~ | Implantação dos MCP, banco da aplicação, cofre de segredos | ✅ **Respondidas em 05–06/09, por medição.** Em troca, deixaram uma lista de conserto: **R-62 a R-67**, e o **Portainer publicado na internet** é o mais urgente dela |
 | **5 — responsavel interno** | Interlocutor unico das decisoes de negocio | ✅ **Respondida em 05/09 — Malu Souza** (D-200) |
 | **6 — colaborador pode aprovar ato de prazo?** | Regra Inegociavel 2 e o botao de aprovacao (RN-09) | 🚧 **Aberta** — proposta em D-194 |
@@ -482,7 +482,7 @@
 | **20c — horário útil** | **O relógio de toda a escalada de E2** — sem ele os números da D-208 não significam nada | 🚧 **Pendente, com data: terça (08/09)**, com a Malu. Cinco definições com proposta estão na A3; falta a **lista de feriados** |
 | **20 (principal) — como o escritório confere prazo hoje** | Validação do rito antes de E2 entrar em operação | 🔴 **Aberta, e as cinco derivadas fecharam sem ela** |
 | **16a → 15 — a Ana Beatriz não usa a caixa compartilhada** | Desenho da frente E3, e o alcance de R-11 | 🔴 **Nova, de 07/09.** São **seis** na conta, não sete: onde chega o e-mail dos processos dela? |
-| **75 — a Ana Beatriz tambem vai de V1** | Vigilancia de prazo (E2) dos processos compartilhados | 🔄 **Reescrita em 05/09 (D-206).** A pergunta original era a frequencia do monitoramento por processo — **caiu**: com a Ana Beatriz atuando em outros escritorios, o V1 pelo nome dela custa R$ 3,00/mes contra R$ 55,20-72,00 e ainda cobre mais. **O que resta perguntar a Malu:** (a) confirma o V1 para a Ana Beatriz; (b) **quais dos processos dela o escritorio acompanha** — e a lista precisa existir, porque e a chave da triagem (RF-45); (c) o `limite_aparicoes` do monitoramento novo, que nao pode ser aumentado depois (R-46) |
+| **75 — a Ana Beatriz tambem vai de V1** | Vigilancia de prazo (E2) dos processos compartilhados | 🔄 **Reescrita em 05/09 (D-206).** A pergunta original era a frequencia do monitoramento por processo — **caiu**: com a Ana Beatriz atuando em outros escritorios, o V1 pelo nome dela custa R$ 3,00/mes contra R$ 55,20-72,00 e ainda cobre mais. **O que resta perguntar a Malu:** (a) confirma o V1 para a Ana Beatriz; (b) **quais dos processos dela o escritorio acompanha** — e a lista precisa existir, porque e a chave da triagem (RF-52); (c) o `limite_aparicoes` do monitoramento novo, que nao pode ser aumentado depois (R-46) |
 | **Os numeros propostos** — franquia de aparicoes, tetos de bloco, tetos de orcamento | Configuracao de E2 e do disjuntor (D-149) | 🔴 **Aberto** — aguarda o de acordo do escritorio |
 | **71 — teto de gasto mensal com IA** | Disjuntor no eixo de IA (Regra 6) | 🟡 **Adiada pelo usuario.** Nao trava a entrega; entra na lista de numeros que faltam |
 | 15 — caixas de e-mail | Desenho da frente F3 | 🔴 Aberta |

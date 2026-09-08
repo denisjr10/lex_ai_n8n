@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Status | 🟢 Completo quanto à superfície · 🔴 Um achado bloqueante de segurança (§3) |
-| Versão | 1.0 |
-| Data | 2026-08-20 |
+| Versão | 1.1 — 08/09: a **D-226** trouxe a fatia mínima para dentro de E2 (§8.1, §9.3) |
+| Data | 2026-08-20 · atualizado em 2026-09-08 |
 | Fase | 1 — Descoberta e mapeamento das APIs |
 | Fontes | OpenAPI oficial (`swagger.v3.json`) e guias da Atlassian (§15) |
 
@@ -425,7 +425,9 @@ Custom Fields são essa peça. Proposta de campos a criar nos quadros do escrit�
 
 | Campo | Tipo | Função |
 |---|---|---|
-| `id_demanda` | texto | Identificador na base interna. **A chave da correspondência** |
+| `id_tarefa` 🆕 | texto | Identificador da `tarefa` na base interna. **A chave da correspondência** desde a D-229 |
+| `id_alerta` 🆕 | texto | Presente quando a tarefa nasceu de um alerta de prazo. Vazio quando nasceu de demanda |
+| `id_demanda` | texto | Identificador da demanda na base interna. Vazio até E3 chegar |
 | `numero_cnj` | texto | Liga o card ao processo no Escavador |
 | `cliente_id` | texto | Liga o card ao cliente na base interna |
 | `origem` | lista | `manual` · `automacao` — distingue o que foi criado por pessoa do que foi criado por fluxo |
@@ -437,6 +439,21 @@ Duas observações:
 **`origem` não é burocracia.** Saber o que a automação criou é o que permite corrigir um erro em massa sem tocar no trabalho manual das pessoas. É barato agora e caro de acrescentar depois.
 
 Confirmar quais campos já existem hoje é a **pergunta 26**.
+
+### 8.1 🆕 A fatia mínima entrou em E2 — 08/09
+
+**Mudou em 08/09 pela D-226.** Este documento nasceu descrevendo uma frente inteiramente de E3. Ela continua sendo de E3 na maior parte — mas **uma fatia subiu para E2**, porque o alerta de prazo do PRD §5.2.1 provava ciência e não entregava gestão: depois do "Ciente", o prazo saía do sistema.
+
+| O que sobe para E2 | O que continua em E3 |
+|---|---|
+| `criar_card`, `atualizar_card`, `mover_card` | As outras 9 ferramentas de §9 |
+| Os campos personalizados de §8 | Ingestão de e-mail, classificação e resposta |
+| **Um** webhook, no quadro que receber os cards de prazo | Webhook nos demais quadros |
+| A etiqueta `prazo não calculado` e a `origem: automação` | O fluxo de demanda completo |
+
+**A regra que vale só para o card de prazo, e é a mais importante desta atualização:** a **data de vencimento** (`due`) que a automação escreve é a **data-limite de triagem** — o N2 do rito, 4 horas úteis —, **nunca o prazo processual**. Escrever prazo processual ali violaria a RF-11 e a D-64, e violaria pior que num texto, porque a data fica vermelha, notifica e entra no calendário. Ver **D-227** e **R-80**.
+
+🚧 **Nada disto grava antes de a pendência 5 de §13 fechar** — o inventário do Butler, agora com bloqueio em código (RF-62, R-81).
 
 ---
 
@@ -458,6 +475,14 @@ Confirmar quais campos já existem hoje é a **pergunta 26**.
 | `consultar_quadro` | Estrutura: listas, etiquetas, membros, campos personalizados, `limits` | `trello:board:read` | A0 |
 | `historico_do_card` | Actions do card, somente leitura | `trello:acao:read` | A0 |
 | `arquivar_card` | Arquivar (reversível). **Excluir não é ferramenta** | `trello:card:arquivar` | A2 |
+
+### 9.0 🆕 As três que entram primeiro — 08/09
+
+A **D-226** antecipou três das doze para E2: **`criar_card`**, **`atualizar_card`** e **`mover_card`**. São as que o fluxo de alerta de prazo precisa, e nada além disso — `consultar_card` e `listar_cards` entram junto por serem leitura e virem de graça no mesmo SDK, mas não são requisito.
+
+A escolha não é arbitrária: são exatamente as três operações que a §9.2 já dizia serem compostas **no n8n**, não no MCP. O fluxo de prazo cria o card, escreve os campos personalizados e o move quando o estado da tarefa muda — e qual é a lista de destino continua sendo conhecimento do escritório (D-230, perguntas 24 e 25).
+
+**`arquivar_card` não entra**, e a ausência é deliberada: nesta fase nada some do quadro por ação da plataforma. Card de prazo tratado **muda de lista**; some do quadro só por ato de pessoa.
 
 ### 9.1 Perfis de exposição
 
@@ -543,10 +568,10 @@ Para somar à tabela §15 de `01-diretrizes-gerais.md`:
 | # | Pendência | Depende de |
 |---|---|---|
 | 1 | **O Trello é gestão de casos ou quadro de tarefas?** | Pergunta 23 / **D-09** — muda a prioridade e o volume |
-| 2 | Quantos quadros e qual a lógica deles | Pergunta 24 — define a granularidade do escopo `carteira` |
-| 3 | Fluxo típico de um card, da criação ao encerramento | Pergunta 25 — define os fluxos n8n de §9.2 |
-| 4 | Campos personalizados já em uso | Pergunta 26 — evita colidir com o desenho de §8 |
-| 5 | Power-Ups e automações Butler ativos | Pergunta 27 — **Butler pode reagir às nossas escritas e criar efeitos inesperados** |
+| 2 | 🔴 Quantos quadros e qual a lógica deles | Pergunta 24 — define a granularidade do escopo `carteira`. **Bloqueadora de E2 desde 08/09**: sem ela não há onde criar o card de prazo |
+| 3 | 🔴 Fluxo típico de um card, da criação ao encerramento | Pergunta 25 — define os fluxos n8n de §9.2. **Bloqueadora de E2 desde 08/09**: sem ela não há para onde movê-lo (D-230) |
+| 4 | 🔴 Campos personalizados já em uso | Pergunta 26 — evita colidir com o desenho de §8. **Subiu para bloqueadora de E2 em 08/09** (D-226) |
+| 5 | 🔴 **A mais crítica** — Power-Ups e automações Butler ativos | Pergunta 27 — **Butler pode reagir às nossas escritas e criar efeitos inesperados.** **Subiu para bloqueadora de E2 em 08/09**, com bloqueio em código (RF-62) e risco próprio (**R-81**) |
 | 6 | Plano contratado e número de licenças | Pergunta 29 — decide se `enterprises` existe e se cabe conta de serviço |
 | 7 | É possível criar conta de serviço dedicada? | Pergunta 66 — **se a resposta for não, R-20 fica sem tratamento** |
 | 8 | Volume de cards por quadro | Teto de 5.000 cards abertos (§2.6) |

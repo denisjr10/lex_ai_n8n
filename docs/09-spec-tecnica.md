@@ -36,7 +36,7 @@ Exemplo do critério funcionando: *como* o servidor verifica se um usuário tem 
 |---|---|---|
 | Matriz definitiva de escopos por papel | ~~**D-07**~~ ✅ **respondida em 27/08 — base inteira** (D-146). 🚧 Falta o colaborador (pergunta 4a) | Muda a abrangência concedida em quase todo escopo |
 | Modelagem da demanda e correspondência com o Trello | ~~**D-09**~~ ✅ **respondida em 27/08 — Trello é visualização** (D-152) | Muda quem é dono do dado e a direção da sincronização |
-| Campos personalizados e convivência com o Butler | **Perguntas 26 e 27** — ⚙️ reatribuídas a nós em 27/08; dependem da chave de API do Trello | Escrever num quadro com automação desconhecida é gravar às cegas |
+| Campos personalizados e convivência com o Butler | **Perguntas 26 e 27** — ⚙️ reatribuídas a nós em 27/08; dependem da chave de API do Trello. 🔴 **Subiram de urgência em 08/09 (D-226):** eram levantamento de E3 e viraram **pré-requisito de E2**, com bloqueio em código na RF-62 (R-81) | Escrever num quadro com automação desconhecida é gravar às cegas |
 | Rito de escalada de alerta não lido | ~~**Pergunta 12**~~ → **Perguntas 20a–20c** — os prazos N1 e N2 de RF-13 | O mecanismo é Parte I; o relógio é do escritório |
 | Catálogo de gabaritos e enquadramento em A3a | **D-142**, e a pergunta 10 (as cinco perguntas mais frequentes dos clientes) | O gabarito é onde a eficiência mora; sem saber o que se repete, não há o que padronizar |
 | Fluxos n8n de E2, E3 e E4 | Todas as acima | Fluxo é onde mora a regra de negócio (Regra 3) |
@@ -545,6 +545,7 @@ Os dois usam modelos diferentes, e o chassi suporta ambos (D-52):
 | Segredo | Token gerado no painel, tela *Callbacks* | Segredo da aplicação |
 | Verificação extra | — | Faixa de IP `104.192.142.240/28` (D-39) |
 | Anti-laço | Não se aplica | `X-Trello-Client-Identifier` obrigatório em toda escrita (D-40) |
+| Quando entra | E1 e E2, desde o marco 7 | ⚠️ **Mudou em 08/09:** era E3; a **D-226** trouxe **um** webhook de quadro para dentro de E2, para o card de prazo refletir na base (RF-60) |
 | Retentativa do fornecedor | Sim — o painel conta as tentativas | 3 tentativas: 30 s, 60 s, 120 s |
 
 O `X-Trello-Client-Identifier` merece a ênfase que o mapeamento já dava: sem ele, nossa escrita no Trello dispara webhook, que aciona nossa automação, que escreve de novo — laço infinito, vazão esgotada e cards bagunçados. Está no chassi desde o primeiro dia, não como melhoria posterior.
@@ -641,8 +642,9 @@ Este bloco implementa D-63 — o agente do cliente lê daqui, não da API paga. 
 | `publicacao` | `id` · `fonte` · `origem_diario` · `data_publicacao` · `numero_cnj` · `teor` · `itens_vigiados` · `hash` (único) · `recebida_em` · `evento_callback_id` |
 | `movimentacao` | `id` · `numero_cnj` · `data` · `teor` · `fonte` · `hash` (único) · `recebida_em` · `evento_callback_id` |
 | `alerta` | `id` · `tipo` · `prioridade` · `publicacao_id` · `movimentacao_id` · `processo_id` · `indicio_de_prazo` · `enviado_em` · `destinatarios` · `lido_por` · `lido_em` · `escalado_em` · `resolvido_em` |
+| `tarefa` 🆕 | `id` · `origem` (`alerta` · `demanda` · `manual`) · `alerta_id` · `demanda_id` · `processo_id` · `numero_cnj` · `titulo` · `estado` (`aberta` · `em_triagem` · `tratada` · `cancelada`) · `responsavel_id` · `criada_em` · `prazo_triagem_em` · `tratada_em` · `tratada_por` · `motivo` · `sensivel` · `card_id` · `card_url` · `card_sincronizado_em` · `card_divergente` |
 
-Quatro observações de desenho, e cada uma corresponde a um requisito do PRD:
+Cinco observações de desenho, e cada uma corresponde a um requisito do PRD:
 
 **`hash` único em `publicacao` e `movimentacao`** — a mesma publicação pode chegar por dois caminhos (monitoramento de OAB e monitoramento de processo). Sem deduplicação, o advogado recebe o mesmo alerta duas vezes e passa a ignorar alertas. Ruído destrói a confiança que o produto depende de ter.
 
@@ -653,6 +655,14 @@ Quatro observações de desenho, e cada uma corresponde a um requisito do PRD:
 > **Atualização de 27/08 (D-145).** O escritório informou que **colaboradores também conferem prazo**. Isso muda dois campos de `alerta`: `lido_por` deixa de ser único e vira lista — colaborador e advogado confirmam separadamente —, e o encerramento da escalada passa a exigir que **pelo menos um dos confirmantes seja advogado**. O clique do colaborador registra a triagem e para o reenvio para ele, sem parar o relógio. Campos derivados: `confirmado_por_colaborador_em` e `confirmado_por_advogado_em`, sendo o segundo o que fecha `escalado_em`. O rito completo está no [PRD §5.2.1](08-prd.md).
 
 **`item_vigiado.desativado_por` e `desativado_em`** — desligar vigilância é a operação de maior potencial de dano silencioso do projeto (R-14). Quem desligou e quando fica registrado, e a remoção é ferramenta separada com confirmação explícita (D-29).
+
+**🆕 `tarefa` é tabela própria, e não um `card_id` dentro de `alerta`** — **D-226** e **D-229**, de 08/09. O rito de §5.2.1 do PRD provava que alguém tinha visto o alerta e parava aí; depois do "Ciente", o prazo saía do sistema. A `tarefa` é o que o torna gerenciável, e ela é entidade própria por três razões que só aparecem depois: **(1)** um alerta pode gerar duas tarefas — a mesma publicação alcança dois processos vigiados; **(2)** a tarefa sobrevive ao alerta que a originou; **(3)** quando E3 chegar, a demanda de e-mail entra pela mesma porta (`origem = demanda`), e o quadro fica coerente em vez de ter dois tipos de card indistinguíveis.
+
+Três campos merecem nota, porque cada um evita um jeito específico de o mecanismo falhar em silêncio:
+
+- **`prazo_triagem_em` não é prazo processual.** É o "até quando alguém precisa olhar isto" — o N2 do rito, 4 horas úteis (D-208). É este campo, e só ele, que vira a **data de vencimento do card** no Trello. **Não existe campo de prazo processual nesta tabela**, e a ausência é deliberada, pela mesma razão que `alerta` não tem `prazo_calculado`: RF-11 e D-64 proíbem a plataforma de contar prazo, e uma data vermelha no quadro afirma com mais força que uma linha de texto (D-227, R-80)
+- **`card_id` pode ser nulo, e isso é estado normal, não erro.** Enquanto a chave de API do Trello não existir (D-196), a tarefa roda inteira sem card. `card_divergente` é o que a conferência periódica marca quando o espelho e a base discordam — card apagado, card sem tarefa, tarefa sem card (RF-61)
+- **`motivo` é obrigatório para sair de `aberta`**, imposto no banco e não na aplicação. É a D-194 dentro do esquema: encerramento sem motivo declarado não fecha, venha ele do Telegram ou de um card movido no Trello (RF-63)
 
 ### 9.4 Regras de esquema
 

@@ -57,6 +57,9 @@ P-01 recorte do escopo ─────────────┐
                                     ├──> define a prioridade de TUDO abaixo
 P-02 aval das decisões ─────────────┘
 
+P-28 mudança de escopo (D-226) ──> P-29 metade B (o card no Trello)
+P-22 chave do Trello ────────────┘   (a metade A, a tarefa na base, não depende de nada disto)
+
 P-04 saldo Escavador (08/09) ──┬──> P-15 verificação ponta a ponta
                                ├──> P-16 monitoramentos de produção
                                └──> reconciliação do motor de custo (parte de P-08)
@@ -107,13 +110,49 @@ O recorte proposto (**D-207**):
 
 **Recomendação:** ler a §3 do digesto — 13 decisões, cerca de 4 linhas cada, das quais **6 são urgentes antes de 15/09** —, dar o de acordo em bloco da §4 com data, e decidir as 10 da §5. ✅ **Duas já foram resolvidas em 08/09:** a colisão de numeração (D-213 a D-215, R-76) e a **D-171** — que não era exceção esquecida e sim decisão de negócio da advogada proprietária, agora registrada como **D-216**, com **D-217** e **D-218** junto.
 
+### P-28 · 👤🔴🚧 Levar à Malu a mudança de escopo da D-226 — **junto com a D-219**
+
+> 🆕 **Novo em 08/09.** Nasce da pergunta do usuário sobre gestão de tarefa, e das decisões **D-226 a D-230**.
+
+**Trava:** a metade "card" do **P-29**, e nada mais — a metade "tarefa na base" roda sem isto.
+
+**O que se leva.** Uma página, e ela já está escrita no PRD §5.2.2 ("O que isto custa, dito antes de alguém descobrir"):
+
+| Ponto | O que dizer |
+|---|---|
+| **O que estava faltando** | O alerta de prazo provava que alguém viu, e parava aí. Não havia lugar de **gerenciar** o prazo — e hoje, pela R-75, também não há nada fora da plataforma |
+| **O que entra** | A fatia mínima do Trello dentro de E2: alerta de prazo vira card, com CNJ, responsável, etiquetas e data de triagem |
+| **O que continua fora** | E3 inteira — e-mail, classificação, resposta por gabarito — e as outras 9 ferramentas do Trello. E4 idem, pela D-197 |
+| **O que isso custa** | É **mudança de escopo em contrato fechado** (pergunta 73, R-83). Não vira hora extra; vira escopo negociado |
+| **O que ela precisa responder junto** | As perguntas **24, 25, 26 e 27** — quadros, fluxo do card, campos personalizados e Butler. Sem elas não há onde criar nem para onde mover |
+| **E a chave** | A de API, em **conta dedicada** (D-196, A-13 do digesto). Sem ela, a metade do card não roda |
+
+⚠️ **Leve junto com a D-219** (o faseamento de datas). São duas conversas sobre a mesma coisa — o que cabe até quando —, e separá-las gasta duas reuniões e produz duas respostas que podem se contradizer.
+
+### P-29 · 🤖 Alerta de prazo vira tarefa, e a tarefa vira card
+
+> 🆕 **Novo em 08/09** (**D-226** a **D-230**, RF-56 a RF-64).
+
+**Trava:** nada. **É travado por** P-28 (a metade do card) e por P-11, que constrói o receptor e a vigilância onde o alerta nasce.
+
+**Duas metades, e elas se separam limpo:**
+
+| Metade | O que é | Depende de | Cabe até 15/09? |
+|---|---|---|---|
+| **A — a tarefa na base** | Tabela `tarefa` (Spec §9.3), criação no mesmo ato do alerta, estado, responsável, `prazo_triagem_em`, e o encerramento com motivo da D-194 | **Nada além do P-11.** Não depende do Trello, nem da chave, nem da Malu | ✅ Sim — é o mesmo trabalho do rito, com uma tabela a mais |
+| **B — o card no Trello** | `criar_card`, `atualizar_card`, `mover_card`, campos personalizados, um webhook, e a conferência de divergência | 🚧 Chave de API (P-22), inventário do Butler (RF-62), perguntas 24 e 25, e o de acordo do P-28 | ⚠️ **Só se a chave chegar a tempo.** Nada disto é longo; tudo isto é bloqueado |
+
+**A ordem é essa, e não a inversa.** Se a metade B for construída primeiro, o alerta fica sem lugar de gestão até a chave chegar — e a chave "chega quando chegar". Com a metade A pronta, o `card_id` fica nulo esperando, que é estado normal e não erro (Spec §9.3).
+
+🔴 **O teste que não pode faltar:** um que procure prazo processual escrito em data de vencimento de card e **falhe** se encontrar. É a RF-58 virada em código, e é o que impede a R-80 de virar hábito.
+
 ### P-03 · 👤🔴🚧 Levar à Malu o pacote de números e as perguntas que sobraram
 
 **Trava:** P-11 (triagem), P-14 (rito do alerta) e P-16 (criação dos monitoramentos). O texto já está pronto no PRD §9.3.1.
 
 | O que perguntar | Por que trava | Urgência |
 |---|---|---|
-| **A lista dos ~24 processos da Ana Beatriz que o escritório acompanha** | É a **chave da triagem por CNJ** (RF-45). A Ana Beatriz atua em outros escritórios; sem essa lista o sistema não distingue publicação do escritório de publicação de fora | 🔴 **A mais bloqueante de todas** |
+| **A lista dos ~24 processos da Ana Beatriz que o escritório acompanha** | É a **chave da triagem por CNJ** (RF-52). A Ana Beatriz atua em outros escritórios; sem essa lista o sistema não distingue publicação do escritório de publicação de fora | 🔴 **A mais bloqueante de todas** |
 | **O `limite_aparicoes` de cada monitoramento novo** | ⚠️ **Não pode ser alterado depois de criado** (R-46). Errar aqui custa criar tudo de novo | 🔴 Antes de P-16 |
 | **20a a 20e** — 2h úteis para chamar todos? 4h para escalar? Qual o horário útil? Quanto tempo o pedido de aprovação vive? E **quando a janela de reversão expira em silêncio, o alerta fecha ou reabre?** | Configuração de E2 (RF-13) | 🟠 Antes de P-14 |
 | Confirmar o V1 para a Ana Beatriz — R$ 3,00/mês contra R$ 55–72 do V2 | Custo mensal de E2 | 🟠 Junto com o resto |
@@ -179,7 +218,7 @@ A ordem canônica é a da **Spec §15** — não a seção "Próximo passo" do `
 | **P-08** | 🤖 **Motor de custo** — catálogo, estimativa, reserva, reconciliação, disjuntor | 4 | Nada — o marco 3 está pronto | ❌ Só a reconciliação final |
 | **P-09** | 🤖🔀 **Policy Gate** — emite a sessão assinada e nega o que deve negar | 9 | Nada | ❌ Não |
 | **P-10** | 🤖 **Cache** — validade por tipo, invalidação, cache negativo, isolamento | 5 | P-08 | ❌ Não |
-| **P-11** | 🤖🔀 **Receptor gravando na hora + base de vigilância + triagem por CNJ** (RF-45 a RF-48) | 8 | P-03 para a lista de CNJ; o mecanismo, nada | ❌ Não |
+| **P-11** | 🤖🔀 **Receptor gravando na hora + base de vigilância + triagem por CNJ** (RF-52 a RF-55) | 8 | P-03 para a lista de CNJ; o mecanismo, nada | ❌ Não |
 | **P-12** | 🤖 **SDK do Escavador** sobre as gravações, V1 e V2 no mesmo chassi | 6 | P-10 | ❌ Roda sobre `captura/respostas-brutas/` |
 | **P-13** | 🤖 **Servidor MCP do Escavador** com as ferramentas e os perfis | 7 | P-12 | ❌ Não |
 | **P-14** | 🤖🔀 **Fluxos n8n de produção** — bot do Telegram (consulta E1) e alerta de prazo com o rito (E2) | — | P-07 (bot) e P-03 (números) | ❌ Não |
@@ -199,7 +238,7 @@ A ordem canônica é a da **Spec §15** — não a seção "Próximo passo" do `
 | # | Passo | O que está errado |
 |---|---|---|
 | **P-17** | ✅ **Feito em 08/09** — [`18-digesto-de-aval.md`](18-digesto-de-aval.md) v2.0 | São **182** em 🟡 Proposta contra **31** confirmadas, não 173 contra 2. Triadas em **15 / 159 / 8**. Nenhum status foi alterado — o aval é do usuário, e é ele que destrava o **P-02** |
-| **P-18** | 🤖🔀 **Corrigir a colisão de numeração no PRD** — **e na §13 também** | **RF-42, RF-43, RF-44 e RF-45 estão cada um definido duas vezes**, com significados diferentes — os do catálogo de gabaritos (§6.3) e os da vigilância (§9.3). ✅ **A parte da §13 foi corrigida em 08/09:** D-157, D-158 e D-159 tinham dois significados cada, e o trio da revisão externa virou **D-213 a D-215**; o **R-70** também estava duplicado e o do ruído virou **R-76**. **Falta a parte do PRD**, e falta a prevenção: um hook que recuse commit com identificador repetido em `01-diretrizes-gerais.md` e no PRD — terceira ocorrência do mesmo defeito, e as três têm a mesma causa (uma sessão registra um bloco novo sem conferir o último número usado) |
+| **P-18** | ✅ **FEITO em 08/09 — a colisão de numeração acabou, no PRD e na §13** | **RF-42, RF-43, RF-44 e RF-45 estavam cada um definido duas vezes** — os do catálogo de gabaritos (§6.3) e os da vigilância (§9.3). ✅ **A §13 foi corrigida em 08/09:** D-157 a D-159 viraram **D-213 a D-215**, e o R-70 duplicado virou **R-76**. ✅ **O PRD foi corrigido em 08/09:** o bloco de **gabaritos ficou** com RF-42 a RF-45 (é o mais antigo, de 27/08, e o mais referenciado fora do PRD) e o bloco de **vigilância andou** para **RF-49 a RF-55** — a numeração passou a subir junto com o documento. As 15 referências cruzadas em seis documentos foram atualizadas, e a **tabela de correspondência está na §12.1**, para quem reler um documento antigo. 🔴 **Falta a prevenção**, e ela continua valendo: um hook que recuse commit com identificador repetido em `01-diretrizes-gerais.md` e no PRD — foi a terceira ocorrência do mesmo defeito, e as três têm a mesma causa (uma sessão registra um bloco novo sem conferir o último número usado) |
 | **P-19** | 🤖🔀 **Atualizar o que envelheceu** | O `README.md` diz **7 migrações e 44 testes** e sua tabela de documentos para no `05`; o disco tem **13 migrações, 92 testes e 17 documentos**. O cabeçalho do `00-estado-atual.md` diz **10 migrações**, e sua seção "Onde estamos" diz **"Fase 2"** enquanto o cabeçalho do mesmo documento diz **"Fase 3"** |
 | **P-20** | 🤖⏭️ **Preparar as Partes A2 a A6 da descoberta** | 25 perguntas nunca enviadas. Dimensionam **E3 e E4** — fora desta fase |
 
@@ -210,7 +249,7 @@ A ordem canônica é a da **Spec §15** — não a seção "Próximo passo" do `
 | # | Passo | Quando |
 |---|---|---|
 | **P-21** | 👤🔴 **Decidir a assinatura `2813617` antes de 26/09** | Data dura. Ela renova sozinha e passa a cobrar |
-| **P-22** | 👤 Chave de API do Trello em **conta dedicada** do escritório (D-196), depois o inventário do Butler | Antes da primeira gravação no Trello, nunca depois — o Butler reage ao que escrevermos |
+| **P-22** | ⬆️ **SUBIU PARA O BLOCO 0 em 08/09** — ver a linha nova na §4. A chave de API do Trello deixou de ser providência de E3 e virou bloqueadora de E2 (D-226) | ~~Antes da primeira gravação no Trello~~ → agora **antes de 15/09**, junto com o resto de E2 |
 | **P-23** | 👤 WhatsApp por BSP, não direto pela Meta (D-197) | E4. Pelo caminho da Meta são semanas, e o tempo é da Meta |
 | **P-24** | 🤖 HMAC no anonimizador (**D-215**, era D-159 até a renumeração de 08/09), retentativa com idempotência, cofre de segredos no Swarm | Achados abertos, nenhum urgente. ⚠️ A **D-211** encareceu este: anonimização antes de saída externa deixou de ser opcional |
 | **P-25** | 🤖 Entender por que o *polling* discordou do callback (R-55) | Precisa de crédito, baixo valor agora |
@@ -321,9 +360,25 @@ Nenhum trava código. Três enganam quem ler o repositório na semana que vem �
 
 | # | Achado | Onde | Peso |
 |---|---|---|---|
-| 1 | **RF-42 a RF-45 estão cada um definido duas vezes**, com significados diferentes: catálogo de gabaritos e vigilância de prazo | `08-prd.md` §6.3 e §9.3 | **Médio** — dois requisitos com o mesmo número viram um só na hora de conferir o aceite |
+| 1 | ✅ **RESOLVIDO em 08/09.** ~~RF-42 a RF-45 estão cada um definido duas vezes~~ — o bloco de vigilância andou para **RF-49 a RF-55**; correspondência na §12.1 | `08-prd.md` §6.3 e §9.3 | ~~**Médio**~~ — fechado |
 | 2 | O `README.md` diz **7 migrações e 44 testes**; o disco tem **13 e 92**. A tabela de documentos dele para no `05`, e existem 17 | `README.md` | Baixo, e é o cartão de visita do repositório |
 | 3 | O cabeçalho do `00-estado-atual.md` diz **10 migrações**; o disco tem 13 — as 011 a 013 vieram do receptor em 02/09 e o cabeçalho não acompanhou | `00-estado-atual.md` | Baixo |
 | 4 | A seção "Onde estamos" diz **"Fase 2 em andamento"**; o cabeçalho do mesmo documento diz **"Fase 3 — construção"**. E a seção "Próximo passo" está congelada em 31/08 | `00-estado-atual.md` | **Médio** — é a seção que uma sessão nova lê para saber o que fazer, e ela aponta para o passo errado |
 
 Os quatro são o conteúdo dos passos **P-18** e **P-19**.
+
+### 12.1 Correspondência da renumeração dos RF — 08/09
+
+Quem reler um documento anterior a 08/09, ou uma conversa antiga, vai encontrar os números da coluna da esquerda. **Só o bloco de vigilância andou.** O bloco de gabaritos (§6.3 do PRD) ficou onde estava, porque é o mais antigo — nasceu com a D-142, em 27/08 — e o mais citado fora do PRD.
+
+| Era | Virou | O que é |
+|---|---|---|
+| RF-42 *(vigilância)* | **RF-49** | Monitoramento V2 registra `frequencia` e `documentos_publicos`, com quem escolheu |
+| RF-43 *(vigilância)* | **RF-50** | Monitoramento de frequência não diária é sinalizado como fora da vigilância de prazo |
+| RF-44 *(vigilância)* | **RF-51** | O inventário de vigilância cobre as duas advogadas |
+| RF-45 | **RF-52** | Triagem de pertinência pelo CNJ, com as três saídas |
+| RF-46 | **RF-53** | A triagem nunca usa a lista de envolvidos como critério de exclusão |
+| RF-47 | **RF-54** | Marcar processo como "não acompanhado" é ato nominal, datado e reversível |
+| RF-48 | **RF-55** | O filtro na origem recorta apenas por jurisdição |
+
+**Não mudaram** — e continuam querendo dizer o que sempre quiseram: RF-42 (catálogo de gabaritos versionado), RF-43 (toda mensagem A3a registra gabarito, versão e valores), RF-44 (gabarito desligável na hora) e RF-45 (amostragem pós-envio).
