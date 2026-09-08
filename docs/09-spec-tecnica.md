@@ -823,6 +823,10 @@ Duas escolhas de ordem que merecem justificativa:
 
 **O receptor de callbacks (8) não espera o servidor MCP (7).** São caminhos independentes: um recebe evento, o outro atende pergunta. Construir o receptor cedo antecipa a entrega mais valiosa do produto — a vigilância de prazo (E2) — e é ele que alimenta a base que torna o atendimento ao cliente barato.
 
+> ⚠️ **Uma ausência que precisa ser lida como decisão, e não como esquecimento (08/09, D-223).** **Não há painel web nesta lista, e isso é deliberado.** A **D-16** prevê um painel desde 17/08, e três decisões acordadas foram pendurando peso nele — a **D-147** (a identidade vive no painel), a **D-17** (conteúdo confidencial não vai na mensagem, só o link) e o texto da **RF-01** no documento 04 (login por senha desde a primeira versão). Nenhuma delas percebeu que **o componente que citava não estava sendo construído por marco nenhum**.
+>
+> A [Nota Técnica 04](19-painel-web-e-administracao.md) separou o painel em três camadas e as datou. **Nenhuma entra em E2 (15/09) nem em E1 (30/09)** — as camadas 1 e 2 (login + caixa de aprovações, 8 a 13 dias úteis estimados) vão para a fase seguinte, e a camada 3 (console de administração) sai de escopo por decisão (**D-224**: o super admin da fase 1 é o prestador, por acesso técnico). **Os dez marcos acima continuam íntegros e nenhum deles muda** — o que muda é que a lacuna passou a estar escrita, com o que ela custa registrado no **R-78** e no **R-79**.
+
 ---
 
 ## 16. O que a Parte II precisa, e de quem

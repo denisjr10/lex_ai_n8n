@@ -46,6 +46,8 @@ flowchart LR
 
 **Consequência de projeto:** o login por senha do painel é obrigatório desde a primeira versão. Login único via Google, se vier, é conveniência adicional — nunca a única porta.
 
+> ⚠️ **Atualização de 08/09 — "primeira versão" ganhou data, e não é 30/09 (D-223).** Esta frase foi escrita em 19/08 e ficou sendo lida como *"o login existe em E1"*. **Não existe.** O painel se separou em três camadas ([Nota Técnica 04](19-painel-web-e-administracao.md)), e a **camada 1** — conta, senha e segundo fator — entra na **fase seguinte a 30/09**, junto da caixa de aprovações. **O que vale em E2 e E1** é a *camada 0*: o vínculo entre o ID do Telegram e a linha de `usuario`, cadastrado pelo escritório. Ela **cumpre o critério de aceite da RF-01** — duas pessoas produzem registros de auditoria distintos, conta compartilhada é rejeitada — e **não cumpre esta frase**: quem controla o acesso é o Telegram, não a plataforma, e o segundo fator exigido é o da conta do Telegram (RNF-18), conferido por declaração. **O princípio fundador acima continua inteiro** — a conta é da plataforma, o Telegram é um vínculo pendurado nela —, e é justamente por ele que a camada 1 chega depois **sem retrabalho**: nada no núcleo muda quando o login nascer.
+
 ---
 
 ## 2. Modelo de dados
@@ -138,9 +140,15 @@ A lista definitiva sai do mapeamento de cada API. A estrutura já pode ser fixad
 | **Cliente** | Apenas leitura, sempre com abrangência `own`, sobre um conjunto reduzido de recursos. **Quota de crédito do Escavador igual a zero** — o agente do cliente lê só da base interna e nunca dispara chamada paga (D-144) |
 | **Colaborador** | Leitura ampla com abrangência `carteira`, escrita em recursos internos, quota moderada. Consulta paga acima do teto exige aprovação. 🚧 *A abrangência pode virar `any` — depende da pergunta 4a* |
 | **Advogado** | Leitura `any` — **base inteira, confirmado pelo escritório em 27/08 (D-07, D-146)** —, escrita ampla, aprovação de faixas A3b e A4, quota alta. **Exceção:** processo sigiloso exige escopo próprio, que `any` não concede |
-| **Administrador** | Configuração, orçamentos, gestão de usuários e leitura da auditoria. **Não recebe escopo de dado de cliente por padrão** — separação entre administrar o sistema e acessar o conteúdo |
+| **Administrador** | Configuração, orçamentos, gestão de usuários e leitura da auditoria. **Não recebe escopo de dado de cliente por padrão** — separação entre administrar o sistema e acessar o conteúdo. ⚠️ **Na fase 1 este papel não tem superfície e é exercido pelo prestador, por acesso técnico direto (D-224)** — ver a nota abaixo |
 
 > **O que substitui o controle que a abrangência `any` removeu.** Com o advogado enxergando tudo, deixa de existir a barreira que impedia acesso a processo de outra carteira. A troca é deliberada — bloquear atrapalharia a colaboração cruzada que o escritório descreveu como sua operação real — e o substituto é **registro, não permissão**: toda leitura de processo fora da carteira do próprio advogado é marcada como **acesso amplo** no `evento_auditoria` e entra em relatório mensal para o administrador (RF-37). O escritório perde a barreira e ganha o espelho.
+
+> ⚠️ **Onde o administrador opera, de 08/09 em diante (D-224).** O papel está descrito acima desde 19/08 e **nunca teve superfície**. A decisão de 08/09 é que ele **não terá uma na fase 1**: o super admin é o **prestador**, por acesso técnico direto — banco, editor do n8n, Portainer, painel do Escavador. O **console de administração** é a camada 3 da [Nota Técnica 04](19-painel-web-e-administracao.md), e entra quando o escritório quiser assumir a administração.
+>
+> **Três consequências, e a terceira é a que este documento precisa carregar:** (1) o escritório **não consegue desligar ninguém sozinho** — é o **R-79**, e o que existe no lugar do botão é um pedido nominal da Malu atendido no mesmo dia útil, com registro; (2) reforça o **R-48**, porque quem opera, administra e apura passa a ser a mesma pessoa; (3) **a D-26 continua valendo dentro da plataforma, e acesso técnico ao banco a atravessa inteira.** Dizer *"administrador não recebe escopo de dado de cliente"* descreve o que o Policy Gate concede — não descreve o que um `SELECT` no banco alcança. **O que preserva a separação na fase 1 não é a permissão, é a auditoria imutável do Marco 3**, que o gatilho protege até contra o dono do banco (D-128).
+>
+> As duas atribuições de administrador que **já entram em E1** — consumo de crédito por pessoa (RF-08) e relatório de acesso amplo (RF-37) — são cumpridas por **relatório gerado**, não por tela (**D-225**).
 
 ---
 

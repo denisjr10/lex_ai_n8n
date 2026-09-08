@@ -2,14 +2,14 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | **2.1 — os cinco primeiros avais chegaram, e três delas geraram decisão nova.** A-1, A-2, A-4 e A-5 confirmadas; **A-3 recusada** (não recortar, mover a data). Nasceram **D-219 a D-222**, na nova §3.1. **2.0 — reescrita para ser lida por quem decide, não por quem programou.** Cada ficha do grupo A ganhou contexto, exemplo concreto, o custo em reais quando existe e uma linha de decisão para marcar. Entrou o **glossário** da §9. Nenhum conteúdo de decisão mudou entre a v1.1 e esta |
+| Versão | **2.2 — a pergunta sobre o painel web achou um componente do qual três decisões dependiam e que nenhum marco construía.** Nasceram **D-223 a D-225** e os riscos **R-78** e **R-79**, na nova §3.2, fundamentados na [Nota Técnica 04](19-painel-web-e-administracao.md). **2.1 — os cinco primeiros avais chegaram, e três delas geraram decisão nova.** A-1, A-2, A-4 e A-5 confirmadas; **A-3 recusada** (não recortar, mover a data). Nasceram **D-219 a D-222**, na nova §3.1. **2.0 — reescrita para ser lida por quem decide, não por quem programou.** Cada ficha do grupo A ganhou contexto, exemplo concreto, o custo em reais quando existe e uma linha de decisão para marcar. Entrou o **glossário** da §9. Nenhum conteúdo de decisão mudou entre a v1.1 e esta |
 | Data | 2026-09-08 |
 | Estado | 🟢 **Pronto para leitura.** Não altera o estado de nenhuma decisão — o aval é do usuário |
 | Fase | 3 — construção |
 | Passo | **P-17** do [plano de execução](17-plano-de-execucao.md) §6. Destrava o **P-02** |
 | Herda de | `01-diretrizes-gerais.md` §13 (registro único e centralizado), `17-plano-de-execucao.md`, `00-estado-atual.md` |
 
-> **O que este documento é.** A leitura curta da pilha de aval. A §13 das diretrizes tem **182 decisões em 🟡 Proposta**, e ler as 182 não é caminho — a maior parte é registro de coisa que o projeto já fez e que ninguém contestou. Aqui elas estão separadas em três grupos: as que **precisam da sua leitura uma a uma** (§3), as que se confirmam **em bloco, com uma data** (§4), e as que **não deveriam estar em Proposta** (§5).
+> **O que este documento é.** A leitura curta da pilha de aval. A §13 das diretrizes tem **184 decisões em 🟡 Proposta**, e ler as 184 não é caminho — a maior parte é registro de coisa que o projeto já fez e que ninguém contestou. Aqui elas estão separadas em três grupos: as que **precisam da sua leitura uma a uma** (§3), as que se confirmam **em bloco, com uma data** (§4), e as que **não deveriam estar em Proposta** (§5).
 >
 > **O que este documento não é.** Ele não decide nada e não muda nenhum status. A §13 continua sendo o registro único; este é o índice de leitura dela. **Nenhuma linha da §13 foi alterada para produzir este digesto.**
 
@@ -59,20 +59,19 @@ Contado em **08/09** sobre `01-diretrizes-gerais.md` §13, linha a linha:
 
 | Estado | Linhas |
 |---|---|
-| 🟡 **Proposta** | **181** — cinco saíram com os avais de 08/09, e quatro entraram (D-219 a D-222) |
-| ✅ Confirmada / Resolvida | **35** |
+| 🟡 **Proposta** | **184** — cinco saíram com os avais de 08/09, e sete entraram: D-219 a D-222 (dos avais) e **D-223 a D-225** (da pergunta sobre o painel) |
+| ✅ Confirmada / Resolvida | **36** — uma delas (**D-205**) marcada 🔄 Revisada dentro da mesma célula, o que fazia a contagem anterior separá-la e chegar a 35 + 1 |
 | 🔴 Em aberto | 3 — D-197, D-202, D-212 |
-| 🔄 Revisada | 1 — D-205 |
 | ❌ Derrubada / Recusada | 2 — D-153 e **D-207** |
-| **Total de linhas** | **222**, e **222 identificadores distintos** |
+| **Total de linhas** | **225**, e **225 identificadores distintos** |
 
 Três correções ao que o `00-estado-atual.md` e o plano diziam:
 
-1. **Eram 179 em Proposta, não 173** — e viraram 182 no fim do dia. O número 173 é de 06/09 e o repositório andou: D-208 a D-212 nasceram em 07 e 08/09, D-216 a D-218 nasceram desta triagem, e o resto veio do levantamento da instância.
-2. **São 31 confirmadas, não 2.** O `00-estado-atual.md` §Decisões dizia "173 contra 2 ✅" — a conta ignorava as 13 da demo, as 5 resolvidas pelo escritório em 27/08, as 4 da revisão externa e as de 05 a 08/09. A pilha é grande, mas menos torta do que o registro fazia parecer.
+1. **Eram 179 em Proposta, não 173** — e viraram **184** no fim do dia. O número 173 é de 06/09 e o repositório andou: D-208 a D-212 nasceram em 07 e 08/09, D-216 a D-218 nasceram desta triagem, e o resto veio do levantamento da instância.
+2. **São 36 confirmadas ou resolvidas, não 2.** O `00-estado-atual.md` §Decisões dizia "173 contra 2 ✅" — a conta ignorava as 13 da demo, as 5 resolvidas pelo escritório em 27/08, as 4 da revisão externa e as de 05 a 08/09. A pilha é grande, mas menos torta do que o registro fazia parecer.
 3. ✅ **A tabela tinha 215 linhas e 212 identificadores** — três IDs usados duas vezes cada. **Corrigido em 08/09** com o seu aval, e a §15 tinha a mesma doença no **R-70**. Ver §5.1.
 
-Uma delas conta como Proposta mas com estado escrito à mão fora da convenção: **D-97**, "🟡 Proposta — depende da conversa do usuário com a advogada". Está contada nas 182 e tratada na §5.
+Uma delas conta como Proposta mas com estado escrito à mão fora da convenção: **D-97**, "🟡 Proposta — depende da conversa do usuário com a advogada". Está contada nas 184 e tratada na §5.
 
 ---
 
@@ -103,9 +102,11 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 
 > ✅ **Cinco foram decididas em 08/09** — A-1, A-2, A-4 e A-5 adotadas; **A-3 recusada**, com a data movendo em vez do escopo encolhendo. As fichas delas ficam aqui, marcadas, porque o registro de *o que foi decidido e com que fundamento* vale mais que a economia de espaço.
 >
-> 🆕 **Três dessas decisões vieram com perguntas suas, e as perguntas acharam buracos reais no desenho.** As respostas viraram **D-219 a D-222**, na **§3.1** — quatro fichas novas, no fim desta seção.
+> 🆕 **Três dessas decisões vieram com perguntas suas, e as perguntas acharam buracos reais no desenho.** As respostas viraram **D-219 a D-222**, na **§3.1** — quatro fichas novas.
+>
+> 🆕 **E uma quarta pergunta, sobre o painel web e o super admin, achou o maior buraco até aqui:** três decisões acordadas dependiam de um componente que nenhum marco construía. Virou a [Nota Técnica 04](19-painel-web-e-administracao.md) e as **D-223 a D-225**, na **§3.2**.
 
-**Sobram 10 das originais + 4 novas = 14 pendentes.**
+**Sobram 10 das originais + 4 da §3.1 + 3 da §3.2 = 17 pendentes.**
 
 ### 3.0 O quadro, antes de entrar em cada uma
 
@@ -132,6 +133,9 @@ Uma delas conta como Proposta mas com estado escrito à mão fora da convenção
 | **A-17** | 🟠 D-220 | Como um processo novo entra na lista da triagem | Muda desenho | — |
 | **A-18** | 🟠 D-221 | Como se cadastra um advogado novo para ser vigiado | Custa dinheiro · Irreversível | **R$ 3,00/mês** cada |
 | **A-19** | 🔴 D-222 | Como a advogada confirma, no primeiro e no segundo ciclo | Muda desenho | — |
+| **A-20** | 🟠 D-223 | O painel são três camadas, e nenhuma entra em E1 ou E2 | Muda desenho · Cumpre RF só em parte | **8–13 dias** na fase seguinte |
+| **A-21** | 🟠 D-224 | O super admin é você, por acesso técnico — não existe console | Muda desenho · LGPD · Segurança | — |
+| **A-22** | 🟢 D-225 | RF-08 e RF-37 saem por relatório gerado, não por tela | — | — |
 
 **Como cada ficha está organizada:** *em uma frase* → *o que está em jogo* (o cenário concreto) → *o que a decisão determina* → *se você disser não* → *recomendação* → *linha de decisão para marcar*.
 
@@ -684,7 +688,7 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 
 ⚠️ **A porta 3 NÃO consulta a capa do processo.** Consultar custaria crédito para confirmar um número que a pessoa acabou de digitar. O CNJ sozinho basta para a triagem funcionar, e o processo se enriquece na primeira publicação que chegar.
 
-⚠️ **E não conte com painel web.** A D-16 prevê um, mas ele **não é nenhum dos dez marcos** da Spec — não existe em E1+E2 nem no escopo cheio. Cadastro que dependa dele não tem porta nenhuma até a fase seguinte. Por isso as três portas acima são todas Telegram ou lote.
+⚠️ **E não conte com painel web.** A D-16 prevê um, mas ele **não é nenhum dos dez marcos** da Spec — não existe em E1+E2 nem no escopo cheio. ✅ **Confirmado e datado em 08/09 pela D-223** ([Nota Técnica 04](19-painel-web-e-administracao.md)): as camadas 1 e 2 vão para depois de 30/09. Cadastro que dependa dele não tem porta nenhuma até a fase seguinte. Por isso as três portas acima são todas Telegram ou lote.
 
 **Recomendação: adotar.** A porta 2 sai junto com a triagem (é E2, requisito RF-45); a porta 3 cabe no bot de E1; a porta 1 é operação, não código.
 
@@ -769,6 +773,100 @@ Três delas existem porque as suas perguntas encontraram buracos reais no desenh
 **Sua decisão:**
 - [ ] Adotar
 - [ ] Adotar, mas quero um terceiro botão (diga qual)
+- [ ] Outra coisa
+
+---
+
+## 3.2 A pergunta do painel — três decisões novas
+
+> A sua pergunta de 08/09 foi: *existe previsão de painel ou interface web para colaboradores e advogados? Existe painel do super admin? Por onde ele gerencia em produção?*
+>
+> **Ela achou o maior buraco encontrado até aqui** — não porque o painel seja grande, mas porque **três decisões já acordadas dependiam de um componente que nenhum marco construía**, e ninguém tinha percebido. As respostas viraram a [Nota Técnica 04](19-painel-web-e-administracao.md) e as três fichas abaixo.
+
+### A-20 · D-223 🟠 — o "painel" são três camadas, e nenhuma entra em E1 ou E2
+
+**Em uma frase.** O painel está previsto desde 17/08, três decisões dependem dele, e ele nunca esteve em nenhum cronograma — a decisão o separa em três partes e data cada uma.
+
+**Como isso aconteceu, porque o padrão vale a pena reconhecer.** O painel entrou pela porta de uma *nota sobre canais* (D-16), como recomendação. Depois:
+
+| Decisão | O que pendurou no painel |
+|---|---|
+| **D-17** (17/08) | Conteúdo confidencial não vai no corpo da mensagem do Telegram — vai um **link**. O link aponta para o painel |
+| Documento 04 (19/08) | *"O login por senha do painel é obrigatório desde a primeira versão"* |
+| **D-147** (27/08) | O escritório escolheu o Caminho B: *"a identidade sai do Google e passa a viver no painel web do projeto"* |
+
+**Nenhuma dessas três percebeu que o painel não estava sendo construído.** Cada uma herdou a palavra e supôs que ela nomeava algo planejado. É o mesmo mecanismo das três colisões de numeração — e é por isso que a pergunta valeu.
+
+**A separação, que é o que permite datar:**
+
+| Camada | O que é | Tamanho | Quando |
+|---|---|---|---|
+| **0** | **Já existe.** O vínculo entre o ID do Telegram e a pessoa na base | — | Agora |
+| **1** | Conta e login — senha, segundo fator, pareamento do Telegram | 6 telas · **3 a 5 dias** | Fase seguinte |
+| **2** | Caixa de aprovações — ler conteúdo integral, editar, aprovar | 5 telas · **5 a 8 dias** | Fase seguinte |
+| **3** | Console de administração — usuários, orçamentos, custo, auditoria | 6 telas · **5 a 8 dias** | Fora de escopo (D-224) |
+
+⚠️ **A notícia que precisa ser dita, e não escondida:** a **camada 0 cumpre o critério de aceite da RF-01** — duas pessoas produzem registros de auditoria distintos, conta compartilhada é rejeitada. O que ela **não** cumpre é o texto do documento 04: quem controla o acesso é o Telegram, não a plataforma, e o segundo fator exigido é o **da conta do Telegram** (RNF-18), conferido por declaração de quem ativou. **A RF-01 fica parcialmente cumprida em E1**, e é melhor assumir isso agora do que alguém descobrir depois lendo o documento 04.
+
+**Por que as camadas 1 e 2 vão juntas, e não a 1 primeiro.** Login sozinho é **porta para uma sala vazia** — a pessoa entra e não há nada para fazer. Juntas são **8 a 13 dias úteis**, e são pré-requisito de E3 e E4 de qualquer forma.
+
+**Recomendação: adotar.** Nada disso muda os dez marcos nem o que está sendo construído. O que muda é que a lacuna passou a estar escrita, e o que ela custa está no R-78.
+
+**Sua decisão:**
+- [ ] Adotar o faseamento em três camadas
+- [ ] Quero a camada 1 (login) dentro de E1, mesmo sendo porta para sala vazia
+- [ ] Outra coisa
+
+---
+
+### A-21 · D-224 🟠 — o super admin é você, por acesso técnico direto
+
+**Em uma frase.** Não existe console de administração, e a decisão é que ele não exista na fase 1 — quem administra é o prestador, pelas ferramentas que já usa.
+
+**O retrato de hoje, sem maquiagem:**
+
+| O que se administra | Onde | Quem |
+|---|---|---|
+| Fluxos e credenciais | Editor do n8n | Você |
+| Contêineres e segredos | **Portainer** 🔴 exposto na internet (R-62) | Você |
+| Banco de dados | **pgAdmin**, por porta publicada 🔴 (R-63) | Você |
+| Saldo e tokens | Painel do Escavador | Você |
+| **Contas de pessoas** | **Nenhum lugar** — é ato técnico no banco | Você |
+
+**A escolha é a certa para a fase 1** — barata, imediata, proporcional a sete pessoas com um prestador só. **O que ela cobra, e precisa estar escrito antes de precisar:**
+
+1. 🔴 **O escritório não consegue desligar ninguém sozinho.** É o **R-79**. Somado ao R-47 (a conta de Telegram também não é administrada pelo escritório), o escritório tem **zero** capacidade própria de corte. Uma pessoa que sai numa sexta às 18h mantém acesso **até você executar a revogação**. O compromisso que substitui o botão: pedido nominal da Malu, atendido no mesmo dia útil, registrado.
+2. **Reforça o R-48.** Você já é operador de dados; agora é também administrador. Quem opera, administra e apura vira a mesma pessoa. O encaminhamento já registrado continua: **o encarregado perante o titular e a ANPD é a Malu, sempre.**
+3. **A D-26 ganha nota de rodapé.** *"Administrador não recebe escopo de dado de cliente"* descreve o que o Policy Gate concede — **não descreve o que um acesso direto ao banco alcança**. O que preserva a separação na fase 1 não é a permissão: é a auditoria imutável do Marco 3, que o gatilho protege até contra o dono do banco.
+
+**Recomendação: adotar**, com o R-79 registrado e o compromisso de revogação escrito.
+
+**Sua decisão:**
+- [ ] Adotar — super admin sou eu, por acesso técnico
+- [ ] Adotar, e quero a camada 3 (console) já na fase seguinte
+- [ ] Outra coisa
+
+---
+
+### A-22 · D-225 🟢 — RF-08 e RF-37 saem por relatório, não por tela
+
+**Em uma frase.** Os dois requisitos que a D-219 devolveu ao escopo se cumprem sem interface — e os critérios de aceite já diziam isso.
+
+**O problema.** A D-219 trouxe de volta a E1 o **painel de custo (RF-08)** e o **relatório de acesso amplo (RF-37)**. Mas a camada 3 está fora de escopo (D-224), então **nenhum dos dois tem onde aparecer**.
+
+**A saída não é adiá-los de novo — é reler o que já estava escrito:**
+
+| Requisito | O critério de aceite diz | Precisa de tela? |
+|---|---|---|
+| **RF-37** | *"O relatório existe e é gerado sem consulta manual ao banco"* | **Não** — já dizia relatório |
+| **RF-08** | *"Responde 'quem gastou o quê no mês' sem consulta manual ao banco"* | **Não** — a exigência é não consultar o banco na mão |
+
+**A forma é a mesma do resumo de fim de dia útil** (D-217): artefato gerado por rotina, entregue por canal, sem ninguém abrir tela. Quando a camada 3 existir, os dois viram **também** tela — e o relatório continua, porque quem precisa de histórico mensal precisa de arquivo, não de consulta.
+
+**Recomendação: adotar.** É o único trabalho novo que esta nota cria antes de 30/09, e ele já estava no escopo pela D-219.
+
+**Sua decisão:**
+- [ ] Adotar — relatório gerado
 - [ ] Outra coisa
 
 ---

@@ -264,6 +264,10 @@ Duas ressalvas: **não confirmei se o Cloud Identity Free dá acesso ao Google C
 
 O painel não precisa ser grande na primeira versão. Uma tela de "caixa de aprovações" — lista de pendências, conteúdo integral, editar, aprovar, rejeitar — já destrava as frentes internas. Isso é dias de trabalho, não meses.
 
+> ⚠️ **Atualização de 08/09 — este faseamento ficou sem data por três semanas, e a frase acima virou o único dimensionamento que o projeto tinha (D-223).** Ela foi escrita em 17/08, **antes** de a D-147 pendurar a identidade no painel e de a D-17 fazer dele o destino do link. A [Nota Técnica 04](19-painel-web-e-administracao.md) recolocou o assunto: o painel se separa em **três camadas**, e **nenhuma entra em E2 (15/09) nem em E1 (30/09)**.
+>
+> **A intuição acima envelheceu bem na ordem e mal no tamanho.** A ordem estava certa — a caixa de aprovações é mesmo a primeira tela que vale —, mas ela **não vem sozinha**: precisa da camada de login por baixo (a identidade tem de existir antes de haver o que aprovar nominalmente). Somadas, são **8 a 13 dias úteis** estimados, não "dias". **A fase "Produção interna" da tabela acima é, hoje, a fase seguinte a 30/09**, e a fase "Piloto" é o que E1 e E2 entregam pelo Telegram — com uma diferença em relação ao que esta linha previa: **elas retornam dado de cliente**, o que é exatamente o que o **R-78** registra como descoberto.
+
 ---
 
 # Parte 2 — Onde fica o servidor MCP
@@ -355,7 +359,7 @@ O código custa mais nas primeiras semanas e menos em todas as seguintes. Como o
 
 | ID | Decisão | Recomendação |
 |---|---|---|
-| **D-16** | Interface interna em dois níveis: mensageiro para notificação e ação rápida; painel web para conteúdo, edição e aprovação | Adotar |
+| **D-16** | Interface interna em dois níveis: mensageiro para notificação e ação rápida; painel web para conteúdo, edição e aprovação | Adotar. ⚠️ **08/09 — o painel ganhou data pela D-223**: três camadas, nenhuma em E1 ou E2, as camadas 1 e 2 na fase seguinte ([Nota Técnica 04](19-painel-web-e-administracao.md)) |
 | **D-17** | Conteúdo confidencial não trafega no corpo da mensagem do mensageiro — apenas notificação e link | Adotar |
 | **D-18** | Canal de notificação: **Telegram**, enquanto a equipe não tiver contas individuais do Workspace. Google Chat só passa a ser viável no Caminho A (§1.6.3) | ✅ **Confirmada** (escritório, 27/08) — e o Telegram deixa de ser só cano de aviso: passa a carregar também a **identidade individual** (D-147) |
 | **D-21** | Identidade individual é pré-requisito do projeto. Levar a conta compartilhada ao escritório e recomendar licenças individuais; desenhar o painel com identidade própria de qualquer forma (§1.6) | ✅ **Confirmada e cumprida** (escritório, 27/08) — pelo **Caminho B**. A segunda metade da decisão ("desenhar o painel com identidade própria de qualquer forma") é o que evitou retrabalho |

@@ -101,9 +101,9 @@ O recorte proposto (**D-207**):
 
 **Trava:** formalmente, toda a construção. O PRD (v2.0) e a Spec Parte I (v1.2) estão desde 27/08 em "🟡 Proposta — aguarda aval do usuário".
 
-**O tamanho real do problema:** ~~173 decisões em 🟡 Proposta contra 2 confirmadas~~ → **182 em 🟡 Proposta contra 31 confirmadas**, recontado linha a linha em 08/09. A pilha cresceu (D-208 a D-212 em 07 e 08/09, e D-216 a D-218 na própria triagem) e a contagem antiga errava dos dois lados. Continua sendo dívida acumulada, não uma pilha de escolhas pendentes.
+**O tamanho real do problema:** ~~173 decisões em 🟡 Proposta contra 2 confirmadas~~ → **184 em 🟡 Proposta contra 36 confirmadas ou resolvidas**, recontado linha a linha em 08/09 (**225 linhas, 225 identificadores distintos**). A pilha cresceu (D-208 a D-212 em 07 e 08/09, D-216 a D-218 na própria triagem, D-219 a D-222 nos avais e **D-223 a D-225** na pergunta sobre o painel) e a contagem antiga errava dos dois lados. Continua sendo dívida acumulada, não uma pilha de escolhas pendentes.
 
-✅ **O digesto está pronto:** [`18-digesto-de-aval.md`](18-digesto-de-aval.md), produzido pelo **P-17** em 08/09. As 182 saíram em três grupos — **15 que pedem leitura individual** (a estimativa era 8 a 12; nenhuma foi cortada para caber no número), **159 de acordo em bloco** e **8 que não deveriam estar em Proposta**.
+✅ **O digesto está pronto:** [`18-digesto-de-aval.md`](18-digesto-de-aval.md), produzido pelo **P-17** em 08/09. Elas saíram em três grupos — **17 que ainda pedem leitura individual** (eram 15 na triagem; cinco foram decididas e sete nasceram desde então, com **D-223 a D-225** na §3.2), **159 de acordo em bloco** e **8 que não deveriam estar em Proposta** (17 + 159 + 8 = 184).
 
 **Recomendação:** ler a §3 do digesto — 13 decisões, cerca de 4 linhas cada, das quais **6 são urgentes antes de 15/09** —, dar o de acordo em bloco da §4 com data, e decidir as 10 da §5. ✅ **Duas já foram resolvidas em 08/09:** a colisão de numeração (D-213 a D-215, R-76) e a **D-171** — que não era exceção esquecida e sim decisão de negócio da advogada proprietária, agora registrada como **D-216**, com **D-217** e **D-218** junto.
 
@@ -214,6 +214,8 @@ A ordem canônica é a da **Spec §15** — não a seção "Próximo passo" do `
 | **P-23** | 👤 WhatsApp por BSP, não direto pela Meta (D-197) | E4. Pelo caminho da Meta são semanas, e o tempo é da Meta |
 | **P-24** | 🤖 HMAC no anonimizador (**D-215**, era D-159 até a renumeração de 08/09), retentativa com idempotência, cofre de segredos no Swarm | Achados abertos, nenhum urgente. ⚠️ A **D-211** encareceu este: anonimização antes de saída externa deixou de ser opcional |
 | **P-25** | 🤖 Entender por que o *polling* discordou do callback (R-55) | Precisa de crédito, baixo valor agora |
+| **P-26** | 🤖 **Camadas 1 e 2 do painel web** — login com senha e 2FA, e a caixa de aprovações (**D-223**, [Nota Técnica 04](19-painel-web-e-administracao.md)) | **Depois de 30/09**, e as duas juntas: login que não abre nada não vale o esforço. **8 a 13 dias úteis estimados.** É pré-requisito de **E3** e **E4**, e é o que fecha o **R-78** — enquanto não existir, a D-17 manda o conteúdo para um link que não aponta para lugar nenhum |
+| **P-27** | 🤖🔀 **Escrever a regra do que pode aparecer no corpo da mensagem do Telegram** — referência, tribunal, tipo de ato e data; nunca o teor da publicação | **Antes de E2 entrar em operação, e é barato.** É o tratamento (a) do **R-78**: enquanto não há painel, a limitação precisa ser decisão escrita, não esquecimento que a primeira exceção derruba |
 
 ---
 
