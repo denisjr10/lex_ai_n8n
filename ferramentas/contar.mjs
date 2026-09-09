@@ -292,9 +292,21 @@ function contarRequisitos() {
   return { rf: rf.size, rnf: rnf.size }
 }
 
-/** Linhas de código versionado, por linguagem. */
+/** Linhas de código, por linguagem.
+ *
+ *  Conta o que está versionado E o que ainda não foi commitado mas entraria no
+ *  Git (`--others --exclude-standard` traz os arquivos novos e respeita o
+ *  `.gitignore`). Um `git ls-files` puro contaria só o que já está rastreado —
+ *  e aí um arquivo novo só apareceria na contagem DEPOIS do commit, deixando o
+ *  `numeros.md` sempre um commit atrasado a cada arquivo criado.
+ *
+ *  Não é hipótese: aconteceu neste mesmo arquivo. Ele foi criado, o documento
+ *  foi gerado sem contá-lo, e o `fechar-ciclo.mjs` bloqueou a sessão logo
+ *  depois do commit acusando 549 linhas de diferença — que era o tamanho do
+ *  próprio contador. A barreira funcionou; o que ela pegou foi um defeito dela.
+ */
 function contarLinhas() {
-  const saida = rodar('git', ['ls-files'], 20_000)
+  const saida = rodar('git', ['ls-files', '--cached', '--others', '--exclude-standard'], 20_000)
   if (!saida) return null
   const conta = { ts: 0, sql: 0, mjs: 0 }
   for (const arquivo of saida.split('\n').filter(Boolean)) {

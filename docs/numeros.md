@@ -25,7 +25,7 @@
 | Testes passando | **109** |
 | Provas de regra (exige banco) | **—** |
 | Provas de auditoria (exige banco) | **—** |
-| Linhas versionadas | TypeScript 3619 · SQL 1759 · Node 12119 |
+| Linhas versionadas | TypeScript 3619 · SQL 1759 · Node 12680 |
 
 **Pacotes ainda sem uma linha executável:** `packages/sdk-escavador` · `packages/sdk-trello` · `mcp-servers/escavador` · `mcp-servers/trello` · `services/policy-gate`.
 
