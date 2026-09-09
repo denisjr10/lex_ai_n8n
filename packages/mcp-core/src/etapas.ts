@@ -17,7 +17,9 @@
  */
 
 import {
+  A4_DISPONIVEL,
   abrangenciaConcedida,
+  erroInterno,
   exigeAdvogadoNominal,
   exigePapelDeAdvogado,
   exigeAprovacao,
@@ -294,6 +296,28 @@ export function etapaAprovacao(
 
   if (aprovacao.resumo_do_conteudo !== resumoDoConteudo) {
     return negar(precisaAprovacao(faixa, quem));
+  }
+
+  // A FAIXA A4 NÃO EXECUTA ENQUANTO AS DUAS GARANTIAS DELA FOREM DOCUMENTO.
+  //
+  // Falta a reconsulta ao Policy Gate no ato — o serviço é casca — e a
+  // identificação nominal é um campo de texto não vazio, que prova
+  // preenchimento e não identidade. Como a A4 é o ato com efeito jurídico ou de
+  // prazo (Regra 2), a Regra 5 manda fechar: falha fecha.
+  //
+  // A recusa é `erro_interno`, e não `precisa_aprovacao`, de propósito. Não
+  // falta aprovação: falta metade do chassi. Dizer "peça aprovação" mandaria o
+  // agente buscar um humano que aprovaria algo que não sairia mesmo assim, e o
+  // humano concluiria que a aprovação dele não funciona. A ação sugerida por
+  // `erroInterno` é escalar, que é o que de fato resolve.
+  //
+  // Isto é trava de EXECUÇÃO, não de carga (D-236): declarar uma ferramenta A4
+  // continua valendo, e o porquê está em `faixa.ts`, na própria constante.
+  if (faixa === 'A4' && !A4_DISPONIVEL) {
+    return negar(erroInterno(
+      'a faixa A4 exige reconsulta ao Policy Gate no ato e advogado identificado nominalmente, '
+      + 'e nenhuma das duas existe ainda — o Policy Gate é casca e a identificação é um campo de texto',
+    ));
   }
 
   return PERMITIDO;

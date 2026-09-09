@@ -46,8 +46,8 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 ## Painel de execução
 
-**Fechados:** Bloco 1 inteiro (5 de 5) e 5 dos 10 itens do Bloco 2.
-**Próximo:** 2.1 e 2.2 — as travas de carga.
+**Fechados:** Bloco 1 inteiro (5 de 5) e 6 dos 10 itens do Bloco 2.
+**Próximo:** 2.2 — a sessão assinada, com a mesma forma de trava que o 2.1 acabou tendo.
 
 ### BLOCO 0 — Antes da conversa com a Malu
 
@@ -78,7 +78,7 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 | # | Item | Estado | Prova / próximo passo |
 |---|---|---|---|
-| 2.1 | **Travar a faixa A4** enquanto o Policy Gate e a identidade nominal não existirem | 🔴 **Travado — precisa da sua escolha** | ⚠️ **A premissa do achado é falsa.** A revisão dizia *"hoje não existe ferramenta A4 nenhuma, a trava não incomoda ninguém"*. Existe: `testes/ajuda.mjs:94` declara `peticionar` como A4, e é o alicerce de toda a suíte do chassi. Implementada como a revisão pedia — recusa na **carga** —, ela derrubou **47 dos 118 testes**, porque o alicerce deixa de carregar. Revertida no mesmo turno; a árvore está verde. Ver a nota abaixo. → **D-236** |
+| 2.1 | **Travar a faixa A4** enquanto o Policy Gate e a identidade nominal não existirem | ✅ **Feito, mas não como a revisão pediu** | Trava na **execução**, não na carga, por escolha do usuário em 09/09. `etapaAprovacao` recusa a A4 depois de conferir tudo o mais — assim "falta aprovação" e "estagiário não aprova" continuam respondendo o que é mais útil, e a trava só pega o caminho feliz. 117 testes, dois novos. ⚠️ **A premissa do achado original era falsa.** A revisão dizia *"hoje não existe ferramenta A4 nenhuma, a trava não incomoda ninguém"*. Existe: `testes/ajuda.mjs:94` declara `peticionar` como A4, e é o alicerce de toda a suíte do chassi. Implementada como a revisão pedia — recusa na **carga** —, ela derrubou **47 dos 118 testes**, porque o alicerce deixa de carregar. Revertida no mesmo turno; a árvore está verde. Ver a nota abaixo. → **D-236** |
 | 2.2 | **A sessão precisa chegar assinada**, e o chassi não pode aceitar objeto `Sessao` pronto vindo de fora. Trava de carga agora; implementação com o marco 9. **E corrigir o `13-chassi-marco-2.md`**, que declara concluída uma etapa que está pela metade | 🔴 | **Próximo.** Marco declarado pronto pela metade é pior que marco pendente. → **D-237** |
 | 2.3 | **`identidade_externa` e `reserva_orcamento`:** acrescentar `inquilino_id`, política por linha e chave composta, com a busca global de login virando função dedicada (`SECURITY DEFINER`), nomeada e auditável | 🟠 | Única que mexe no banco. Recomendação (a); a alternativa (b) é documentar o desvio com teste que o prove. **Aguarda sua escolha.** → **D-239** |
 | 2.4 | **`conferirPapel()` dentro de `abrirConexao`** — a conferência do papel deixou de ser opcional | ✅ | `bc954d6`. Importa porque a migração 010 não usa `FORCE ROW LEVEL SECURITY`: era disciplina, virou trava. → **D-240** |
@@ -134,12 +134,23 @@ reconsulta ao Policy Gate no ato de executar**, e a identificação nominal é h
 um campo de texto não vazio. Barrar a declaração desliga o caminho inteiro,
 inclusive a parte que funciona, e cega os testes que a cobrem.
 
-**As saídas, e a recomendação.** Trava na **execução** em vez da carga: a faixa
-continua declarável, e `executarChamada` recusa enquanto `A4_DISPONIVEL` for
-falso. Isso ataca exatamente o furo medido — nenhum ato com efeito jurídico sai
-sem a reconsulta — e mantém vivos o alicerce e a cobertura. A alternativa fiel à
-recomendação original exige refazer o alicerce dos testes, e traz o risco de
-perder cobertura da semântica A4 no caminho.
+**O que foi feito, decidido pelo usuário em 09/09:** trava na **execução** em vez
+da carga. A faixa continua declarável e `etapaAprovacao` recusa a A4 enquanto
+`A4_DISPONIVEL` for falso — **depois** de conferir aprovação, papel, prazo e
+resumo, para que as recusas mais específicas continuem tendo precedência. Um
+agente sem aprovação segue ouvindo *"precisa de aprovação"*, e não *"o chassi
+está incompleto"*.
+
+A recusa sai como `erro_interno` com ação `escalar_humano`, e **não** como
+`precisa_aprovacao`: não falta aprovação, falta metade do chassi — mandar pedir
+aprovação faria a advogada aprovar algo que não sairia mesmo assim. Na trilha de
+auditoria o evento fica como `erro`, não `negado`, e a distinção é a certa: quem
+for ler depois precisa separar *"o privilégio não permitia"* de *"a plataforma
+ainda não sabe verificar"*.
+
+Custo real: dois testes novos, um teste repontado de A4 para A3b — ele provava
+uma propriedade geral da auditoria e usava a A4 só como veículo — e nenhuma
+cobertura perdida. 117 de 117.
 
 **Isto vale para o 2.2 também:** ele tem a mesma forma — trava de carga proposta
 pela revisão para a sessão assinada — e merece a mesma pergunta antes de virar

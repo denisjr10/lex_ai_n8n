@@ -97,6 +97,42 @@ export function exigeAdvogadoNominal(faixa: Faixa): boolean {
 export const A3A_DISPONIVEL = false;
 
 /**
+ * A faixa A4 já pode **executar**?
+ *
+ * **Não — e a trava é na execução, não na carga (D-236).** A diferença é
+ * deliberada, e custou uma tentativa: travar na carga, como a A3a, derruba 47
+ * dos 118 testes, porque `testes/ajuda.mjs` declara `peticionar` como A4 e essa
+ * ferramenta é o alicerce da suíte inteira do chassi.
+ *
+ * O motivo de fundo é que a analogia com a A3a não transfere. A A3a está fora
+ * de circulação porque **dispensa** aprovação apoiada numa garantia inexistente:
+ * barrá-la remove um caminho permissivo, e nada mais depende dela. A A4 é a
+ * faixa mais **restritiva** do projeto, e o caminho dela — aprovação, papel de
+ * advogado, identidade nominal, registro na auditoria — está implementado e
+ * coberto por teste. Barrar a declaração desligaria o caminho inteiro, inclusive
+ * a parte que funciona.
+ *
+ * O furo é específico, e é este:
+ *
+ * 1. **Falta a reconsulta ao Policy Gate no ato de executar.** A faixa mais
+ *    perigosa é justamente a que não pode se apoiar numa sessão emitida minutos
+ *    antes — privilégio revogado nesse intervalo continuaria valendo. O
+ *    `services/policy-gate` é `export {}`: não há a quem reconsultar.
+ * 2. **A identificação nominal é um campo de texto não vazio.** A conferência
+ *    de hoje é `aprovacao.aprovador_id.trim()`, que prova preenchimento, não
+ *    identidade (R-11, D-25).
+ *
+ * A A4 é a faixa do ato com efeito jurídico ou de prazo (Regra Inegociável 2).
+ * Deixá-la executar enquanto as duas conferências são texto de documento
+ * inverte a Regra 5: na dúvida, libera.
+ *
+ * Vira `true` no marco 9, com o Policy Gate e a identidade individual — e não
+ * antes de uma das duas, porque meia trava numa faixa dessas é pior que trava
+ * nenhuma: parece cumprida.
+ */
+export const A4_DISPONIVEL = false;
+
+/**
  * Faixas que gastam dinheiro de fornecedor externo.
  *
  * Só A1 por enquanto. Serve ao motor de custo (marco 4): faixa que não gasta

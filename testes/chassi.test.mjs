@@ -730,10 +730,55 @@ test('escopo: entre concessões vale a mais ampla; sem abrangência vale own', (
 // ---------------------------------------------------------------------------
 
 test('a auditoria guarda QUAL aprovação autorizou o ato', async () => {
-  const { cfg, sessao: s, auditoria } = montar({ escopos: ['escritorio:peticao:write:any'] });
+  // A faixa aqui é A3b, e não A4, desde 09/09: a A4 não executa enquanto o
+  // Policy Gate e a identidade nominal não existirem (D-236), e este teste
+  // prova uma propriedade GERAL da auditoria — qual aprovação autorizou o ato —
+  // que não é da A4. A trava da A4 tem teste próprio, logo abaixo.
+  const { cfg, sessao: s, auditoria } = montar({ escopos: ['escritorio:mensagem:write:any'] });
 
   const aprovacao = {
     aprovacao_id: 'apr_0001',
+    faixa: 'A3b',
+    aprovador_id: 'usr_advogada',
+    papel_do_aprovador: 'advogado',
+    status: 'aprovada',
+    expira_em: '2026-08-27T12:05:00.000Z',
+    inquilino_id: s.inquilino_id,
+    sessao_id: s.sessao_id,
+    resumo_do_conteudo: `enviar_ao_cliente:${JSON.stringify({ numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' })}`,
+  };
+
+  const r = await executarChamada(
+    cfg,
+    chamada('enviar_ao_cliente', { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' }, s, { aprovacao }),
+  );
+
+  assert.equal(ehErro(r), false, 'a chamada aprovada deveria passar');
+
+  // A pergunta que se faz depois de um ato A4 dar errado não é "houve
+  // aprovação?" — é "de quem foi a assinatura?". Sem este campo, a trilha
+  // responde a primeira e não a segunda, e a Regra 2 exige advogado
+  // IDENTIFICADO. Identificar na hora de decidir e esquecer na hora de
+  // registrar cumpre a metade da regra que não serve para nada.
+  const evento = auditoria.eventos.at(-1);
+  assert.equal(evento.resultado, 'permitido');
+  assert.equal(evento.aprovacao_id, 'apr_0001');
+});
+
+test('A4 não executa nem com aprovação impecável — a trava é do chassi, não do rito', async () => {
+  // Aprovação perfeita: advogada, no prazo, deste inquilino, desta sessão, com
+  // o resumo exato da chamada. Ainda assim o ato não sai, porque as duas
+  // garantias que a A4 promete não existem em código: falta a reconsulta ao
+  // Policy Gate no ato (o serviço é casca) e a identificação nominal é um campo
+  // de texto não vazio (D-236, R-11, D-25).
+  //
+  // A trava é de EXECUÇÃO, não de carga: `peticionar` continua sendo declarada
+  // como A4 pelo alicerce da suíte. Travar na carga derrubaria 47 testes e
+  // desligaria o caminho A4 inteiro, inclusive a parte que funciona.
+  const { cfg, sessao: s, auditoria, fornecedor } = montar({ escopos: ['escritorio:peticao:write:any'] });
+
+  const aprovacao = {
+    aprovacao_id: 'apr_0003',
     faixa: 'A4',
     aprovador_id: 'usr_advogada',
     papel_do_aprovador: 'advogado',
@@ -749,16 +794,23 @@ test('a auditoria guarda QUAL aprovação autorizou o ato', async () => {
     chamada('peticionar', { numero_cnj: CNJ_DA_CARTEIRA, corpo: 'Excelentíssimo.' }, s, { aprovacao }),
   );
 
-  assert.equal(ehErro(r), false, 'a chamada aprovada deveria passar');
+  assert.equal(ehErro(r), true, 'a faixa A4 não deveria executar');
+  assert.equal(fornecedor.estado.chamadas, 0, 'a recusa não pode ter tocado o fornecedor');
 
-  // A pergunta que se faz depois de um ato A4 dar errado não é "houve
-  // aprovação?" — é "de quem foi a assinatura?". Sem este campo, a trilha
-  // responde a primeira e não a segunda, e a Regra 2 exige advogado
-  // IDENTIFICADO. Identificar na hora de decidir e esquecer na hora de
-  // registrar cumpre a metade da regra que não serve para nada.
+  // O código é `erro_interno` e NÃO `precisa_aprovacao`: não falta aprovação,
+  // falta metade do chassi. Mandar pedir aprovação faria a advogada aprovar algo
+  // que não sairia mesmo assim.
+  assert.equal(r.erro.codigo, 'erro_interno');
+  assert.equal(r.erro.acao_sugerida, 'escalar_humano');
+  assert.match(r.erro.mensagem_agente, /Policy Gate|nominalmente/i);
+
+  // A trilha registra 'erro', e não 'negado' — e a distinção é a certa: isto
+  // não é recusa de política contra quem chamou, é metade do chassi faltando.
+  // Quem for ler a auditoria depois precisa conseguir separar "o privilégio não
+  // permitia" de "a plataforma ainda não sabe verificar".
   const evento = auditoria.eventos.at(-1);
-  assert.equal(evento.resultado, 'permitido');
-  assert.equal(evento.aprovacao_id, 'apr_0001');
+  assert.equal(evento.resultado, 'erro');
+  assert.equal(evento.etapa, 'aprovacao');
 });
 
 test('a recusa de um ato aprovado também guarda a aprovação apresentada', async () => {
