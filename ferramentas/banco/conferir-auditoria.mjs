@@ -76,6 +76,10 @@ function montarFerramentas() {
     escopo: 'escavador:processo:read',
     entrada: { numero_cnj: cnj() },
     sujeito: (p) => ({ processos: [p.numero_cnj] }),
+    // Obrigatorio desde 09/09: faixa A1 e leitura externa PAGA, e a trava de
+    // carga recusa ferramenta paga que nao diga de qual rota do catalogo ela e
+    // (Regra 6). Esta declaracao foi a primeira que a trava pegou.
+    custo: { rota: 'v2.processo.capa' },
     executar: async () => { chamadasAoFornecedor += 1; return { capa: 'veio do fornecedor' }; },
   });
   return new Map([[consultar.nome, consultar]]);

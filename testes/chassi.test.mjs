@@ -15,6 +15,7 @@ import {
   texto,
   cnj,
   ehErro,
+  confirmacao,
 } from '@lex/mcp-core';
 import {
   abrangenciaConcedida,
@@ -96,6 +97,43 @@ test('401 e 403 nunca repetem — insistir com credencial inválida não muda na
     assert.equal(e.codigo, 'credencial_invalida');
     assert.equal(e.repetivel, false);
   }
+});
+
+test('🔴 403 do Escavador dizendo saldo é SALDO, não credencial', () => {
+  // O Escavador não usa 402. Ele devolve 403 com este corpo, gravado em
+  // captura/respostas-brutas/. Até 09/09 tudo isso virava "credencial
+  // inválida", e o humano chamado ia rotacionar token quando o que resolve é
+  // recarregar. D-120: o diagnóstico sai do corpo bruto, nunca do código HTTP.
+  const e = traduzirErro('escavador', {
+    status: 403,
+    mensagem: 'Seu saldo está bloqueado. Faça uma recarga para voltar a utilizar a API.',
+  });
+  assert.equal(e.codigo, 'saldo_esgotado');
+  assert.equal(e.repetivel, false, 'repetir com saldo bloqueado não muda nada e enche o histórico de falhas');
+  assert.equal(e.acao_sugerida, 'escalar_humano');
+});
+
+test('403 SEM corpo continua sendo credencial — sem o que ler, não se chuta', () => {
+  // O outro lado da trava. Chutar "saldo" para todo 403 seria repetir o mesmo
+  // defeito na direção oposta: um token revogado apareceria como problema de
+  // dinheiro, e ninguém iria olhar a credencial.
+  const semCorpo = traduzirErro('escavador', { status: 403 });
+  assert.equal(semCorpo.codigo, 'credencial_invalida');
+
+  const outroMotivo = traduzirErro('escavador', {
+    status: 403,
+    mensagem: 'Token revogado pelo administrador da conta',
+  });
+  assert.equal(outroMotivo.codigo, 'credencial_invalida');
+});
+
+test('o corpo que revela o saldo não vaza para o agente', () => {
+  const e = traduzirErro('escavador', {
+    status: 403,
+    mensagem: 'Seu saldo está bloqueado na conta 98765. Faça uma recarga.',
+  });
+  assert.equal(e.codigo, 'saldo_esgotado');
+  assert.ok(!e.mensagem_agente.includes('98765'));
 });
 
 test('429 repete; 5xx repete e sugere cache', () => {
@@ -217,6 +255,82 @@ test('escopo ilegível derruba a ferramenta na carga, não na chamada', () => {
       }),
     /convenção|convencao/i,
   );
+});
+
+// ---------------------------------------------------------------------------
+// As duas travas de carga que nasceram da revisão de 09/09
+// ---------------------------------------------------------------------------
+
+test('🔴 faixa que gasta crédito sem declarar a rota do custo é recusada na carga', () => {
+  // A faixa A1 é leitura externa PAGA, e o campo `custo` era opcional sem que
+  // nada o conferisse: dava para declarar uma ferramenta paga sem dizer de qual
+  // rota ela é. Quando o motor de custo chegar, a reserva sai zerada — que é
+  // gastar sem teto. A Regra 6 diz que custo é requisito funcional.
+  assert.throws(
+    () =>
+      definirFerramenta({
+        nome: 'ferramenta_gastadora',
+        descricao: 'Consulta paga que nao diz quanto custa.',
+        faixa: 'A1',
+        escopo: 'escavador:processo:read',
+        entrada: { numero_cnj: cnj() },
+        executar: async () => ({}),
+      }),
+    /custo\.rota/i,
+  );
+});
+
+test('faixa que NÃO gasta crédito não precisa declarar custo', () => {
+  // O outro lado da trava. Uma leitura interna (A0) sem `custo` é normal, e
+  // exigir a chave dela empurraria todo mundo a inventar uma rota de mentira —
+  // que é como uma trava vira ritual.
+  const f = definirFerramenta({
+    nome: 'ferramenta_de_graca',
+    descricao: 'Leitura interna, que nao toca fornecedor nenhum.',
+    faixa: 'A0',
+    escopo: 'escritorio:processo:read',
+    entrada: {},
+    executar: async () => ({}),
+  });
+  assert.equal(f.nome, 'ferramenta_de_graca');
+});
+
+test('🔴 ferramenta de ação destrutiva sem campo de confirmação é recusada na carga', () => {
+  // A Spec §4.5 listava isto como impedido "por construção", e até 09/09 a
+  // função `confirmacao()` existia sem ser referenciada em lugar nenhum — a
+  // promessa dependia da disciplina de quem escreve a ferramenta.
+  assert.throws(
+    () =>
+      definirFerramenta({
+        nome: 'remover_monitoramento',
+        descricao: 'Remove uma vigilancia. Desliga o alerta de prazo em silencio.',
+        faixa: 'A2',
+        escopo: 'escavador:monitoramento:delete',
+        entrada: { id: texto({ maximo: 40 }) },
+        executar: async () => ({}),
+      }),
+    /confirma/i,
+  );
+});
+
+test('ferramenta destrutiva COM confirmação carrega, e a confirmação é obrigatória na chamada', async () => {
+  const f = definirFerramenta({
+    nome: 'remover_monitoramento',
+    descricao: 'Remove uma vigilancia. Desliga o alerta de prazo em silencio.',
+    faixa: 'A2',
+    escopo: 'escavador:monitoramento:delete',
+    entrada: { id: texto({ maximo: 40 }), confirmo: confirmacao() },
+    executar: async () => ({ removido: true }),
+  });
+  assert.equal(f.escopoLido.acao, 'delete');
+
+  // E a confirmação não é decorativa: sem ela, a entrada é recusada.
+  const semConfirmar = f.entrada.confirmo.ler(undefined, 'confirmo');
+  assert.equal(semConfirmar.ok, false);
+  const comValorErrado = f.entrada.confirmo.ler('sim', 'confirmo');
+  assert.equal(comValorErrado.ok, false, 'a string "sim" não é confirmação — só o booleano verdadeiro');
+  const certo = f.entrada.confirmo.ler(true, 'confirmo');
+  assert.equal(certo.ok, true);
 });
 
 // ---------------------------------------------------------------------------

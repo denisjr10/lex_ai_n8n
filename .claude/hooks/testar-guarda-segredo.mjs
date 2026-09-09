@@ -85,6 +85,49 @@ const CASOS = [
   ['permitido', 'git add de documento',           'Bash', { command: 'git add docs/00-estado-atual.md' }],
   ['permitido', 'git status nao e assunto',       'Bash', { command: 'git status --short' }],
 
+  // --- EXECUTAR nao e FALAR SOBRE (09/09) --------------------------------
+  //
+  // Em 09/09 este guarda negou a gravacao de um relatorio porque o TEXTO do
+  // relatorio descrevia o que o proprio guarda bloqueia; e negou de novo um
+  // `grep` cujo PADRAO citava a mesma frase. Os padroes casavam em qualquer
+  // posicao da string, sem distinguir o comando invocado do assunto tratado.
+  //
+  // Falso positivo em guarda de seguranca nao e incomodo: e o que ensina a
+  // proxima sessao a desliga-lo. O cabecalho deste arquivo ja dizia isso, e a
+  // licao precisou ser aprendida duas vezes.
+  //
+  // Estes seis casos travam as duas direcoes. Se um dos tres primeiros voltar
+  // a dar deny, o guarda voltou a confundir falar com fazer; se um dos tres
+  // ultimos deixar de dar deny, abriu um caminho de verdade.
+  ['permitido', 'heredoc que CITA a opcao de forca', 'Bash',
+    { command: "cat > nota.md <<'FIM'\nnao use git add -f, ele fura o .gitignore\nFIM" }],
+  ['permitido', 'padrao de grep que CITA a frase',   'Bash',
+    { command: 'grep -n "git add -f" docs/00-estado-atual.md' }],
+  ['permitido', 'mensagem de commit que CITA',       'Bash',
+    { command: 'git commit -m "documenta por que git add -f e proibido"' }],
+  ['deny',      'invocacao dentro de $( )',          'Bash',
+    { command: 'echo $(git add -f captura/token.local)' }],
+  ['deny',      'invocacao dentro de crase',         'Bash',
+    { command: 'echo `git add -f captura/token.local`' }],
+  ['deny',      'invocacao com variavel de ambiente na frente', 'Bash',
+    { command: 'GIT_DIR=.git git add --force captura/token.local' }],
+
+  // --- a opcao de forcar e minuscula, e casa por segmento (09/09) ---------
+  //
+  // O padrao antigo era `git\s+add\b[^&|;]*(-f|--force)` com /i, e tinha dois
+  // defeitos que so apareceram juntos: `[^&|;]*` atravessa quebra de linha, e
+  // `\w*f` sem distinguir caixa casa o `-F` de `git commit -F -` (ler a
+  // mensagem de um arquivo). Resultado: `git add -A && git commit -F -` era
+  // acusado de adicionar a forca — e o bloqueio dizia que a pessoa tentava
+  // burlar o .gitignore. Foi assim que o hook barrou o commit que registrava a
+  // correcao dele proprio.
+  ['permitido', 'add -A seguido de commit -F -',   'Bash',
+    { command: "git add -A && git commit -F - <<'M'\nmensagem\nM" }],
+  ['permitido', 'commit -F le mensagem de arquivo', 'Bash',
+    { command: 'git commit -F /tmp/mensagem.txt' }],
+  ['deny',      'forca agrupada em -vf',           'Bash',
+    { command: 'git add -vf captura/token.local' }],
+
   // --- camada 3: o CONTEUDO preparado -----------------------------------
   //
   // Os quatro primeiros sao o falso positivo de 27/08 e seus vizinhos: codigo

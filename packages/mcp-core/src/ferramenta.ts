@@ -17,8 +17,8 @@
  */
 
 import type { Faixa } from '@lex/dominio';
-import { A3A_DISPONIVEL, ehFaixa, lerEscopo, type Escopo } from '@lex/dominio';
-import { conferirEsquema, type Esquema, type Lido } from './esquema.js';
+import { A3A_DISPONIVEL, ehFaixa, gastaCredito, lerEscopo, type Escopo } from '@lex/dominio';
+import { conferirEsquema, temConfirmacao, type Esquema, type Lido } from './esquema.js';
 
 /**
  * Os sujeitos que esta chamada toca — o que será conferido contra a sessão.
@@ -131,6 +131,45 @@ export function definirFerramenta<E extends Esquema, R>(
     // opinar sobre o próprio limite.
     problemas.push(
       `escopo "${d.escopo}" traz abrangência. Abrangência é da concessão (sessão), nunca da exigência (ferramenta)`,
+    );
+  }
+
+  // FERRAMENTA QUE GASTA CRÉDITO PRECISA DIZER QUANTO (Regra 6).
+  //
+  // A faixa A1 é, por definição, leitura externa PAGA — `gastaCredito()` só
+  // devolve `true` para ela. Mesmo assim o campo `custo` era opcional e nada o
+  // conferia: dava para declarar uma ferramenta paga sem dizer de qual rota ela
+  // é, e o servidor subia. Quando o motor de custo do marco 4 chegar, ele vai
+  // procurar o preço por essa chave; sem ela, ou a reserva sai zerada — gasto
+  // sem teto — ou a rota cai como desconhecida e alguém desliga a trava para
+  // destravar, que é o desfecho pior.
+  //
+  // A Regra 6 diz que custo é requisito FUNCIONAL. Requisito funcional que
+  // ninguém confere é comentário; isto é a conferência.
+  if (ehFaixa(d.faixa) && gastaCredito(d.faixa) && !d.custo?.rota) {
+    problemas.push(
+      `faixa ${d.faixa} gasta crédito de fornecedor e a declaração não traz "custo.rota", ` +
+        'que é a chave no catálogo de preços. Sem ela o motor de custo não sabe quanto ' +
+        'reservar antes da chamada, e reservar zero é gastar sem teto (Regra 6)',
+    );
+  }
+
+  // OPERAÇÃO DESTRUTIVA EXIGE CONFIRMAÇÃO EXPLÍCITA (D-29).
+  //
+  // A Spec §4.5 lista isto entre o que o chassi impede "por construção", e até
+  // 09/09 não impedia nada: a função `confirmacao()` existia e não era
+  // referenciada em lugar nenhum do código-fonte. A promessa dependia da
+  // disciplina de quem escreve a ferramenta, que é o oposto do que o chassi
+  // existe para oferecer.
+  //
+  // A hora de ligar a trava é agora, enquanto nenhuma ferramenta de ação
+  // `delete` existe. Ligada depois, ela quebraria código escrito e viraria
+  // discussão — e a operação que ela protege é a de maior dano silencioso do
+  // projeto: remover um monitoramento desliga o alerta de prazo sem erro nenhum.
+  if (escopoLido?.acao === 'delete' && !temConfirmacao(d.entrada)) {
+    problemas.push(
+      `escopo "${d.escopo}" é de ação destrutiva e a entrada não exige confirmação ` +
+        'explícita. Acrescente um campo `confirmacao()` ao esquema (Spec §4.5, D-29)',
     );
   }
 

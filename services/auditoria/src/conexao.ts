@@ -40,6 +40,14 @@ export interface OpcoesDeConexao {
   readonly senha: string;
   /** Teto por consulta. Auditoria que pendura é auditoria indisponível. */
   readonly prazoMs?: number;
+  /**
+   * Qual papel do PostgreSQL esta conexão precisa estar usando.
+   *
+   * Padrão: `lex_app`. Passar `null` **desliga** a conferência — e o campo tem
+   * nome explícito de propósito: quem desligar deixa rastro no código, e um
+   * `grep` acha. Serve para script de manutenção que precise conectar como dono.
+   */
+  readonly papelEsperado?: string | null;
 }
 
 export class ConfiguracaoAusente extends Error {
@@ -143,8 +151,51 @@ export function abrirConexao(opcoes: OpcoesDeConexao): Conexao {
   // queremos.
   pool.on('error', () => {});
 
+  /**
+   * O papel é conferido AQUI, uma vez, antes da primeira consulta de verdade.
+   *
+   * ⚠️ POR QUE ISTO SAIU DE FORA E VEIO PARA DENTRO
+   *
+   * A `conferirPapel()` já existia — e era **opcional**. Em 09/09, de tudo que
+   * abre conexão neste repositório, exatamente **duas** ferramentas a chamavam.
+   * Um serviço novo que esquecesse de chamá-la rodava sem conferência nenhuma,
+   * e o esquecimento não dava sintoma: tudo funcionava, só que sem a garantia.
+   *
+   * E a garantia não é pequena. A política por linha da migração 010 **não**
+   * usa `FORCE ROW LEVEL SECURITY` — decisão consciente e bem justificada lá,
+   * porque forçar aplicaria a política também ao dono das tabelas, que é quem
+   * roda as migrações. O preço dessa escolha é que o isolamento entre
+   * escritórios vale *enquanto ninguém conectar como dono*. Era disciplina;
+   * agora é trava.
+   *
+   * Falha fecha: a promessa rejeitada fica guardada, então toda consulta
+   * seguinte falha igual — não é um erro na primeira vez e silêncio depois.
+   */
+  const papelEsperado = opcoes.papelEsperado === undefined ? PAPEL_ESPERADO : opcoes.papelEsperado;
+  let conferencia: Promise<void> | null = null;
+
+  const garantirPapel = (): Promise<void> => {
+    if (papelEsperado === null) return Promise.resolve();
+    conferencia ??= (async () => {
+      const r = await pool.query('SELECT current_user AS papel');
+      const papel = (r.rows[0] as { papel?: string } | undefined)?.papel;
+      if (papel !== papelEsperado) {
+        throw new Error(
+          `auditoria: conectada como "${papel ?? '(desconhecido)'}" e o esperado é ` +
+            `"${papelEsperado}". O isolamento entre escritórios depende disso: a política ` +
+            'por linha da migração 010 não usa FORCE, então ela NÃO se aplica ao dono das ' +
+            'tabelas — conectar como dono enxerga e escreve em todos os escritórios. ' +
+            'O append-only da auditoria também depende da revogação de UPDATE/DELETE ' +
+            'desse papel (migração 007).',
+        );
+      }
+    })();
+    return conferencia;
+  };
+
   return {
     async consultar<L extends Record<string, unknown>>(sql: string, valores: readonly unknown[] = []) {
+      await garantirPapel();
       const r = await pool.query(sql, valores as unknown[]);
       return r.rows as L[];
     },
@@ -154,6 +205,7 @@ export function abrirConexao(opcoes: OpcoesDeConexao): Conexao {
       // sintaxe dentro do SET, e a mensagem do PostgreSQL não diria que o
       // problema era o inquilino.
       const inq = exigirUuid('inquilino_id', inquilino_id);
+      await garantirPapel();
 
       const cliente = await pool.connect();
       try {

@@ -113,15 +113,122 @@ function proibido(caminho) {
   return CAMINHOS_PROIBIDOS.find(p => p.re.test(caminho))
 }
 
+/** Tira do comando o que e CONTEUDO DE DOCUMENTO, e nao comando a executar.
+ *
+ *  ⚠️ POR QUE ISTO EXISTE — o guarda mordeu quem o descrevia
+ *
+ *  Em 09/09, ao gravar o relatorio de uma revisao com `cat >> arquivo <<'FIM'`,
+ *  este hook NEGOU o comando. Motivo: o texto do relatorio, dentro do heredoc,
+ *  citava a opcao de forca do `git add` ao explicar o que este proprio hook
+ *  bloqueia. Os padroes casavam contra a string crua do comando inteiro, sem
+ *  distinguir EXECUTAR de ESCREVER SOBRE.
+ *
+ *  O estrago nao e o incomodo. E que o bloqueio vem com um texto acusando a
+ *  pessoa de tentar burlar o .gitignore — entao ela diagnostica errado, procura
+ *  um problema que nao existe, e aprende que o guarda erra. Guarda que erra e
+ *  guarda que alguem desliga; foi a licao do disjuntor de credito, e o
+ *  cabecalho deste arquivo ja dizia isso vinte linhas acima.
+ *
+ *  O que sai: corpo de heredoc (`<<TAG ... TAG`) e mensagem de `-m`/`--message`.
+ *  Nada dentro deles e comando executado neste shell — sao dados a caminho de
+ *  um arquivo ou de um commit.
+ */
+function semCorpoDeDocumento(comando) {
+  let texto = String(comando || '')
+
+  // Heredoc fechado: <<TAG ... TAG (aceita <<-, aspas na etiqueta).
+  texto = texto.replace(
+    /<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1[\s\S]*?^\s*\2\s*$/gm,
+    '<<CORPO_DE_DOCUMENTO',
+  )
+  // Heredoc sem terminador a vista (comando truncado): corta dali ate o fim.
+  texto = texto.replace(
+    /<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1[\s\S]*$/,
+    '<<CORPO_DE_DOCUMENTO',
+  )
+  // Mensagem de commit passada na linha: -m "..." / --message='...'
+  texto = texto.replace(
+    /(-m|--message)(\s*=?\s*)(['"])[\s\S]*?\3/g,
+    '$1$2$3CORPO_DE_DOCUMENTO$3',
+  )
+
+  return texto
+}
+
 const entrada = await lerEntrada()
 const ferramenta = entrada.tool_name || ''
 if (ferramenta !== 'Bash' && ferramenta !== 'PowerShell') process.exit(0)
 
-const comando = String((entrada.tool_input || {}).command || '')
-if (!/\bgit\b/.test(comando)) process.exit(0)
+// O comando CRU ainda e usado onde o conteudo importa (a conferencia do diff
+// em stage, mais abaixo, le do proprio Git). O que fica sem o corpo dos
+// documentos e a analise do que esta sendo INVOCADO.
+const comandoCru = String((entrada.tool_input || {}).command || '')
+
+/** Os pedacos do comando que sao, de fato, uma INVOCACAO do git.
+ *
+ *  ⚠️ A CORRECAO QUE FALTAVA, E A PRIMEIRA TENTATIVA NAO BASTOU
+ *
+ *  Tirar o corpo dos heredocs resolveu o caso que apareceu primeiro — gravar um
+ *  relatorio que descrevia este hook. Nao resolveu o caso seguinte, que
+ *  apareceu cinco minutos depois: um `grep` cujo PADRAO citava a mesma frase.
+ *  O texto estava num argumento entre aspas, nao num heredoc, e o padrao
+ *  casava do mesmo jeito.
+ *
+ *  A raiz nao e onde o texto esta: e que procurar "git add" em qualquer posicao
+ *  da string confunde EXECUTAR com FALAR SOBRE. A correcao e exigir que o `git`
+ *  esteja em POSICAO DE COMANDO — no comeco de um segmento, admitindo prefixo
+ *  de variavel de ambiente (`GIT_DIR=... git ...`).
+ *
+ *  Os embutidos em `$(...)` e crase entram como segmentos proprios, porque ali
+ *  dentro tambem se executa comando. E o corpo dos documentos sai antes de tudo,
+ *  porque uma linha de heredoc pode comecar com a palavra `git` sem ser comando.
+ */
+function invocacoesDeGit(comando) {
+  const limpo = semCorpoDeDocumento(comando)
+
+  const embutidos = []
+  for (const m of limpo.matchAll(/\$\(([^()]*)\)/g)) embutidos.push(m[1])
+  for (const m of limpo.matchAll(/`([^`]*)`/g)) embutidos.push(m[1])
+
+  return [limpo, ...embutidos]
+    .flatMap(t => t.split(/&&|\|\||[;|\n\r]/))
+    .map(s => s.trim())
+    .filter(s => /^(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*git\b/i.test(s))
+}
+
+const invocacoes = invocacoesDeGit(comandoCru)
+if (invocacoes.length === 0) process.exit(0)
+
+// Só o que é invocação de git, junto, para os padrões que olham o comando todo.
+const comando = invocacoes.join('\n')
+
+/** Este segmento é um `git add` com a opção de forçar?
+ *
+ *  ⚠️ DUAS ARMADILHAS QUE ESTE PADRAO PRECISOU APRENDER, AS DUAS EM 09/09
+ *
+ *  1. **Casar por segmento, nunca pela string toda.** O padrao antigo era
+ *     `git\s+add\b[^&|;]*(-f|--force)`, e `[^&|;]*` atravessa quebra de linha.
+ *     Num comando como `git add -A` seguido de outra invocacao, ele varria da
+ *     palavra `add` ate encontrar qualquer coisa parecida com a opcao — em
+ *     outro comando, linhas adiante.
+ *
+ *  2. **A opcao de forcar e minuscula.** O padrao era case-insensitive e
+ *     `\w*f` casava o **`-F`** de `git commit -F -`, que e a opcao de ler a
+ *     mensagem de um arquivo — nada a ver. Foi assim que o hook bloqueou o
+ *     commit que registrava a correcao dele proprio.
+ *
+ *  O resultado das duas juntas era o pior tipo de falso positivo: bloqueio com
+ *  um texto acusando burla do .gitignore, num comando que nao adicionava nada a
+ *  forca. Guarda que acusa errado e guarda que alguem desliga.
+ */
+function ehAddForcado(segmento) {
+  if (!/^(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*git\s+add\b/i.test(segmento)) return false
+  // Sem `/i`: `-f` e `--force` sao minusculos. `-vf` e agrupamento valido.
+  return /(?:^|\s)(?:-[A-Za-z]*f[A-Za-z]*|--force)(?:\s|=|$)/.test(segmento)
+}
 
 // --- Camada 1: git add -f -------------------------------------------------
-if (/git\s+add\b[^&|;]*(?:\s-\w*f|\s--force)\b/i.test(comando)) {
+if (invocacoes.some(ehAddForcado)) {
   responder('deny',
     'BLOQUEADO pelo guarda de segredo.\n' +
     '"git add -f" ignora o .gitignore a forca — e o .gitignore deste projeto e ' +

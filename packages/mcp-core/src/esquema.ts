@@ -23,6 +23,16 @@ export interface Campo<T> {
   readonly obrigatorio: boolean;
   /** Recebe o valor cru; devolve o normalizado ou um erro. */
   readonly ler: (bruto: unknown, nome: string) => Validacao<T>;
+  /**
+   * Marca o campo produzido por `confirmacao()`.
+   *
+   * Existe para a trava de carga conseguir responder uma pergunta que antes ela
+   * não conseguia: *"esta ferramenta destrutiva exige confirmação explícita?"*.
+   * Sem a marca, a única forma seria comparar funções, e o `definirFerramenta`
+   * teria de confiar em quem escreveu a ferramenta — que é exatamente o que o
+   * chassi existe para não fazer.
+   */
+  readonly ehConfirmacao?: true;
 }
 
 /**
@@ -162,6 +172,7 @@ export function inteiro(
 export function confirmacao(): Campo<true> {
   return {
     obrigatorio: true,
+    ehConfirmacao: true,
     ler(bruto, nome) {
       if (bruto !== true) {
         return {
@@ -192,6 +203,11 @@ export type Lido<E extends Esquema> = {
  *
  * Devolve a lista de problemas. Vazia significa esquema aceitável.
  */
+/** O esquema traz um campo de confirmação explícita? Ver `definirFerramenta`. */
+export function temConfirmacao(esquema: Esquema): boolean {
+  return Object.values(esquema).some((campo) => campo.ehConfirmacao === true);
+}
+
 export function conferirEsquema(esquema: Esquema): string[] {
   const problemas: string[] = [];
   for (const nome of Object.keys(esquema)) {

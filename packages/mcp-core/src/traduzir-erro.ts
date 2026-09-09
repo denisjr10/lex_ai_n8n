@@ -52,11 +52,46 @@ function erro(
  * R-44), e ela pode conter detalhe de conta ou de acervo que não deve chegar a
  * quem perguntou.
  */
+/**
+ * O corpo da resposta está dizendo que o problema é DINHEIRO?
+ *
+ * ⚠️ POR QUE ISTO PRECISA EXISTIR, E POR QUE OLHA A MENSAGEM
+ *
+ * O Escavador **não usa 402 para saldo**. Ele devolve **403** com o corpo
+ * `{"error":"Seu saldo está bloqueado. Faça uma recarga para voltar a utilizar
+ * a API."}` — foi assim em 23/08 e de novo depois de a cota expirar, e está
+ * gravado em `captura/respostas-brutas/`.
+ *
+ * Até 09/09 este arquivo mandava todo 403 para `credencial_invalida`, com a
+ * mensagem *"a plataforma não conseguiu se autenticar"*. O ramo do 402, que
+ * está escrito e correto, nunca era acionado. O efeito prático não é cosmético:
+ * o humano chamado às três da manhã lê "não conseguiu se autenticar" e vai
+ * rotacionar token — quando o que resolve é recarregar. É o mesmo engano que o
+ * `CLAUDE.md` cometia ao mandar ler 403 como problema de rede.
+ *
+ * A **R-44** e a **D-120** dizem exatamente o que fazer: declaração do
+ * fornecedor é indício, o diagnóstico sai do corpo bruto. Um 403 SEM mensagem
+ * continua sendo credencial — sem corpo não há o que ler, e chutar seria
+ * repetir o defeito na direção oposta.
+ */
+const CORPO_DIZ_SALDO = /\bsaldo\b|\brecarga\b|\bcr[ée]ditos?\s+(esgotad|insuficient)/i;
+
 export function traduzirErro(
   fornecedor: Fornecedor,
   resposta: RespostaDeFornecedor,
 ): ErroInterno {
   const { status } = resposta;
+
+  // 402 é o código certo para "sem saldo", e algum fornecedor há de usá-lo.
+  // O 403 com corpo falando de saldo cai aqui junto — ver CORPO_DIZ_SALDO.
+  if (status === 402 || (status === 403 && CORPO_DIZ_SALDO.test(resposta.mensagem ?? ''))) {
+    return erro(
+      'saldo_esgotado',
+      'O saldo da conta no sistema de origem acabou. Consultas pagas estão indisponíveis.',
+      'escalar_humano',
+      false, // ⚠️ NUNCA. Ver o cabeçalho deste arquivo.
+    );
+  }
 
   if (status === 401 || status === 403) {
     return erro(
@@ -64,15 +99,6 @@ export function traduzirErro(
       'A plataforma não conseguiu se autenticar no sistema de origem.',
       'escalar_humano',
       false, // NUNCA repete: repetir com credencial inválida não muda nada.
-    );
-  }
-
-  if (status === 402) {
-    return erro(
-      'saldo_esgotado',
-      'O saldo da conta no sistema de origem acabou. Consultas pagas estão indisponíveis.',
-      'escalar_humano',
-      false, // ⚠️ NUNCA. Ver o cabeçalho deste arquivo.
     );
   }
 
