@@ -1,0 +1,79 @@
+# ==========================================================================
+# verificar.yml — roda `npm run verificar` a cada envio
+#
+# POR QUE EXISTE
+#
+# O comando `npm run verificar` já existia e já era bom: confere as migrações,
+# roda as provas de regra do banco, as provas de auditoria e a suíte de testes.
+# O que faltava era alguém executá-lo sem depender de memória.
+#
+# A revisão de 09/09 encontrou o mesmo defeito em dezessete lugares — número
+# escrito à mão que envelheceu sem ninguém perceber. Num projeto assim, o
+# antídoto estrutural não é lembrar melhor: é uma barreira que roda sozinha.
+#
+# O QUE ELE FAZ, EM ORDEM
+#   1. sobe o PostgreSQL do `infra/docker-compose.yml` e aplica as migrações
+#   2. roda `npm run verificar` (migrações · regras · auditoria · testes)
+#   3. confere que `docs/numeros.md` continua batendo com o disco
+#
+# NENHUM SEGREDO É NECESSÁRIO, e isso é de propósito: nada aqui toca a API do
+# Escavador nem o n8n do cliente. Este fluxo NUNCA deve ganhar credencial de
+# fornecedor — a Regra 8 diz que chamada paga precisa de aval humano na hora, e
+# integração contínua é exatamente o lugar onde não há humano na hora.
+# ==========================================================================
+
+name: verificar
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+# Um envio novo cancela a execução anterior da mesma branch: o que importa é o
+# veredito sobre o último commit, não a fila inteira.
+concurrency:
+  group: verificar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # As ferramentas de banco falam com o PostgreSQL por
+      # `docker compose exec`, e leem a configuração de infra/.env — que o Git
+      # ignora, com razão. Aqui o arquivo de exemplo serve: são credenciais de
+      # um banco descartável, escutando só no laço local do runner.
+      - name: Configurar o ambiente do banco
+        run: cp infra/ambiente.exemplo infra/.env
+
+      - name: Subir o PostgreSQL e aplicar as migrações
+        run: npm run banco:subir
+
+      - name: Conferir migrações, regras, auditoria e testes
+        run: npm run verificar
+
+      # Sem `--com-banco`, de propósito. O `docs/numeros.md` versionado é
+      # gerado sem as provas que exigem banco (elas ficam como "—", que quer
+      # dizer "não medido"). Medi-las aqui produziria um número onde o arquivo
+      # tem um travessão, e a conferência acusaria uma divergência que não
+      # existe. O que esta etapa vigia é o que qualquer máquina consegue
+      # recontar: migrações, tabelas, pacotes, testes, documentos e decisões.
+      - name: Conferir os números do projeto
+        run: node ferramentas/contar.mjs --conferir
+
+      - name: Registro do banco, se algo falhar
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs banco --tail 120

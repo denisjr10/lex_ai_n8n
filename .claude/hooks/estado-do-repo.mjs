@@ -82,16 +82,58 @@ add()
 // --- Orçamento do Escavador -------------------------------------------
 // Regra 8 do CLAUDE.md. Fica no topo do contexto porque é a única coisa
 // deste projeto cujo erro custa dinheiro e não se desfaz.
+//
+// O saldo é LIDO do cabeçalho de docs/06, nunca escrito aqui. Até 09/09 estas
+// linhas traziam "R$ 47,00, validade até 01/09/2026" cravadas no código — um
+// número que estava velho desde 27/08 e virou ficção em 01/09, quando a cota
+// expirou. O hook criado para impedir orçamento velho em memória era, ele
+// próprio, a maior fonte de orçamento velho em memória, e com prioridade
+// máxima: chegava ao contexto antes de qualquer documento.
+//
+// Se o cabeçalho não puder ser lido, o hook NÃO inventa um valor de reserva:
+// ele avisa que não sabe. Não saber o saldo bloqueia a chamada (Regra 5);
+// achar que sabe, não.
 add('**Orçamento do Escavador — leia antes de qualquer chamada à API:**')
-add('**R$ 47,00 de R$ 50,00**, validade até 01/09/2026, sem recarga contratada.')
+try {
+  const orcamento = readFileSync(
+    join(raiz, 'docs', '06-orcamento-de-chamadas-escavador.md'), 'utf8',
+  ).replace(/\r/g, '')
+
+  // Só o cabeçalho: da primeira linha de tabela até a linha em branco que a fecha.
+  const linhasDoc = orcamento.split('\n').slice(0, 40)
+  const interessam = ['Estado', 'Saldo', 'Expira em', 'Recarga', 'Custo recorrente ativo']
+  const achadas = []
+  for (const linha of linhasDoc) {
+    if (!linha.startsWith('|')) continue
+    const celulas = linha.split('|').map(c => c.trim())
+    const rotulo = (celulas[1] || '').replace(/[*⚠️\s]/g, '')
+    const alvo = interessam.find(i => rotulo.toLowerCase() === i.replace(/\s/g, '').toLowerCase())
+    if (alvo) achadas.push(`- **${alvo}:** ${celulas[2] || ''}`)
+  }
+
+  if (achadas.length) {
+    add('Lido agora de `docs/06-orcamento-de-chamadas-escavador.md` — a sede única do saldo:')
+    add()
+    for (const l of achadas) add(l)
+  } else {
+    add('⚠️ **Não consegui achar o saldo** no cabeçalho de')
+    add('`docs/06-orcamento-de-chamadas-escavador.md`. Abra o documento antes de')
+    add('qualquer chamada — sem saber o saldo, não há chamada autorizada.')
+  }
+} catch {
+  add('⚠️ **Não consegui ler `docs/06-orcamento-de-chamadas-escavador.md`.**')
+  add('Sem saber o saldo, não há chamada autorizada — abra o documento à mão.')
+}
+add()
 add('O custo **varia por rota** e **existem rotas gratuitas** — a tarifa plana de')
 add('R$ 3,00 que o suporte informou foi desmentida pela medição (D-108), e o')
 add('teto de 16 requisições **não existe** (D-119): a cota é de dinheiro, e só.')
 add('Isso NÃO afrouxa nada — gratuito se confirma pelo cabeçalho medido, nunca')
-add('por suposição. Toda chamada precisa constar de')
-add('`docs/06-orcamento-de-chamadas-escavador.md`. O hook `guarda-escavador.mjs`')
-add('bloqueia em código as que não constam — se ele barrar, pare e pergunte ao')
-add('usuário em vez de contornar.')
+add('por suposição. Toda chamada precisa constar do orçamento. O hook')
+add('`guarda-escavador.mjs` bloqueia em código as que não constam — se ele')
+add('barrar, pare e pergunte ao usuário em vez de contornar. E atenção: um')
+add('**403 do Escavador é saldo bloqueado**, não problema de rede nem de')
+add('credencial — não repita a chamada, avise o usuário (R-22, D-120).')
 add()
 
 if (commits) {

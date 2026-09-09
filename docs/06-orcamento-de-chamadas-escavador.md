@@ -2,15 +2,29 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 4.0 — **Bloco E executado.** O contrato da V2 é o mesmo entre ramos da Justiça; o que varia é quanto dele vem preenchido (§5.8) |
-| Data | 2026-08-27 |
-| Estado | ✅ **Blocos A, B, C e E executados.** Vigilância ativa. Falta capturar uma aparição — gratuita |
-| Saldo | ✅ **R$ 44,00** de R$ 50,00 — R$ 47,00 conferidos no painel em 26/08, menos os R$ 3,00 do Bloco E |
+| Versão | 4.1 — **cabeçalho corrigido em 09/09:** a cota expirou em 01/09 e o cabeçalho ainda a descrevia como viva |
+| Data | 2026-09-09 |
+| Estado | 🔴 **COTA DE TESTE EXPIRADA.** Nenhuma chamada à API é possível hoje. Blocos A, B, C e E foram executados enquanto ela valia |
+| Saldo | 🔴 **R$ 0,00.** ~~R$ 44,00 de R$ 50,00~~ — o saldo não gasto **evaporou** no vencimento: saldo de teste não vira crédito |
 | Liberado em | **13/08/2026** |
-| **Expira em** | ✅ **01/09/2026** — lido na barra lateral do painel em 25/08 |
-| Gastas até agora | **12 chamadas · R$ 6,00 medidos** — A1 e E1 R$ 0,05 cada · B1 e E2 R$ 2,95 cada · B2, origens, V1-criar, aparições e C1/C2 R$ 0,00 |
+| **Expira em** | 🔴 **EXPIROU em 01/09/2026** — lido na barra lateral do painel em 25/08 |
+| Gastas até agora | **12 chamadas pagas · R$ 6,00 medidos** — A1 e E1 R$ 0,05 cada · B1 e E2 R$ 2,95 cada · B2, origens, V1-criar, aparições e C1/C2 R$ 0,00 |
+| Recarga | ❌ **Nenhuma contratada.** Recarga é decisão exclusiva do usuário, negociada com o comercial (R-22) — nunca consequência de uma chamada exploratória |
+| ⚠️ Custo recorrente ativo | **Monitoramento `2813617`**, criado em 26/08. Assinatura mensal. 🔴 **Remover até 22/09**, e **antes de qualquer recarga** |
 
 > Documento de controle. **Toda** chamada à API do Escavador passa por aqui — antes, para ser autorizada; depois, para registrar o que ensinou.
+>
+> **Este cabeçalho é a sede única do saldo.** O `CLAUDE.md` e o hook
+> `.claude/hooks/estado-do-repo.mjs` leem daqui em vez de repetir o número —
+> a revisão de 09/09 encontrou o saldo escrito à mão em três arquivos e num
+> hook, todos desatualizados, e o hook era a maior fonte de orçamento velho em
+> memória justamente por ter sido criado para impedir isso.
+>
+> ⚠️ **Divergência não resolvida, registrada de propósito:** este documento conta
+> **12 chamadas pagas**; o `00-estado-atual.md` fala em **21 requisições**. Os
+> dois podem estar certos com definições diferentes (chamada paga × requisição
+> total), mas ninguém escreveu qual é qual. Resolver isso exige conferir
+> `captura/respostas-brutas/` — e vale fazer antes de qualquer recarga.
 
 ## 0. Autorização vigente — 26/08/2026
 

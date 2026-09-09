@@ -110,10 +110,61 @@ function responder(objeto) {
   process.exit(0)
 }
 
+/** Os numeros do projeto batem com o disco?
+ *
+ *  Devolve o texto do aviso quando `docs/numeros.md` esta velho, ou `null`.
+ *
+ *  POR QUE ESTA CONFERENCIA EXISTE. A revisao de 09/09 achou o mesmo defeito em
+ *  dezessete lugares: numero contavel guardado a mao em varios documentos,
+ *  divergindo. A pilha de decisoes chegou a ter CINCO contagens diferentes,
+ *  todas datadas do mesmo dia. O `contar.mjs` moveu a contagem para o disco; a
+ *  conferencia aqui e o que impede o documento gerado de envelhecer de novo.
+ *
+ *  POR QUE ELE COBRA MESMO DE QUEM NAO CAUSOU. O resto deste hook toma o
+ *  cuidado de nao cobrar uma sessao por trabalho alheio — inventar estado sobre
+ *  o que outra sessao fez e pior que nao registrar nada. Aqui a preocupacao nao
+ *  se aplica: nao ha nada a inventar. A correcao e um comando so, mecanico, e
+ *  vale igual venha de onde vier a mudanca.
+ *
+ *  POR QUE ELE FALHA ABERTO. Se o proprio `contar.mjs` sumir ou quebrar, o hook
+ *  avisa e deixa passar, em vez de travar toda parada de sessao ate alguem
+ *  consertar o contador. E uma excecao consciente a Regra 5: o que esta em jogo
+ *  aqui e a frescura de um numero, nao dinheiro nem privilegio, e uma barreira
+ *  que trava o trabalho por defeito proprio e uma barreira que vai ser
+ *  desligada.
+ */
+function conferirNumeros() {
+  if (!existsSync(join(RAIZ, 'ferramentas', 'contar.mjs'))) return null
+  try {
+    execFileSync('node', ['ferramentas/contar.mjs', '--conferir', '--sem-testes'], {
+      cwd: RAIZ, encoding: 'utf8', timeout: 20_000, stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    return null
+  } catch (e) {
+    // Codigo 1 e o contador dizendo "divergiu", e a explicacao vem no stderr.
+    // Qualquer outra falha (node ausente, prazo estourado) nao acusa nada.
+    if (e?.status !== 1) return null
+    const detalhe = String(e?.stderr ?? '').trim()
+    return (
+      'OS NUMEROS DO PROJETO NAO BATEM COM O DISCO.\n\n' +
+      detalhe +
+      '\n\nIsto e conferido aqui porque o defeito mais repetido deste projeto e ' +
+      'numero escrito a mao que envelhece: em 09/09 a pilha de decisoes tinha ' +
+      'cinco contagens diferentes, todas do mesmo dia, e nenhuma igual ao disco.\n\n' +
+      'A correcao e mecanica e nao depende de saber o que mudou:\n' +
+      '  node ferramentas/contar.mjs --escrever\n\n' +
+      'Se a mudanca no disco foi de outra sessao, regravar mesmo assim esta ' +
+      'certo — o arquivo e gerado, nao ha estado alheio a inventar.'
+    )
+  }
+}
+
 const entrada = await lerEntrada()
 
 // Ja estamos dentro de um ciclo provocado por este hook: nao insista.
 if (entrada.stop_hook_active) process.exit(0)
+
+const avisoNumeros = conferirNumeros()
 
 const sessao = String(entrada.session_id || 'sem-id').replace(/[^A-Za-z0-9_-]/g, '')
 const agora = statusPorcelain()
@@ -197,10 +248,18 @@ if (fotoIlegivel && agora.length > 0) {
   })
 }
 
+/** Sai calado — a menos que os numeros estejam velhos, que e cobranca propria. */
+function sairSalvoNumeros() {
+  if (!avisoNumeros) process.exit(0)
+  responder(BLOQUEAR
+    ? { decision: 'block', reason: avisoNumeros }
+    : { systemMessage: avisoNumeros })
+}
+
 // Nada provado como meu. Ou nao houve trabalho, ou foi de outra sessao.
 if (certos.length === 0) {
   // Sem nada incerto, ou sem terminal que escreva: nao foi esta sessao.
-  if (incertos.length === 0 || !bashEscreveu) process.exit(0)
+  if (incertos.length === 0 || !bashEscreveu) sairSalvoNumeros()
 }
 
 const incerto = certos.length === 0
@@ -210,7 +269,7 @@ const novidades = incerto ? incertos : certos
 const estadoMexido = mexidos.some(c => c.toLowerCase() === DOC_ESTADO)
 
 // Nada por commitar e o estado ja registrado: o ciclo fechou. Sai calado.
-if (agora.length === 0 && estadoMexido) process.exit(0)
+if (agora.length === 0 && estadoMexido) sairSalvoNumeros()
 
 const lista = novidades.slice(0, 12).map(c => `  - ${c}`).join('\n')
 const resto = novidades.length > 12 ? `\n  ...e mais ${novidades.length - 12}` : ''
@@ -221,7 +280,8 @@ if (estadoMexido) {
     systemMessage:
       'Lembrete do fechar-ciclo: docs/00-estado-atual.md ja foi atualizado, mas ' +
       'o trabalho ainda nao foi registrado. Falta commit descritivo em portugues ' +
-      'e push para claude/law-firm-ai-automation-6pwaug.',
+      'e push para claude/law-firm-ai-automation-6pwaug.' +
+      (avisoNumeros ? `\n\n${avisoNumeros}` : ''),
   })
 }
 
@@ -248,4 +308,6 @@ const motivo =
   'Se a mudanca for mesmo irrelevante (rascunho, teste descartavel), diga isso ao ' +
   'usuario em uma frase e pare — nao ha nada a registrar.'
 
-responder(BLOQUEAR ? { decision: 'block', reason: motivo } : { systemMessage: motivo })
+const textoFinal = motivo + (avisoNumeros ? `\n\n---\n\n${avisoNumeros}` : '')
+
+responder(BLOQUEAR ? { decision: 'block', reason: textoFinal } : { systemMessage: textoFinal })

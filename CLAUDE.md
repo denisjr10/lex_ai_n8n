@@ -41,12 +41,16 @@ Estas não se renegociam sem decisão formal registrada. Se uma tarefa parecer e
 
 O projeto opera hoje sobre uma **cota de teste**, liberada pelo suporte do Escavador Business:
 
+🔴 **A cota de teste EXPIROU em 01/09/2026. O saldo hoje é R$ 0,00** — o dinheiro não gasto evaporou, porque saldo de teste não vira crédito. **Nenhuma chamada à API do Escavador é possível hoje**, e um `403` do fornecedor significa saldo bloqueado, não problema de rede nem de credencial.
+
+**O saldo não é escrito aqui.** Ele mora no cabeçalho de [`docs/06-orcamento-de-chamadas-escavador.md`](docs/06-orcamento-de-chamadas-escavador.md), que é a sede única — e o hook `estado-do-repo.mjs` lê de lá e entrega no início de cada sessão. Até 09/09 o número estava copiado à mão aqui, no hook e em mais dois documentos, todos divergentes e todos desatualizados havia dias. Valor copiado é valor que envelhece.
+
 | Item | Valor |
 |---|---|
-| Saldo | **R$ 47,00** de R$ 50,00 — conferido no painel em 26/08 |
+| Saldo, validade, recarga | Ver o cabeçalho de `docs/06-orcamento-de-chamadas-escavador.md` |
 | Custo por requisição | **Varia por rota.** ~~R$ 3,00 plano~~ — o suporte afirmou tarifa plana, a medição desmentiu: R$ 0,05, R$ 2,95 e R$ 0,00 no mesmo dia (D-108) |
-| Teto de requisições | **Não existe** (D-119). 18 requisições feitas com o saldo intacto — a cota é de dinheiro, e só |
-| Validade | **Até 01/09/2026**, lido no painel |
+| Teto de requisições | **Não existe** (D-119). A cota é de dinheiro, e só |
+| ⚠️ Custo recorrente ativo | **Monitoramento `2813617`** — assinatura mensal criada em 26/08. **Remover até 22/09, e antes de qualquer recarga** |
 
 Não há recarga contratada. Uma recarga paga só acontece quando for **realmente necessária** — e essa é uma decisão do usuário, nunca uma consequência de uma chamada exploratória.
 
@@ -84,20 +88,27 @@ Trabalhe sempre em **`claude/law-firm-ai-automation-6pwaug`**. Envie com `git pu
 
 ## Ambiente
 
-**Rede** — o ambiente foi configurado em modo `Custom` liberando `*.escavador.com`, `*.atlassian.com`, `developer.atlassian.com` e `api.trello.com`. Se algum desses retornar 403, a sessão iniciou antes da mudança valer — avise o usuário.
+**Máquina** — Windows 11, em `C:\Users\denis\OneDrive\Documentos\GitHub\lex_ai_n8n`. PowerShell é o terminal principal, com Bash também disponível — cada um com a sua sintaxe. Node ≥ 22. O PostgreSQL de desenvolvimento sobe com `npm run banco:subir` (Docker, porta 5433).
 
-**SDK do Escavador** — `/workspace/` não persiste entre sessões. Para reler o SDK oficial (fonte primária útil no mapeamento):
+**Diagnóstico de `403`** — um 403 do Escavador **é saldo bloqueado**, e o corpo da resposta diz isso: `{"error":"Seu saldo está bloqueado. Faça uma recarga..."}`. Não repita a chamada e não rotacione token: avise o usuário (R-22). *Até 09/09 esta seção mandava ler qualquer 403 como "a sessão começou antes de a liberação de rede valer" — diagnóstico de um ambiente em nuvem que não é este, e que levava direto a repetir a chamada.*
+
+**SDK do Escavador** — o mapeamento já está concluído em `docs/mapeamento-escavador.md`. Se precisar reler a fonte oficial, clone em um diretório temporário desta máquina:
 
 ```bash
-GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 \
-  https://github.com/Escavador/escavador-python \
-  /workspace/escavador/escavador-python
+git clone --depth 1 https://github.com/Escavador/escavador-python
 ```
 
-Tráfego do GitHub usa proxy próprio e funciona independentemente da política de rede.
+**Acessos** — falta **apenas o Trello** (chave de API, token e segredo da aplicação), e ele virou bloqueador de E2 pela D-226.
 
-**Ainda sem acesso** — instância n8n do cliente, credenciais do Escavador e do Trello.
+- **n8n:** ✅ em uso desde 26/08. Chave em `demo/n8n.local`, instância `auto.criativeia.com.br` levantada em 05/09. ⚠️ A chave **não tem escopo** (R-38): alcança a instância inteira, com 194 workflows que não são deste projeto. Nada de operação destrutiva.
+- **Escavador:** ✅ token funcional. Mas a cota expirou — sem chamada possível.
 
-## O que este projeto ainda não é
+## Onde o projeto está
 
-Não existe código. O trabalho até aqui é de definição: diretrizes, notas técnicas e modelo de identidade. Fases 0 e 1. Não comece a implementar sem que a etapa correspondente tenha sido acordada com o usuário.
+**Fase 3 — construção.** Marcos 1, 2 e 3 fechados (fundação, chassi e auditoria), os três verificados.
+
+**Os números estão em [`docs/numeros.md`](docs/numeros.md)** — gerado por `node ferramentas/contar.mjs`, nunca escrito à mão. Não copie número de lá para outro documento: aponte. A revisão de 09/09 encontrou a pilha de decisões com cinco contagens diferentes, todas do mesmo dia, e nenhuma igual ao disco.
+
+O que **não** existe ainda, e é bom saber antes de propor trabalho: os dois servidores MCP, os dois SDKs e o Policy Gate são casca (`export {}`) — marcos 6, 7 e 9. O verificador de privilégio existe (`packages/mcp-core`); o servidor onde ele roda, não.
+
+**Não abra marco novo sem acordo com o usuário.** O estado corrente, com o próximo passo, está em `docs/00-estado-atual.md`; o que fazer agora, em `docs/17-plano-de-execucao.md`.
