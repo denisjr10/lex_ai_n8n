@@ -526,9 +526,19 @@ if (querJson) {
     process.exit(1)
   }
 
-  // Compara linha a linha, e ignora as linhas cujo valor não foi medido nesta
-  // execução (`—`). Sem isso, rodar com --sem-testes acusaria divergência
-  // falsa contra um documento gerado com os testes medidos.
+  // Compara linha a linha, e ignora a linha em que QUALQUER UM DOS DOIS LADOS
+  // esteja com `—`, que é como este arquivo escreve "não medido".
+  //
+  // Os dois lados, e não só um. O lado gerado cobre o caso óbvio: rodar com
+  // `--sem-testes` não pode acusar divergência contra um documento gerado com
+  // os testes medidos. O lado gravado cobre o inverso, que é menos óbvio e
+  // igualmente real: quem regravar o arquivo numa máquina sem Docker deixa as
+  // provas de banco como `—`, e a execução seguinte — com banco de pé — mediria
+  // "46 de 46" contra um travessão e apontaria uma divergência que não existe.
+  //
+  // Nos dois casos o certo é a mesma coisa: onde não houve medição, não há
+  // afirmação a conferir. O que garante as provas de banco não é esta
+  // comparação, é o `npm run verificar` — que falha por si só quando elas falham.
   const linhasNovas = novo.split('\n')
   const linhasAtuais = atual.split('\n')
   const divergentes = []
@@ -537,7 +547,7 @@ if (querJson) {
     const a = linhasNovas[i] ?? ''
     const b = linhasAtuais[i] ?? ''
     if (a === b) continue
-    if (a.includes('—')) continue // não medido agora: não afirma nada
+    if (a.includes('—') || b.includes('—')) continue
     divergentes.push({ linha: i + 1, gerado: a.trim(), gravado: b.trim() })
   }
 
