@@ -78,7 +78,7 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 | # | Item | Estado | Prova / próximo passo |
 |---|---|---|---|
-| 2.1 | **Travar a faixa A4 na carga** — `A4_DISPONIVEL = false` conferida em `definirFerramenta`, no mesmo padrão que a A3a já usa | 🔴 | **Próximo.** Hoje não existe ferramenta A4 nenhuma: a trava não incomoda ninguém agora e quebraria código depois. → **D-236** |
+| 2.1 | **Travar a faixa A4** enquanto o Policy Gate e a identidade nominal não existirem | 🔴 **Travado — precisa da sua escolha** | ⚠️ **A premissa do achado é falsa.** A revisão dizia *"hoje não existe ferramenta A4 nenhuma, a trava não incomoda ninguém"*. Existe: `testes/ajuda.mjs:94` declara `peticionar` como A4, e é o alicerce de toda a suíte do chassi. Implementada como a revisão pedia — recusa na **carga** —, ela derrubou **47 dos 118 testes**, porque o alicerce deixa de carregar. Revertida no mesmo turno; a árvore está verde. Ver a nota abaixo. → **D-236** |
 | 2.2 | **A sessão precisa chegar assinada**, e o chassi não pode aceitar objeto `Sessao` pronto vindo de fora. Trava de carga agora; implementação com o marco 9. **E corrigir o `13-chassi-marco-2.md`**, que declara concluída uma etapa que está pela metade | 🔴 | **Próximo.** Marco declarado pronto pela metade é pior que marco pendente. → **D-237** |
 | 2.3 | **`identidade_externa` e `reserva_orcamento`:** acrescentar `inquilino_id`, política por linha e chave composta, com a busca global de login virando função dedicada (`SECURITY DEFINER`), nomeada e auditável | 🟠 | Única que mexe no banco. Recomendação (a); a alternativa (b) é documentar o desvio com teste que o prove. **Aguarda sua escolha.** → **D-239** |
 | 2.4 | **`conferirPapel()` dentro de `abrirConexao`** — a conferência do papel deixou de ser opcional | ✅ | `bc954d6`. Importa porque a migração 010 não usa `FORCE ROW LEVEL SECURITY`: era disciplina, virou trava. → **D-240** |
@@ -110,6 +110,40 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 | 3.12 | Recalcular a **§9.5** com a base real (2 advogadas, não 5), separando fórmula genérica do número deste cliente | ⬜ |
 | 3.13 | Corrigir os **riscos com número derrubado**: R-40, R-21, R-72, R-41 e R-42 | ⬜ |
 | 3.14 | Dar **gancho operacional ao R-10 (OAB)**, com dono nomeado e data → **D-244** | ⬜ |
+
+---
+
+## Nota — o item 2.1 e o limite da analogia com a A3a
+
+A revisão recomendou travar a faixa A4 **na carga**, no mesmo padrão da A3a, com o
+argumento de que *"hoje não existe ferramenta A4 nenhuma, então a trava não
+incomoda ninguém"*. **Isso foi verificado em 09/09 e é falso.**
+
+`testes/ajuda.mjs:94` declara `peticionar` como A4, e essa ferramenta é o
+alicerce de toda a suíte do chassi. Com a trava na carga, o módulo de apoio para
+de carregar e **47 dos 118 testes caem** — inclusive os que exercitam a própria
+lógica de aprovação que a A4 existe para proteger. A trava foi escrita, medida e
+revertida no mesmo turno.
+
+**Por que a analogia não transfere.** A A3a é uma faixa que **dispensa** aprovação
+apoiada numa garantia inexistente: barrá-la na carga remove um caminho permissivo,
+e nada mais depende dela. A A4 é a faixa mais **restritiva** do projeto, e o
+caminho dela — aprovação, papel de advogado, identidade nominal, registro na
+auditoria — está implementado e coberto por testes. O furo é específico: **falta a
+reconsulta ao Policy Gate no ato de executar**, e a identificação nominal é hoje
+um campo de texto não vazio. Barrar a declaração desliga o caminho inteiro,
+inclusive a parte que funciona, e cega os testes que a cobrem.
+
+**As saídas, e a recomendação.** Trava na **execução** em vez da carga: a faixa
+continua declarável, e `executarChamada` recusa enquanto `A4_DISPONIVEL` for
+falso. Isso ataca exatamente o furo medido — nenhum ato com efeito jurídico sai
+sem a reconsulta — e mantém vivos o alicerce e a cobertura. A alternativa fiel à
+recomendação original exige refazer o alicerce dos testes, e traz o risco de
+perder cobertura da semântica A4 no caminho.
+
+**Isto vale para o 2.2 também:** ele tem a mesma forma — trava de carga proposta
+pela revisão para a sessão assinada — e merece a mesma pergunta antes de virar
+código.
 
 ---
 
