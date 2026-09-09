@@ -33,23 +33,23 @@
 
 | O quê | Quanto |
 |---|---|
-| Documentos escritos em `docs/` | **22** — sem contar este, que é gerado |
+| Documentos escritos em `docs/` | **23** — sem contar este, que é gerado |
 | Requisitos funcionais (RF) | **61** |
 | Requisitos não funcionais (RNF) | **19** |
-| Riscos registrados (§15) | **83** — o maior é R-83 |
+| Riscos registrados (§15) | **88** — o maior é R-88 |
 
 ## Decisões (§13 de `01-diretrizes-gerais.md`)
 
-**233 linhas**, e o maior identificador é D-233.
+**244 linhas**, e o maior identificador é D-244.
 
 | Estado | Quantas |
 |---|---|
-| 🟡 Proposta | **191** |
+| 🟡 Proposta | **201** |
 | ✅ Confirmada | **30** |
 | ✅ Resolvida | **5** |
-| 🔴 Em aberto | **3** |
+| 🔴 Em aberto | **4** |
 | ❌ Derrubada / Recusada | **2** |
 | 🔄 Revisada | **1** |
 | ✅ Feita | **1** |
-| **Total** | **233** |
+| **Total** | **244** |
 

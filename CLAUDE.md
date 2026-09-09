@@ -8,7 +8,8 @@ Leia, nesta ordem:
 
 1. **`docs/00-estado-atual.md`** — onde o projeto está agora, o que está pendente, qual o próximo passo. **Sempre comece por aqui.**
 2. **`docs/01-diretrizes-gerais.md`** — escopo, princípios, arquitetura, matriz de privilégios, registro de decisões (§13) e riscos (§15).
-3. Os demais documentos conforme a tarefa.
+3. **`docs/20-revisao-geral.md`** — o roteiro vivo da revisão de 09/09. **Antes de trabalhar num item dele, leia a linha do item; ao terminar, marque na mesma hora.** É o que sobrevive a um `/clear`.
+4. Os demais documentos conforme a tarefa.
 
 A conversa anterior não vem junto numa sessão nova. **Os documentos são a memória do projeto** — eles estão completos e são a fonte da verdade.
 
