@@ -42,7 +42,7 @@ Com o chassi no caminho obrigatório, **é impossível escrever uma ferramenta q
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | Correlação (`requisicao_id`) | ✅ marco 2 |
-| 2 | **Sessão** — validade e lista de revogação | ✅ marco 2 |
+| 2 | **Sessão** — validade e lista de revogação | ✅ marco 2 — e **só isso**: a assinatura do token é do marco 9 (§8), e a `Sessao` chega pronta de quem chama (**D-237**) |
 | 3 | Inquilino e credencial | 🟡 trava mínima; credencial no marco 6 |
 | 4 | **Perfil** — a ferramenta está exposta a esta sessão? | ✅ marco 2 |
 | 5 | **Escopo** — a sessão tem direito a esta categoria? | ✅ marco 2 |

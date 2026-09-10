@@ -22,6 +22,8 @@
  */
 
 import {
+  VERIFICACAO_DE_ASSINATURA_DISPONIVEL,
+  type OrigemDaSessao,
   ehErro,
   erroInterno,
   exigeAprovacao,
@@ -171,6 +173,15 @@ export interface Chamada {
 }
 
 export interface ConfiguracaoDoChassi {
+  /**
+   * De onde veio a sessão — e é **obrigatório** de propósito (D-237).
+   *
+   * Não tem valor padrão, e não vai ganhar um. Um padrão aqui seria a lacuna
+   * voltando a ser invisível: quem montasse o chassi sem pensar herdaria a
+   * resposta mais conveniente, que é justamente a que ninguém quer descobrir
+   * em produção. Sem o campo, o chassi recusa a chamada.
+   */
+  readonly origem_da_sessao: OrigemDaSessao;
   readonly ferramentas: ReadonlyMap<string, Ferramenta<Esquema, unknown>>;
   readonly perfis: ReadonlyMap<string, ReadonlySet<string>>;
   readonly auditoria: Auditoria;
@@ -248,6 +259,36 @@ export async function executarChamada(
   };
 
   // -- Etapa 2: sessão ------------------------------------------------------
+  //
+  // Antes de conferir validade e revogação, uma pergunta que a Spec §4.2 supõe
+  // respondida e não está: esta sessão foi VERIFICADA, ou só recebida?
+  //
+  // O chassi aceita um objeto `Sessao` pronto de quem chama. Enquanto for
+  // assim, quem chama decide o próprio privilégio — Regra 1 ao contrário. A
+  // correção de verdade é o marco 9: token assinado pelo Policy Gate, e a
+  // `Sessao` construída aqui dentro depois de conferir assinatura e emissor.
+  //
+  // Até lá, o que dá para fazer é impedir que a lacuna siga invisível e que
+  // alguém afirme uma garantia que não existe (D-237).
+  {
+    trilha.etapas.push('origem_da_sessao');
+    if (cfg.origem_da_sessao === undefined) {
+      return await encerrar(
+        'sessao',
+        erroInterno('a configuração do chassi não declara de onde vem a sessão, e não há padrão: sem a declaração, nada executa'),
+      );
+    }
+    if (cfg.origem_da_sessao === 'verificada' && !VERIFICACAO_DE_ASSINATURA_DISPONIVEL) {
+      // Declarar 'verificada' hoje é afirmar o que o chassi não sabe fazer. A
+      // recusa protege contra o pior caso: um servidor futuro que declare
+      // verificação por otimismo e passe a parecer seguro sem ser.
+      return await encerrar(
+        'sessao',
+        erroInterno('a configuração declara sessão verificada, e o chassi ainda não sabe conferir assinatura de token (Spec §4.2, marco 9)'),
+      );
+    }
+  }
+
   {
     const parar = await passo('sessao', etapaSessao(sessao, agora, revogacao));
     if (parar) return parar;

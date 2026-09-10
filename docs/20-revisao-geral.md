@@ -46,8 +46,8 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 ## Painel de execução
 
-**Fechados:** Bloco 1 inteiro (5 de 5) e 6 dos 10 itens do Bloco 2.
-**Próximo:** 2.2 — a sessão assinada, com a mesma forma de trava que o 2.1 acabou tendo.
+**Fechados:** Bloco 1 inteiro (5 de 5) e 7 dos 10 itens do Bloco 2.
+**Próximo:** 2.3 — o isolamento de `identidade_externa`, opção (a), que é a única que mexe no banco.
 
 ### BLOCO 0 — Antes da conversa com a Malu
 
@@ -79,7 +79,7 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 | # | Item | Estado | Prova / próximo passo |
 |---|---|---|---|
 | 2.1 | **Travar a faixa A4** enquanto o Policy Gate e a identidade nominal não existirem | ✅ **Feito, mas não como a revisão pediu** | Trava na **execução**, não na carga, por escolha do usuário em 09/09. `etapaAprovacao` recusa a A4 depois de conferir tudo o mais — assim "falta aprovação" e "estagiário não aprova" continuam respondendo o que é mais útil, e a trava só pega o caminho feliz. 117 testes, dois novos. ⚠️ **A premissa do achado original era falsa.** A revisão dizia *"hoje não existe ferramenta A4 nenhuma, a trava não incomoda ninguém"*. Existe: `testes/ajuda.mjs:94` declara `peticionar` como A4, e é o alicerce de toda a suíte do chassi. Implementada como a revisão pedia — recusa na **carga** —, ela derrubou **47 dos 118 testes**, porque o alicerce deixa de carregar. Revertida no mesmo turno; a árvore está verde. Ver a nota abaixo. → **D-236** |
-| 2.2 | **A sessão precisa chegar assinada**, e o chassi não pode aceitar objeto `Sessao` pronto vindo de fora. Trava de carga agora; implementação com o marco 9. **E corrigir o `13-chassi-marco-2.md`**, que declara concluída uma etapa que está pela metade | 🔴 | **Próximo.** Marco declarado pronto pela metade é pior que marco pendente. → **D-237** |
+| 2.2 | **A sessão precisa chegar assinada**, e o chassi não pode aceitar objeto `Sessao` pronto vindo de fora | ✅ **Feito — a trava possível, não a definitiva** | A verificação de assinatura é do marco 9 e depende do Policy Gate emitir o token. O que dava para travar hoje foi feito: `ConfiguracaoDoChassi` ganhou o campo **obrigatório** `origem_da_sessao`, sem padrão — sem ele o chassi recusa a chamada —, e declarar `'verificada'` é recusado enquanto o chassi não souber conferir assinatura. A lacuna deixou de ser invisível e virou declaração escrita. 120 testes, três novos. ⚠️ **A segunda metade do achado era falsa:** o `13-chassi-marco-2.md` **não** declarava a etapa concluída — ele escopa a etapa 2 a *"validade e lista de revogação"* e defere a assinatura ao marco 9 na §8. Quem superdeclarava era a **Spec**, §4.2 e §5.3, e foi lá que a correção entrou. → **D-237** |
 | 2.3 | **`identidade_externa` e `reserva_orcamento`:** acrescentar `inquilino_id`, política por linha e chave composta, com a busca global de login virando função dedicada (`SECURITY DEFINER`), nomeada e auditável | 🟠 | Única que mexe no banco. Recomendação (a); a alternativa (b) é documentar o desvio com teste que o prove. **Aguarda sua escolha.** → **D-239** |
 | 2.4 | **`conferirPapel()` dentro de `abrirConexao`** — a conferência do papel deixou de ser opcional | ✅ | `bc954d6`. Importa porque a migração 010 não usa `FORCE ROW LEVEL SECURITY`: era disciplina, virou trava. → **D-240** |
 | 2.5 | **Tetos de tamanho no receptor de callbacks** — teor 200 KB, nome 300 caracteres, 200 envolvidos, profundidade de JSON 32. Estourar **não descarta**: grava com estado `truncado` e alerta | 🟠 | Descartar em silêncio é o defeito que a migração 013 acabou de consertar. → **D-241** |
@@ -173,7 +173,15 @@ Dizer o que fica de fora é parte da proposta:
 
 A revisão rodou **seis frentes em agentes paralelos**, e a **verificação adversarial não aconteceu**: a lente que pergunta *"isto já está tratado em outro lugar?"* morreu junto com o limite de sessão. Um achado já caiu por isso — o **2.9**, que era a D-155, decisão consciente e com trava mecânica.
 
-**Consequência prática:** todo item ainda não marcado ✅ merece a pergunta *"isto já está tratado?"* antes de virar trabalho. Os itens marcados ✅ passaram por essa conferência ao serem implementados.
+**Já são três os achados que não se sustentaram**, e os três pela mesma causa:
+
+| Achado | O que a revisão disse | O que o disco disse |
+|---|---|---|
+| 2.9 | A Demo B afirma revisão por advogado que não acontece | É a **D-155**, decisão consciente com trava mecânica |
+| 2.1 | *"Hoje não existe ferramenta A4 nenhuma"* | `testes/ajuda.mjs:94` declara uma, e é o alicerce da suíte |
+| 2.2 | O `13-chassi-marco-2.md` declara a etapa 2 concluída | Ele escopa a etapa a *"validade e revogação"* e defere a assinatura ao marco 9 |
+
+**Consequência prática:** todo item ainda não marcado ✅ merece a pergunta *"isto já está tratado?"* antes de virar trabalho — e a pergunta precisa ser respondida **lendo o arquivo**, não relendo o achado. Os itens marcados ✅ passaram por essa conferência ao serem implementados.
 
 Os laudos brutos dos subagentes e o relatório original estão **fora do repositório**, em `Documentos\Claude\recuperado-sessao-2026-09-09\` — recuperados do diretório temporário do sistema depois de um `/clear`, e mantidos fora do Git por conterem caminhos e saídas de máquina.
 

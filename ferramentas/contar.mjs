@@ -539,6 +539,29 @@ if (querJson) {
   // Nos dois casos o certo é a mesma coisa: onde não houve medição, não há
   // afirmação a conferir. O que garante as provas de banco não é esta
   // comparação, é o `npm run verificar` — que falha por si só quando elas falham.
+  /** A linha traz um campo NÃO MEDIDO?
+   *
+   *  Só vale o travessão que ocupa a **célula de valor inteira** — `—` ou
+   *  `**—**` —, nunca o que aparece como pontuação no meio de uma frase.
+   *
+   *  A distinção não é preciosismo de estilo. A regra anterior era
+   *  `linha.includes('—')`, e o travessão é sinal de pontuação comum em
+   *  português: três linhas de dados o usavam na descrição — pacotes do
+   *  monorepo, documentos escritos e riscos registrados — e **as três ficavam
+   *  fora da conferência**. Foi assim que a contagem de documentos passou dias
+   *  em 23 com 24 no disco, sem a barreira notar.
+   *
+   *  A exceção era mais larga que o caso que ela existia para cobrir, e uma
+   *  exceção larga demais numa barreira não é um detalhe: é a barreira
+   *  parcialmente desligada, com aparência de ligada.
+   */
+  const naoMedido = linha => {
+    const celulas = linha.split('|')
+    if (celulas.length < 3) return false
+    const valor = celulas[celulas.length - 2].trim()
+    return valor === '—' || valor === '**—**'
+  }
+
   const linhasNovas = novo.split('\n')
   const linhasAtuais = atual.split('\n')
   const divergentes = []
@@ -547,7 +570,7 @@ if (querJson) {
     const a = linhasNovas[i] ?? ''
     const b = linhasAtuais[i] ?? ''
     if (a === b) continue
-    if (a.includes('—') || b.includes('—')) continue
+    if (naoMedido(a) || naoMedido(b)) continue
     divergentes.push({ linha: i + 1, gerado: a.trim(), gravado: b.trim() })
   }
 

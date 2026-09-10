@@ -22,10 +22,10 @@
 | Tabelas criadas | **23** |
 | Tabelas com política por linha | **18** de 23 |
 | Pacotes do monorepo | **9** — 4 implementados, 5 ainda casca |
-| Testes passando | **117** |
-| Provas de regra (exige banco) | **46 de 46** |
-| Provas de auditoria (exige banco) | **23 de 23** |
-| Linhas versionadas | TypeScript 3812 · SQL 1759 · Node 13010 |
+| Testes passando | **120** |
+| Provas de regra (exige banco) | **—** |
+| Provas de auditoria (exige banco) | **—** |
+| Linhas versionadas | TypeScript 3893 · SQL 1759 · Node 13098 |
 
 **Pacotes ainda sem uma linha executável:** `packages/sdk-escavador` · `packages/sdk-trello` · `mcp-servers/escavador` · `mcp-servers/trello` · `services/policy-gate`.
 
@@ -33,10 +33,10 @@
 
 | O quê | Quanto |
 |---|---|
-| Documentos escritos em `docs/` | **23** — sem contar este, que é gerado |
+| Documentos escritos em `docs/` | **24** — sem contar este, que é gerado |
 | Requisitos funcionais (RF) | **61** |
 | Requisitos não funcionais (RNF) | **19** |
-| Riscos registrados (§15) | **88** — o maior é R-88 |
+| Riscos registrados (§15) | **89** — o maior é R-89 |
 
 ## Decisões (§13 de `01-diretrizes-gerais.md`)
 

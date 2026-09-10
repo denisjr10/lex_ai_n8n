@@ -51,6 +51,70 @@ test('sessão revogada não passa, mesmo dentro da validade', async () => {
   assert.equal(base.fornecedor.estado.chamadas, 0);
 });
 
+// ---------------------------------------------------------------------------
+// De onde veio a sessão — D-237
+//
+// O chassi aceita um objeto `Sessao` pronto de quem chama, e acredita nele.
+// Enquanto for assim, quem chama decide o próprio privilégio: a Regra 1 ao
+// contrário. A correção de verdade é o marco 9 — token assinado pelo Policy
+// Gate, e a `Sessao` construída aqui dentro. Até lá, o que dá para travar é a
+// lacuna ficar invisível, e alguém afirmar garantia que não existe.
+// ---------------------------------------------------------------------------
+
+test('configuração que não declara de onde vem a sessão não executa nada', async () => {
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const { origem_da_sessao, ...semDeclaracao } = base.cfg;
+
+  const r = await executarChamada(
+    semDeclaracao,
+    chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao),
+  );
+
+  // Não há padrão, e não vai haver: um padrão devolveria a lacuna ao estado
+  // invisível, com quem montasse o chassi sem pensar herdando a resposta mais
+  // conveniente. Falha fecha (Regra 5).
+  assert.equal(ehErro(r), true);
+  assert.equal(r.erro.codigo, 'erro_interno');
+  assert.match(r.erro.mensagem_agente, /de onde vem a sessão|declara/i);
+  assert.equal(base.fornecedor.estado.chamadas, 0, 'a recusa não pode ter tocado o fornecedor');
+});
+
+test('declarar a sessão como VERIFICADA é recusado enquanto o chassi não souber conferir assinatura', async () => {
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  const cfg = { ...base.cfg, origem_da_sessao: 'verificada' };
+
+  const r = await executarChamada(
+    cfg,
+    chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao),
+  );
+
+  // A Spec §4.2 descreve a etapa 2 como "valida assinatura e validade do token",
+  // e a §5.3 detalha a validação offline. Nada disso existe: `etapaSessao`
+  // confere data e lista de revogação, e mais nada.
+  //
+  // A recusa protege contra o pior caso — um servidor futuro que declare
+  // verificação por otimismo e passe a PARECER seguro sem ser. Afirmação que o
+  // chassi não cumpre é pior que lacuna aberta.
+  assert.equal(ehErro(r), true);
+  assert.equal(r.erro.codigo, 'erro_interno');
+  assert.match(r.erro.mensagem_agente, /assinatura/i);
+  assert.equal(base.fornecedor.estado.chamadas, 0);
+});
+
+test('sessão declarada como confiada pelo chamador executa — e é o estado real de hoje', async () => {
+  // O caminho que todo o resto da suíte usa, aqui explícito: a única declaração
+  // que o chassi aceita hoje é a que diz a verdade sobre ele.
+  const base = montar({ escopos: ['escavador:processo:read:any'] });
+  assert.equal(base.cfg.origem_da_sessao, 'confiada_pelo_chamador');
+
+  const r = await executarChamada(
+    base.cfg,
+    chamada('consultar_processo', { numero_cnj: CNJ_DA_CARTEIRA }, base.sessao),
+  );
+
+  assert.equal(ehErro(r), false);
+});
+
 test('data ilegível é sessão inválida, não sessão eterna', () => {
   const boa = {
     emitida_em: '2026-08-27T11:55:00.000Z',

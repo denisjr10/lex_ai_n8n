@@ -164,7 +164,7 @@ try {
   secao('2. Uma RECUSA atravessa o chassi e vira registro');
   // -------------------------------------------------------------------------
   {
-    const cfg = { ferramentas: montarFerramentas(), perfis: PERFIS, auditoria };
+    const cfg = { origem_da_sessao: 'confiada_pelo_chamador', ferramentas: montarFerramentas(), perfis: PERFIS, auditoria };
     const trilha = { etapas: [], executou: false };
     // Sessão SEM escopo nenhum: recusa na etapa `escopo`.
     const r = await executarChamada(cfg, {
@@ -189,7 +189,7 @@ try {
   secao('3. Um SUCESSO atravessa o chassi e vira registro');
   // -------------------------------------------------------------------------
   {
-    const cfg = { ferramentas: montarFerramentas(), perfis: PERFIS, auditoria };
+    const cfg = { origem_da_sessao: 'confiada_pelo_chamador', ferramentas: montarFerramentas(), perfis: PERFIS, auditoria };
     const r = await executarChamada(cfg, {
       ferramenta: 'consultar_processo',
       parametros: { numero_cnj: CNJ },
@@ -368,6 +368,7 @@ try {
     // é um dublê que lança: é a falha que de fato acontece às três da manhã.
     const morta = abrirConexao({ ...lerAmbiente(), porta: 59999, prazoMs: 1500 });
     const cfg = {
+      origem_da_sessao: 'confiada_pelo_chamador',
       ferramentas: montarFerramentas(),
       perfis: PERFIS,
       auditoria: criarAuditoriaPostgres(morta),

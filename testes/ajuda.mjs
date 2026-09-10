@@ -155,7 +155,7 @@ export function montar(ajustesDaSessao = {}) {
     fornecedor,
     auditoria,
     aprovacoes,
-    cfg: { ferramentas: criarFerramentas(fornecedor), perfis: PERFIS, auditoria, aprovacoes },
+    cfg: { origem_da_sessao: 'confiada_pelo_chamador', ferramentas: criarFerramentas(fornecedor), perfis: PERFIS, auditoria, aprovacoes },
     sessao: sessao(ajustesDaSessao),
   };
 }

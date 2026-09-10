@@ -49,6 +49,46 @@ export interface Sessao {
   readonly expira_em: string;
 }
 
+/**
+ * De onde veio a `Sessao` que o chassi recebeu.
+ *
+ * Existe porque hoje **não existe a outra opção**: o chassi recebe um objeto
+ * `Sessao` já montado por quem chama, e acredita nele. Quem chama decide o
+ * próprio privilégio — que é a Regra Inegociável 1 ao contrário.
+ *
+ * O campo não conserta isso. O que ele faz é impedir que a lacuna continue
+ * **invisível**: quem monta o chassi é obrigado a declarar, por escrito, que a
+ * sessão chegou confiada em vez de verificada. Suposição declarada é suposição
+ * que alguém pode encontrar; suposição implícita atravessa marco após marco.
+ */
+export type OrigemDaSessao =
+  /** O chassi conferiu assinatura e emissor do token, e construiu a `Sessao`. */
+  | 'verificada'
+  /** Quem chamou entregou a `Sessao` pronta, e o chassi acreditou. */
+  | 'confiada_pelo_chamador';
+
+/**
+ * O chassi já sabe verificar a assinatura de um token de sessão?
+ *
+ * **Não.** A Spec §4.2 descreve a etapa 2 como *"valida assinatura e validade do
+ * token de sessão"*, e a §5.3 explica em detalhe por que a validação é offline.
+ * Nada disso existe: `etapaSessao` confere data de expiração e lista de
+ * revogação, e mais nada. Uma busca por `jwt`, `hmac`, `verify(` ou `signature`
+ * em todo o repositório não devolve implementação nenhuma.
+ *
+ * A consequência é concreta: quem constrói uma `Sessao` com o papel que quiser
+ * e os escopos que quiser passa por todas as etapas seguintes. As etapas 4 a 8
+ * conferem com rigor um documento que ninguém autenticou.
+ *
+ * Enquanto for `false`, declarar `origem_da_sessao: 'verificada'` é recusado —
+ * não por desconfiança de quem declara, mas porque seria uma afirmação que o
+ * chassi não tem como cumprir, e afirmação assim é pior que lacuna aberta:
+ * parece garantia (D-237).
+ *
+ * Vira `true` no marco 9, junto com o Policy Gate que emite e assina o token.
+ */
+export const VERIFICACAO_DE_ASSINATURA_DISPONIVEL = false;
+
 export const SUJEITOS_VAZIOS: SujeitosAutorizados = Object.freeze({
   processos: Object.freeze([]) as readonly string[],
   documentos: Object.freeze([]) as readonly string[],
