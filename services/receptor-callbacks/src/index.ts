@@ -37,6 +37,13 @@
 
 export { chaveDoEvento, resumoDoTeor, semEnvelope } from './chave.js';
 export {
+  bytesDe,
+  cortarPorBytes,
+  cortarPorCaracteres,
+  LIMITES,
+  type Truncagem,
+} from './limites.js';
+export {
   normalizarEnvolvidoDoDiario,
   traduzirTipo,
   ADVOGADO_DE_NAO_VEM_PREENCHIDO,

@@ -18,6 +18,10 @@ import {
   lerPublicacaoDoDiario,
   normalizarEnvolvidoDoDiario,
   traduzirTipo,
+  bytesDe,
+  cortarPorBytes,
+  cortarPorCaracteres,
+  LIMITES,
 } from '@lex/receptor-callbacks';
 
 /** Um evento de diário com a forma real, sem dado de pessoa de verdade. */
@@ -204,4 +208,121 @@ test('🔴 teor idêntico em processos diferentes produz publicações diferente
 
   assert.equal(resumoDoTeor(a.teor), resumoDoTeor(b.teor), 'o teor é o mesmo, e isso é normal');
   assert.notEqual(a.id_externo, b.id_externo, 'e mesmo assim são publicações distintas');
+});
+
+
+// ---------------------------------------------------------------------------
+// Os tetos do conteúdo externo — D-241
+//
+// A Regra 4 diz que conteúdo externo é hostil, e até 10/09 ele entrava sem teto
+// nenhum. A regra que governa estes testes: ESTOURAR NÃO DESCARTA. O que passa
+// do teto é cortado e registrado, e a publicação segue para a base — descartar
+// por tamanho repetiria, pela outra ponta, o defeito da migração 013, em que
+// seis intimações de seis processos sumiram sem erro nenhum.
+// ---------------------------------------------------------------------------
+
+test('teor acima do teto é CORTADO, não descartado — e o tamanho original fica registrado', () => {
+  const gigante = 'a'.repeat(LIMITES.teor_bytes + 5000);
+  const pub = lerPublicacaoDoDiario(eventoDeDiario({ movimentacao: { conteudo: gigante } }));
+
+  assert.notEqual(pub, null, 'a publicação não pode ser recusada por tamanho');
+  assert.equal(bytesDe(pub.teor), LIMITES.teor_bytes);
+  assert.equal(pub.truncagem.teor_bytes, LIMITES.teor_bytes + 5000,
+    'o tamanho ORIGINAL é o que permite calibrar o teto depois');
+});
+
+test('teor dentro do teto passa intacto, e a truncagem fica vazia', () => {
+  const pub = lerPublicacaoDoDiario(eventoDeDiario());
+  assert.equal(pub.teor, 'Intimação da parte para manifestar-se no prazo legal.');
+  assert.deepEqual(pub.truncagem, {}, 'o caso normal não registra corte nenhum');
+});
+
+test('🔴 o corte por bytes não parte um caractere ao meio', () => {
+  // "ã" ocupa 2 bytes em UTF-8. Cortar no byte 1 produziria o caractere de
+  // substituição — defeito que só apareceria em nome com acento, que aqui é a
+  // maioria deles. O corte é por code point, e por isso sobra 1 byte.
+  const texto = 'ã'.repeat(10);
+  const cortado = cortarPorBytes(texto, 5);
+
+  assert.equal(cortado, 'ãã');
+  assert.equal(bytesDe(cortado), 4, 'prefere sobrar byte a partir caractere');
+  assert.equal(cortado.includes('\uFFFD'), false, 'nenhum caractere de substituição');
+});
+
+test('nome de envolvido acima do teto é cortado, e guarda-se o MAIOR', () => {
+  const evento = eventoDeDiario({
+    movimentacao: {
+      envolvidos: [
+        { nome: 'M'.repeat(400), envolvido_tipo: 'Polo Ativo', oab: null, advogado_de: null },
+        { nome: 'N'.repeat(900), envolvido_tipo: 'Polo Passivo', oab: null, advogado_de: null },
+        { nome: 'Fulano de Tal', envolvido_tipo: 'Polo Ativo', oab: null, advogado_de: null },
+      ],
+    },
+  });
+  const pub = lerPublicacaoDoDiario(evento);
+
+  assert.equal(pub.envolvidos.length, 3, 'ninguém foi descartado');
+  assert.equal([...pub.envolvidos[0].nome].length, LIMITES.nome_caracteres);
+  assert.equal([...pub.envolvidos[1].nome].length, LIMITES.nome_caracteres);
+  assert.equal(pub.envolvidos[2].nome, 'Fulano de Tal', 'quem cabia não foi tocado');
+
+  // O maior, e não o primeiro nem o último: é o que diz se o teto está perto
+  // ou longe da realidade.
+  assert.equal(pub.truncagem.nome_caracteres, 900);
+});
+
+test('lista de envolvidos acima do teto entra pela metade, com o total registrado', () => {
+  const muitos = Array.from({ length: LIMITES.envolvidos + 231 }, (_, i) => ({
+    nome: `Parte ${i}`,
+    envolvido_tipo: 'Polo Ativo',
+    oab: null,
+    advogado_de: null,
+  }));
+  const pub = lerPublicacaoDoDiario(eventoDeDiario({ movimentacao: { envolvidos: muitos } }));
+
+  assert.equal(pub.envolvidos.length, LIMITES.envolvidos);
+  assert.equal(pub.truncagem.envolvidos, LIMITES.envolvidos + 231);
+  // A publicação continua de pé: o teor é o que alimenta o alerta de prazo, e
+  // ele não se perde porque a lista de partes era absurda.
+  assert.equal(pub.teor, 'Intimação da parte para manifestar-se no prazo legal.');
+});
+
+test('🔴 JSON aninhado fundo não derruba a pilha, e a marca diz que houve corte', () => {
+  // Sem teto, esta é a entrega que trava o receptor ANTES de ele registrar
+  // qualquer coisa — e um receptor que morre antes de registrar não deixa nem o
+  // sinal de que foi atacado.
+  let fundo = { fim: true };
+  for (let i = 0; i < 5000; i++) fundo = { dentro: fundo };
+
+  const marca = { excedeu: false };
+  const chave = chaveDoEvento({ event: 'x', payload: fundo }, marca);
+
+  assert.equal(typeof chave, 'string');
+  assert.equal(chave.length, 64);
+  assert.equal(marca.excedeu, true);
+});
+
+test('a mesma entrega funda produz a MESMA chave — cortar não pode quebrar a idempotência', () => {
+  // A marca de profundidade é texto fixo de propósito. Se variasse, cada
+  // reentrega do mesmo fato viraria evento novo, e a reentrega é o caso comum.
+  const montar = () => {
+    let fundo = { fim: true };
+    for (let i = 0; i < 100; i++) fundo = { dentro: fundo };
+    return { event: 'x', uuid: 'entrega-diferente', payload: fundo };
+  };
+
+  assert.equal(chaveDoEvento(montar()), chaveDoEvento(montar()));
+});
+
+test('conteúdo raso não aciona a marca de profundidade', () => {
+  const marca = { excedeu: false };
+  chaveDoEvento(eventoDeDiario(), marca);
+  assert.equal(marca.excedeu, false, 'o payload real do Escavador não passa de 6 níveis');
+});
+
+test('cortarPorCaracteres conta caracteres, não unidades de código', () => {
+  // Emoji fora do plano básico ocupa duas unidades em JavaScript. Contar por
+  // `.length` cortaria um deles ao meio.
+  assert.equal(cortarPorCaracteres('👩‍⚖️abc', 50), '👩‍⚖️abc');
+  assert.equal(cortarPorCaracteres('abcdef', 3), 'abc');
 });

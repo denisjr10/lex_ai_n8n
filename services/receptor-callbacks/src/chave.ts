@@ -22,6 +22,8 @@
 
 import { createHash } from 'node:crypto';
 
+import { LIMITES } from './limites.js';
+
 /**
  * Campos que pertencem ao ENVELOPE, não ao fato. Saem antes do resumo.
  *
@@ -40,12 +42,41 @@ const ENVELOPE = new Set(['uuid']);
  * mudado. Um resumo sensível à ordem produziria chaves diferentes para fatos
  * iguais — que é exatamente o defeito que este arquivo existe para não ter.
  */
-function estavel(v: unknown): unknown {
+/**
+ * Marca que substitui a subárvore que passou do teto de profundidade.
+ *
+ * É texto fixo, e isso é o que mantém a chave de idempotência **estável**: a
+ * mesma entrega, cortada no mesmo lugar, produz a mesma chave, então a
+ * reentrega continua sendo reconhecida como repetida. Uma marca que variasse —
+ * com o nível, com o conteúdo — transformaria cada reentrega em evento novo.
+ */
+const MARCA_DE_PROFUNDIDADE = '[profundidade excedida]';
+
+/**
+ * Ordena as chaves e limita o aninhamento.
+ *
+ * ⚠️ O teto de profundidade não é economia de memória: é o que impede a
+ * recursão de derrubar a pilha (D-241). Esta função roda em TODA entrega,
+ * **antes** de qualquer gravação — um objeto aninhado de propósito travava o
+ * receptor no ponto em que ele ainda não tinha registrado nada, e um receptor
+ * que morre antes de registrar não deixa nem o sinal de que foi atacado.
+ *
+ * Com o teto, a recursão não passa de `LIMITES.profundidade` quadros, aconteça
+ * o que acontecer com o que chega de fora.
+ *
+ * `marca.excedeu` é como o chamador fica sabendo que houve corte, sem que esta
+ * função precise devolver duas coisas.
+ */
+function estavel(v: unknown, nivel = 0, marca?: { excedeu: boolean }): unknown {
   if (v === null || typeof v !== 'object') return v;
-  if (Array.isArray(v)) return v.map(estavel);
+  if (nivel >= LIMITES.profundidade) {
+    if (marca) marca.excedeu = true;
+    return MARCA_DE_PROFUNDIDADE;
+  }
+  if (Array.isArray(v)) return v.map((item) => estavel(item, nivel + 1, marca));
   const o = v as Record<string, unknown>;
   const saida: Record<string, unknown> = {};
-  for (const k of Object.keys(o).sort()) saida[k] = estavel(o[k]);
+  for (const k of Object.keys(o).sort()) saida[k] = estavel(o[k], nivel + 1, marca);
   return saida;
 }
 
@@ -64,8 +95,13 @@ export function semEnvelope(corpo: Readonly<Record<string, unknown>>): Record<st
  * passariam pelo `if` as duas, e a corrida só aparece em produção, no dia em
  * que o fornecedor reenviar em paralelo.
  */
-export function chaveDoEvento(corpo: Readonly<Record<string, unknown>>): string {
-  return createHash('sha256').update(JSON.stringify(estavel(semEnvelope(corpo)))).digest('hex');
+export function chaveDoEvento(
+  corpo: Readonly<Record<string, unknown>>,
+  marca?: { excedeu: boolean },
+): string {
+  return createHash('sha256')
+    .update(JSON.stringify(estavel(semEnvelope(corpo), 0, marca)))
+    .digest('hex');
 }
 
 /** Resumo de um texto qualquer — o `hash` de `publicacao`, sobre o teor. */

@@ -38,6 +38,14 @@ import type { Auditoria } from '@lex/mcp-core';
 import { exigirUuid, type Conexao } from '@lex/auditoria';
 
 import { chaveDoEvento, resumoDoTeor } from './chave.js';
+import {
+  bytesDe,
+  cortarPorBytes,
+  cortarPorCaracteres,
+  LIMITES,
+  montarTruncagem,
+  type Truncagem,
+} from './limites.js';
 import { normalizarEnvolvidoDoDiario, type EnvolvidoNormalizado } from './envolvido.js';
 
 export type Fornecedor = 'escavador' | 'trello';
@@ -87,12 +95,20 @@ export interface ResultadoDaGravacao {
   /** A publicação que ESTA chamada gravou. `null` quando não gravou nenhuma. */
   readonly publicacao_id: string | null;
   readonly envolvidos: number;
+  /**
+   * O que foi cortado por estourar teto, e por quanto. `null` no caso normal.
+   *
+   * Sai no resultado, e não só no banco, porque quem chama é o recolhimento —
+   * e é o relatório dele que alguém lê para decidir se precisa investigar. Um
+   * corte que só existisse numa coluna seria um corte que ninguém vê.
+   */
+  readonly truncagem: Truncagem | null;
 }
 
 const INSERIR_EVENTO = `
   INSERT INTO evento_callback
-    (inquilino_id, fornecedor, chave_evento, tipo, recebido_em, origem_valida, payload_ref, estado)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    (inquilino_id, fornecedor, chave_evento, tipo, recebido_em, origem_valida, payload_ref, estado, truncagem)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   ON CONFLICT (inquilino_id, fornecedor, chave_evento)
     DO UPDATE SET tentativas = evento_callback.tentativas + 1
   RETURNING id, tentativas, (xmax = 0) AS inserido
@@ -138,6 +154,8 @@ interface PublicacaoLida {
   readonly pagina: number | null;
   readonly link_fonte: string | null;
   readonly envolvidos: readonly EnvolvidoNormalizado[];
+  /** O que estourou teto nesta publicação. Objeto vazio quando nada estourou. */
+  readonly truncagem: Truncagem;
 }
 
 function texto(v: unknown): string | null {
@@ -166,14 +184,41 @@ export function lerPublicacaoDoDiario(corpo: Readonly<Record<string, unknown>>):
   const origem = (diario['origem'] ?? {}) as Record<string, unknown>;
   const processo = (mov['processo'] ?? {}) as Record<string, unknown>;
 
-  const teor = texto(mov['conteudo']);
+  const teorCru = texto(mov['conteudo']);
   const dataPub = texto(diario['data_publicacao']);
-  if (!teor || !dataPub) return null;
+  if (!teorCru || !dataPub) return null;
+
+  // OS TETOS. Nada aqui recusa a publicação — o que estoura é cortado e
+  // registrado, e a publicação segue para a base (D-241). Descartar por tamanho
+  // repetiria, pela outra ponta, o defeito que a migração 013 consertou.
+  const cortes: {
+    teor_bytes?: number;
+    nome_caracteres?: number;
+    envolvidos?: number;
+  } = {};
+
+  const teorBytes = bytesDe(teorCru);
+  const teor = teorBytes > LIMITES.teor_bytes
+    ? cortarPorBytes(teorCru, LIMITES.teor_bytes)
+    : teorCru;
+  if (teor !== teorCru) cortes.teor_bytes = teorBytes;
 
   const envolvidosCrus = Array.isArray(mov['envolvidos']) ? (mov['envolvidos'] as unknown[]) : [];
+  if (envolvidosCrus.length > LIMITES.envolvidos) cortes.envolvidos = envolvidosCrus.length;
+
   const envolvidos = envolvidosCrus
+    .slice(0, LIMITES.envolvidos)
     .map((e) => normalizarEnvolvidoDoDiario(e as Record<string, unknown>))
-    .filter((e): e is EnvolvidoNormalizado => e !== null);
+    .filter((e): e is EnvolvidoNormalizado => e !== null)
+    .map((e) => {
+      const nome = cortarPorCaracteres(e.nome, LIMITES.nome_caracteres);
+      if (nome === e.nome) return e;
+      // Guarda o MAIOR nome cortado: um número serve para calibrar o teto, e o
+      // maior é o que diz se o teto está perto ou longe da realidade.
+      const tamanho = [...e.nome].length;
+      if (tamanho > (cortes.nome_caracteres ?? 0)) cortes.nome_caracteres = tamanho;
+      return { ...e, nome };
+    });
 
   const id = inteiro(mov['id']);
 
@@ -191,6 +236,7 @@ export function lerPublicacaoDoDiario(corpo: Readonly<Record<string, unknown>>):
     pagina: inteiro(mov['pagina']),
     link_fonte: texto(mov['link_pdf']) ?? texto(mov['link']),
     envolvidos,
+    truncagem: cortes,
   };
 }
 
@@ -200,8 +246,28 @@ export async function gravarEntrega(
   entrega: EntregaDeCallback,
 ): Promise<ResultadoDaGravacao> {
   const inq = exigirUuid('inquilino_id', entrega.inquilino_id);
-  const chave = chaveDoEvento(entrega.corpo);
+
+  // A profundidade é medida ENQUANTO a chave é calculada, e não numa passada
+  // própria: a estabilização já percorre a árvore inteira, e uma segunda
+  // travessia só para contar níveis seria o dobro do trabalho sobre conteúdo
+  // que, por definição, pode ser hostil.
+  const marca = { excedeu: false };
+  const chave = chaveDoEvento(entrega.corpo, marca);
   const tipo = texto(entrega.corpo['event']) ?? 'desconhecido';
+
+  // A publicação é lida AQUI, antes do INSERT do evento, e a ordem é o ponto:
+  // é uma função pura, e ler antes permite gravar a truncagem na mesma linha
+  // em que o evento nasce. Ler depois obrigaria a um UPDATE — e um UPDATE que
+  // falhasse deixaria o evento gravado dizendo que nada foi cortado.
+  //
+  // Só se a origem conferir. Entrega não autenticada não vira publicação, e
+  // gastar trabalho de leitura com ela seria fazer o que ela quer.
+  const pub = entrega.origem_valida ? lerPublicacaoDoDiario(entrega.corpo) : null;
+
+  const truncagem = montarTruncagem({
+    ...(pub?.truncagem ?? {}),
+    ...(marca.excedeu ? { profundidade: LIMITES.profundidade } : {}),
+  });
 
   const resultado = await c.noInquilino(inq, async (cliente) => {
     const ev = await cliente.query(INSERIR_EVENTO, [
@@ -212,7 +278,12 @@ export async function gravarEntrega(
       entrega.recebido_em,
       entrega.origem_valida,
       entrega.payload_ref ?? null,
+      // O estado continua sendo o do CICLO DE VIDA. Truncagem não entra aqui:
+      // um evento marcado 'truncado' sairia do índice de não processados e
+      // nunca seria processado — o remédio contra o descarte em silêncio
+      // viraria uma forma nova de descarte em silêncio (migração 015).
       entrega.origem_valida ? 'recebido' : 'ignorado',
+      truncagem === null ? null : JSON.stringify(truncagem),
     ]);
 
     const linha = ev.rows[0] as { id: string; tentativas: number; inserido: boolean } | undefined;
@@ -242,13 +313,13 @@ export async function gravarEntrega(
       origem_valida: entrega.origem_valida,
       publicacao_id,
       envolvidos,
+      truncagem,
     });
 
     if (!entrega.origem_valida) {
       return base(null, 0);
     }
 
-    const pub = lerPublicacaoDoDiario(entrega.corpo);
     if (!pub) {
       return base(null, 0);
     }
@@ -314,7 +385,11 @@ export async function gravarEntrega(
     sessao_id: '',
     acao: `callback:${entrega.fornecedor}:${tipo}`,
     resultado: resultado.origem_valida ? 'permitido' : 'negado',
-    etapa: resultado.publicacao_id ? 'publicacao_gravada' : 'evento_registrado',
+    // O sufixo existe para que a truncagem apareça na TRILHA, e não só na
+    // coluna do evento. Quem investiga um alerta começa pela auditoria, e um
+    // corte visível apenas para quem já sabe onde procurar não é um aviso.
+    etapa: (resultado.publicacao_id ? 'publicacao_gravada' : 'evento_registrado')
+      + (truncagem === null ? '' : '_truncado'),
     momento: entrega.recebido_em,
   });
 
