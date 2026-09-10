@@ -198,6 +198,10 @@ for (const e of execucoes) {
     execucao_id: String(e.id),
     recebido_em: carimbo.recebido_em ?? e.startedAt,
     origem_valida: carimbo.veredito === 'autentico',
+    // O no SEMPRE carimbou os cabecalhos, e este recolhimento os jogava fora.
+    // Sem eles o servico nao tem como reconferir o segredo e fica preso ao
+    // veredito de fora, que e exatamente o que o item 2.6 corrigiu.
+    cabecalhos: carimbo.cabecalhos ?? undefined,
     corpo: carimbo.corpo ?? {},
   });
 }
@@ -260,6 +264,7 @@ try {
         inquilino_id: INQUILINO,
         fornecedor: 'escavador',
         corpo: e.corpo,
+        cabecalhos: e.cabecalhos,
         origem_valida: e.origem_valida,
         recebido_em: new Date(e.recebido_em).toISOString(),
         payload_ref: ref,

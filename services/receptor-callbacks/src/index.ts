@@ -37,6 +37,12 @@
 
 export { chaveDoEvento, resumoDoTeor, semEnvelope } from './chave.js';
 export {
+  conferirOrigem,
+  segredoDoCallback,
+  type Conferencia,
+  type ConferidaPor,
+} from './origem.js';
+export {
   bytesDe,
   cortarPorBytes,
   cortarPorCaracteres,

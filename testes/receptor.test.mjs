@@ -22,6 +22,8 @@ import {
   cortarPorBytes,
   cortarPorCaracteres,
   LIMITES,
+  conferirOrigem,
+  segredoDoCallback,
 } from '@lex/receptor-callbacks';
 
 /** Um evento de diário com a forma real, sem dado de pessoa de verdade. */
@@ -325,4 +327,95 @@ test('cortarPorCaracteres conta caracteres, não unidades de código', () => {
   // `.length` cortaria um deles ao meio.
   assert.equal(cortarPorCaracteres('👩‍⚖️abc', 50), '👩‍⚖️abc');
   assert.equal(cortarPorCaracteres('abcdef', 3), 'abc');
+});
+
+
+// ---------------------------------------------------------------------------
+// A conferência de origem — item 2.6 da revisão, D-237 pelo mesmo formato
+//
+// A Spec §8.1 lista "Validar a origem" como a ETAPA 1 do receptor, com "falha
+// fecha" ao lado. Até 10/09 o receptor recebia um booleano já decidido por um
+// nó do n8n e acreditava. O problema não era o n8n: era quem chama decidir se
+// a origem é válida — o mesmo formato que a D-237 tratou no chassi.
+// ---------------------------------------------------------------------------
+
+const SEGREDO = 'segredo-de-teste-nao-e-o-de-producao';
+
+test('segredo correto no Authorization: autêntica, e quem conferiu fomos nós', () => {
+  const c = conferirOrigem({ authorization: SEGREDO }, SEGREDO);
+  assert.equal(c.origem_valida, true);
+  assert.equal(c.conferida_por, 'servico');
+  assert.equal(c.divergiu, false);
+});
+
+test('o formato Bearer é aceito, porque o do fornecedor já mudou uma vez', () => {
+  const c = conferirOrigem({ authorization: `Bearer ${SEGREDO}` }, SEGREDO);
+  assert.equal(c.origem_valida, true);
+});
+
+test('o nome do cabeçalho não distingue caixa — HTTP não distingue', () => {
+  assert.equal(conferirOrigem({ Authorization: SEGREDO }, SEGREDO).origem_valida, true);
+  assert.equal(conferirOrigem({ AUTHORIZATION: SEGREDO }, SEGREDO).origem_valida, true);
+});
+
+test('segredo errado é recusado, e a recusa é uma conferência FEITA', () => {
+  const c = conferirOrigem({ authorization: 'outro-segredo-qualquer' }, SEGREDO);
+  assert.equal(c.origem_valida, false);
+  // 'servico', e não 'ninguem': nós conferimos e o resultado foi negativo.
+  // Não ter como conferir é outra coisa, e a distinção é o que a migração 016
+  // existe para registrar.
+  assert.equal(c.conferida_por, 'servico');
+});
+
+test('🔴 sem segredo configurado, NÃO SEI CONFERIR — e não saber fecha', () => {
+  const c = conferirOrigem({ authorization: SEGREDO }, null);
+  assert.equal(c.origem_valida, false, 'Regra 5: governança indisponível bloqueia');
+  assert.equal(c.conferida_por, 'ninguem');
+});
+
+test('🔴 sem cabeçalhos, não há o que conferir', () => {
+  const c = conferirOrigem(undefined, SEGREDO);
+  assert.equal(c.origem_valida, false);
+  assert.equal(c.conferida_por, 'ninguem');
+});
+
+test('cabeçalhos SEM Authorization são conferência feita, com resultado negativo', () => {
+  const c = conferirOrigem({ 'content-type': 'application/json' }, SEGREDO);
+  assert.equal(c.origem_valida, false);
+  assert.equal(c.conferida_por, 'servico');
+});
+
+test('🔴 o veredito de quem chamou NÃO promove uma entrega que nós recusamos', () => {
+  // Este é o teste que descreve o buraco antigo: bastava dizer "é válida" para
+  // a entrega virar publicação, e publicação alimenta alerta de prazo.
+  const c = conferirOrigem({ authorization: 'invasor' }, SEGREDO, true);
+  assert.equal(c.origem_valida, false);
+  assert.equal(c.divergiu, true, 'discordar de quem chama é sinal de segurança');
+});
+
+test('divergência também conta quando quem chamou recusou e nós aceitamos', () => {
+  const c = conferirOrigem({ authorization: SEGREDO }, SEGREDO, false);
+  assert.equal(c.origem_valida, true);
+  assert.equal(c.divergiu, true, 'ou o segredo girou, ou o nó está com regra diferente');
+});
+
+test('concordância não é divergência', () => {
+  assert.equal(conferirOrigem({ authorization: SEGREDO }, SEGREDO, true).divergiu, false);
+  assert.equal(conferirOrigem({ authorization: 'x' }, SEGREDO, false).divergiu, false);
+});
+
+test('token de tamanho diferente é recusado sem quebrar a comparação', () => {
+  // `timingSafeEqual` lança quando os buffers têm tamanhos diferentes. Se o
+  // tamanho não fosse conferido antes, um token curto derrubaria o receptor —
+  // e derrubar o receptor é mais barato para um atacante que adivinhar o token.
+  assert.equal(conferirOrigem({ authorization: 'a' }, SEGREDO).origem_valida, false);
+  assert.equal(conferirOrigem({ authorization: 'a'.repeat(5000) }, SEGREDO).origem_valida, false);
+});
+
+test('o segredo vem do ambiente, por fornecedor, e não tem padrão', () => {
+  const env = { LEX_CALLBACK_SEGREDO_ESCAVADOR: 'abc' };
+  assert.equal(segredoDoCallback('escavador', env), 'abc');
+  assert.equal(segredoDoCallback('trello', env), null, 'cada fornecedor tem o seu');
+  assert.equal(segredoDoCallback('escavador', {}), null, 'ausente é null, nunca um valor de reserva');
+  assert.equal(segredoDoCallback('escavador', { LEX_CALLBACK_SEGREDO_ESCAVADOR: '' }), null);
 });

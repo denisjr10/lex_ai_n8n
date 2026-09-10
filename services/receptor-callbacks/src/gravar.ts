@@ -38,6 +38,7 @@ import type { Auditoria } from '@lex/mcp-core';
 import { exigirUuid, type Conexao } from '@lex/auditoria';
 
 import { chaveDoEvento, resumoDoTeor } from './chave.js';
+import { conferirOrigem, segredoDoCallback, type ConferidaPor } from './origem.js';
 import {
   bytesDe,
   cortarPorBytes,
@@ -55,8 +56,26 @@ export interface EntregaDeCallback {
   readonly fornecedor: Fornecedor;
   /** O corpo cru, como chegou. */
   readonly corpo: Readonly<Record<string, unknown>>;
-  /** O token conferiu? Vem do nó que carimba, não daqui. */
-  readonly origem_valida: boolean;
+  /**
+   * Os cabeçalhos da requisição, como o nó do n8n os carimbou.
+   *
+   * É o que permite ao receptor **conferir o segredo ele mesmo** em vez de
+   * acreditar num veredito pronto. Ausentes, não há como conferir — e não ter
+   * como conferir fecha (Regra 5).
+   */
+  readonly cabecalhos?: Readonly<Record<string, unknown>>;
+  /**
+   * O veredito de QUEM CHAMOU. ⚠️ Segunda opinião, nunca a barreira.
+   *
+   * Até 10/09 este campo **era** a decisão, e o problema não era o n8n: era o
+   * formato. Quem chama decidindo se a origem é válida é o mesmo defeito que a
+   * D-237 tratou no chassi — o objeto de decisão chegando pronto de fora.
+   *
+   * Hoje serve para duas coisas: valer enquanto o serviço não tem como
+   * conferir (arranjo provisório até o marco 8), e **denunciar divergência**
+   * quando tem. Divergir é sinal de segurança, não ruído de integração.
+   */
+  readonly origem_valida?: boolean;
   /** ISO 8601. Quando o receptor recebeu — não quando nós processamos. */
   readonly recebido_em: string;
   /**
@@ -92,6 +111,10 @@ export interface ResultadoDaGravacao {
   readonly tentativas: number;
   /** Se falso, nada do conteúdo entrou na base — só o registro da tentativa. */
   readonly origem_valida: boolean;
+  /** Quem produziu o veredito acima. */
+  readonly conferida_por: ConferidaPor;
+  /** O veredito de quem chamou discordou do nosso? Sinal de segurança. */
+  readonly origem_divergiu: boolean;
   /** A publicação que ESTA chamada gravou. `null` quando não gravou nenhuma. */
   readonly publicacao_id: string | null;
   readonly envolvidos: number;
@@ -107,10 +130,28 @@ export interface ResultadoDaGravacao {
 
 const INSERIR_EVENTO = `
   INSERT INTO evento_callback
-    (inquilino_id, fornecedor, chave_evento, tipo, recebido_em, origem_valida, payload_ref, estado, truncagem)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    (inquilino_id, fornecedor, chave_evento, tipo, recebido_em, origem_valida, payload_ref, estado, truncagem,
+     origem_conferida_por)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   ON CONFLICT (inquilino_id, fornecedor, chave_evento)
-    DO UPDATE SET tentativas = evento_callback.tentativas + 1
+    DO UPDATE SET
+      tentativas = evento_callback.tentativas + 1,
+      -- A REENTREGA PODE CORRIGIR O VEREDITO, E SÓ NUM SENTIDO.
+      --
+      -- Uma conferência de verdade vale mais que a ausência dela: se a linha
+      -- foi gravada quando não havia como conferir e a reentrega chega com o
+      -- segredo configurado, o veredito do serviço substitui o antigo — mesmo
+      -- quando ele RECUSA o que antes passou.
+      --
+      -- O contrário não vale: um veredito de fora nunca sobrescreve o que o
+      -- serviço conferiu. Sem isso, bastaria reentregar dizendo "é válida"
+      -- para desfazer uma recusa nossa.
+      origem_valida = CASE WHEN EXCLUDED.origem_conferida_por = 'servico'
+                           THEN EXCLUDED.origem_valida
+                           ELSE evento_callback.origem_valida END,
+      origem_conferida_por = CASE WHEN EXCLUDED.origem_conferida_por = 'servico'
+                                  THEN 'servico'
+                                  ELSE evento_callback.origem_conferida_por END
   RETURNING id, tentativas, (xmax = 0) AS inserido
 `;
 
@@ -262,7 +303,30 @@ export async function gravarEntrega(
   //
   // Só se a origem conferir. Entrega não autenticada não vira publicação, e
   // gastar trabalho de leitura com ela seria fazer o que ela quer.
-  const pub = entrega.origem_valida ? lerPublicacaoDoDiario(entrega.corpo) : null;
+  // A ETAPA 1 DO RECEPTOR, QUE A SPEC §8.1 SEMPRE DESCREVEU E O CÓDIGO NÃO FAZIA.
+  //
+  // O serviço confere o segredo nos cabeçalhos carimbados. Quando consegue, o
+  // veredito dele vale — inclusive contra o de quem chamou. Quando não
+  // consegue, cai para o veredito de fora, e a queda fica REGISTRADA em
+  // `origem_conferida_por` em vez de invisível (migração 016).
+  const conferencia = conferirOrigem(
+    entrega.cabecalhos,
+    segredoDoCallback(entrega.fornecedor),
+    entrega.origem_valida,
+  );
+
+  // O arranjo provisório, e ele tem data para acabar: enquanto o endpoint
+  // próprio não existe (marco 8), uma entrega que o serviço não tem como
+  // conferir ainda pode passar pelo veredito do n8n. O que mudou é que isso
+  // deixou de ser silencioso — a linha diz 'n8n', e quem auditar vê.
+  const origemValida = conferencia.conferida_por === 'servico'
+    ? conferencia.origem_valida
+    : (entrega.origem_valida ?? false);
+  const conferidaPor: ConferidaPor = conferencia.conferida_por === 'servico'
+    ? 'servico'
+    : entrega.origem_valida === undefined ? 'ninguem' : 'n8n';
+
+  const pub = origemValida ? lerPublicacaoDoDiario(entrega.corpo) : null;
 
   const truncagem = montarTruncagem({
     ...(pub?.truncagem ?? {}),
@@ -276,14 +340,15 @@ export async function gravarEntrega(
       chave,
       tipo,
       entrega.recebido_em,
-      entrega.origem_valida,
+      origemValida,
       entrega.payload_ref ?? null,
       // O estado continua sendo o do CICLO DE VIDA. Truncagem não entra aqui:
       // um evento marcado 'truncado' sairia do índice de não processados e
       // nunca seria processado — o remédio contra o descarte em silêncio
       // viraria uma forma nova de descarte em silêncio (migração 015).
-      entrega.origem_valida ? 'recebido' : 'ignorado',
+      origemValida ? 'recebido' : 'ignorado',
       truncagem === null ? null : JSON.stringify(truncagem),
+      conferidaPor,
     ]);
 
     const linha = ev.rows[0] as { id: string; tentativas: number; inserido: boolean } | undefined;
@@ -310,13 +375,15 @@ export async function gravarEntrega(
       evento_id: linha.id,
       evento_novo: linha.inserido,
       tentativas: Number(linha.tentativas),
-      origem_valida: entrega.origem_valida,
+      origem_valida: origemValida,
+      conferida_por: conferidaPor,
+      origem_divergiu: conferencia.divergiu,
       publicacao_id,
       envolvidos,
       truncagem,
     });
 
-    if (!entrega.origem_valida) {
+    if (!origemValida) {
       return base(null, 0);
     }
 
@@ -389,7 +456,12 @@ export async function gravarEntrega(
     // coluna do evento. Quem investiga um alerta começa pela auditoria, e um
     // corte visível apenas para quem já sabe onde procurar não é um aviso.
     etapa: (resultado.publicacao_id ? 'publicacao_gravada' : 'evento_registrado')
-      + (truncagem === null ? '' : '_truncado'),
+      + (truncagem === null ? '' : '_truncado')
+      // Divergência entre o nosso veredito e o de quem chamou vai para a
+      // trilha, que é onde alguém procura depois. Ou o segredo girou sem
+      // aviso, ou o nó está com regra diferente da nossa, ou uma entrega passou
+      // por um caminho que não deveria existir.
+      + (resultado.origem_divergiu ? '_origem_divergente' : ''),
     momento: entrega.recebido_em,
   });
 

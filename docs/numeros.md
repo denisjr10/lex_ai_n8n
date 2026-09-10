@@ -18,14 +18,14 @@
 
 | O quê | Quanto |
 |---|---|
-| Migrações SQL | **15** |
+| Migrações SQL | **16** |
 | Tabelas criadas | **23** |
 | Tabelas com política por linha | **20** de 23 |
 | Pacotes do monorepo | **9** — 4 implementados, 5 ainda casca |
-| Testes passando | **129** |
+| Testes passando | **141** |
 | Provas de regra (exige banco) | **52 de 52** |
 | Provas de auditoria (exige banco) | **23 de 23** |
-| Linhas versionadas | TypeScript 4137 · SQL 2009 · Node 13303 |
+| Linhas versionadas | TypeScript 4363 · SQL 2064 · Node 13401 |
 
 **Pacotes ainda sem uma linha executável:** `packages/sdk-escavador` · `packages/sdk-trello` · `mcp-servers/escavador` · `mcp-servers/trello` · `services/policy-gate`.
 
@@ -36,20 +36,20 @@
 | Documentos escritos em `docs/` | **24** — sem contar este, que é gerado |
 | Requisitos funcionais (RF) | **61** |
 | Requisitos não funcionais (RNF) | **19** |
-| Riscos registrados (§15) | **89** — o maior é R-89 |
+| Riscos registrados (§15) | **90** — o maior é R-90 |
 
 ## Decisões (§13 de `01-diretrizes-gerais.md`)
 
-**244 linhas**, e o maior identificador é D-244.
+**245 linhas**, e o maior identificador é D-245.
 
 | Estado | Quantas |
 |---|---|
-| 🟡 Proposta | **202** |
+| 🟡 Proposta | **203** |
 | ✅ Confirmada | **30** |
 | ✅ Resolvida | **5** |
 | 🔴 Em aberto | **3** |
 | ❌ Derrubada / Recusada | **2** |
 | 🔄 Revisada | **1** |
 | ✅ Feita | **1** |
-| **Total** | **244** |
+| **Total** | **245** |
 

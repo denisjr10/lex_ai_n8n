@@ -527,7 +527,7 @@ A regra que fecha o comportamento: **um dado velho identificado como velho é ú
 
 | # | Etapa | Regra |
 |---|---|---|
-| 1 | **Validar a origem** | Falha fecha. Evento não validado é descartado e registrado como incidente |
+| 1 | **Validar a origem** | Falha fecha. ⚠️ **Duas correções de 10/09.** (a) Até então o receptor **não validava**: recebia o veredito pronto de um nó do n8n e acreditava. Agora ele reconfere o segredo nos cabeçalhos carimbados, e o veredito dele prevalece — o de fora nunca promove entrega que o serviço recusou (**D-245**). Quem decidiu cada linha fica em `evento_callback.origem_conferida_por` (migração 016). (b) *"Evento não validado é descartado"* **está errado e nunca foi o que o código fez**: evento não validado é **gravado** e não vira publicação. Entrega não autenticada é sinal de segurança, e apagar sinal de segurança por ele ser inválido apaga a evidência de que alguém está batendo na porta |
 | 2 | **Responder rápido** | Confirma o recebimento e processa em fila. Os dois fornecedores penalizam receptor lento |
 | 3 | **Deduplicar** | Chave de evento única; segunda entrega não repete efeito |
 | 4 | **Persistir cru** | O corpo recebido é guardado antes de ser interpretado |
