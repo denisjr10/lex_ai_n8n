@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Vivo — este documento é o roteiro de execução da revisão** |
 | Versão | 1.0 |
-| Data | 2026-09-09 |
+| Data | 2026-09-09 · atualizado em 2026-09-10 |
 | Origem | Revisão completa do repositório feita em 09/09/2026, em seis frentes de auditoria |
 | Decisões geradas | D-232 a D-244 (ver [`01-diretrizes-gerais.md`](01-diretrizes-gerais.md) §13) |
 | Riscos gerados | R-84 a R-88 (ver [`01-diretrizes-gerais.md`](01-diretrizes-gerais.md) §15) |
@@ -46,8 +46,8 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 ## Painel de execução
 
-**Fechados:** Bloco 1 inteiro (5 de 5) e 7 dos 10 itens do Bloco 2.
-**Próximo:** 2.3 — o isolamento de `identidade_externa`, opção (a), que é a única que mexe no banco.
+**Fechados:** Bloco 1 inteiro (5 de 5) e 8 dos 10 itens do Bloco 2.
+**Próximo:** 2.5 — os tetos de tamanho no receptor de callbacks.
 
 ### BLOCO 0 — Antes da conversa com a Malu
 
@@ -80,7 +80,7 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 |---|---|---|---|
 | 2.1 | **Travar a faixa A4** enquanto o Policy Gate e a identidade nominal não existirem | ✅ **Feito, mas não como a revisão pediu** | Trava na **execução**, não na carga, por escolha do usuário em 09/09. `etapaAprovacao` recusa a A4 depois de conferir tudo o mais — assim "falta aprovação" e "estagiário não aprova" continuam respondendo o que é mais útil, e a trava só pega o caminho feliz. 117 testes, dois novos. ⚠️ **A premissa do achado original era falsa.** A revisão dizia *"hoje não existe ferramenta A4 nenhuma, a trava não incomoda ninguém"*. Existe: `testes/ajuda.mjs:94` declara `peticionar` como A4, e é o alicerce de toda a suíte do chassi. Implementada como a revisão pedia — recusa na **carga** —, ela derrubou **47 dos 118 testes**, porque o alicerce deixa de carregar. Revertida no mesmo turno; a árvore está verde. Ver a nota abaixo. → **D-236** |
 | 2.2 | **A sessão precisa chegar assinada**, e o chassi não pode aceitar objeto `Sessao` pronto vindo de fora | ✅ **Feito — a trava possível, não a definitiva** | A verificação de assinatura é do marco 9 e depende do Policy Gate emitir o token. O que dava para travar hoje foi feito: `ConfiguracaoDoChassi` ganhou o campo **obrigatório** `origem_da_sessao`, sem padrão — sem ele o chassi recusa a chamada —, e declarar `'verificada'` é recusado enquanto o chassi não souber conferir assinatura. A lacuna deixou de ser invisível e virou declaração escrita. 120 testes, três novos. ⚠️ **A segunda metade do achado era falsa:** o `13-chassi-marco-2.md` **não** declarava a etapa concluída — ele escopa a etapa 2 a *"validade e lista de revogação"* e defere a assinatura ao marco 9 na §8. Quem superdeclarava era a **Spec**, §4.2 e §5.3, e foi lá que a correção entrou. → **D-237** |
-| 2.3 | **`identidade_externa` e `reserva_orcamento`:** acrescentar `inquilino_id`, política por linha e chave composta, com a busca global de login virando função dedicada (`SECURITY DEFINER`), nomeada e auditável | 🟠 | Única que mexe no banco. Recomendação (a); a alternativa (b) é documentar o desvio com teste que o prove. **Aguarda sua escolha.** → **D-239** |
+| 2.3 | **`identidade_externa` e `reserva_orcamento`:** `inquilino_id`, política por linha, chave composta, e a busca global de login virando função dedicada | ✅ **Feito — opção (a), escolhida por você** | Migração **014**. As duas tabelas entraram na política: **20 de 23** agora, eram 18. A porta única do login é `identidade_para_login(provedor, identificador)`, `SECURITY DEFINER`, que devolve **só** `inquilino_id` e `usuario_id`. 🔴 **O índice de unicidade NÃO virou composto, e isso é o ponto:** com `UNIQUE (inquilino_id, provedor, identificador)` o mesmo WhatsApp poderia ser pessoa diferente em dois escritórios, em silêncio — a conta compartilhada que a Regra 7 existe para impedir (R-11). O isolamento é da **leitura**; a unicidade da identidade é do **sistema**. **52 provas de regra**, seis novas. → **D-239** |
 | 2.4 | **`conferirPapel()` dentro de `abrirConexao`** — a conferência do papel deixou de ser opcional | ✅ | `bc954d6`. Importa porque a migração 010 não usa `FORCE ROW LEVEL SECURITY`: era disciplina, virou trava. → **D-240** |
 | 2.5 | **Tetos de tamanho no receptor de callbacks** — teor 200 KB, nome 300 caracteres, 200 envolvidos, profundidade de JSON 32. Estourar **não descarta**: grava com estado `truncado` e alerta | 🟠 | Descartar em silêncio é o defeito que a migração 013 acabou de consertar. → **D-241** |
 | 2.6 | **Revalidar a origem do callback dentro do serviço.** Hoje o veredito de origem chega pronto de um nó do n8n e trafega por um histórico de execução do qual 98,5% dos registros já sumiram | 🟠 | A Spec §8 afirma o contrário do que o código faz. Provisório enquanto o endpoint próprio (marco 8) não existe |

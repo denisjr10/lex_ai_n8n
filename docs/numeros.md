@@ -18,14 +18,14 @@
 
 | O quê | Quanto |
 |---|---|
-| Migrações SQL | **13** |
+| Migrações SQL | **14** |
 | Tabelas criadas | **23** |
-| Tabelas com política por linha | **18** de 23 |
+| Tabelas com política por linha | **20** de 23 |
 | Pacotes do monorepo | **9** — 4 implementados, 5 ainda casca |
 | Testes passando | **120** |
-| Provas de regra (exige banco) | **—** |
-| Provas de auditoria (exige banco) | **—** |
-| Linhas versionadas | TypeScript 3893 · SQL 1759 · Node 13098 |
+| Provas de regra (exige banco) | **52 de 52** |
+| Provas de auditoria (exige banco) | **23 de 23** |
+| Linhas versionadas | TypeScript 3893 · SQL 1957 · Node 13182 |
 
 **Pacotes ainda sem uma linha executável:** `packages/sdk-escavador` · `packages/sdk-trello` · `mcp-servers/escavador` · `mcp-servers/trello` · `services/policy-gate`.
 
@@ -44,10 +44,10 @@
 
 | Estado | Quantas |
 |---|---|
-| 🟡 Proposta | **201** |
+| 🟡 Proposta | **202** |
 | ✅ Confirmada | **30** |
 | ✅ Resolvida | **5** |
-| 🔴 Em aberto | **4** |
+| 🔴 Em aberto | **3** |
 | ❌ Derrubada / Recusada | **2** |
 | 🔄 Revisada | **1** |
 | ✅ Feita | **1** |

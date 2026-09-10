@@ -101,17 +101,17 @@ const CASOS = [
   // ---- Regra 7: nada de conta compartilhada -------------------------------
   deveRecusar(
     'dois usuarios no MESMO numero de WhatsApp',
-    `INSERT INTO identidade_externa (usuario_id, provedor, identificador_externo) VALUES
-       ('22222222-2222-2222-2222-222222222222', 'whatsapp', '+5596999990000'),
-       ('33333333-3333-3333-3333-333333333333', 'whatsapp', '+5596999990000');`,
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo) VALUES
+       ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'whatsapp', '+5596999990000'),
+       ('11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'whatsapp', '+5596999990000');`,
     'Regra 7 / R-11'
   ),
   devePassar(
     'reaproveitar um numero JA REVOGADO',
-    `INSERT INTO identidade_externa (usuario_id, provedor, identificador_externo, revogada_em) VALUES
-       ('22222222-2222-2222-2222-222222222222', 'whatsapp', '+5596999990000', now());
-     INSERT INTO identidade_externa (usuario_id, provedor, identificador_externo) VALUES
-       ('33333333-3333-3333-3333-333333333333', 'whatsapp', '+5596999990000');`,
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo, revogada_em) VALUES
+       ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'whatsapp', '+5596999990000', now());
+     INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo) VALUES
+       ('11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'whatsapp', '+5596999990000');`,
     'troca de telefone acontece'
   ),
 
@@ -431,6 +431,90 @@ const CASOS = [
      INSERT INTO cliente (inquilino_id, nome, tipo)
      VALUES ('11111111-1111-1111-1111-111111111111', 'Cliente Legitimo', 'fisica');`,
     'o caminho de todo dia nao pode ficar barrado'
+  ),
+
+  // ---- 014: isolamento de identidade_externa e reserva_orcamento ----------
+  //
+  // A migracao 010 deixou as duas de fora da politica com um argumento sobre
+  // INTEGRIDADE ("penduradas num pai unico, nao ha o que divergir") aplicado a
+  // uma pergunta de CONFIDENCIALIDADE. A 014 corrige, e estas provas fixam as
+  // duas metades: o que passou a ser isolado, e o que NAO podia ser.
+
+  deveRecusar(
+    'o mesmo numero em DOIS ESCRITORIOS diferentes',
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo) VALUES
+       ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'whatsapp', '+5596988887777'),
+       ('99999999-9999-9999-9999-999999999999', '88888888-8888-8888-8888-888888888888', 'whatsapp', '+5596988887777');`,
+    'Regra 7 e GLOBAL: o indice de unicidade nao virou composto de proposito'
+  ),
+  devePassar(
+    'escritorio A nao enxerga identidade externa do escritorio B',
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo) VALUES
+       ('99999999-9999-9999-9999-999999999999', '88888888-8888-8888-8888-888888888888', 'telegram', '55501');
+     SET LOCAL ROLE lex_app;
+     SELECT set_config('lex.inquilino_id', '11111111-1111-1111-1111-111111111111', true);
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM identidade_externa;
+       IF n <> 0 THEN RAISE EXCEPTION 'enxergou % identidade(s) de outro escritorio', n; END IF;
+     END $$;`,
+    'o SELECT sem JOIN deixa de devolver a identidade do vizinho'
+  ),
+  devePassar(
+    'escritorio A nao enxerga reserva de orcamento do escritorio B',
+    `INSERT INTO orcamento (id, inquilino_id, escopo, referencia, periodo, limite_centavos) VALUES
+       ('66666666-6666-6666-6666-666666666666', '99999999-9999-9999-9999-999999999999',
+        'inquilino', 'geral', '2026-09', 10000);
+     INSERT INTO reserva_orcamento (inquilino_id, requisicao_id, orcamento_id, rota, estimado_centavos) VALUES
+       ('99999999-9999-9999-9999-999999999999', gen_random_uuid(),
+        '66666666-6666-6666-6666-666666666666', '/v2/processos', 295);
+     SET LOCAL ROLE lex_app;
+     SELECT set_config('lex.inquilino_id', '11111111-1111-1111-1111-111111111111', true);
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM reserva_orcamento;
+       IF n <> 0 THEN RAISE EXCEPTION 'enxergou % reserva(s) de outro escritorio', n; END IF;
+     END $$;`,
+    'dinheiro reservado tambem e dado de cliente'
+  ),
+
+  // A PORTA UNICA. Isolar identidade_externa cria um problema real: o login
+  // acontece ANTES de o escritorio ser conhecido. A funcao existe para ser o
+  // unico caminho global — e uma porta que nao abre e tao defeito quanto uma
+  // que nao fecha.
+  devePassar(
+    'identidade_para_login acha o escritorio SEM escritorio declarado',
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo) VALUES
+       ('99999999-9999-9999-9999-999999999999', '88888888-8888-8888-8888-888888888888', 'telegram', '55502');
+     SET LOCAL ROLE lex_app;
+     DO $$ DECLARE achou uuid; BEGIN
+       SELECT inquilino_id INTO achou FROM identidade_para_login('telegram', '55502');
+       IF achou IS DISTINCT FROM '99999999-9999-9999-9999-999999999999'::uuid
+         THEN RAISE EXCEPTION 'a porta do login nao abriu: devolveu %', achou; END IF;
+     END $$;`,
+    'sem ela, isolar identidade_externa tornaria o login impossivel'
+  ),
+  devePassar(
+    'identidade_para_login NAO devolve identidade revogada',
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo, revogada_em) VALUES
+       ('99999999-9999-9999-9999-999999999999', '88888888-8888-8888-8888-888888888888', 'telegram', '55503', now());
+     SET LOCAL ROLE lex_app;
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM identidade_para_login('telegram', '55503');
+       IF n <> 0 THEN RAISE EXCEPTION 'a porta abriu para identidade revogada'; END IF;
+     END $$;`,
+    'revogar o numero precisa fechar a porta, nao so marcar a data'
+  ),
+  devePassar(
+    'identidade_para_login NAO devolve usuario desligado',
+    `INSERT INTO identidade_externa (inquilino_id, usuario_id, provedor, identificador_externo) VALUES
+       ('99999999-9999-9999-9999-999999999999', '88888888-8888-8888-8888-888888888888', 'telegram', '55504');
+     UPDATE usuario SET status = 'desligado', desligado_em = now()
+       WHERE id = '88888888-8888-8888-8888-888888888888';
+     SET LOCAL ROLE lex_app;
+     DO $$ DECLARE n int; BEGIN
+       SELECT count(*) INTO n FROM identidade_para_login('telegram', '55504');
+       IF n <> 0 THEN RAISE EXCEPTION 'quem foi desligado ainda entra'; END IF;
+     END $$;`,
+    'vazio indistinguivel de desconhecido: o desligado nao descobre que o cadastro existe'
   ),
 
 ];
