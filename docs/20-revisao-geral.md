@@ -6,8 +6,8 @@
 | Versão | 1.0 |
 | Data | 2026-09-09 · atualizado em 2026-09-10 |
 | Origem | Revisão completa do repositório feita em 09/09/2026, em seis frentes de auditoria |
-| Decisões geradas | D-232 a D-244 (ver [`01-diretrizes-gerais.md`](01-diretrizes-gerais.md) §13) |
-| Riscos gerados | R-84 a R-88 (ver [`01-diretrizes-gerais.md`](01-diretrizes-gerais.md) §15) |
+| Decisões geradas | D-232 a D-245 (ver [`01-diretrizes-gerais.md`](01-diretrizes-gerais.md) §13) |
+| Riscos gerados | R-84 a R-90 (ver [`01-diretrizes-gerais.md`](01-diretrizes-gerais.md) §15) |
 | Documentos afetados | `00-estado-atual.md`, `01-diretrizes-gerais.md` (§13 e §15), `CLAUDE.md`, e os listados no Bloco 3 |
 | Números | Nenhum número escrito à mão aqui. Ver [`numeros.md`](numeros.md) (D-232) |
 
@@ -100,15 +100,15 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 | 3.2 | Ampliar a **convenção de estados** da §13 para os sete realmente usados, com formato de célula fixo → **D-235** | ⬜ |
 | 3.3 | Substituir a seção **"Riscos ativos"** do `00-estado-atual.md` por ponteiro para a §15 — hoje ela congelou em 26/08 e omite dezenas de riscos, entre eles o banco exposto (R-63) e o Portainer publicado (R-62) | ⬜ |
 | 3.4 | Subir **cabeçalho e versão** do PRD e do plano de execução, com calendário provisório sob a hipótese da D-219 | ⬜ |
-| 3.5 | Marcar a **D-145 como Revisada pela D-194**, e riscar a 20e do P-14 (já respondida em 07/09) | ⬜ |
-| 3.6 | Escolher a **numeração canônica de marco** — o receptor é 7 ou 8? — e corrigir as cinco ocorrências divergentes | ⬜ |
-| 3.7 | Corrigir o **Marco 1**: nota datada de 02/09 dizendo que a prova *"mesma publicação por dois caminhos → recusado"* foi derrubada pelo dado real (migração 013), **riscando em vez de apagar** | ⬜ |
-| 3.8 | Corrigir `credentials/` → `esquemas-de-credencial/` nas diretrizes §12.3 e na Spec §3, e atualizar a árvore de diretórios | ⬜ |
+| 3.5 | Marcar a **D-145 como Revisada pela D-194**, e riscar a 20e do P-14 (já respondida em 07/09) | ✅ **Feito** — e a premissa era mais estreita do que parecia: o conflito não é D-145 × D-194 no assunto (uma trata de alerta, a outra de mensagem), é D-145 × **RF-13 alterada pela D-194**, que passou a admitir confirmação pela colaboradora. D-145 marcada 🔄 Revisada na §13 e no PRD; a nota da Spec §9.3 reescrita; as 20a–20e riscadas no plano. 🔴 **Achado de passagem:** nenhum dos dois ritos está no banco — `alerta` tem `lido_por` único (migração 006) |
+| 3.6 | Escolher a **numeração canônica de marco** — o receptor é 7 ou 8? — e corrigir as cinco ocorrências divergentes | ✅ **Feito** — não foi escolha: a Spec §15 é a numeração canônica e o receptor é o **marco 8**. Eram **quatro** ocorrências de "marco 7", não cinco |
+| 3.7 | Corrigir o **Marco 1**: nota datada de 02/09 dizendo que a prova *"mesma publicação por dois caminhos → recusado"* foi derrubada pelo dado real (migração 013), **riscando em vez de apagar** | ✅ **Feito** — linha riscada no Marco 1, com a data e a medição da migração 013 |
+| 3.8 | Corrigir `credentials/` → `esquemas-de-credencial/` nas diretrizes §12.3 e na Spec §3, e atualizar a árvore de diretórios | ✅ **Feito** — `n8n/esquemas-de-credencial/` existe, a revisão acertou. A §12.3 das diretrizes virou ponteiro para a Spec §3 em vez de ganhar uma segunda árvore corrigida: duas árvores à mão divergem, e divergiram. A da Spec ganhou `ferramentas/`, `captura/` e `demo/` |
 | 3.9 | Atualizar o **README** — trocar números por ponteiro e listar os documentos que existem | ⬜ |
-| 3.10 | Corrigir a **Spec**: `hash (único)` → `hash (índice)`, preços apontando para `dados/precos-escavador.json`, e a §9.3 registrando que o rito da D-145 ainda não está no banco | ⬜ |
+| 3.10 | Corrigir a **Spec**: `hash (único)` → `hash (índice)`, preços apontando para `dados/precos-escavador.json`, e a §9.3 registrando que o rito da D-145 ainda não está no banco | ✅ **Feito**, conferido antes contra a migração 013: ela derrubou o `hash` único **das duas** tabelas, então "índice" vale para `publicacao` e para `movimentacao`. O JSON de preços copiado na §6.1 virou ponteiro para `dados/precos-escavador.json` |
 | 3.11 | **Nove requisitos sem critério de aceite** — RF-30, RF-34, RF-31 a RF-33, RF-42 a RF-45 | ⬜ |
 | 3.12 | Recalcular a **§9.5** com a base real (2 advogadas, não 5), separando fórmula genérica do número deste cliente | ⬜ |
-| 3.13 | Corrigir os **riscos com número derrubado**: R-40, R-21, R-72, R-41 e R-42 | ⬜ |
+| 3.13 | Corrigir os **riscos com número derrubado**: R-40, R-21, R-72, R-41 e R-42 | ✅ **Feito** — R-21 realizado (a cota venceu em 01/09; o teto de 16 nunca existiu), R-40 corrigido (franquia real 1.000, não editável). O **R-72 estava mais errado que o dito**: afirmava "36 a 39, todas sem resposta" e **as quatro** foram respondidas em 07/09. R-41 e R-42 ganharam na §15 os dois fatos que só existiam no estado-atual — sem isso, o 3.3 os apagaria |
 | 3.14 | Dar **gancho operacional ao R-10 (OAB)**, com dono nomeado e data → **D-244** | ⬜ |
 
 ---

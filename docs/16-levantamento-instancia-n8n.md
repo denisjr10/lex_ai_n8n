@@ -216,7 +216,7 @@ EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL=15   # minutos
 
 O R-57 registrou, em 02/09, que 11.076 execuções de 11.249 haviam sumido, e que a primeira leitura ("~302 dias de retenção, não há perda em curso") estava errada porque olhou a mais antiga **sobrevivente**. Estava certo em desconfiar, e agora o número não é mais inferido: **está configurado**. Num servidor com fluxos comerciais ativos, o teto de 10.000 chega bem antes dos 14 dias.
 
-**Consequência direta:** entrega de callback que fique só no histórico de execução tem prazo de validade curto e variável. O receptor gravar na hora (marco 7, D-181) deixa de ser boa prática e passa a ter número em cima. Ver **D-203**.
+**Consequência direta:** entrega de callback que fique só no histórico de execução tem prazo de validade curto e variável. O receptor gravar na hora (marco 8, D-181) deixa de ser boa prática e passa a ter número em cima. Ver **D-203**.
 
 ### 12.2 Onde os segredos vivem — pergunta 54
 

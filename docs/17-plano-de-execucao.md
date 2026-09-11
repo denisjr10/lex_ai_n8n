@@ -154,10 +154,10 @@ O recorte proposto (**D-207**):
 |---|---|---|
 | **A lista dos ~24 processos da Ana Beatriz que o escritório acompanha** | É a **chave da triagem por CNJ** (RF-52). A Ana Beatriz atua em outros escritórios; sem essa lista o sistema não distingue publicação do escritório de publicação de fora | 🔴 **A mais bloqueante de todas** |
 | **O `limite_aparicoes` de cada monitoramento novo** | ⚠️ **Não pode ser alterado depois de criado** (R-46). Errar aqui custa criar tudo de novo | 🔴 Antes de P-16 |
-| **20a a 20e** — 2h úteis para chamar todos? 4h para escalar? Qual o horário útil? Quanto tempo o pedido de aprovação vive? E **quando a janela de reversão expira em silêncio, o alerta fecha ou reabre?** | Configuração de E2 (RF-13) | 🟠 Antes de P-14 |
+| ~~**20a a 20e** — 2h úteis para chamar todos? 4h para escalar? Qual o horário útil? Quanto tempo o pedido de aprovação vive? E quando a janela de reversão expira em silêncio, o alerta fecha ou reabre?~~ | Configuração de E2 (RF-13) | ✅ **Respondidas em 07/09, menos a 20c** — **D-208** (N1 2 h úteis, N2 4 h úteis, expiração 4 h/2 h) e **D-209** (a janela expira **reabrindo**). 🚧 A **20c**, horário útil, segue aberta — e sem ela "2 horas úteis" não tem relógio |
 | Confirmar o V1 para a Ana Beatriz — R$ 3,00/mês contra R$ 55–72 do V2 | Custo mensal de E2 | 🟠 Junto com o resto |
 
-**A 20e merece destaque na conversa.** Hoje o desenho diz que **o silêncio da advogada ratifica** o encerramento feito pela colaboradora. Está registrado como **R-68**, e é a única coisa nesta fase que contraria a linha *"Nunca"* do próprio rito do PRD §5.2.1. Vale a Malu decidir isso com os olhos abertos.
+~~**A 20e merece destaque na conversa.** Hoje o desenho diz que **o silêncio da advogada ratifica** o encerramento feito pela colaboradora. Está registrado como **R-68**, e é a única coisa nesta fase que contraria a linha *"Nunca"* do próprio rito do PRD §5.2.1. Vale a Malu decidir isso com os olhos abertos.~~ ✅ **Decidida em 07/09: a janela expira REABRINDO** (D-209). O escritório escolheu o lado seguro, **o R-68 caiu**, e o silêncio da advogada voltou a não significar nada.
 
 ### P-04 · 👤🔴🚧 Contratar o saldo do Escavador — 08/09 — e resolver a assinatura antes
 

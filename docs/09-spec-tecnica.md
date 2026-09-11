@@ -126,12 +126,15 @@ lex_ai_n8n/
 │   └── auditoria/               escrita append-only e consulta
 ├── n8n/
 │   ├── workflows/               fluxos exportados em JSON, versionados
-│   └── credentials/             apenas esquemas — nunca segredos
+│   └── esquemas-de-credencial/  apenas esquemas — nunca segredos
 ├── dados/
 │   ├── precos-escavador.json    catálogo de preços versionado (§6.1)
 │   └── migracoes/               evolução do esquema do banco
 ├── testes/
 │   └── gravacoes/               respostas reais anonimizadas, para teste (§14)
+├── ferramentas/                   contador de números, migrador, provas de regra, recolhimento
+├── captura/                       chamadas reais ao fornecedor — as respostas brutas ficam fora do Git
+├── demo/                          as demonstrações ao escritório, com marco de remoção a declarar (D-243)
 └── infra/                       containers, implantação, configuração
 ```
 
@@ -323,27 +326,11 @@ Esta seção existe porque a **Regra 6** diz que custo é requisito funcional. E
 
 ### 6.1 O catálogo de preços é dado, não código
 
-Nenhum preço aparece literalmente no código. Todos vivem num arquivo versionado, com data de leitura e fonte:
+Nenhum preço aparece literalmente no código. Todos vivem num arquivo versionado, com data de leitura e fonte.
 
-```json
-{
-  "fornecedor": "escavador",
-  "lido_em": "2026-08-20",
-  "fonte": "painel autenticado — Serviços e Preços; conferido no Playground",
-  "rotas": [
-    { "chave": "v2.processo.envolvidos",   "preco_centavos": 5,   "unidade": "chamada",  "classificacao": "cobrada" },
-    { "chave": "v2.processo.capa",         "preco_centavos": 300, "unidade": "chamada",  "classificacao": "cobrada" },
-    { "chave": "v2.processo.movimentacoes","preco_centavos": 300, "unidade": "chamada",  "classificacao": "cobrada" },
-    { "chave": "v2.ia.resumo.obter",       "preco_centavos": 5,   "unidade": "chamada",  "classificacao": "cobrada" },
-    { "chave": "v2.ia.resumo.solicitar",   "preco_centavos": 8,   "unidade": "chamada",  "classificacao": "cobrada" },
-    { "chave": "v2.atualizacao.status",    "preco_centavos": 0,   "unidade": "chamada",  "classificacao": "gratuita" },
-    { "chave": "v2.envolvido.processos",   "preco_centavos": 300, "unidade": "bloco_200","classificacao": "cobrada" },
-    { "chave": "v2.oab.processos",         "preco_centavos": 300, "unidade": "bloco_200","classificacao": "cobrada" },
-    { "chave": "v1.monitoramento.diario",  "preco_centavos": 300, "unidade": "mes_bloco_200", "adicional_centavos": 5, "classificacao": "cobrada" },
-    { "chave": "v2.monitoramento.processo.mensal_docs", "preco_centavos": 18, "unidade": "mes", "classificacao": "cobrada" }
-  ]
-}
-```
+O catálogo vive em [`dados/precos-escavador.json`](../dados/precos-escavador.json), que é a **sede única** dos preços — espelhado no banco pela tabela `catalogo_preco` (migração 004).
+
+> ⚠️ *Até 11/09 esta seção trazia um trecho do arquivo com preços escritos à mão, lidos em 20/08. A medição de 26/08 desmentiu a tarifa plana (D-108), e o trecho seguiu aqui com os valores antigos: preço copiado é preço que envelhece (D-232). Abra o arquivo.*
 
 Três propriedades desse formato:
 
@@ -641,20 +628,22 @@ Este bloco implementa D-63 — o agente do cliente lê daqui, não da API paga. 
 | Tabela | Campos essenciais |
 |---|---|
 | `item_vigiado` | `id` · `tipo` (`oab` · `nome` · `documento` · `processo`) · `valor` · `assinatura_id` · `criado_por` · `criado_em` · `ativo` · `desativado_em` · `desativado_por` |
-| `publicacao` | `id` · `fonte` · `origem_diario` · `data_publicacao` · `numero_cnj` · `teor` · `itens_vigiados` · `hash` (único) · `recebida_em` · `evento_callback_id` |
-| `movimentacao` | `id` · `numero_cnj` · `data` · `teor` · `fonte` · `hash` (único) · `recebida_em` · `evento_callback_id` |
+| `publicacao` | `id` · `fonte` · `origem_diario` · `data_publicacao` · `numero_cnj` · `teor` · `itens_vigiados` · `hash` (índice) · `recebida_em` · `evento_callback_id` |
+| `movimentacao` | `id` · `numero_cnj` · `data` · `teor` · `fonte` · `hash` (índice) · `recebida_em` · `evento_callback_id` |
 | `alerta` | `id` · `tipo` · `prioridade` · `publicacao_id` · `movimentacao_id` · `processo_id` · `indicio_de_prazo` · `enviado_em` · `destinatarios` · `lido_por` · `lido_em` · `escalado_em` · `resolvido_em` |
 | `tarefa` 🆕 | `id` · `origem` (`alerta` · `demanda` · `manual`) · `alerta_id` · `demanda_id` · `processo_id` · `numero_cnj` · `titulo` · `estado` (`aberta` · `em_triagem` · `tratada` · `cancelada`) · `responsavel_id` · `criada_em` · `prazo_triagem_em` · `tratada_em` · `tratada_por` · `motivo` · `sensivel` · `card_id` · `card_url` · `card_sincronizado_em` · `card_divergente` |
 
 Cinco observações de desenho, e cada uma corresponde a um requisito do PRD:
 
-**`hash` único em `publicacao` e `movimentacao`** — a mesma publicação pode chegar por dois caminhos (monitoramento de OAB e monitoramento de processo). Sem deduplicação, o advogado recebe o mesmo alerta duas vezes e passa a ignorar alertas. Ruído destrói a confiança que o produto depende de ter.
+**`hash` do teor é ÍNDICE, não restrição de unicidade** — ⚠️ corrigido em 11/09. O texto original dizia *"único, porque a mesma publicação pode chegar por dois caminhos"*, e a migração 006 fez exatamente isso nas duas tabelas. **O dado real derrubou a regra em 02/09** (migração 013): 30 publicações de diário entraram e saíram 21 — a restrição engoliu nove, e **seis eram a mesma intimação padrão de 123 caracteres em seis processos diferentes**. Teor idêntico não é duplicata: tribunal publica o mesmo texto para processos distintos e republica em edições seguintes. A deduplicação ficou com quem sabe o que é o mesmo fato — `(inquilino_id, fonte, id_externo)` —, e o `hash` virou índice de consulta. O ruído de alerta repetido, que era a preocupação original, se trata no alerta — nunca descartando a publicação.
 
 **`indicio_de_prazo` é um sinalizador, não uma data** — RF-11 e D-64. A plataforma sinaliza indício; quem conta prazo é advogado. Não existe campo `prazo_calculado` neste esquema, e a ausência é deliberada.
 
 **`lido_por` e `lido_em` existem porque RF-13 exige confirmação de leitura** — e `escalado_em` porque alerta não lido escala. O prazo da escalada é configuração, e é ele que depende do escritório (**perguntas 20a–20c**; a referência anterior à "pergunta 12" estava errada — aquela é sobre horário de atendimento).
 
-> **Atualização de 27/08 (D-145).** O escritório informou que **colaboradores também conferem prazo**. Isso muda dois campos de `alerta`: `lido_por` deixa de ser único e vira lista — colaborador e advogado confirmam separadamente —, e o encerramento da escalada passa a exigir que **pelo menos um dos confirmantes seja advogado**. O clique do colaborador registra a triagem e para o reenvio para ele, sem parar o relógio. Campos derivados: `confirmado_por_colaborador_em` e `confirmado_por_advogado_em`, sendo o segundo o que fecha `escalado_em`. O rito completo está no [PRD §5.2.1](08-prd.md).
+> ⚠️ **Esta nota seguia a D-145, que foi superada** (correção de 11/09). O texto de 27/08 dizia que o encerramento da escalada exigiria **pelo menos um advogado** entre os confirmantes. **Em 05/09 a D-194 mudou isso:** a RF-13 passou a admitir a **confirmação pela colaboradora**, com motivo declarado, aviso nominal imediato à advogada responsável e janela de reversão. **Em 07/09 a D-209** fixou que a janela expira **reabrindo** o alerta. O rito vigente está na RF-13 e no [PRD §5.2.1](08-prd.md).
+>
+> 🔴 **Nenhum dos dois ritos está no banco.** A tabela `alerta` da migração 006 tem `lido_por` **único**, sem confirmação por papel, sem motivo declarado e sem janela de reversão. Os campos que esta nota previa — `confirmado_por_colaborador_em`, `confirmado_por_advogado_em` — não existem, e o desenho deles precisa partir da D-194, não da D-145.
 
 **`item_vigiado.desativado_por` e `desativado_em`** — desligar vigilância é a operação de maior potencial de dano silencioso do projeto (R-14). Quem desligou e quando fica registrado, e a remoção é ferramenta separada com confirmação explícita (D-29).
 

@@ -23,8 +23,8 @@
 | Tabelas com política por linha | **20** de 23 |
 | Pacotes do monorepo | **9** — 4 implementados, 5 ainda casca |
 | Testes passando | **141** |
-| Provas de regra (exige banco) | **52 de 52** |
-| Provas de auditoria (exige banco) | **23 de 23** |
+| Provas de regra (exige banco) | **—** |
+| Provas de auditoria (exige banco) | **—** |
 | Linhas versionadas | TypeScript 4363 · SQL 2064 · Node 13401 |
 
 **Pacotes ainda sem uma linha executável:** `packages/sdk-escavador` · `packages/sdk-trello` · `mcp-servers/escavador` · `mcp-servers/trello` · `services/policy-gate`.
@@ -44,12 +44,12 @@
 
 | Estado | Quantas |
 |---|---|
-| 🟡 Proposta | **203** |
+| 🟡 Proposta | **202** |
 | ✅ Confirmada | **30** |
 | ✅ Resolvida | **5** |
 | 🔴 Em aberto | **3** |
 | ❌ Derrubada / Recusada | **2** |
-| 🔄 Revisada | **1** |
+| 🔄 Revisada | **2** |
 | ✅ Feita | **1** |
 | **Total** | **245** |
 

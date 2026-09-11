@@ -79,7 +79,7 @@ npm run banco:conferir
 | Gastar além do limite do orçamento | 🚫 recusado (Regra 6) |
 | Reservar **exatamente** até o limite | ✅ aceito — teto é teto, não parede antes do teto |
 | Gravar o mesmo evento de callback duas vezes | 🚫 recusado (D-116 / R-43) |
-| A mesma publicação chegando por dois caminhos | 🚫 recusado |
+| ~~A mesma publicação chegando por dois caminhos~~ | ~~🚫 recusado~~ ⛔ **Regra derrubada pelo dado real em 02/09** (migração 013). Teor idêntico não é duplicata: a restrição descartou **seis intimações de seis processos diferentes**, em silêncio. A prova foi retirada; a linha fica riscada, porque o registro de que a suposição existiu e falhou vale mais que a tabela limpa |
 | CNJ malformado entrando como processo | 🚫 recusado |
 | Verificar vínculo de canal sem dizer quem verificou | 🚫 recusado |
 | Desativar vigilância sem dizer quem desativou | 🚫 recusado (R-14) |
