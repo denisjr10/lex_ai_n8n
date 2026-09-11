@@ -412,12 +412,14 @@ Exemplo, com as lacunas em colchetes:
 4. **Nenhum sinalizador de exceção disparou:** menção a prazo, valor, reclamação, pedido de orientação jurídica, processo sigiloso, cliente sem vínculo verificado, ou processo em que o escritório não é o constituído
 
 
-| #         | Requisito                                                                                                                                                                  |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **RF-42** | Existe um catálogo de gabaritos versionado, com data de aprovação, advogado aprovador e histórico de revisões. Alterar um gabarito exige nova aprovação e cria versão nova |
-| **RF-43** | Toda mensagem A3a registra **qual gabarito, qual versão e quais valores** preencheram as lacunas. Reconstruir o texto exato enviado é sempre possível                      |
-| **RF-44** | Um gabarito pode ser **desligado na hora** por qualquer advogado, sem passar por ninguém. Desligar é sempre mais fácil que ligar                                           |
-| **RF-45** | Amostragem periódica: uma fração das mensagens A3a enviadas é revista por advogado depois do envio, e o resultado alimenta a revisão do gabarito                           |
+> 🟡 **Critérios de aceite propostos em 11/09** (revisão de 09/09, item 3.11) — aguardam o seu aval, como o resto do PRD. Os números entre eles são proposta: servem para ter o que conferir, não para encerrar a discussão.
+
+| # | Requisito | Critério de aceite |
+|---|---|---|
+| **RF-42** | Existe um catálogo de gabaritos versionado, com data de aprovação, advogado aprovador e histórico de revisões. Alterar um gabarito exige nova aprovação e cria versão nova | Alterar um gabarito cria versão nova, com aprovador e data. A versão anterior continua consultável, e nenhuma operação altera uma versão existente — com prova de banco, como a da auditoria |
+| **RF-43** | Toda mensagem A3a registra **qual gabarito, qual versão e quais valores** preencheram as lacunas. Reconstruir o texto exato enviado é sempre possível | Dado qualquer envio A3a, o texto é reconstruído a partir de gabarito, versão e valores registrados, e sai **idêntico, byte a byte**, ao que foi enviado (teste) |
+| **RF-44** | Um gabarito pode ser **desligado na hora** por qualquer advogado, sem passar por ninguém. Desligar é sempre mais fácil que ligar | Qualquer advogado desliga um gabarito com uma ação. A partir daí nenhuma mensagem sai dele: a próxima tentativa cai para A3b e espera um humano (teste) |
+| **RF-45** | Amostragem periódica: uma fração das mensagens A3a enviadas é revista por advogado depois do envio, e o resultado alimenta a revisão do gabarito | Uma fração configurável das mensagens A3a enviadas — proposta: **1 em cada 10** — entra numa fila de revisão depois do envio, e o resultado da revisão fica registrado junto da versão do gabarito |
 
 
 > **Por que isto não afrouxa a Regra 2.** O advogado continua aprovando o texto exato que sai — ele só aprova antes, uma vez, para todos os casos iguais, em vez de aprovar mil vezes o mesmo parágrafo. É a diferença entre revisar uma minuta-padrão e revisar cada cópia dela. O que **nunca** sai sem leitura humana é texto novo, escrito pelo modelo, sobre situação que ninguém previu — e é exatamente aí que mora o risco.
@@ -561,6 +563,8 @@ O produto expõe ao agente uma superfície **curada**, não a API inteira. Cober
 
 **RF-30** — O perfil decide o que **aparece** na janela do agente; o escopo decide o que a chamada tem **direito** de fazer. Ferramenta na mão sem escopo recebe recusa do servidor.
 
+> **Critério de aceite** *(proposto em 11/09)* — ferramenta fora do perfil da sessão é recusada como `nao_encontrado`; ferramenta no perfil sem o escopo exigido, como `nao_autorizado`; as duas **antes de qualquer gasto** e com a mesma mensagem ao agente. ✅ **Já coberto** pela suíte do chassi e pela matriz de escopo (`testes/matriz-de-escopo.test.mjs`).
+
 Capacidades que ficam fora de **todo** perfil, em qualquer papel:
 
 - Escavador: toda a família de certificados digitais
@@ -606,11 +610,13 @@ Para uma pessoa física com dois processos, custa R$ 3,00. Para uma empresa que 
 Tratamento, já como requisito:
 
 
-| #         | Requisito                                                                                                                                       |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **RF-31** | Nenhuma ferramenta pagina em laço. Traz um bloco, devolve, e **informa que há mais** — quem decide continuar é gente                            |
-| **RF-32** | Antes de listar envolvido de volume desconhecido, **contar** com a rota de resumo, que é barata. Perguntar "quantos são?" antes de "quais são?" |
-| **RF-33** | Teto de blocos por chamada e por papel. Acima do teto, a IA propõe, escreve o custo estimado no pedido, e um advogado aprova                    |
+> 🟡 **Critérios de aceite propostos em 11/09** (revisão de 09/09, item 3.11) — aguardam o seu aval, como o resto do PRD. Os números entre eles são proposta: servem para ter o que conferir, não para encerrar a discussão.
+
+| # | Requisito | Critério de aceite |
+|---|---|---|
+| **RF-31** | Nenhuma ferramenta pagina em laço. Traz um bloco, devolve, e **informa que há mais** — quem decide continuar é gente | Nenhuma ferramenta faz mais de uma requisição paginada por chamada: o teste de contrato do SDK (marco 6) conta as requisições e falha com duas. A resposta de listagem informa, em campo próprio, que há mais resultados |
+| **RF-32** | Antes de listar envolvido de volume desconhecido, **contar** com a rota de resumo, que é barata. Perguntar "quantos são?" antes de "quais são?" | Listagem de envolvidos de volume desconhecido chama a rota de resumo **antes** da de listagem, e o teste confere a ordem das requisições. Resumo acima do teto do papel impede a listagem (RF-33) |
+| **RF-33** | Teto de blocos por chamada e por papel. Acima do teto, a IA propõe, escreve o custo estimado no pedido, e um advogado aprova | Pedido acima do teto de blocos do papel é recusado como `precisa_aprovacao`, e o pedido gerado traz o custo estimado em reais. Aprovação de quem não é advogado é recusada |
 
 
 **Os tetos propostos** (configuráveis, e este é o número que o escritório precisa avalizar):
@@ -853,7 +859,17 @@ O escritório pediu para entender o mecanismo. São três tetos encadeados, e **
 | **Global do escritório/mês** | Último anteparo                                       | **R$ 300,00**                                    |
 
 
-> Os números acima são **proposta**, dimensionada para um escritório de porte pequeno com vigilância de 5 advogados (R$ 15/mês fixos) e consulta pontual. Eles precisam do aval do escritório, e serão recalibrados no primeiro trimestre com o consumo real. O teto do canal do cliente não aparece na tabela porque é zero por construção (RN-21).
+> Os números acima são **proposta**, e precisam do aval do escritório (D-149). Serão recalibrados no primeiro trimestre com o consumo real. O teto do canal do cliente não aparece na tabela porque é zero por construção (RN-21).
+>
+> **A fórmula, separada do número deste cliente** — ⚠️ corrigido em 11/09. O texto anterior dizia que a proposta fora *"dimensionada para vigilância de 5 advogados (R$ 15/mês fixos)"*. **O escritório tem 7 pessoas, das quais 2 advogadas** (P-07 coleta os sete ids de Telegram). Recalculado com a base real:
+>
+> | | Fórmula genérica | Este escritório |
+> |---|---|---|
+> | Vigilância fixa | advogados vigiados × R$ 3,00/mês | 2 × R$ 3,00 = **R$ 6,00** |
+> | Tetos por pessoa | advogados × R$ 60,00 + demais × R$ 30,00 | 2 × R$ 60,00 + 5 × R$ 30,00 = **R$ 270,00** |
+> | Soma | fixo + tetos por pessoa | **R$ 276,00** |
+>
+> O teto global proposto, **R$ 300,00**, cobre a soma com folga de cerca de 9%. A conta precisa ser feita com o número real e não herdada: pedir aval sobre um teto calculado para outro escritório desperdiça a única chance de calibrar.
 
 **O que acontece quando um teto é atingido.** Três coisas, nesta ordem:
 
@@ -866,6 +882,8 @@ O escritório pediu para entender o mecanismo. São três tetos encadeados, e **
 Duas camadas de alarme: a nossa e o **Alerta de saldo** nativo do painel do Escavador, que é gratuito (D-54).
 
 **RF-34** — Recarga de crédito do Escavador **não é autosserviço**: depende de atendimento comercial e pode levar dias (R-22). O disjuntor alerta com antecedência suficiente para pedir recarga antes de parar, não depois.
+
+> **Critério de aceite** *(proposto em 11/09)* — "antecedência suficiente" não se confere, então vira número: ao cruzar **70%** do orçamento mensal do escritório sai um alerta ao responsável, e ao cruzar **90%** sai outro. Os dois trazem o saldo, o ritmo de gasto e os **dias úteis estimados até o esgotamento** — que é o que diz se ainda dá tempo de o comercial responder.
 
 ---
 
