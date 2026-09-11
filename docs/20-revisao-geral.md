@@ -46,8 +46,8 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 ## Painel de execução
 
-**Fechados:** Blocos 1 e 2 inteiros. **O Bloco 2 fechou em 10/09.**
-**Próximo:** o Bloco 3 — 14 correções pontuais de documentação, ~7 h, divisível. O Bloco 0 continua sendo seu.
+**Fechados:** Blocos 1 e 2 inteiros, e **12 dos 14 itens do Bloco 3** (11/09).
+**Aguardando você:** **3.1** (as oito decisões confirmadas pelo escritório e propostas na §13) e **3.14** (dono e prazo do R-10) — além do **Bloco 0**, que sempre foi seu.
 
 ### BLOCO 0 — Antes da conversa com a Malu
 
@@ -96,7 +96,7 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 
 | # | Item | Estado |
 |---|---|---|
-| 3.1 | Tirar a **coluna de estado** das tabelas de decisão do PRD, da NT01 e do Modelo de Identidade; depois decidir uma a uma as nove divergentes → **D-234** | ⬜ |
+| 3.1 | Tirar a **coluna de estado** das tabelas de decisão do PRD, da NT01 e do Modelo de Identidade; depois decidir uma a uma as nove divergentes → **D-234** | 👤 **Aguarda sua decisão.** Oito divergências, não nove: **D-61 e D-63 a D-67** no PRD, **D-18 e D-21** na NT01, todas dizendo *"Confirmada (escritório, 27/08)"* — a §13 diz 🟡 Proposta. O Modelo de Identidade não tem nenhuma. ⚠️ **A coluna NÃO foi tirada, de propósito:** tirá-la antes de decidir apagaria o único registro de que o escritório confirmou. E a **D-63** está presa ao item **0.1** — a célula dela na §13 tem uma parte revogada pela D-144 que precisa ser riscada antes de qualquer aval |
 | 3.2 | Ampliar a **convenção de estados** da §13 para os sete realmente usados, com formato de célula fixo → **D-235** | ✅ **Feito** — a tabela dos sete estados entrou no cabeçalho da §13, e a contagem escrita à mão logo abaixo virou ponteiro para `numeros.md` |
 | 3.3 | Substituir a seção **"Riscos ativos"** do `00-estado-atual.md` por ponteiro para a §15 — hoje ela congelou em 26/08 e omite dezenas de riscos, entre eles o banco exposto (R-63) e o Portainer publicado (R-62) | ✅ **Feito** — antes de apagar, o script confere que os dois fatos que só existiam ali (R-41 e R-42) já estão na §15. Ficaram os cinco mais urgentes, por ID, com a ressalva de que a ordem é editorial |
 | 3.4 | Subir **cabeçalho e versão** do PRD e do plano de execução, com calendário provisório sob a hipótese da D-219 | ✅ **Feito, pela metade de propósito** — os cabeçalhos subiram (PRD 2.1, plano 1.1). ⚠️ **O calendário provisório não foi escrito**: ele já existe na pauta 21 §1.1, e o plano já trazia o aviso de que o da §10 caiu. Escrever outro seria a doença da D-232 de volta |
@@ -109,7 +109,7 @@ Quase tudo que a revisão encontrou é sintoma de **um único defeito de método
 | 3.11 | **Nove requisitos sem critério de aceite** — RF-30, RF-34, RF-31 a RF-33, RF-42 a RF-45 | ✅ **Feito como proposta** — os nove ganharam critério, e ele é **meu**, não do escritório: entra marcado como aguardando o seu aval. A RF-30 já estava coberta pela suíte do chassi e pela matriz de escopo. As RF-31 a RF-33 e RF-42 a RF-45 ganharam a coluna que as outras tabelas do PRD já tinham |
 | 3.12 | Recalcular a **§9.5** com a base real (2 advogadas, não 5), separando fórmula genérica do número deste cliente | ✅ **Feito** — a fórmula genérica ficou separada do número deste cliente: 2 advogadas e 7 pessoas dão R$ 276,00, e o teto global de R$ 300,00 cobre com folga de ~9%. Os números seguem sendo proposta que pede o de acordo do escritório (D-149) |
 | 3.13 | Corrigir os **riscos com número derrubado**: R-40, R-21, R-72, R-41 e R-42 | ✅ **Feito** — R-21 realizado (a cota venceu em 01/09; o teto de 16 nunca existiu), R-40 corrigido (franquia real 1.000, não editável). O **R-72 estava mais errado que o dito**: afirmava "36 a 39, todas sem resposta" e **as quatro** foram respondidas em 07/09. R-41 e R-42 ganharam na §15 os dois fatos que só existiam no estado-atual — sem isso, o 3.3 os apagaria |
-| 3.14 | Dar **gancho operacional ao R-10 (OAB)**, com dono nomeado e data → **D-244** | ⬜ |
+| 3.14 | Dar **gancho operacional ao R-10 (OAB)**, com dono nomeado e data → **D-244** | 👤 **Aguarda sua decisão.** O gancho operacional já existe — é a **D-244**: nenhuma mensagem sai para cliente real antes da cláusula de IA no contrato e do aviso prévio. Falta o que só você pode dar: **quem** responde pelo R-10, e **até quando**. Hoje o encaminhamento é *"revisão periódica"*, que não cobra ninguém |
 
 ---
 
