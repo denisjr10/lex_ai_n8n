@@ -1269,30 +1269,16 @@ As pendências completas de cada mapeamento estão em `mapeamento-escavador.md` 
 
 ## Riscos ativos
 
-| Risco | Situação |
+**O registro dos riscos é a [§15 das diretrizes](01-diretrizes-gerais.md)** — a sede única. Esta seção não repete aquela tabela.
+
+> ⚠️ *Até 11/09 repetia, e tinha congelado em 26/08: 21 riscos de um registro várias vezes maior, sem o banco exposto à internet (R-63), sem o plano de controle publicado (R-62), e com dois riscos em estado diferente do da §15. Os fatos que só existiam aqui foram levados para a §15 antes de a tabela sair.*
+
+**Os cinco mais urgentes hoje.** A ordem é editorial — nenhum script a calcula —, então ela é revista por quem mexer em risco:
+
+| Risco | Por que agora |
 |---|---|
-| **R-16** — Trello não tem escopo por quadro; token vê a conta inteira | **Grave e estrutural.** Tratado por desenho (D-36), mas o isolamento passa a depender do nosso código. Precisa ser dito ao escritório |
-| **R-11** — conta única do Workspace compartilhada por toda a equipe | ⚠️ **Resolvido pela metade em 27/08.** A identidade **da plataforma** virou individual pelo Telegram (D-147), destravando privilégio por papel, aprovação nominal, auditoria e a faixa A4. **E-mail e Drive seguem na conta única** — E3 vai ler de uma caixa que ninguém responde individualmente. O escritório foi informado e aceitou |
-| **R-51** — o painel do fornecedor exibe o token da instância em tela, e ele vaza por captura | **Novo, moderado — e fora do nosso alcance.** A D-114 tirou o segredo da saída dos nossos scripts, mas o painel da Uazapi mostra o token em texto aberto, e a captura de tela o carrega para onde o usuário mandar. Em produção esse campo **dá acesso a mandar mensagem como o escritório**. Aconteceu em 01/09, sem dano — instância gratuita de 1 hora | Segredo se lê pelo script, nunca pelo painel; se o painel for inevitável, tape o campo antes de qualquer captura. Na plataforma real, token de canal externo mora no cofre e nenhuma tela o exibe |
-| **R-46** — a franquia de aparições **não é editável** depois de criada | **Novo e grave.** O `PUT` da V1 aceita só `origens_ids` e `variacoes`. O alarme de 70% pede procedimento, não ajuste de número (D-150). *Lido do OpenAPI; conferir por medição — é gratuito* |
-| **R-47** — identidade individual ancorada em conta de Telegram | **Novo, moderado a grave.** Número de telefone é o âncora (SIM swap, troca de chip), e **o escritório não administra as contas** — não há desligamento central. Tratado por revogação do vínculo na plataforma, 2FA obrigatório e conteúdo fora do corpo da mensagem |
-| **R-48** — a plataforma roda em infraestrutura do prestador | **Novo, jurídico.** Dado sob sigilo profissional em ambiente de terceiro. Escritório é controlador, prestador é operador — precisa de cláusula de finalidade, devolução, expurgo e continuidade |
-| **R-49** — gabarito pré-aprovado envelhece em silêncio | **Novo, moderado — e é o risco que a D-142 cria.** Texto aprovado uma vez segue saindo depois de a realidade mudar, e ninguém percebe porque não passa mais por ninguém. Tratado por revisão datada, amostragem pós-envio, desligamento imediato e contramétrica |
-| **R-12** — API do Escavador armazena certificado digital, senha e semente de 2FA | **Gravíssimo.** Tratado por desenho: rotas fora de todo perfil (D-30) |
-| **R-15** — plano do Escavador pode não cobrir V1 | ✅ **Encerrado em 20/08.** O painel lista V1 e V2 inteiras, com preço, nada bloqueado |
-| **R-22** — recarga do Escavador não é autosserviço, depende do comercial | **Novo e aberto.** Risco de prazo: o projeto para até o comercial responder |
-| **R-24** — token do Escavador não tem escopo; alcança toda a API da organização | **Novo e grave.** Espelha o R-16 do Trello. Privilégio fica só no código do MCP. Agrava R-12 |
-| **R-26** — o `mcp-core` concentra a fronteira de segurança dos dois servidores | **Novo e grave.** Consequência aceita de R-16 + R-24: com uma fronteira só, ela precisa ser auditada como tal (D-78) |
-| **R-27** — janela entre revogar a sessão MCP e ela expirar | **Novo, moderado.** Sessão de minutos, lista de revogação, A4 reconsultando o Policy Gate |
-| **R-28** — reserva por estimativa pode subestimar o custo nas rotas por bloco | **Novo, financeiro.** Reserva pelo pior caso permitido e teto de blocos por papel |
-| **R-29 a R-32** — riscos do ClickUp: API de Chat experimental, sem identidade de robô, migração descarta o mapeamento do Trello, concentração em fornecedor único em dólar | **Novos, moderados e condicionais** — só se materializam se a migração for adotada (`10-clickup-avaliacao.md` §11) |
-| ~~R-23~~ — o painel não exibiria a expiração do bônus | ✅ Encerrado no mesmo dia: o painel exibe "Válido até 23/08/2026" |
-| **R-20** — token pessoal do Trello dá acesso à conta inteira e pode ser revogado sem aviso | **Aberto.** Depende da pergunta 66. Agrava R-09 |
-| R-13, R-14, R-17 a R-19 | Tratados por desenho (D-29, D-32, D-40, D-46) |
-| R-01 — rede bloqueada | **Resolvido.** Acesso a Escavador e Trello reconfirmado em 2026-08-20 |
-| **R-40** — cegueira por cota: o monitoramento atinge a franquia mensal e para de capturar, sem erro | **Novo e grave.** Franquia real medida: **1000/mês**, não os 200 documentados. Alarme a 70% (D-107) |
-| **R-41** — não existe conferência de inventário de assinaturas | **Novo, e já se realizou** em 26/08: uma assinatura ficou ativa e fora do inventário por horas. Tratado por código no `monitorar.mjs` e pela tabela no topo deste documento |
-| **R-42** — segredo exibido na tela por ferramenta que prometia escondê-lo | ✅ **Encerrado em 26/08.** Ferramenta reescrita em modo cru, chave rotacionada, anteriores revogadas (D-114) |
-| **R-43** — reentrega de callback com identificador diferente a cada vez | **Novo e grave.** Medido: 3 entregas, 3 `uuid`, 2 corpos idênticos. Deduplicação por resumo do conteúdo (D-116, D-117) |
-| **R-44** — fonte oficial do Escavador contradiz o comportamento do sistema (3ª vez) | **Novo, moderado e insidioso.** Declaração vira premissa só depois de medida (D-120) |
-| Demais (R-02 a R-10) | Registrados em `01` §15, tratados por desenho |
+| **R-02** e **R-75** — perda de prazo, sem rede nenhuma por baixo | Ninguém vigia prazo no escritório hoje, e a E2 vai ser a única camada. Travado pela pergunta 20 |
+| **R-62** — o plano de controle da infraestrutura publicado na internet | O item mais grave em aberto na infraestrutura |
+| **R-63** — o PostgreSQL responde à internet | Nenhum sinal de exploração na janela medida — mas ninguém ter tentado não é estar protegido |
+| **R-90** — o segredo do callback escrito dentro do nó do n8n | A chave do n8n não tem escopo (R-38): quem lê o nó forja publicação na base de vigilância |
+| **R-41** — a assinatura `2813617`, ativa e sem dono | **Remover até 22/09**, e antes de qualquer recarga |

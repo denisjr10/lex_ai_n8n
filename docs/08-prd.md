@@ -3,9 +3,9 @@
 
 | Campo    | Valor                                                                                                                                                      |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Versão   | 2.0 — **o escritório respondeu.** P-01 a P-03 e P-07 fechadas, D-07 e D-09 resolvidas, e a aprovação humana ganhou a faixa que devolve eficiência (§6.2)   |
-| Data     | 2026-08-27                                                                                                                                                 |
-| Estado   | 🟡 **Proposta — aguarda aval do usuário sobre as decisões novas (D-142 a D-152)**                                                                          |
+| Versão   | 2.1 — o alerta de prazo vira tarefa (RF-56 a RF-64, D-226 a D-231, 08/09), a colisão de numeração dos RF desfeita (D-231), e a D-145 marcada como revisada pela D-194 (11/09). *A 2.0, de 27/08, registrava a resposta do escritório* |
+| Data     | 2026-09-11 |
+| Estado   | 🟡 **Proposta** — o aval se dá pelo [digesto](18-digesto-de-aval.md) (P-02), e o estado de cada decisão está na §13 das diretrizes, não aqui |
 | Fase     | 2 — PRD e Spec                                                                                                                                             |
 | Antecede | `09-spec-tecnica.md` — **Parte I escrita em 20/08**; a Parte II está quase destravada (§13)                                                                |
 | Herda de | `01-diretrizes-gerais.md`, `04-modelo-de-identidade-e-autorizacao.md`, `mapeamento-escavador.md`, `mapeamento-trello.md`, `07-painel-escavador-achados.md` |

@@ -505,9 +505,21 @@ A árvore do repositório, **com o que existe de fato**, está na [Spec §3](09-
 
 ## 13. Registro de decisões
 
-Ponto de trabalho conjunto. **Proposta** = aguarda seu aval; **Confirmada** = fechada; **Em aberto** = precisa de informação do escritório.
+Ponto de trabalho conjunto. O estado de cada decisão é um de **sete**, e a célula de estado **abre com o marcador e o rótulo** — o comentário vem depois (D-235):
 
-> 📖 **Esta tabela não se lê inteira — leia o digesto.** Contado em 08/09: **215 linhas**, das quais **179 em 🟡 Proposta** e **31 ✅ Confirmadas**. O [`18-digesto-de-aval.md`](18-digesto-de-aval.md) separa as 179 em **13 que pedem leitura individual**, **156 de acordo em bloco** e **10 que não deveriam estar em Proposta** — e é por ele que o aval do P-02 se dá.
+| Marcador | Estado | Significa |
+|---|---|---|
+| 🟡 | **Proposta** | Aguarda o seu aval |
+| ✅ | **Confirmada** | Fechada, com o seu aval |
+| ✅ | **Resolvida** | A pergunta que a gerou foi respondida |
+| 🔴 | **Em aberto** | Precisa de informação do escritório, ou de uma escolha sua entre saídas |
+| ❌ | **Derrubada** / **Recusada** | Não vale — e a linha fica, com o porquê |
+| 🔄 | **Revisada** | Superada por decisão posterior, que a célula nomeia |
+| ✅ | **Feita** | Decisão de execução, já cumprida |
+
+> ⚠️ *O formato não é estético: `ferramentas/contar.mjs` lê o estado no **início** da célula (D-232). Procurando em qualquer posição, a célula da D-207 — que abre com "RECUSADA" e cita "proposta" trinta palavras adiante — voltava para a fila de aval. Até 11/09 este cabeçalho declarava três estados, e a tabela já usava sete.*
+
+> 📖 **Esta tabela não se lê inteira — leia o [digesto](18-digesto-de-aval.md)**, que é por onde o aval do P-02 se dá. **Quantas decisões há em cada estado está em [`numeros.md`](numeros.md)**, gerado do disco (D-232). Até 11/09 este parágrafo trazia a contagem escrita à mão — e ela não fechava nem consigo mesma.
 >
 > ✅ **Colisão de numeração corrigida em 08/09.** **D-157, D-158 e D-159** apareciam **duas vezes cada**: um trio do Marco 3 da auditoria (31/08) e outro da revisão externa (01/09). O trio da revisão externa foi renumerado para **D-213, D-214 e D-215**, mantendo a posição cronológica na tabela; o do Marco 3 ficou com os números originais, como a nota de rodapé desta seção sempre declarou. As citações em `00-estado-atual.md` e `17-plano-de-execucao.md` foram acertadas junto. **A §15 tinha a mesma doença:** o **R-70** estava em dois riscos, e o do ruído de alerta (D-209, 07/09) virou **R-76**.
 

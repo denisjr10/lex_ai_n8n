@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Versão | 1.0 — primeira ordenação completa do que falta, com dependências, paralelismo e calendário |
-| Data | 2026-09-06 |
-| Estado | 🟡 **Proposta** — o recorte da §4 (D-207) precisa do aval do usuário e do "de acordo" da Malu |
+| Versão | 1.1 — o recorte da §4 foi **recusado** em 08/09 (D-207), e o calendário da §10 caiu junto. Vale o faseamento da **D-219**, cujo calendário está na [pauta da reunião](21-pauta-reuniao-malu.md) §1.1. *A 1.0, de 06/09, foi a primeira ordenação completa, com dependências e paralelismo* |
+| Data | 2026-09-11 |
+| Estado | 🟡 **Proposta** — o faseamento da D-219 ainda depende do de acordo da Malu (pauta §1.1). Um calendário provisório não foi escrito aqui de propósito: ele já existe na pauta, e dois calendários à mão divergiriam |
 | Fase | 3 — construção |
 | Herda de | `00-estado-atual.md`, `01-diretrizes-gerais.md`, `02-descoberta-perguntas-abertas.md`, `08-prd.md`, `09-spec-tecnica.md`, `16-levantamento-instancia-n8n.md` |
 
