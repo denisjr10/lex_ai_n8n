@@ -179,6 +179,8 @@ A infraestrutura é do prestador, não do escritório (D-148). Sob a LGPD isso f
 
 Não é burocracia adiável: é a diferença entre um contrato de prestação e uma exposição pessoal sobre dado sigiloso de terceiros.
 
+**E a cláusula de uso de IA vai no mesmo aditivo** — decidido em 11/09 (D-244, R-10). O contrato de honorários não menciona IA (pergunta 36), e nenhuma mensagem sai para cliente real sem essa cláusula e o aviso prévio. Quem responde por ela é a Malu.
+
 ### P-06 · 👤🔴🚧 Consertar a infraestrutura — o que precede dado real
 
 **Trava:** a entrada em produção, pelo mesmo motivo do P-05.

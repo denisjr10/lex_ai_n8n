@@ -148,11 +148,12 @@ Estes dois itens não pedem decisão. São informação que ela precisa ter **an
 2. **Devolução e expurgo** — o que acontece com os dados quando o contrato terminar;
 3. **Continuidade** — o que acontece se você ficar indisponível (ver item 5.5);
 4. **Transferência internacional** — que dados saem do país, para quem, e com que base legal (art. 33 da LGPD). Ver item 5.1;
-5. **Decisão jurídica continua humana** — o que a regra do projeto já garante em código; o contrato só declara.
+5. **Decisão jurídica continua humana** — o que a regra do projeto já garante em código; o contrato só declara;
+6. **Uso de inteligência artificial** — que a plataforma usa IA no tratamento, e que nenhuma comunicação ao cliente sai sem aviso prévio (Recomendação 001/2024 do CFOAB). O contrato de honorários hoje não menciona IA (pergunta 36). *Decidido em 11/09: vai neste mesmo aditivo, e quem responde por ela é a Malu (R-10, D-244).*
 
 **Isso não é burocracia adiável.** É a diferença entre um contrato de prestação de serviço e uma exposição pessoal sua sobre dado sigiloso de terceiros. **Assinada antes** de o primeiro processo real entrar no banco.
 
-*(Registro: passo **P-05**; risco **R-48**.)*
+*(Registro: passo **P-05**; riscos **R-48** e **R-10**; decisão **D-244**.)*
 
 ▶ **RESPOSTA:**
 
@@ -802,7 +803,7 @@ Cada resposta preenchida nesta pauta gera, no mesmo dia:
 | 1.1 | Datas: **15/09 (E2) + 30/09 (E1)** | ☐ aceita ☐ exige 15/09 cheio ☐ outra: ______ |
 | 1.2 | Alerta vira card no Trello — mudança de escopo | ☐ aceita ☐ só a tarefa na base ☐ recusa |
 | 1.3 | Data do card = triagem, com etiqueta `prazo não calculado` | ☐ aceita ☐ card sem data ☐ automação calcula (exige ciência do risco) |
-| 1.4 | Cláusula de LGPD antes do dado real | ☐ ok — prazo: ______ |
+| 1.4 | Cláusulas de LGPD **e de uso de IA** antes do dado real | ☐ ok — prazo: ______ |
 | 1.5 | Encarregado de LGPD = Malu; você responde para ela | ☐ ok |
 | 2.1 | Chave do Trello em conta dedicada | ☐ ok — responsável: ______ data: ______ |
 | 2.2 | Trello: quadros (24), fluxo do card (25), uso real (28), plano (29) | ☐ respondidas |

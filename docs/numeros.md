@@ -44,8 +44,8 @@
 
 | Estado | Quantas |
 |---|---|
-| 🟡 Proposta | **202** |
-| ✅ Confirmada | **30** |
+| 🟡 Proposta | **194** |
+| ✅ Confirmada | **38** |
 | ✅ Resolvida | **5** |
 | 🔴 Em aberto | **3** |
 | ❌ Derrubada / Recusada | **2** |

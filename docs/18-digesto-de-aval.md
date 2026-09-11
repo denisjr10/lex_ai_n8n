@@ -15,6 +15,9 @@
 >
 > **O que este documento não é.** Ele não decide nada e não muda nenhum status. A §13 continua sendo o registro único; este é o índice de leitura dela. **Nenhuma linha da §13 foi alterada para produzir este digesto.**
 
+
+> ⚠️ **11/09 — oito decisões saíram da fila de aval.** D-18, D-21, D-61 e D-63 a D-67 foram registradas como ✅ Confirmadas na §13 (revisão de 09/09, item 3.1): o escritório as confirmou em 27/08, e a §13 nunca tinha sido atualizada. **Os totais das seções deste digesto são anteriores a isso e não foram recontados** — recontá-los é parte do item 0.1 do Bloco 0.
+
 ---
 
 ## 0. Como ler isto — leia esta seção primeiro, ela custa dois minutos
@@ -959,7 +962,7 @@ Os blocos abaixo existem para que o seu "de acordo" seja **auditável**: você c
 | **B2** | **O que o sistema pode pedir ao Escavador.** Cerca de 15 ferramentas curadas sobre 83 operações disponíveis, com perfis por papel; certificado digital fora de todos os perfis; teto obrigatório em tudo que percorre lista longa | D-27 a D-35 | 9 |
 | **B3** | **O que o sistema pode fazer no Trello.** Isolamento por quadro conferido em código (a API do Trello não oferece isso), webhook com assinatura conferida, marcação obrigatória em toda escrita para não criar laço infinito, e só a alternativa reversível exposta — arquivar, nunca excluir | D-36 a D-46 | 11 |
 | **B4** | **A disciplina de crédito.** Nenhuma chamada paga sem constar de orçamento aprovado; toda resposta salva bruta em arquivo e nunca reconsultada; preço conferido no painel depois da chamada; nenhuma ferramenta percorre páginas em laço automático | D-47, D-48, D-50 a D-60 | 13 |
-| **B5** | **A forma do produto.** Quatro entregas nesta ordem, vigilância barata por nome no diário em vez de cara por processo, o agente do cliente lendo da base interna, e a plataforma **sinalizando** indício de prazo sem **nunca** calcular prazo | D-61 a D-64, D-66, D-67 | 6 |
+| **B5** | ✅ **Cinco das seis confirmadas em 11/09** (D-61, D-63, D-64, D-66, D-67 — revisão, item 3.1). Resta a **D-62**: vigilância barata por nome no diário, em vez de cara por processo. ~~A forma do produto: quatro entregas nesta ordem, o agente do cliente lendo da base interna, e a plataforma sinalizando indício de prazo sem nunca calcular prazo~~ | D-62 | 1 |
 | **B6** | **Como o sistema é construído.** Um repositório em TypeScript, PostgreSQL como única persistência, toda ferramenta devolvendo o mesmo formato de resposta, orçamento por reserva-antes/reconciliação-depois, e auditoria que **bloqueia a operação** se estiver indisponível | D-68 a D-78 | 11 |
 | **B7** | **O parecer sobre o ClickUp.** Ele não substitui o Google Workspace, não vira caminho do agente em produção, e a aprovação humana vive na tarefa e não na mensagem | D-79 a D-84 | 6 |
 | **B8** | **O custo real, medido em 26/08.** O catálogo é por rota e não tarifa plana; monitoramento cobra na criação e a cada renovação; a franquia de aparições é alarmada a 70% antes de cegar | D-103 a D-110 | 8 |
@@ -1033,7 +1036,7 @@ A decisão diz "faixas A0–A4 e aprovação humana obrigatória em A3/A4". Desd
 
 "Aprovação humana expira: pedido não respondido em janela definida vence e precisa ser refeito." A **D-143** a redigiu (a expiração recai sobre o pedido pendente, nunca sobre autorização já concedida; gabarito não expira; alerta de prazo não expira), e a **D-208** deu os números — 4 h úteis para mensagem ao cliente, 2 h para ato com efeito de prazo.
 **Na prática:** ela não contradiz nada, só não é mais o texto que vale.
-**O que fazer:** fechar a D-65 apontando para D-143 + D-208.
+**O que fazer:** fechar a D-65 apontando para D-143 + D-208. ✅ **Feito em 11/09** — confirmada na §13, apontando para as duas (revisão, item 3.1).
 
 ### 5.6 D-85 — a condição do congelamento já foi respondida
 
